@@ -1,0 +1,67 @@
+<?php
+
+namespace App\Http\Controllers\Head;
+
+use Illuminate\Http\Request;
+use App\Models\Counselor;
+use App\Http\Controllers\Controller;
+use App\Models\User;
+
+class CounselorController extends Controller
+{
+    public function store(Request $request)
+    {
+        // Validate the input
+        $request->validate([
+            'lname' => 'required|string',
+            'fname' => 'required|string',
+            'mname' => 'nullable|string',
+            'email' => 'required|email|unique:counselors,email|unique:users,email',
+            'contact_num' => 'required|string',
+            'c_level' => 'required|string',
+            'username' => 'required|string|unique:users,username',
+            'password' => 'required|string|min:6',
+        ]);
+
+
+        $counselor = new Counselor();
+        $counselor->lname = $request->lname;
+        $counselor->fname = $request->fname;
+        $counselor->mname = $request->mname;
+        $counselor->email = $request->email;
+        $counselor->contact_num = $request->contact_num;
+        $counselor->c_level = $request->c_level;
+        $counselor->c_image = 'default.png';
+        $counselor->save();
+
+
+        $user = new User();
+        $user->username = $request->username;
+        $user->email = $request->email;
+        $user->password = bcrypt($request->password);
+        $user->role = 'counselor';
+        $user->counselor_id = $counselor->c_id; // link to counselor
+        $user->status = 'Pending';
+        $user->account_status = 'active'; // optional
+        $user->save();
+
+        return redirect()->back()->with('success', 'Counselor and user account created successfully.');
+    }
+
+    public function getCounselor($id)
+    {
+        $counselor = Counselor::findOrFail($id);
+        return response()->json($counselor);
+    }
+
+    public function show($id)
+    {
+        $counselor = Counselor::find($id);
+
+        if (!$counselor) {
+            return response()->json(['error' => 'Counselor not found'], 404);
+        }
+        return response()->json($counselor);
+    }
+
+}

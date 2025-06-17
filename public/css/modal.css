@@ -1,0 +1,260 @@
+/* Base modal styling */
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
+  background-color: rgba(0, 0, 0, 0.6);
+  padding: 40px 20px;
+  box-sizing: border-box;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.modal-content {
+  background: #ffffff;
+  margin: auto;
+  padding: 35px 30px;
+  max-width: 600px;
+  border-radius: 12px;
+  position: relative;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.modal-content .close {
+  position: absolute;
+  right: 20px;
+  top: 15px;
+  font-size: 28px;
+  color: #aaa;
+  cursor: pointer;
+  transition: color 0.3s ease;
+}
+
+.modal-content .close:hover {
+  color: #333;
+}
+
+.modal-content h2 {
+  margin-top: 0;
+  margin-bottom: 25px;
+  font-size: 26px;
+  font-weight: 600;
+  color: #2c3e50;
+  text-align: center;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 10px;
+}
+
+/* Buttons */
+.modal-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 25px;
+}
+
+.btn {
+  padding: 10px 22px;
+  border: none;
+  border-radius: 6px;
+  font-size: 15px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 500;
+}
+
+.btn.save {
+  background-color: #2ecc71;
+  color: white;
+}
+
+.btn.save:hover {
+  background-color: #27ae60;
+}
+
+.btn.cancel {
+  background-color: #ecf0f1;
+  color: #2c3e50;
+}
+
+.btn.cancel:hover {
+  background-color: #d0d3d4;
+}
+
+.btn-export {
+    display: inline-block;
+    padding: 8px 16px;
+    background: #28a745;
+    color: #fff !important;
+    border: none;
+    border-radius: 4px;
+    text-decoration: none;
+    margin-right: 8px;
+    transition: background 0.2s;
+}
+.btn-export:hover {
+    background: #218838;
+}
+
+/* Counsel */
+.form-group {
+  margin-bottom: 18px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 600;
+  color: #34495e;
+}
+
+.form-group input,
+.form-group select {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 15px;
+  background-color: #fdfdfd;
+  transition: border-color 0.3s ease;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+  border-color: #2ecc71;
+  outline: none;
+}
+
+#viewCounselContent {
+  font-size: 15px;
+  color: #2c3e50;
+  line-height: 1.6;
+}
+
+#viewCounselContent p {
+  margin: 12px 0;
+}
+
+#view_c_image {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  margin: 0 auto 15px auto;
+  display: block;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+
+
+/* Student Modal Improvements */
+
+#addStudentForm,
+#editStudentForm {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  font-size: 15px;
+  background: #f9f9fb;
+  border-radius: 10px;
+  padding: 24px 18px;
+  box-shadow: 0 4px 24px rgba(44, 62, 80, 0.08);
+}
+
+#addStudentForm label,
+#editStudentForm label {
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 6px;
+  letter-spacing: 0.03em;
+}
+
+#addStudentForm input,
+#editStudentForm input,
+#addStudentForm select,
+#editStudentForm select {
+  padding: 11px 14px;
+  border: 1.5px solid #d1d5db;
+  border-radius: 7px;
+  font-size: 15px;
+  background-color: #fff;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  margin-bottom: 4px;
+  box-sizing: border-box;
+}
+
+#addStudentForm input:focus,
+#editStudentForm input:focus,
+#addStudentForm select:focus,
+#editStudentForm select:focus {
+  border-color: #2ecc71;
+  box-shadow: 0 0 0 2px rgba(46, 204, 113, 0.15);
+  outline: none;
+}
+
+#studentImage,
+#edit_studentImage {
+  width: 110px;
+  height: 110px;
+  object-fit: cover;
+  border-radius: 50%;
+  margin-top: 12px;
+  box-shadow: 0 2px 10px rgba(44, 62, 80, 0.10);
+  border: 2px solid #e1e4ea;
+  background: #f4f6fa;
+}
+
+#programField,
+#edit_programField,
+#sectionField,
+#edit_sectionField {
+  margin-top: 10px;
+}
+
+#addStudentForm button,
+#editStudentForm button {
+  align-self: flex-end;
+  padding: 11px 28px;
+  background-color: #2ecc71;
+  border: none;
+  border-radius: 7px;
+  color: white;
+  font-weight: 600;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background 0.2s, box-shadow 0.2s;
+  box-shadow: 0 2px 8px rgba(46, 204, 113, 0.08);
+  margin-top: 10px;
+}
+
+#addStudentForm button:hover,
+#editStudentForm button:hover {
+  background-color: #27ae60;
+  box-shadow: 0 4px 16px rgba(46, 204, 113, 0.12);
+}
+
+#id_num_display,
+#edit_id_num_display {
+  font-weight: 700;
+  margin-bottom: 8px;
+  display: inline-block;
+  color: #27ae60;
+  font-size: 16px;
+  letter-spacing: 0.04em;
+}
+

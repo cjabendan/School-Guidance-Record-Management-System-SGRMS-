@@ -1,0 +1,173 @@
+
+    .tab-container {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 15px;
+    }
+    .tab {
+        padding: 10px 20px;
+        cursor: pointer;
+        font-weight: bold;
+        color: #666;
+        border: none;
+        background: none;
+    }
+    .tab:hover, .tab.active {
+        color: #007bff;
+        border-bottom: 2px solid #007bff;
+    }
+
+
+/* Scrollable table wrapper */
+
+
+.table-container {
+    max-height: 500px;
+    overflow-y: auto;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    background-color: #fff;
+}
+
+/* Table style */
+.table-container table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-size: 14px;
+    color: #333;
+}
+
+table th {
+    background-color: #f3f4f6;
+    font-weight: 600;
+    padding: 12px;
+    border-bottom: 2px solid #e5e7eb;
+    text-align: left;
+}
+
+table td {
+    padding: 12px;
+    border-bottom: 1px solid #e5e7eb;
+    vertical-align: middle;
+}
+
+table tr:nth-child(even) {
+    background-color: #f9fafb;
+}
+
+table tr:hover {
+    background-color: #f1f5f9;
+}
+
+/* Buttons */
+.btn {
+    padding: 6px 10px;
+    margin: 5px;
+    border-radius: 6px;
+    color: white;
+    border: none;
+    cursor: pointer;
+    text-decoration: none;
+    font-size: 13px;
+    transition: background 0.2s ease;
+}
+
+.btn-add {
+    background: #2563eb;
+}
+.btn-add:hover {
+    background: #1e40af;
+}
+
+.btn-edit {
+    background: #f59e0b;
+}
+.btn-edit:hover {
+    background: #d97706;
+}
+
+.btn-delete {
+    background: #dc2626;
+}
+.btn-delete:hover {
+    background: #b91c1c;
+}
+
+.btn-view {
+    background: #10b981;
+}
+.btn-view:hover {
+    background: #059669;
+}
+
+/* Status dot */
+.status-circle {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    margin-right: 6px;
+}
+table .status-circle.green {
+    background: #22c55e !important;
+}
+table .status-circle.orange {
+    background: orange !important;
+}
+table .status-circle.red {
+    background: red !important;
+}
+
+/* Search bar layout */
+.search-flex {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.search-bar input,
+.search-bar select {
+    padding: 8px 10px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 14px;
+}
+
+.search-bar button {
+    padding: 8px 14px;
+    border: none;
+    border-radius: 6px;
+    background: #4a90e2;
+    color: white;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+.search-bar button:hover {
+    background: #2563eb;
+}
+
+/* Badges */
+.badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #fff;
+    vertical-align: middle;
+}
+.badge-gray {
+    background: #6b7280;
+}
+.badge-green {
+    background: #22c55e;
+}
+.badge-orange {
+    background: #f59e0b;
+}
