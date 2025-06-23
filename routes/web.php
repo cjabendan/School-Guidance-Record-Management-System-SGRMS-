@@ -3,9 +3,10 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\HeadController;
-use App\Http\Controllers\Head\CounselorController;
 use App\Http\Controllers\Auth\LogoutController;
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Head\CounselorController;
+use App\Http\Controllers\Head\StudentController;
 
 
 Route::get('/', function () {
@@ -28,7 +29,12 @@ Route::prefix('Head')->group(function () {
     Route::get('/settings', [HeadController::class, 'settings'])->name('Head.settings');
 
     Route::post('/addcounsel', [CounselorController::class, 'store'])->name('addcounsel');
-    Route::get('/counselor/{id}', [CounselorController::class, 'show'])->name('Head.counselor.show');
+    Route::get('/counselors/{id}', [CounselorController::class, 'show']);
+    Route::post('/updatecounsel', [CounselorController::class, 'update'])->name('updatecounsel');
+
+
+    Route::get('/students/next-id', [StudentController::class, 'getNextStudentId']);
+    Route::post('/students/add', [StudentController::class, 'addStudent'])->name('students.add');
 
 });
 

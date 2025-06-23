@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
+use App\Models\Student;
 
 
 class HeadController extends Controller
@@ -84,33 +85,6 @@ class HeadController extends Controller
         return view('Head.counselors', compact('counselors'));
     }
 
-    public function getCounselor($id)
-    {
-        $counselor = DB::table('counselors')
-            ->leftJoin('users', 'users.counselor_id', '=', 'counselors.c_id')
-            ->select(
-                'counselors.c_id',
-                'counselors.lname',
-                'counselors.fname',
-                'counselors.mname',
-                'counselors.contact_num',
-                'counselors.email',
-                'counselors.c_level',
-                'counselors.c_image',
-                'users.username'
-            )
-            ->where('counselors.c_id', $id)
-            ->first();
-
-        if (!$counselor) {
-            return response()->json(['error' => 'Counselor not found'], 404);
-        }
-
-        return response()->json($counselor);
-    }
-
-
-
     public function students(Request $request)
     {
         $filter = $request->query('status', 'active');
@@ -171,6 +145,23 @@ class HeadController extends Controller
     public function settings()
     {
         return view('Head.settings');
+    }
+
+    public function getNextStudentId()
+    {
+        $lastStudent = \DB::table('students')->orderByDesc('s_id')->first();
+
+        if ($lastStudent && preg_match('/(\d{8})$/', $lastStudent->id_num, $matches)) {
+            $lastNumber = intval($matches[1]);
+        } else {
+            $lastNumber = 0;
+        }
+
+        $nextNumber = str_pad($lastNumber + 1, 8, '0', STR_PAD_LEFT);
+        $currentYear = date('y');
+        $fullId = "SCC-$currentYear-$nextNumber";
+
+        return response()->json(['next_id' => $fullId]);
     }
 
 }

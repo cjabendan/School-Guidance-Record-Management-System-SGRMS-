@@ -186,6 +186,9 @@
     </main>
 </section>
 
+@include('Head.Modal.studentModal')
+
 <script src="{{ asset('js/head.js') }}"></script>
+<script src="{{ asset('js/Modal/studentModal.js') }}"></script>
 </body>
 </html>

@@ -64,7 +64,7 @@
     <div class="modal-content">
         <span class="close" onclick="closeEditModal()">&times;</span>
         <h2>Edit Counselor</h2>
-        <form action="{{ url('updatecounsel') }}" method="POST">
+        <form action="{{ url('Head/updatecounsel') }}" method="POST">
             @csrf
             <input type="hidden" name="c_id" id="edit_id">
 
@@ -107,29 +107,30 @@
 
 
 
-<!-- View Modal -->
-<div id="viewCounselorModal" class="modal">
+<!-- View Counselor Modal -->
+<div id="viewCounselorModal" class="modal" style="display:none;">
     <div class="modal-content">
-        <span class="close" onclick="closeViewCounselModal()">&times;</span>
+        <span class="close" onclick="closeViewCounselorModal()">&times;</span>
         <h2>View Counselor Details</h2>
         <div class="form-group">
             <label>Full Name:</label>
-            <p id="view_fullname"></p>
+            <span id="view_fullname" class="modal-value"></span>
         </div>
         <div class="form-group">
             <label>Email:</label>
-            <p id="view_email"></p>
+            <span id="view_email" class="modal-value"></span>
         </div>
         <div class="form-group">
             <label>Phone:</label>
-            <p id="view_contact"></p>
+            <span id="view_contact" class="modal-value"></span>
         </div>
         <div class="form-group">
             <label>Department:</label>
-            <p id="view_department"></p>
+            <span id="view_department" class="modal-value"></span>
         </div>
         <div class="modal-buttons">
-            <button type="button" class="btn cancel" onclick="closeViewCounselModal()">Close</button>
+            <button type="button" class="btn save" onclick="openEditFromViewModal()">Edit</button>
+            <button type="button" class="btn cancel" onclick="closeViewCounselorModal()">Close</button>
         </div>
     </div>
 </div>

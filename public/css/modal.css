@@ -89,12 +89,12 @@
 }
 
 .btn.cancel {
-  background-color: #ecf0f1;
-  color: #2c3e50;
+  background-color: #e90b0b;
+  color: white;
 }
 
 .btn.cancel:hover {
-  background-color: #d0d3d4;
+  background-color: #ad0101;
 }
 
 .btn-export {

@@ -8,32 +8,6 @@ function closeFormModal() {
     document.getElementById('formModal').style.display = 'none';
 }
 
-function openViewCounselModal(counselorId) {
-    console.log("Opening modal for ID:", counselorId);
-
-    fetch(`/Head/counselor/${counselorId}`)
-        .then(response => {
-            console.log("Fetch status:", response.status);
-            if (!response.ok) throw new Error('Fetch failed');
-            return response.json();
-        })
-        .then(data => {
-            console.log("Data:", data);
-            document.getElementById('view_fullname').textContent = `${data.lname}, ${data.fname} ${data.mname}`;
-            document.getElementById('view_email').textContent = data.email;
-            document.getElementById('view_contact').textContent = data.contact_num;
-            document.getElementById('view_department').textContent = data.c_level;
-            document.getElementById('viewCounselorModal').style.display = 'block';
-        })
-        .catch(err => {
-            console.error('Modal fetch error:', err);
-            alert("Failed to load counselor info.");
-        });
-}
-
-function closeViewCounselModal() {
-    document.getElementById('viewCounselorModal').style.display = 'none';
-}
 
 window.openFormModal = function () {
     const viewModal = document.getElementById('viewCounselorModal');
@@ -54,3 +28,47 @@ window.closeFormModal = function () {
         console.error("Modal not found!");
     }
 };
+
+function openViewCounselModal(counselorId) {
+    fetch(`/Head/counselors/${counselorId}`)
+        .then(response => {
+            if (!response.ok) throw new Error('Failed to load counselor info.');
+            return response.json();
+        })
+        .then(data => {
+
+            window.editCounselorData = data;
+
+            document.getElementById('view_fullname').textContent = `${data.lname}, ${data.fname} ${data.mname}`;
+            document.getElementById('view_email').textContent = data.email;
+            document.getElementById('view_contact').textContent = data.contact_num;
+            document.getElementById('view_department').textContent = data.c_level;
+            document.getElementById('viewCounselorModal').style.display = 'block';
+        })
+        .catch(error => {
+            alert(error.message);
+        });
+}
+
+function closeViewCounselorModal() {
+    document.getElementById('viewCounselorModal').style.display = 'none';
+}
+
+function openEditFromViewModal() {
+    const data = window.editCounselorData;
+    if (!data) {
+        alert('No counselor data loaded.');
+        return;
+    }
+
+    document.getElementById('edit_id').value = data.c_id;
+    document.getElementById('edit_lname').value = data.lname;
+    document.getElementById('edit_fname').value = data.fname;
+    document.getElementById('edit_mname').value = data.mname;
+    document.getElementById('edit_email').value = data.email;
+    document.getElementById('edit_contact').value = data.contact_num;
+    document.getElementById('edit_c_level').value = data.c_level;
+
+    closeViewCounselorModal();
+    document.getElementById('editModal').style.display = 'block';
+}

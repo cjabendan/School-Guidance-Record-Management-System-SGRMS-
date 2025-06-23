@@ -11,7 +11,7 @@ class CounselorController extends Controller
 {
     public function store(Request $request)
     {
-        // Validate the input
+
         $request->validate([
             'lname' => 'required|string',
             'fname' => 'required|string',
@@ -40,28 +40,35 @@ class CounselorController extends Controller
         $user->email = $request->email;
         $user->password = bcrypt($request->password);
         $user->role = 'counselor';
-        $user->counselor_id = $counselor->c_id; // link to counselor
+        $user->counselor_id = $counselor->c_id;
         $user->status = 'Pending';
-        $user->account_status = 'active'; // optional
+        $user->account_status = 'active';
         $user->save();
 
         return redirect()->back()->with('success', 'Counselor and user account created successfully.');
     }
 
-    public function getCounselor($id)
-    {
-        $counselor = Counselor::findOrFail($id);
-        return response()->json($counselor);
-    }
-
     public function show($id)
     {
         $counselor = Counselor::find($id);
-
         if (!$counselor) {
             return response()->json(['error' => 'Counselor not found'], 404);
         }
         return response()->json($counselor);
+    }
+
+    public function update(Request $request)
+    {
+        $counselor = Counselor::findOrFail($request->input('c_id'));
+        $counselor->lname = $request->input('lname');
+        $counselor->fname = $request->input('fname');
+        $counselor->mname = $request->input('mname');
+        $counselor->email = $request->input('email');
+        $counselor->contact_num = $request->input('contact_num');
+        $counselor->c_level = $request->input('c_level');
+        $counselor->save();
+
+        return redirect()->back()->with('success', 'Counselor updated successfully!');
     }
 
 }
