@@ -20,7 +20,11 @@
 
                 <label for="image">Image:</label>
                 <input type="file" id="image" name="image" accept="image/*">
-                <img id="studentImage" src="../../Public/stud.img/circle-user.png" alt="Student Image" style="display: none; width: 100px; height: auto; margin-top: 10px;">
+                <img id="studentImage"
+                     src="{{ asset('images/stud.img/circle-user.png') }}"
+                     data-default="{{ asset('images/stud.img/circle-user.png') }}"
+                     alt="Student Image"
+                     style="width: 100px; height: auto; margin-top: 10px;">
 
                 <label for="lname">Last Name:</label>
                 <input type="text" id="lname" name="lname" placeholder="Enter last name">
@@ -108,6 +112,16 @@
 
                 <button type="submit">Save</button>
             </form>
+
+            @if ($errors->any())
+                <div class="alert alert-danger">
+                    <ul>
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
         </div>
     </div>
 
@@ -149,6 +163,25 @@
                 idNumDisplay.textContent = 'Error generating ID';
             });
     }
+
+    document.addEventListener('DOMContentLoaded', function() {
+    const imageInput = document.getElementById('image');
+    const imgPreview = document.getElementById('studentImage');
+    if (imageInput) {
+        imageInput.addEventListener('change', function(event) {
+            const [file] = event.target.files;
+            if (file) {
+                imgPreview.src = URL.createObjectURL(file);
+            } else {
+                imgPreview.src = imgPreview.getAttribute('data-default');
+            }
+            imgPreview.style.display = 'block';
+        });
+    }
+    // Always show the default image when modal opens
+    imgPreview.src = imgPreview.getAttribute('data-default');
+    imgPreview.style.display = 'block';
+});
     </script>
 </body>
 </html>

@@ -113,7 +113,7 @@
             @endif
         </a>
         <a href="#" class="profile">
-            <img src="{{ asset('images/people.png') }}" alt="Profile">
+            <img src="{{ asset('images/user.img/people.png') }}" alt="Profile">
         </a>
     </nav>
 

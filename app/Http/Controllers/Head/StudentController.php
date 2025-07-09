@@ -5,13 +5,12 @@ namespace App\Http\Controllers\Head;
 use App\Models\Student;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-use App\Models\User;
 
 class StudentController extends Controller
 {
     public function getNextStudentId()
     {
-        $lastStudent = \DB::table('students')->orderByDesc('s_id')->first();
+        $lastStudent = Student::orderByDesc('s_id')->first();
 
         if ($lastStudent && preg_match('/(\d{8})$/', $lastStudent->id_num, $matches)) {
             $lastNumber = intval($matches[1]);
@@ -44,7 +43,19 @@ class StudentController extends Controller
             'section' => 'nullable|string|max:20',
             'program' => 'nullable|string|max:100',
             'previous_school' => 'nullable|string|max:255',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
+
+        // Handle image upload
+        if ($request->hasFile('image')) {
+            $image = $request->file('image');
+            $imageName = uniqid('stud_') . '.' . $image->getClientOriginalExtension();
+            $image->move(public_path('images/stud.img'), $imageName);
+            $imagePath = 'images/stud.img/' . $imageName;
+        } else {
+            // Use default image if none uploaded
+            $imagePath = 'images/stud.img/circle-user.png';
+        }
 
         Student::create([
             'id_num' => $validated['id_num'],
@@ -62,7 +73,7 @@ class StudentController extends Controller
             'section' => $validated['section'] ?? null,
             'program' => $validated['program'] ?? null,
             'previous_school' => $validated['previous_school'] ?? null,
-            's_image' => '', // handle image upload if needed
+            's_image' => $imagePath,
             'status' => 'active',
         ]);
 
