@@ -11,9 +11,28 @@ class Student extends Model
     public $timestamps = false;
 
     protected $fillable = [
-        'id_num', 'suffix', 'lname', 'fname', 'mname', 'sex', 'bod', 'address',
-        'mobile_num', 'email', 'educ_level', 'year_level', 'section', 'program',
-        's_image', 'previous_school', 'status', 'parent_id'
+        'user_id',
+        'id_num',
+        'educ_level',
+        'year_level',
+        'section',
+        'program',
+        'status',
+        'parent_id',
+        'previous_school_address',
+        'religion',
+        'civil_status'
     ];
-}
 
+    // Relationship: A student belongs to one user (personal info)
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
+
+    // Relationship: A student belongs to one parent
+    public function parent()
+    {
+        return $this->belongsTo(Parent::class, 'parent_id'); // adjust model name if needed
+    }
+}

@@ -4,9 +4,10 @@ const contents = document.querySelectorAll(".content");
 
 let currentSlide = 0;
 
-var sliderNav = function(manual){
+// Function to show a specific slide
+function sliderNav(manual) {
     // Reset all videos
-    slides.forEach((slide, index) => {
+    slides.forEach((slide) => {
         slide.pause();
         slide.currentTime = 0;
         slide.classList.remove("active");
@@ -20,16 +21,16 @@ var sliderNav = function(manual){
         btn.classList.remove("active");
     });
 
-    // Activate current slide
+    // Activate selected slide
     btns[manual].classList.add("active");
     slides[manual].classList.add("active");
     contents[manual].classList.add("active");
 
-    // Play the active video
+    // Play the current video
     slides[manual].play();
 }
 
-// Function to transition to next slide
+// Function to auto-slide every 6 seconds
 function autoSlide() {
     currentSlide++;
     if (currentSlide >= slides.length) {
@@ -38,18 +39,14 @@ function autoSlide() {
     sliderNav(currentSlide);
 }
 
-// Add event listeners to videos to trigger next slide when they end
-slides.forEach((slide, index) => {
-    slide.addEventListener('ended', () => {
-        autoSlide();
-    });
-});
+// Start auto-sliding every 6 seconds
+setInterval(autoSlide, 10000);
 
-// Initial navigation button click event listeners
-btns.forEach((btn, i) => {
+// Also allow manual navigation
+btns.forEach((btn, index) => {
     btn.addEventListener("click", () => {
-        currentSlide = i;
-        sliderNav(i);
+        currentSlide = index;
+        sliderNav(index);
     });
 });
 
@@ -57,35 +54,33 @@ function openAddModal() {
     document.getElementById("login-modal").style.display = "block";
 }
 
-
-
 // Initially set up the first slide
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener("DOMContentLoaded", () => {
     sliderNav(0);
 });
 
- function openLoginModal() {
-        document.querySelector('.login-modal').classList.add('show');
+function openLoginModal() {
+    document.querySelector(".login-modal").classList.add("show");
+}
+function closeLoginModal() {
+    document.querySelector(".login-modal").classList.remove("show");
+}
+window.onclick = function (event) {
+    const modal = document.querySelector(".login-modal");
+    if (event.target === modal) {
+        closeLoginModal();
     }
-    function closeLoginModal() {
-        document.querySelector('.login-modal').classList.remove('show');
+};
+function togglePassword() {
+    const passwordInput = document.getElementById("login-password");
+    const icon = document.getElementById("togglePasswordIcon");
+    if (passwordInput.type === "password") {
+        passwordInput.type = "text";
+        icon.classList.remove("fa-eye");
+        icon.classList.add("fa-eye-slash");
+    } else {
+        passwordInput.type = "password";
+        icon.classList.remove("fa-eye-slash");
+        icon.classList.add("fa-eye");
     }
-    window.onclick = function(event) {
-        const modal = document.querySelector('.login-modal');
-        if (event.target === modal) {
-            closeLoginModal();
-        }
-    }
-    function togglePassword() {
-        const passwordInput = document.getElementById("login-password");
-        const icon = document.getElementById("togglePasswordIcon");
-        if (passwordInput.type === "password") {
-            passwordInput.type = "text";
-            icon.classList.remove("fa-eye");
-            icon.classList.add("fa-eye-slash");
-        } else {
-            passwordInput.type = "password";
-            icon.classList.remove("fa-eye-slash");
-            icon.classList.add("fa-eye");
-        }
-    }
+}

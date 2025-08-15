@@ -1,9 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <link rel="stylesheet" href="{{ asset('css/modal.css') }}">
 </head>
+
 <body>
 
     <!-- Add Student Modal -->
@@ -11,20 +13,19 @@
         <div class="modal-content">
             <span class="close" onclick="closeAddModal()">&times;</span>
             <h2 id="addModalTitle">Add Student</h2>
-            <form id="addStudentForm" method="POST" action="{{ url('Head/students/add') }}" enctype="multipart/form-data">
+            <form id="addStudentForm" method="POST" action="{{ url('Head/students/add') }}"
+                enctype="multipart/form-data">
                 @csrf
 
-            <label for="id_num_display">Student ID:</label>
-            <span id="id_num_display">Loading...</span>
-            <input type="hidden" id="id_num" name="id_num">
+                <label for="id_num_display">Student ID:</label>
+                <span id="id_num_display">Loading...</span>
+                <input type="hidden" id="id_num" name="id_num">
 
                 <label for="image">Image:</label>
                 <input type="file" id="image" name="image" accept="image/*">
-                <img id="studentImage"
-                     src="{{ asset('images/stud.img/circle-user.png') }}"
-                     data-default="{{ asset('images/stud.img/circle-user.png') }}"
-                     alt="Student Image"
-                     style="width: 100px; height: auto; margin-top: 10px;">
+                <img id="studentImage" src="{{ asset('images/stud.img/circle-user.png') }}"
+                    data-default="{{ asset('images/stud.img/circle-user.png') }}" alt="Student Image"
+                    style="width: 100px; height: auto; margin-top: 10px;">
 
                 <label for="lname">Last Name:</label>
                 <input type="text" id="lname" name="lname" placeholder="Enter last name">
@@ -47,6 +48,12 @@
                     <option value="Female">Female</option>
                 </select>
 
+                <label for="religion">Religion:</label>
+                <input type="text" id="religion" name="religion" placeholder="Enter religion">
+
+                <label for="civil_status">Civil Status:</label>
+                <input type="text" id="civil_status" name="civil_status" placeholder="e.g. Single, Married, etc.">
+
                 <label for="address">Address:</label>
                 <input type="text" id="address" name="address" placeholder="Enter address">
 
@@ -57,12 +64,15 @@
                 <input type="email" id="email" name="email" placeholder="Enter email">
 
                 <label for="educ_level">Educational Level:</label>
-                <select id="educ_level" name="educ_level">
-                    <option value="">Select Level</option>
-                    <option value="Elementary">Elementary</option>
-                    <option value="High School">High School</option>
-                    <option value="College">College</option>
-                </select>
+                <input list="educ_levels" id="educ_level" name="educ_level"
+                    placeholder="Enter or select educational level">
+                <datalist id="educ_levels">
+                    <option value="Kindergarten">
+                    <option value="Elementary">
+                    <option value="High School">
+                    <option value="Senior High School">
+                    <option value="College">
+                </datalist>
 
                 <script>
                     document.getElementById('educ_level').addEventListener('change', function() {
@@ -85,8 +95,14 @@
                     <input type="text" id="section" name="section" placeholder="Enter section name">
                 </div>
 
-                <label for="previous_school">Previous School:</label>
-                <input type="text" id="previous_school" name="previous_school" placeholder="Enter previous school name">
+                <label for="previous_school">Previous School Attended:</label>
+                <input type="text" id="previous_school" name="previous_school"
+                    placeholder="Enter previous school name">
+
+                <label for="previous_school_address">Previous School Address:</label>
+                <input type="text" id="previous_school_address" name="previous_school_address"
+                    placeholder="Enter previous school address">
+
 
                 <hr style="margin: 20px 0;">
 
@@ -125,6 +141,52 @@
         </div>
     </div>
 
+    <!-- View Student Modal -->
+    <div id="viewStudentModal" class="modal" style="display:none;">
+        <div class="modal-content">
+            <span class="close" onclick="closeViewStudentModal()">&times;</span>
+            <h2>Student Details</h2>
+            <div id="viewStudentContent">
+                <!-- Student details will be loaded here -->
+            </div>
+            <div class="modal-buttons">
+                <button class="btn save" onclick="openEditStudentModal()">Edit</button>
+                <button class="btn cancel" onclick="closeViewStudentModal()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Student Modal -->
+    <div id="editStudentModal" class="modal" style="display:none;">
+        <div class="modal-content">
+            <span class="close" onclick="closeEditStudentModal()">&times;</span>
+            <h2>Edit Student</h2>
+            <form id="editStudentForm" method="POST" enctype="multipart/form-data">
+                @csrf
+                @method('POST')
+                <input type="hidden" name="id_num" id="edit_id_num">
+                <label>Last Name:</label>
+                <input type="text" name="lname" id="edit_lname" required>
+                <label>First Name:</label>
+                <input type="text" name="fname" id="edit_fname" required>
+                <label>Middle Name:</label>
+                <input type="text" name="mname" id="edit_mname">
+                <label>Suffix:</label>
+                <input type="text" name="suffix" id="edit_suffix">
+                <label>Birthdate:</label>
+                <input type="date" name="bod" id="edit_bod" required>
+                <label>Gender:</label>
+                <select name="gender" id="edit_gender" required>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                </select>
+                <!-- Add other fields as needed -->
+                <button type="submit" class="btn save">Save</button>
+                <button type="button" class="btn cancel" onclick="closeEditStudentModal()">Cancel</button>
+            </form>
+        </div>
+    </div>
+
     <script>
         function toggleFields() {
             const educLevel = document.getElementById('educ_level').value;
@@ -141,47 +203,54 @@
         }
 
 
-    function openModal() {
-        document.getElementById("studentModal").style.display = "block";
-        fetchStudentId();
-    }
+        function openModal() {
+            document.getElementById("studentModal").style.display = "block";
+            fetchStudentId();
+        }
 
-    function closeModal() {
-        document.getElementById("studentModal").style.display = "none";
-    }
+        function closeModal() {
+            document.getElementById("studentModal").style.display = "none";
+        }
 
-    function fetchStudentId() {
-        const idNumDisplay = document.getElementById('id_num_display');
-        const idNumHidden = document.getElementById('id_num');
-        fetch('/Head/students/next-id')
-            .then(response => response.json())
-            .then(data => {
-                idNumDisplay.textContent = data.next_id;
-                idNumHidden.value = data.next_id;
-            })
-            .catch(error => {
-                idNumDisplay.textContent = 'Error generating ID';
-            });
-    }
+        function fetchStudentId() {
+            const idNumDisplay = document.getElementById('id_num_display');
+            const idNumHidden = document.getElementById('id_num');
+            fetch('/Head/students/next-id')
+                .then(response => response.json())
+                .then(data => {
+                    idNumDisplay.textContent = data.next_id;
+                    idNumHidden.value = data.next_id;
+                })
+                .catch(error => {
+                    idNumDisplay.textContent = 'Error generating ID';
+                });
+        }
 
-    document.addEventListener('DOMContentLoaded', function() {
-    const imageInput = document.getElementById('image');
-    const imgPreview = document.getElementById('studentImage');
-    if (imageInput) {
-        imageInput.addEventListener('change', function(event) {
-            const [file] = event.target.files;
-            if (file) {
-                imgPreview.src = URL.createObjectURL(file);
-            } else {
-                imgPreview.src = imgPreview.getAttribute('data-default');
+        document.addEventListener('DOMContentLoaded', function() {
+            const imageInput = document.getElementById('image');
+            const imgPreview = document.getElementById('studentImage');
+            if (imageInput) {
+                imageInput.addEventListener('change', function(event) {
+                    const [file] = event.target.files;
+                    if (file) {
+                        imgPreview.src = URL.createObjectURL(file);
+                    } else {
+                        imgPreview.src = imgPreview.getAttribute('data-default');
+                    }
+                    imgPreview.style.display = 'block';
+                });
             }
+            // Always show the default image when modal opens
+            imgPreview.src = imgPreview.getAttribute('data-default');
             imgPreview.style.display = 'block';
         });
-    }
-    // Always show the default image when modal opens
-    imgPreview.src = imgPreview.getAttribute('data-default');
-    imgPreview.style.display = 'block';
-});
+
+        @if ($errors->any())
+            document.addEventListener('DOMContentLoaded', function() {
+                document.getElementById('addStudentModal').style.display = 'block';
+            });
+        @endif
     </script>
 </body>
+
 </html>

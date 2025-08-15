@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
-use App\Mail\Welcome;
+use App\Mail\WelcomeEmail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
@@ -12,6 +12,10 @@ use Illuminate\Support\Str;
 
 class RegisterController extends Controller
 {
+    public function showForm()
+    {
+        return view('auth.register');
+    }
     public function register(Request $request)
     {
         User::where('token_expires_at', '<', now())->update([
