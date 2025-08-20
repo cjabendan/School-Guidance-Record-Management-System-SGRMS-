@@ -26,7 +26,6 @@ class ProfilingController extends Controller
                 'counselors.c_level',
                 'users.profile_image',
                 'users.username'
-                // do NOT select users.password
             )
             ->get();
 

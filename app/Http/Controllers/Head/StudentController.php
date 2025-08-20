@@ -122,3 +122,5 @@ class StudentController extends Controller
         return redirect()->back()->with('success', 'Student updated successfully!');
     }
 }
+
+

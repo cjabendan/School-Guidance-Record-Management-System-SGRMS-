@@ -1,13 +1,9 @@
-.navbar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
 #content {
     position: relative;
     left: 280px;
     transition: 0.3s ease;
+    width: calc(100% - 280px);
+    background-color: rgba(0, 0, 0, 0.1);
 }
 
 #sidebar.hide + #content {

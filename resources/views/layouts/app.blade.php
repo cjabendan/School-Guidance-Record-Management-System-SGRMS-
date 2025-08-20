@@ -33,7 +33,10 @@
     {{-- Main Content --}}
 
     @stack('scripts')
+    @include('auth.login')
     @include('partials.footer')
 </body>
 
 </html>
+
+<script src="{{ asset('js/landing.js') }}"></script>

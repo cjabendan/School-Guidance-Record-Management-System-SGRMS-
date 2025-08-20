@@ -1,9 +1,66 @@
-/* ==================== GLOBAL ==================== */
-* {
-    list-style: none;
+/* ==================== NAVBAR ======================*/
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #ffffff;
+    height: 70px;
+    padding: 0 30px;
+}
+
+.nav-right {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.user-profile {
+    display: flex;
+    align-items: center;
+}
+
+.user-profile img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
 }
 
 /* ==================== SIDEBAR ==================== */
+.sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 280px;
+    height: 100%;
+   background-color: #1ea7ff;
+   /* background: linear-gradient(to right, rgb(21, 163, 255), rgb(0, 88, 175)); */
+    z-index: 2000;
+    overflow-x: hidden;
+    scrollbar-width: none;
+}
+
+.sidebar .brand {
+    height: 70px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.sidebar .brand-logo {
+    background-color: #ffffff;
+    border-radius:  14px;
+    width: 50px;
+    height: 50px;
+}
+
+.sidebar .brand h1 {
+    color: #ffffff;
+    font-size: 24px;
+    margin-left: 10px;
+    font-weight: 600;
+    letter-spacing: 1px;
+}
 
 .sidebar ul {
     list-style: none;
@@ -18,26 +75,13 @@
 /* Base style for submenu (hidden by default) */
 .submenu {
     display: none;
-    padding-left: 20px;
-    flex-direction: column;
 }
 
 /* Show submenu when active */
 .submenu.active {
     display: flex;
-}
-
-#sidebar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 280px;
-    height: 100%;
-    background: var(--light);
-    z-index: 2000;
-    font-family: var(--lato);
-    overflow-x: hidden;
-    scrollbar-width: none;
+    flex-direction: column;
+    margin-left: 20px;
 }
 
 #sidebar::--webkit-scrollbar {
@@ -46,26 +90,6 @@
 
 #sidebar.hide {
     width: 60px;
-}
-
-#sidebar .brand {
-    font-size: 24px;
-    font-weight: 700;
-    height: 75px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--blue);
-    background: var(--light);
-    position: sticky;
-    top: 0;
-    z-index: 500;
-}
-
-#sidebar .brand .bx {
-    min-width: 60px;
-    display: flex;
-    justify-content: center;
 }
 
 #sidebar .side-menu {
@@ -81,7 +105,7 @@
 }
 
 #sidebar .side-menu li.active {
-    background: var(--grey);
+    background-color: #ffffff;
     position: relative;
 }
 
@@ -96,25 +120,14 @@
     z-index: -1;
 }
 
-#sidebar .side-menu li.active::before {
-    top: -40px;
-    box-shadow: 20px 20px 0 var(--grey);
-}
-
-#sidebar .side-menu li.active::after {
-    bottom: -40px;
-    box-shadow: 20px -20px 0 var(--grey);
-}
-
 #sidebar .side-menu li a {
     width: 100%;
     height: 100%;
     display: flex;
     align-items: center;
-    border-radius: 48px;
+
     font-size: 16px;
-    color: var(--dark);
-    background: var(--light);
+    color: #ffffff;
     white-space: nowrap;
     overflow-x: hidden;
 }
@@ -125,11 +138,10 @@
     justify-content: center;
 }
 
-#sidebar .side-menu li a.logout {
-    color: var(--red);
-}
-
+/* Top menu hover & active */
 #sidebar .side-menu.top li a:hover {
+    background-color: #ffffff;
+    border-radius: 48px;
     color: var(--blue);
 }
 
@@ -137,16 +149,10 @@
     color: var(--blue);
 }
 
+/* Hide sidebar (collapsed) */
 #sidebar.hide .side-menu li a {
     width: calc(48px - (4px * 2));
     transition: width 0.3s ease;
-}
-
-/* ==================== CONTENT WRAPPER ==================== */
-#content {
-    position: relative;
-    width: calc(100% - 280px);
-    left: 280px;
 }
 
 #sidebar.hide ~ #content {
@@ -154,140 +160,61 @@
     left: 60px;
 }
 
-/* ==================== NAVBAR ==================== */
-#content nav {
-    height: 75px;
-    background: var(--light);
-    padding: 10px 25px;
-    display: flex;
-    align-items: center;
-    gap: 24px;
-    font-family: var(--lato);
-    position: sticky;
-    top: 0;
-    z-index: 1000;
-}
+/* ==================== LOGOUT FIX ==================== */
 
-#content nav a {
-    color: var(--dark);
-}
-
-#content nav .bx.bx-menu {
-    cursor: pointer;
-    color: var(--dark);
-}
-
-#content nav .nav-link {
-    font-size: 16px;
-    transition: 0.3s ease;
-}
-
-#content nav .nav-link:hover {
-    color: var(--blue);
-}
-
-#content nav form {
-    max-width: 400px;
+/* Logout form wrapper stays full width */
+#sidebar .side-menu li .logout-form {
+    margin: 0;
     width: 100%;
-    margin-right: auto;
 }
 
-#content nav form .form-input {
+/* Make logout button like other sidebar links */
+#sidebar .side-menu li .logout-form button {
     display: flex;
     align-items: center;
-    height: 36px;
-}
-
-#content nav form .form-input input {
-    flex-grow: 1;
-    padding: 0 16px;
-    height: 100%;
+    width: 100%;
+    height: 48px;
     border: none;
-    background: var(--grey);
-    border-radius: 36px 0 0 36px;
-    outline: none;
-    width: 100%;
-    color: var(--dark);
+    background-color: #003060; 
+    padding-left: 4px;
+    border-radius: 14px;
+    font-size: 16px;
+    color: #ffffff;
+    cursor: pointer;
+    text-align: left;
+    overflow: hidden;
+    transition: width 0.3s ease, border-radius 0.3s ease;
 }
 
-#content nav form .form-input button {
-    width: 36px;
-    height: 100%;
+/* Icon spacing */
+#sidebar .side-menu li .logout-form button i {
+    min-width: calc(60px - ((4px + 6px) * 2));
     display: flex;
     justify-content: center;
-    align-items: center;
-    background: var(--blue);
-    color: var(--light);
-    font-size: 18px;
-    border: none;
-    outline: none;
-    border-radius: 0 36px 36px 0;
-    cursor: pointer;
+    font-size: 16px;
 }
 
-#content nav .profile img {
-    width: 36px;
-    height: 36px;
-    object-fit: cover;
-    border-radius: 50%;
-    max-width: 100%;
+/* Text inside logout button */
+#sidebar .side-menu li .logout-form button .text {
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    transition: opacity 0.3s ease, width 0.3s ease;
 }
 
-/* ==================== SWITCH MODE ==================== */
-#content nav .switch-mode {
-    display: block;
-    min-width: 50px;
-    height: 25px;
-    border-radius: 25px;
-    background: var(--grey);
-    cursor: pointer;
-    position: relative;
+/* When sidebar is collapsed */
+#sidebar.hide .side-menu li .logout-form button {
+    width: calc(48px - (4px * 2));
+    border-radius: 14px; /* same as other links */
+    padding: 0; /* remove horizontal padding */
+    justify-content: center; /* center icon */
 }
 
-#content nav .switch-mode::before {
-    content: "";
-    position: absolute;
-    top: 2px;
-    left: 2px;
-    bottom: 2px;
-    width: calc(25px - 4px);
-    background: var(--blue);
-    border-radius: 50%;
-    transition: all 0.3s ease;
+#sidebar.hide .side-menu li .logout-form button .text {
+    opacity: 0; /* hide text */
+    width: 0;
 }
 
-#content nav #switch-mode:checked + .switch-mode::before {
-    left: calc(100% - (25px - 4px) - 2px);
-}
-
-/* ==================== NOTIFICATION ==================== */
-nav .notification {
-    position: relative;
-}
-
-nav .notification .num {
-    position: absolute;
-    top: -5px;
-    right: -10px;
-    background-color: red;
-    color: white;
-    font-size: 10px;
-    padding: 2px 6px;
-    border-radius: 50%;
-    animation: pulse 1.5s infinite;
-}
-
-@keyframes pulse {
-    0% {
-        transform: scale(1);
-        opacity: 1;
-    }
-    50% {
-        transform: scale(1.2);
-        opacity: 0.6;
-    }
-    100% {
-        transform: scale(1);
-        opacity: 1;
-    }
+#sidebar .side-menu li .logout-form button:hover {
+    background-color: #fd2828;
 }

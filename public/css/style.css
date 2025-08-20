@@ -6,6 +6,8 @@
     box-sizing: border-box;
     font-family: "Poppins", sans-serif;
     text-decoration: none;
+    list-style: none;
+    border-style: none;
 }
 
 body {
@@ -15,8 +17,10 @@ body {
 }
 
 a,
-button {
+button,
+li {
     font-family: "Poppins", sans-serif;
+    cursor: pointer;
 }
 
 html {
@@ -24,7 +28,8 @@ html {
 }
 
 .wrapper {
-    padding: 20px 30px;
+    padding: 20px;
+    background-color: #ffffff;
 }
 
 :root {

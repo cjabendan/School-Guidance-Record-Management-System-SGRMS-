@@ -11,13 +11,17 @@ use App\Http\Controllers\Head\ProfilingController;
 use App\Http\Controllers\Head\StudentController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\StaffController;
+use App\Http\Controllers\AnnouncementsController;
 
 
-Route::get('/', function () {
-    return view('landing');
+Route::get('/announcements', function () {
+    return view('announcement');
 });
 
 Route::get('/', [StaffController::class, 'index']);
+
+
+Route::get('/announcements', [AnnouncementsController::class, 'index'])->name('announcements.index');
 
 Route::middleware('web')->group(function () {
     Route::post('/login', [LoginController::class, 'login'])->name('login');
@@ -46,6 +50,7 @@ Route::prefix('Head')->group(function () {
     Route::post('Head/students/{id_num}/edit', [StudentController::class, 'editStudent']);
 });
 
-Route::get('/logout', [LogoutController::class, 'logout'])->name('logout');
+Route::post('/logout', [LogoutController::class, 'logout'])->name('logout');
+
 
 Route::get('/dashboard', [DashboardController::class, 'redirect'])->name('dashboard');

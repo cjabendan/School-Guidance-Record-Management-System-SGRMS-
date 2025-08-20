@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Admins;
 use App\Models\Counselor;
-use Illuminate\Http\Request;
 
 class StaffController extends Controller
 {

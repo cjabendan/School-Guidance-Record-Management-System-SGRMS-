@@ -13,6 +13,7 @@ class User extends Authenticatable
     protected $primaryKey = 'id';
 
     protected $fillable = [
+        'id',
         'username',
         'first_name',
         'middle_name',
@@ -25,6 +26,7 @@ class User extends Authenticatable
         'profile_image',
         'password',
         'role',
+        'profile_image',
         'status'
     ];
 
@@ -56,9 +58,9 @@ class User extends Authenticatable
     }
 
     // If this user is an admin
-    // Uncomment and implement Admin model if it exists
-    // public function admin()
-    // {
-    //     return $this->hasOne(Admin::class, 'user_id');
-    // }
+   
+     public function admin()
+    {
+        return $this->hasOne(Admins::class, 'user_id');
+     }
 }

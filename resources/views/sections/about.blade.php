@@ -12,7 +12,7 @@
             <p>At the heart of our school’s commitment to student well-being is the School Guidance Records Management
                 System (SGRMS)—a smart and connected platform that helps us manage guidance services more efficiently.
                 <br>
-                <br> With SGRMS, we streamline student records, schedule appointments with ease, and stay connected with
+                With SGRMS, we streamline student records, schedule appointments with ease, and stay connected with
                 parents through real-time updates. By reducing paperwork and simplifying processes, our guidance team
                 can focus more on what truly matters: providing timely, meaningful support to every learner.
             </p>

@@ -18,7 +18,4 @@
     {{-- FAQ Section --}}
     @include('sections.faq')
 
-
-    @include('auth.login')
-    <script src="{{ asset('js/landing.js') }}"></script>
 @endsection

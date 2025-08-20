@@ -20,7 +20,7 @@
         left: 0;
         width: 100vw;
         height: 100vh;
-        background: rgba(0, 0, 0, 0.4);
+        background: rgba(0, 0, 0, 0.3);
         backdrop-filter: blur(3px);
         z-index: 2000;
         display: flex;

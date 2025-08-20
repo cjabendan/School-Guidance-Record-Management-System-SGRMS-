@@ -84,3 +84,11 @@ function togglePassword() {
         icon.classList.add("fa-eye");
     }
 }
+
+function getQueryParam(param) {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get(param);
+  }
+  if (getQueryParam('login') === 'true') {
+    openLoginModal('login-modal');
+  }

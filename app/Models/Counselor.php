@@ -11,13 +11,7 @@ class Counselor extends Model
     public $timestamps = false;
 
     protected $fillable = [
-        'lname',
-        'fname',
-        'mname',
-        'email',
-        'contact_num',
-        'c_level',
-        'c_image'
+      'user_id',
     ];
 
     public function user()

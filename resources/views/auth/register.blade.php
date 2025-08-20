@@ -1,10 +1,8 @@
-@extends('layouts.main')
 
-@section('head')
     <link rel="stylesheet" href="{{ asset('css/register.css') }}">
-@endsection
 
-@section('content')
+
+
     <div class="container" role="main">
         <section class="left-panel">
             <div>
@@ -71,9 +69,9 @@
                 </button>
                 <div class="switch-auth">
                     <p>Already have an account or a student?</p>
-                    <a class="back-btn" href="{{ url('login') }}">Log in instead</a>
+                    <a class="back-btn" href="{{ url('/?login=true') }}">Log in instead</a>
                 </div>
             </form>
         </section>
     </div>
-@endsection
+
