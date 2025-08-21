@@ -5,13 +5,34 @@
     align-items: center;
     background-color: #ffffff;
     height: 70px;
-    padding: 0 30px;
+    padding: 0 20px;
+}
+
+.nav-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.nav-left i,
+.nav-right i {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    color: #003060;
+    font-size: 22px;
+}
+.nav-left a {
+    color: #003060;
+    font-weight: 500;
+    letter-spacing: 1px;
 }
 
 .nav-right {
     display: flex;
     justify-content: center;
     align-items: center;
+    gap: 20px;
 }
 
 .user-profile {
@@ -24,17 +45,19 @@
     height: 40px;
     border-radius: 50%;
     object-fit: cover;
+    margin-right: 10px;
 }
 
 /* ==================== SIDEBAR ==================== */
+    
 .sidebar {
     position: fixed;
     top: 0;
     left: 0;
-    width: 280px;
+    width: 260px;
     height: 100%;
-   background-color: #1ea7ff;
-   /* background: linear-gradient(to right, rgb(21, 163, 255), rgb(0, 88, 175)); */
+    background-color: #1ea7ff;
+    /* background: linear-gradient(to right, rgb(21, 163, 255), rgb(0, 88, 175)); */
     z-index: 2000;
     overflow-x: hidden;
     scrollbar-width: none;
@@ -48,10 +71,8 @@
 }
 
 .sidebar .brand-logo {
-    background-color: #ffffff;
-    border-radius:  14px;
-    width: 50px;
-    height: 50px;
+    width: 60px;
+    height: 60px;
 }
 
 .sidebar .brand h1 {
@@ -60,6 +81,14 @@
     margin-left: 10px;
     font-weight: 600;
     letter-spacing: 1px;
+}
+
+.sidebar .brand span {
+    color: #ffffff;
+    font-size: 24px;
+    font-weight: 550;
+    letter-spacing: 1px;
+    align-self: center;
 }
 
 .sidebar ul {
@@ -132,7 +161,8 @@
     overflow-x: hidden;
 }
 
-#sidebar .side-menu li a .bx {
+#sidebar .side-menu li a .bx,
+#sidebar .side-menu li a .fi {
     min-width: calc(60px - ((4px + 6px) * 2));
     display: flex;
     justify-content: center;
@@ -149,9 +179,24 @@
     color: var(--blue);
 }
 
+#sidebar .side-menu li.active::before {
+    top: -40px;
+    box-shadow: 20px 20px 0 #ffffff;
+}
+
+#sidebar .side-menu li.active::after {
+    bottom: -40px;
+    box-shadow: 20px -20px 0 #ffffff;
+}
+
 /* Hide sidebar (collapsed) */
 #sidebar.hide .side-menu li a {
     width: calc(48px - (4px * 2));
+    transition: width 0.3s ease;
+}
+
+#sidebar.hide .brand span {
+    display: none;
     transition: width 0.3s ease;
 }
 
@@ -175,7 +220,7 @@
     width: 100%;
     height: 48px;
     border: none;
-    background-color: #003060; 
+    background-color: #003060;
     padding-left: 4px;
     border-radius: 14px;
     font-size: 16px;

@@ -1,8 +1,8 @@
 #content {
     position: relative;
-    left: 280px;
+    left: 260px;
     transition: 0.3s ease;
-    width: calc(100% - 280px);
+    width: calc(100% - 260px);
     background-color: rgba(0, 0, 0, 0.1);
 }
 

@@ -36,7 +36,6 @@ header .logo .brand-logo {
 
 .navbar {
     display: flex;
-    margin-left: 100px;
     gap: 2rem;
     padding: 0.5rem 0;
 }
@@ -1201,7 +1200,7 @@ footer p {
     width: 100%;
     padding: 0.8rem 1.5rem 0.8rem 1.5rem;
     border: 1px solid #bcd6f7;
-    border-radius: 60px;
+    border-radius: 10px;
     font-size: 1rem;
 }
 
@@ -1246,7 +1245,7 @@ footer p {
     background: #1ea7ff;
     color: #fff;
     border: none;
-    border-radius: 60px;
+    border-radius: 10px;
     padding: 0.8rem 2.2rem;
     font-size: 1rem;
     cursor: pointer;

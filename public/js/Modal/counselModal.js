@@ -43,6 +43,9 @@ function openViewCounselModal(counselorId) {
             document.getElementById('view_email').textContent = data.email;
             document.getElementById('view_contact').textContent = data.contact_num;
             document.getElementById('view_department').textContent = data.c_level;
+            document.getElementById('view_c_image').src = data.profile_image
+                ? '/uploads/users/' + data.profile_image
+                : '/images/user.img/people.png';
             document.getElementById('viewCounselorModal').style.display = 'block';
         })
         .catch(error => {

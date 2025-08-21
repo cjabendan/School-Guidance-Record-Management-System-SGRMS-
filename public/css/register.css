@@ -1,99 +1,160 @@
-* {
-      box-sizing: border-box;
-    }
-
-    body {
-      font-family: 'Inter', sans-serif;
-      background: #f1f5f9;
-      margin: 0;
-      padding: 0;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-    }
-
-    .container {
-      background: white;
-      padding: 30px 40px;
-      border-radius: 12px;
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-      width: 100%;
-      max-width: 500px;
-    }
-
-    h2 {
-      margin-top: 0;
-      text-align: center;
-      color: #0f172a;
-    }
-
-    h3 {
-      margin-top: 20px;
-      color: #1e293b;
-      font-size: 18px;
-      border-bottom: 1px solid #e2e8f0;
-      padding-bottom: 5px;
-    }
-
-    label {
-      display: block;
-      margin-top: 15px;
-      color: #334155;
-      font-weight: 600;
-    }
-
-    input {
-      width: 100%;
-      padding: 10px;
-      margin-top: 5px;
-      border-radius: 8px;
-      border: 1px solid #cbd5e1;
-      background-color: #f8fafc;
-    }
-
-    button {
-      width: 100%;
-      margin-top: 25px;
-      padding: 12px;
-      border: none;
-      border-radius: 8px;
-      background-color: #2563eb;
-      color: white;
-      font-weight: bold;
-      font-size: 16px;
-      cursor: pointer;
-      transition: background-color 0.3s;
-    }
-
-    button:hover {
-      background-color: #1d4ed8;
-    }
-
-    .message {
-      text-align: center;
-      margin-top: 20px;
-      color: #059669;
-      font-weight: bold;
-    }
-
-    .message.error {
-      color: #dc2626;
-    }
-
-    .back-btn {
-  display: inline-block;
-  margin-top: 15px;
-  text-align: center;
-  padding: 10px 15px;
-  background-color: #e2e8f0;
-  color: #1e293b;
-  text-decoration: none;
-  border-radius: 6px;
-  font-weight: 600;
-  transition: background-color 0.3s;
+body {
+    background-color: #ffffff;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
-.back-btn:hover {
-  background-color: #cbd5e1;
+.container {
+    background-color: #ffffff;
+    border-radius: 1rem;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    border: 1px solid rgb(19, 44, 80);
+}
+
+.left,
+.right {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+
+.left {
+    padding: 1rem 2rem;
+}
+
+.welcome-text {
+    font-size: 28px;
+    font-weight: 600;
+    color: #1ea7ff;
+    margin: 10px 0;
+    letter-spacing: 1px;
+}
+
+.description {
+    font-size: 18px;
+    color: #6d7375;
+    margin-bottom: 120px;
+}
+
+.reg-image {
+    width: 400px;
+}
+
+.right {
+    padding: 1rem 2rem;
+    background-color: #e2f4ff71;
+    border-radius: 0 1rem 0;
+}
+
+.form {
+    display: flex;
+    flex-direction: column;
+    border-radius: 20px;
+    position: relative;
+    gap: 10px;
+}
+
+.reg-title {
+    font-size: 28px;
+    color: #093c70;
+    font-weight: 650;
+    letter-spacing: 1px;
+    padding: 10px 0;
+}
+
+.message {
+    margin-bottom: 10px;
+}
+
+.form-group {
+    margin-bottom: 5px;
+    gap: 5px;
+    display: flex;
+    flex-direction: column;
+}
+
+label {
+  color: #093c70;
+  font-weight: 550;
+}
+
+input {
+    width: 100%;
+    padding: 0.8rem 1.5rem 0.8rem 1.5rem;
+    border: 1px solid #bcd6f7;
+    border-radius: 10px;
+    font-size: 1rem;
+}
+
+input:focus {
+    border: 1px solid #0080ff;
+    outline: none;
+}
+
+.message,
+.signin {
+    color: rgba(153, 145, 145, 0.822);
+    font-size: 18px;
+}
+
+.signin {
+    text-align: center;
+}
+
+.signin a {
+    color: #fbbf24;
+    text-decoration: none;
+}
+
+.signin a:hover {
+    text-decoration: underline;
+}
+
+
+.toggle-password {
+  position: absolute;
+  right: 18px;
+  top: 43px; 
+  cursor: pointer;
+  color: #64748b;
+}
+
+.toggle-password:hover {
+  color: #2563eb;
+}
+
+.span {
+    font-size: 18px;
+    margin-left: 5px;
+    color: #1ea7ff;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.button-submit {
+    width: 100%;
+    background: #1ea7ff;
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: 0.8rem 2.2rem;
+    font-size: 1rem;
+    margin: 0.5rem 0;
+    transition: background 0.2s;
+}
+
+.button-submit:hover {
+    background-color: #0080ff;
+}
+
+.p {
+    text-align: center;
+    color: #6d7375;
+    font-size: 18x;
+    
 }

@@ -11,7 +11,7 @@ class ParentModel extends Model
     public $timestamps = false;
 
     protected $fillable = [
-        'user_id',
+      
         'relationship',
     ];
 

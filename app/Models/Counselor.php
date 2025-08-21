@@ -11,7 +11,7 @@ class Counselor extends Model
     public $timestamps = false;
 
     protected $fillable = [
-      'user_id',
+        'user_id'
     ];
 
     public function user()

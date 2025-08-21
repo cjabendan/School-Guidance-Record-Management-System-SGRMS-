@@ -23,9 +23,10 @@ class ProfilingController extends Controller
                 'users.last_name',
                 'users.contact_num',
                 'users.email',
-                'counselors.c_level',
+                // 'counselors.c_level', // Removed because it does not exist in the DB
                 'users.profile_image',
                 'users.username'
+                // do NOT select users.password
             )
             ->get();
 

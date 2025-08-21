@@ -9,7 +9,7 @@
         <div class="wrapper">
             <div class="head-title">
                 <div class="left">
-                    <h1>Reports</h1>
+                    <h1>Case Reports</h1>
                 </div>
 
 
@@ -17,6 +17,6 @@
         </div>
     </section>
 
-    <script src="{{ asset('js/head.js') }}"></script>
+    
 
 @endsection

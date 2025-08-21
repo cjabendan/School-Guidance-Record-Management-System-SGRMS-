@@ -1,77 +1,81 @@
-
-    <link rel="stylesheet" href="{{ asset('css/register.css') }}">
-
-
-
+@extends('layouts.reg')
+@section('content')
     <div class="container" role="main">
-        <section class="left-panel">
+        <div class="left">
             <div>
-
-                <h1 class="heading" lang="en"> Let’s setup your Parent <br /> Account </h1>
-
+                <h1 class="welcome-text">
+                    Welcome!<br />
+                    <span class="welcome-subtext">First things first...</span>
+                </h1>
+                <p class="description">
+                    Create a profile to get updated with your child's progress.
+                </p>
             </div>
-        </section>
-        <section class="right-panel" aria-label="Setup form">
-            <h2 class="title">Register account</h2>
-            <?php
-            if (!empty($errors)) {
-                foreach ($errors as $e) {
-                    echo "<div class='error'>$e</div>";
-                }
-            }
-            if (!empty($success)) {
-                echo "<div class='message'>$success</div>";
-            }
-            ?>
-            <form method="POST" action="">
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="first_name">First name</label>
-                        <input type="text" id="first_name" name="first_name" placeholder="Enter your first name"
-                            value="<?php echo isset($first_name) ? htmlspecialchars($first_name) : ''; ?>" />
-                    </div>
-                    <div class="form-group">
-                        <label for="last_name">Last name</label>
-                        <input type="text" id="last_name" name="last_name" placeholder="Enter your last name"
-                            value="<?php echo isset($last_name) ? htmlspecialchars($last_name) : ''; ?>" />
-                    </div>
-                </div>
-                <div class="form-group" style="margin-bottom: 20px;">
-                    <label for="email">Email</label>
-                    <input type="email" id="email" name="email" placeholder="Enter your email address"
-                        value="<?php echo isset($email) ? htmlspecialchars($email) : ''; ?>" />
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="contact_num">Phone number</label>
-                        <input type="tel" id="contact_num" name="contact_num" placeholder="Enter your phone number"
-                            value="<?php echo isset($contact_num) ? htmlspecialchars($contact_num) : ''; ?>" aria-describedby="phone" />
-                    </div>
-                    <div class="form-group">
-                        <label for="username">Username</label>
-                        <input type="text" id="username" name="username" placeholder="Choose a username"
-                            value="<?php echo isset($username) ? htmlspecialchars($username) : ''; ?>" />
-                    </div>
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="password">Password</label>
-                        <input type="password" id="password" name="password" placeholder="Create a password" />
-                    </div>
-                    <div class="form-group">
-                        <label for="confirm_password">Confirm Password</label>
-                        <input type="password" id="confirm_password" name="confirm_password"
-                            placeholder="Confirm your password" />
-                    </div>
-                </div>
-                <button type="submit" aria-label="Get started">
-                    <span>Register Now</span>
-                </button>
-                <div class="switch-auth">
-                    <p>Already have an account or a student?</p>
-                    <a class="back-btn" href="{{ url('/?login=true') }}">Log in instead</a>
-                </div>
-            </form>
-        </section>
-    </div>
+            <div>
+                <img src="{{ asset('images/img/reg.png') }}" class="reg-image" />
+            </div>
+        </div>
 
+        <div class="right">
+            <form class="form" action="/register" method="POST">
+                @csrf
+                <div>
+                    <p class="reg-title">Create your account</p>
+                 
+                </div>
+
+                <div class="form-group">
+                    <label for="first_name">First Name</label>
+                    <input id="first_name" name="first_name" placeholder="Enter your first name" type="text"
+                        class="input">
+                </div>
+
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input id="username" name="username" placeholder="Enter your username" type="text" class="input">
+                </div>
+
+                <div class="form-group">
+                    <label for="last_name">Last Name</label>
+                    <input id="last_name" name="last_name" placeholder="Enter your last name" type="text" class="input">
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input id="email" name="email" placeholder="Enter your email" type="email" class="input">
+                </div>
+
+                <div class="form-group" style="position:relative;">
+                    <label for="password">Password</label>
+                    <input id="password" name="password" type="password" placeholder="Create a password" class="input">
+                    <span class="toggle-password" onclick="togglePassword('password', 'togglePasswordIcon1')"
+                        tabindex="0">
+                        <i class="fas fa-eye" id="togglePasswordIcon1"></i>
+                    </span>
+                </div>
+
+                <div class="form-group" style="position:relative;">
+                    <label for="password_confirmation">Confirm Password</label>
+                    <input id="password_confirmation" name="password_confirmation" type="password"
+                        placeholder="Re-enter your password" class="input">
+                    <span class="toggle-password" onclick="togglePassword('password_confirmation', 'togglePasswordIcon2')"
+                        tabindex="0">
+                        <i class="fas fa-eye" id="togglePasswordIcon2"></i>
+                    </span>
+                </div>
+
+                <div class="form-group">
+                    <label for="guardian_relationship">Relationship to Student</label>
+                    <input id="guardian_relationship" name="guardian_relationship" placeholder="e.g. Mother, Father, Guardian" type="text" class="input">
+                </div>
+
+                <button type="submit" class="button-submit">Register Account</button>
+
+                <p class="p">Already have an account?
+                    <a href="{{ url('/?login=true') }}"><span class="span">Log in instead</span></a>
+                </p>
+            </form>
+        </div>
+    </div>
+    
+@endsection

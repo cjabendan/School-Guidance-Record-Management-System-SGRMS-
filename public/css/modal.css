@@ -403,6 +403,63 @@
     background: #218838;
 }
 
+.btn.edit {
+  background: #e6f4ea;  
+  color: #198754;           
+  border: none;
+  padding: 8px 16px;
+  border-radius: 5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.btn.edit i {
+  color: #198754;         
+}
+.btn.edit:hover {
+  background: #d1e7dd;
+}
+
+.btn.archive {
+  background: #fdeaea;     
+  color: #dc3545;         
+  border: none;
+  padding: 8px 16px;
+  border-radius: 5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.btn.archive i {
+  color: #dc3545;          
+}
+.btn.archive:hover {
+  background: #f8d7da;
+}
+
+.icon-btn {
+  background: none;
+  border: none;
+  padding: 6px 10px;
+  cursor: pointer;
+  font-size: 22px;
+  vertical-align: middle;
+  color: #333;
+  transition: color 0.2s;
+}
+
+.icon-btn[title="Archive"] {
+  color: orange;
+}
+
+.icon-btn[title="Edit"]:hover {
+  color: #2ecc71;
+}
+
+.icon-btn[title="Archive"]:hover {
+  color: #ff9800;
+}
+
 /* Counsel */
 .form-group {
   margin-bottom: 18px;

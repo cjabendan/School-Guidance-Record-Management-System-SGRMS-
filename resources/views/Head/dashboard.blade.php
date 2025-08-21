@@ -192,9 +192,6 @@
             </div>
         </div>
     </section>
-    <!-- SCRIPTS -->
-    <script src="../../js/head.js"></script>
-    <script src="../../js/linechart.js"></script>
-    <script src="../../js/piechart.js"></script>
+
 
 @endsection

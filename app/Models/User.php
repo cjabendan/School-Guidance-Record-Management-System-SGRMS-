@@ -14,7 +14,6 @@ class User extends Authenticatable
 
     protected $fillable = [
         'id',
-        'username',
         'first_name',
         'middle_name',
         'last_name',
@@ -33,6 +32,7 @@ class User extends Authenticatable
     protected $hidden = [
         'password',
         'remember_token',
+        'login_token',
     ];
 
     // === Relationships ===
