@@ -19,12 +19,12 @@
             <form action="{{ url('login') }}" method="POST">
                 @csrf
                 <div class="input-box" style="position:relative;">
-                    <input type="text" name="username" class="input-box" placeholder="Email or Student ID"
-                        value="{{ old('username') }}">
+                    <input type="text" name="login" class="input-box" placeholder="Email or Account ID"
+                        value="{{ old('login') }}">
                     <span class="input-icon">
                         <i class="fas fa-user"></i>
                     </span>
-                    @error('username')
+                    @error('login')
                         <span class='error'>{{ $message }}</span>
                     @enderror
                 </div>

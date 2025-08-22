@@ -6,7 +6,7 @@ use App\Models\ParentModel;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
-class ParentController extends Controller
+class ParentDashboardController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -79,5 +79,13 @@ class ParentController extends Controller
     public function destroy(ParentModel $parent)
     {
         //
+    }
+
+    /**
+     * Display the dashboard view.
+     */
+    public function dashboard()
+    {
+        return view('dashboard.parent');
     }
 }

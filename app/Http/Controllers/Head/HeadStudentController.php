@@ -8,7 +8,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\DB;
 
 
-class StudentController extends Controller
+class HeadStudentController extends Controller
 {
 
     public function index(Request $request)
@@ -25,7 +25,6 @@ class StudentController extends Controller
             ->leftJoin('users', 'students.user_id', '=', 'users.id')
             ->select(
                 'students.s_id',
-                'students.id_num',
                 'users.first_name',
                 'users.middle_name',
                 'users.last_name',
@@ -37,7 +36,6 @@ class StudentController extends Controller
                 'students.year_level',
                 'students.section',
                 'students.program',
-                'students.previous_school_address',
                 'students.status',
                 'users.profile_image'
             )

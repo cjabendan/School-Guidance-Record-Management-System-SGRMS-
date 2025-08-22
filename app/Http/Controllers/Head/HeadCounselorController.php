@@ -8,7 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 
-class CounselorController extends Controller
+class HeadCounselorController extends Controller
 {
 
     public function index()
@@ -24,14 +24,13 @@ class CounselorController extends Controller
                 'users.contact_num',
                 'users.email',
                 'users.profile_image',
-                'users.username'
             )
             ->get();
 
         return view('Head.profiling.counselors', compact('counselors'));
     }
 
-        public function store(Request $request)
+    public function store(Request $request)
     {
 
         $request->validate([
@@ -47,21 +46,21 @@ class CounselorController extends Controller
 
 
 
-    $user = new User();
-    $user->username = $request->username;
-    $user->email = $request->email;
-    $user->password = bcrypt($request->password);
-    $user->role = 'counselor';
-    $user->first_name = $request->fname;
-    $user->middle_name = $request->mname;
-    $user->last_name = $request->lname;
-    $user->contact_num = $request->contact_num;
-    $user->status = 'Pending';
-    $user->save();
+        $user = new User();
+        $user->username = $request->username;
+        $user->email = $request->email;
+        $user->password = bcrypt($request->password);
+        $user->role = 'counselor';
+        $user->first_name = $request->fname;
+        $user->middle_name = $request->mname;
+        $user->last_name = $request->lname;
+        $user->contact_num = $request->contact_num;
+        $user->status = 'Pending';
+        $user->save();
 
-    $counselor = new Counselor();
-    $counselor->user_id = $user->id;
-    $counselor->save();
+        $counselor = new Counselor();
+        $counselor->user_id = $user->id;
+        $counselor->save();
 
         return redirect()->back()->with('success', 'Counselor and user account created successfully.');
     }
@@ -88,19 +87,21 @@ class CounselorController extends Controller
 
     public function update(Request $request)
     {
-
-
-    $counselor = Counselor::findOrFail($request->input('c_id'));
-    // Only update user info, not counselor table
-    $user = $counselor->user;
-    $user->first_name = $request->input('fname');
-    $user->middle_name = $request->input('mname');
-    $user->last_name = $request->input('lname');
-    $user->contact_num = $request->input('contact_num');
-    $user->save();
+        $counselor = Counselor::findOrFail($request->input('c_id'));
+        // Only update user info, not counselor table
+        $user = $counselor->user;
+        $user->first_name = $request->input('fname');
+        $user->middle_name = $request->input('mname');
+        $user->last_name = $request->input('lname');
+        $user->contact_num = $request->input('contact_num');
+        $user->save();
 
         return redirect()->back()->with('success', 'Counselor updated successfully!');
     }
 
-    
+    // Add dashboard method to fix missing method error
+    public function dashboard()
+    {
+        return view('Counselor.dashboard.counselor');
+    }
 }

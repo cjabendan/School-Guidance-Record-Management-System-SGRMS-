@@ -13,6 +13,7 @@ body {
     flex-direction: row;
     justify-content: center;
     border: 1px solid rgb(19, 44, 80);
+    height: 700px;
 }
 
 .left,
@@ -38,11 +39,11 @@ body {
 .description {
     font-size: 18px;
     color: #6d7375;
-    margin-bottom: 120px;
+    margin-bottom: 60px;
 }
 
 .reg-image {
-    width: 400px;
+    width: 450px;
 }
 
 .right {

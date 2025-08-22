@@ -28,8 +28,7 @@
 
     <!-- SIDEBAR -->
 
-
-    @include('partials.head-sidebar')
+    @include('partials.counselor-sidebar')
     @yield('content')
 
 

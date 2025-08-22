@@ -21,32 +21,44 @@
                 @csrf
                 <div>
                     <p class="reg-title">Create your account</p>
-                 
-                </div>
 
+                </div>
                 <div class="form-group">
-                    <label for="first_name">First Name</label>
+                    <label for="first_name">First Name
+                        @error('first_name')
+                            <span class="text-danger">- {{ $message }}</span>
+                        @enderror
+                    </label>
                     <input id="first_name" name="first_name" placeholder="Enter your first name" type="text"
-                        class="input">
+                        class="input" value="{{ old('first_name') }}">
                 </div>
 
                 <div class="form-group">
-                    <label for="username">Username</label>
-                    <input id="username" name="username" placeholder="Enter your username" type="text" class="input">
+                    <label for="last_name">Last Name
+                        @error('last_name')
+                            <span class="text-danger">- {{ $message }}</span>
+                        @enderror
+                    </label>
+                    <input id="last_name" name="last_name" placeholder="Enter your last name" type="text" class="input"
+                        value="{{ old('last_name') }}">
                 </div>
 
                 <div class="form-group">
-                    <label for="last_name">Last Name</label>
-                    <input id="last_name" name="last_name" placeholder="Enter your last name" type="text" class="input">
-                </div>
-
-                <div class="form-group">
-                    <label for="email">Email Address</label>
-                    <input id="email" name="email" placeholder="Enter your email" type="email" class="input">
+                    <label for="email">Email Address
+                        @error('email')
+                            <span class="text-danger">- {{ $message }}</span>
+                        @enderror
+                    </label>
+                    <input id="email" name="email" placeholder="Enter your email" type="email" class="input"
+                        value="{{ old('email') }}">
                 </div>
 
                 <div class="form-group" style="position:relative;">
-                    <label for="password">Password</label>
+                    <label for="password">Password
+                        @error('password')
+                            <span class="text-danger">- {{ $message }}</span>
+                        @enderror
+                    </label>
                     <input id="password" name="password" type="password" placeholder="Create a password" class="input">
                     <span class="toggle-password" onclick="togglePassword('password', 'togglePasswordIcon1')"
                         tabindex="0">
@@ -64,11 +76,6 @@
                     </span>
                 </div>
 
-                <div class="form-group">
-                    <label for="guardian_relationship">Relationship to Student</label>
-                    <input id="guardian_relationship" name="guardian_relationship" placeholder="e.g. Mother, Father, Guardian" type="text" class="input">
-                </div>
-
                 <button type="submit" class="button-submit">Register Account</button>
 
                 <p class="p">Already have an account?
@@ -77,5 +84,5 @@
             </form>
         </div>
     </div>
-    
+
 @endsection

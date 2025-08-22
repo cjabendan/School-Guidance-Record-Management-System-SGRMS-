@@ -18,50 +18,50 @@ class RegisterController extends Controller
         return view('auth.register');
     }
     public function register(Request $request)
-{
-    User::where('token_expires_at', '<', now())->update([
-        'login_token' => null,
-        'token_expires_at' => null,
-    ]);
+    {
+        User::where('token_expires_at', '<', now())->update([
+            'login_token' => null,
+            'token_expires_at' => null,
+        ]);
 
-    $data = $request->validate([
-        'last_name' => 'required|string|max:255',
-        'first_name' => 'required|string|max:255',
-        'email' => 'required|email|unique:users,email',
-        'username' => 'required|string|max:255|unique:users,username',
-        'password' => [
-            'required',
-            'string',
-            'min:8',
-            'max:16',
-            'regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,16}$/',
-            'confirmed',
-        ],
-    ]);
+        $data = $request->validate([
+            'last_name' => 'required|string|max:255',
+            'first_name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email',
+            'password' => [
+                'required',
+                'string',
+                'min:8',
+                'max:16',
+                'regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,16}$/',
+                'confirmed',
+            ],
+        ]);
 
-    $data['password'] = bcrypt($data['password']);
-    $data['role'] = 'parent'; 
+        // Force role to parent and status to pending
+        $data['role'] = 'parent';
+        $data['status'] = 'pending';
+        $data['password'] = bcrypt($data['password']);
 
-    // 1. Create user
-    $user = User::create($data);
+        // 1. Create user (parent, pending)
+        $user = User::create($data);
 
-    $user->login_token = Str::random(32);
-    $user->token_expires_at = now()->addHours(2);
-    $user->save();
+        $user->login_token = Str::random(32);
+        $user->token_expires_at = now()->addHours(2);
+        // Generate a 6-digit verification code
+        $user->verification_code = random_int(100000, 999999);
+        $user->verification_code_expires_at = now()->addHours(2);
+        $user->save();
 
+        // 2. Create parent profile linked to user (save user_id in parent table)
+        $parent = ParentModel::create([
+            'user_id' => $user->id,
+            'relationship' => $request->guardian_relationship ?? '',
+        ]);
 
-    // 2. Create parent profile linked to user (save user_id in parent table)
-    $parent = ParentModel::create([
-        'user_id' => $user->id,
-        'guardian_name' => $user->first_name . ' ' . $user->last_name,
-        'relationship' => $request->guardian_relationship ?? '',
-        'contact_num' => '', // You can add a field for this in the form if needed
-        'email' => $user->email,
-    ]);
+        // 3. Send welcome email with verification code
+        Mail::to($user->email)->send(new WelcomeEmail($user));
 
-    // 3. Send welcome email
-    Mail::to($user->email)->send(new WelcomeEmail($user));
-
-    return redirect('/')->with('success', 'Your parent account has been created!');
-}
+        return redirect('/verify')->with('success', 'Your parent account has been created! Please check your email for the verification code.');
+    }
 }
