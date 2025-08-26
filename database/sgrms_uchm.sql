@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Aug 21, 2025 at 11:46 PM
+-- Generation Time: Aug 26, 2025 at 08:20 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -88,61 +88,30 @@ INSERT INTO `announcements` (`id`, `user_id`, `title`, `description`, `body`, `l
 -- --------------------------------------------------------
 
 --
--- Table structure for table `appointment`
---
-
-CREATE TABLE `appointment` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `student_name` varchar(100) NOT NULL,
-  `requester_name` varchar(100) NOT NULL,
-  `requester_type` enum('parent','teacher') NOT NULL,
-  `appointment_date` date NOT NULL,
-  `appointment_time` time NOT NULL,
-  `reason` text NOT NULL,
-  `status` enum('pending','approved','completed','canceled') NOT NULL DEFAULT 'pending',
-  `counselor_notes` text DEFAULT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
 -- Table structure for table `appointments`
 --
 
 CREATE TABLE `appointments` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `student_name` varchar(100) NOT NULL,
-  `requester_name` varchar(100) NOT NULL,
-  `requester_type` enum('parent','teacher') NOT NULL,
-  `appointment_date` date NOT NULL,
-  `appointment_time` time NOT NULL,
-  `reason` text NOT NULL,
-  `status` enum('pending','approved','completed','canceled') NOT NULL DEFAULT 'pending',
-  `counselor_notes` text DEFAULT NULL,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `appointment_history`
---
-
-CREATE TABLE `appointment_history` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `appointment_id` bigint(20) UNSIGNED DEFAULT NULL,
-  `action` enum('created','approved','rescheduled','canceled','completed') NOT NULL,
-  `old_date` date DEFAULT NULL,
-  `old_time` time DEFAULT NULL,
-  `new_date` date DEFAULT NULL,
-  `new_time` time DEFAULT NULL,
+  `appointment_id` int(11) NOT NULL,
+  `requester_id` bigint(20) UNSIGNED NOT NULL,
+  `requester_type` enum('Parent','Student') NOT NULL,
+  `student_id` bigint(20) UNSIGNED NOT NULL,
+  `counselor_id` bigint(20) UNSIGNED DEFAULT NULL,
+  `appointment_type` enum('Personal Counseling','Career Guidance','Academic Counseling','Conflict Resolution','Family-Related Counseling','Behavioral Counseling','Peer Relationship Counseling','Other','Follow-Up Counseling') NOT NULL,
   `reason` text DEFAULT NULL,
-  `action_by` varchar(100) DEFAULT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+  `appointment_datetime` datetime NOT NULL,
+  `location` varchar(255) DEFAULT 'School Guidance Office',
+  `status` enum('Pending','Approved','Cancelled','Completed') DEFAULT 'Pending'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `appointments`
+--
+
+INSERT INTO `appointments` (`appointment_id`, `requester_id`, `requester_type`, `student_id`, `counselor_id`, `appointment_type`, `reason`, `appointment_datetime`, `location`, `status`) VALUES
+(1, 14, 'Parent', 3, 1, 'Academic Counseling', NULL, '2025-08-25 10:00:00', 'School Guidance Office', 'Pending'),
+(2, 15, 'Parent', 3, 1, 'Personal Counseling', NULL, '2025-08-27 14:00:00', 'School Guidance Office', 'Approved'),
+(3, 13, 'Parent', 3, 1, 'Follow-Up Counseling', NULL, '2025-08-29 09:00:00', 'School Guidance Office', 'Pending');
 
 -- --------------------------------------------------------
 
@@ -171,31 +140,67 @@ CREATE TABLE `cache_locks` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `case_records`
+-- Table structure for table `cases`
 --
 
-CREATE TABLE `case_records` (
+CREATE TABLE `cases` (
   `case_id` bigint(20) UNSIGNED NOT NULL,
-  `case_type` varchar(100) NOT NULL,
-  `description` text NOT NULL,
-  `reported_by` varchar(100) NOT NULL,
-  `referred_by` varchar(100) NOT NULL,
-  `referral_date` datetime NOT NULL,
-  `reason_for_referral` varchar(100) NOT NULL,
+  `case_type_id` bigint(20) UNSIGNED NOT NULL,
   `presenting_problem` varchar(100) NOT NULL,
-  `observe_behavior` text NOT NULL,
-  `family_background` varchar(100) NOT NULL,
-  `academic_history` varchar(100) NOT NULL,
-  `social_relationships` varchar(100) NOT NULL,
-  `medical_history` varchar(500) NOT NULL,
-  `counselor_assessment` varchar(500) NOT NULL,
-  `recommendations` varchar(500) NOT NULL,
-  `follow_up_plan` varchar(500) NOT NULL,
+  `description` text NOT NULL,
+  `severity` enum('Low','Intermediate','Severe') NOT NULL,
+  `witnesses` text DEFAULT NULL,
+  `investigation_notes` text DEFAULT NULL,
+  `evidence` text DEFAULT NULL,
   `filed_date` date NOT NULL DEFAULT curdate(),
   `filed_time` time NOT NULL DEFAULT curtime(),
-  `status` varchar(50) NOT NULL,
-  `student_id` bigint(20) UNSIGNED NOT NULL
+  `status` enum('Pending','Under Investigation','Resolved') NOT NULL DEFAULT 'Pending',
+  `action_taken` varchar(255) DEFAULT NULL,
+  `resolution_notes` text DEFAULT NULL,
+  `resolved_date` date DEFAULT NULL,
+  `follow_up_date` date DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `case_students`
+--
+
+CREATE TABLE `case_students` (
+  `case_id` bigint(20) UNSIGNED NOT NULL,
+  `student_id` varchar(50) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `case_types`
+--
+
+CREATE TABLE `case_types` (
+  `type_id` bigint(20) UNSIGNED NOT NULL,
+  `type_name` varchar(100) NOT NULL,
+  `description` text DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `counseling_notes`
+--
+
+CREATE TABLE `counseling_notes` (
+  `note_id` int(11) NOT NULL,
+  `appointment_id` int(11) NOT NULL,
+  `user_id` bigint(20) UNSIGNED NOT NULL,
+  `observations` text DEFAULT NULL,
+  `recommendations` text DEFAULT NULL,
+  `follow_up_needed` tinyint(1) DEFAULT 0,
+  `follow_up_date` datetime DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -213,9 +218,8 @@ CREATE TABLE `counselors` (
 --
 
 INSERT INTO `counselors` (`c_id`, `user_id`) VALUES
-('C0001', 2),
-('C0002', 3),
-('C0003', 4);
+('MA25-C001', 2),
+('MA25-C002', 3);
 
 -- --------------------------------------------------------
 
@@ -300,7 +304,9 @@ INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES
 (40, '2025_06_07_221250_create_activity_logs_table', 4),
 (41, '2025_06_08_055449_create_appointments_table', 4),
 (43, '2025_07_22_155641_change_educ_level_type_in_students_table', 5),
-(44, '2025_07_22_162807_add_school_address_religion_status_to_students_table', 6);
+(44, '2025_07_22_162807_add_school_address_religion_status_to_students_table', 6),
+(45, '2025_08_22_230923_add_activation_columns_to_users_table', 7),
+(46, '2025_08_25_043900_add_google_fields_to_users_table', 8);
 
 -- --------------------------------------------------------
 
@@ -323,10 +329,19 @@ CREATE TABLE `notifications` (
 --
 
 CREATE TABLE `parents` (
-  `p_id` varchar(50) NOT NULL,
+  `p_id` bigint(50) NOT NULL,
   `user_id` bigint(20) UNSIGNED DEFAULT NULL,
   `relationship` varchar(50) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `parents`
+--
+
+INSERT INTO `parents` (`p_id`, `user_id`, `relationship`) VALUES
+(7, 13, ''),
+(8, 14, ''),
+(9, 15, '');
 
 -- --------------------------------------------------------
 
@@ -364,14 +379,12 @@ CREATE TABLE `sessions` (
 CREATE TABLE `students` (
   `s_id` varchar(50) NOT NULL,
   `user_id` bigint(20) UNSIGNED DEFAULT NULL,
-  `id_num` varchar(20) NOT NULL,
   `educ_level` varchar(50) DEFAULT NULL,
   `year_level` varchar(20) NOT NULL,
   `section` varchar(20) DEFAULT NULL,
   `program` varchar(100) DEFAULT NULL,
   `status` varchar(20) DEFAULT 'active',
-  `parent_id` varchar(50) DEFAULT NULL,
-  `previous_school_address` varchar(255) DEFAULT NULL,
+  `parent_id` bigint(50) DEFAULT NULL,
   `religion` varchar(100) DEFAULT NULL,
   `civil_status` varchar(50) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -388,16 +401,23 @@ CREATE TABLE `users` (
   `middle_name` varchar(50) DEFAULT NULL,
   `last_name` varchar(50) DEFAULT NULL,
   `email` varchar(255) NOT NULL,
+  `google_id` varchar(255) DEFAULT NULL,
+  `google_email` varchar(255) DEFAULT NULL,
+  `google_token` text DEFAULT NULL,
+  `google_refresh_token` text DEFAULT NULL,
   `contact_num` varchar(20) DEFAULT NULL,
   `sex` enum('Male','Female') DEFAULT NULL,
   `bod` date DEFAULT NULL,
   `address` varchar(255) DEFAULT NULL,
   `profile_image` varchar(255) NOT NULL DEFAULT 'default.png',
   `password` varchar(255) NOT NULL,
+  `activation_token` varchar(64) DEFAULT NULL,
+  `activation_token_expires_at` timestamp NULL DEFAULT NULL,
+  `email_verified_at` timestamp NULL DEFAULT NULL,
   `role` enum('admin','counselor','student','parent') NOT NULL,
   `status` enum('active','inactive','pending') DEFAULT 'active',
   `remember_token` varchar(100) DEFAULT NULL,
-  `login_token` datetime DEFAULT NULL,
+  `login_token` varchar(255) DEFAULT NULL,
   `token_expires_at` datetime DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL
@@ -407,11 +427,14 @@ CREATE TABLE `users` (
 -- Dumping data for table `users`
 --
 
-INSERT INTO `users` (`id`, `first_name`, `middle_name`, `last_name`, `email`, `contact_num`, `sex`, `bod`, `address`, `profile_image`, `password`, `role`, `status`, `remember_token`, `login_token`, `token_expires_at`, `created_at`, `updated_at`) VALUES
-(1, 'Christine', 'Arquilos', 'Abendan', 'abendan@gmail.com', '09123456789', 'Female', NULL, NULL, 'christine.png', '$2y$12$4qszi98KSvD9Szf8IU5fnu2W132eqPHcbjE6Y28cY0Ttc4YNaoe1u', 'admin', 'active', NULL, NULL, NULL, '2025-08-08 05:36:51', '2025-08-08 05:36:51'),
-(2, 'Johanna', 'Decena', 'Plameran', 'jb@gmail.com', '09123456789', 'Female', NULL, NULL, 'johanna.png', '$2b$12$dfSB3gpNKyv8LV4XqtVVg..KqAJPIuKCUxB/rATBosqxQBKpMkvC6', 'counselor', 'active', NULL, NULL, NULL, '2025-06-11 10:42:22', '2025-06-11 10:42:22'),
-(3, 'Divine', 'Villondo', 'Romano', 'dasai@gmail.com', '123454678', 'Female', '2024-11-14', 'Adadspadk0', 'divine.png', '$2b$12$dfSB3gpNKyv8LV4XqtVVg..KqAJPIuKCUxB/rATBosqxQBKpMkvC6', 'counselor', 'active', NULL, NULL, NULL, '2025-08-09 08:09:50', '2025-08-09 08:09:50'),
-(4, 'asd', 'adsa', 'dsadadsada', 'a@mail.com', '123456', NULL, NULL, NULL, 'default.png', '$2y$12$6OZPdh1iLGm7SBZlhqmbhuKDdNuV0r/fbmzyEHAjvS916eAdRM.k6', 'counselor', 'pending', NULL, NULL, NULL, '2025-08-22 03:37:24', '2025-08-22 03:37:24');
+INSERT INTO `users` (`id`, `first_name`, `middle_name`, `last_name`, `email`, `google_id`, `google_email`, `google_token`, `google_refresh_token`, `contact_num`, `sex`, `bod`, `address`, `profile_image`, `password`, `activation_token`, `activation_token_expires_at`, `email_verified_at`, `role`, `status`, `remember_token`, `login_token`, `token_expires_at`, `created_at`, `updated_at`) VALUES
+(1, 'Christine', 'Arquilos', 'Abendan', 'abendan@gmail.com', NULL, NULL, NULL, NULL, '09123456789', 'Female', NULL, NULL, 'christine.png', '$2y$12$4qszi98KSvD9Szf8IU5fnu2W132eqPHcbjE6Y28cY0Ttc4YNaoe1u', NULL, NULL, NULL, 'admin', 'active', NULL, NULL, NULL, '2025-08-08 05:36:51', '2025-08-08 05:36:51'),
+(2, 'Johanna', 'Decena', 'Plameran', 'jb@gmail.com', NULL, NULL, NULL, NULL, '09123456789', 'Female', NULL, NULL, 'johanna.png', '$2y$12$4qszi98KSvD9Szf8IU5fnu2W132eqPHcbjE6Y28cY0Ttc4YNaoe1u', NULL, NULL, NULL, 'counselor', 'active', NULL, NULL, NULL, '2025-06-11 10:42:22', '2025-06-11 10:42:22'),
+(3, 'Divine', 'Villondo', 'Romano', 'dasai@gmail.com', NULL, NULL, NULL, NULL, '123454678', 'Female', '2024-11-14', 'Adadspadk0', 'divine.png', '$2y$12$4qszi98KSvD9Szf8IU5fnu2W132eqPHcbjE6Y28cY0Ttc4YNaoe1u', NULL, NULL, NULL, 'counselor', 'active', NULL, NULL, NULL, '2025-08-09 08:09:50', '2025-08-09 08:09:50'),
+(4, 'asd', 'adsa', 'dsadadsada', 'a@mail.com', NULL, NULL, NULL, NULL, '123456', NULL, NULL, NULL, 'default.png', '$2y$12$6OZPdh1iLGm7SBZlhqmbhuKDdNuV0r/fbmzyEHAjvS916eAdRM.k6', NULL, NULL, NULL, 'counselor', 'pending', NULL, NULL, NULL, '2025-08-22 03:37:24', '2025-08-22 03:37:24'),
+(13, 'Christian James', NULL, 'Abendan', 'chrisbend2004@gmail.com', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'default.png', '$2y$12$E7xvBsMBKeyJim2XIZO4feGg52SUWpZ5v42KczDyhIdS8s8o3Jfpy', NULL, NULL, '2025-08-23 15:35:40', 'parent', 'active', NULL, NULL, NULL, '2025-08-23 15:35:22', '2025-08-23 15:35:40'),
+(14, 'James', NULL, 'Arquilos', 'channity.wr@gmail.com', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'default.png', '$2y$12$HoIntGPUTju./iT8LxMBr.JDReOTCjUN1h/V9iiPFYYXLj.Llwpbm', 'BOmISWlWS40eeiTQWwSU3QtWoTVIvpUuy0uA9m77iViqYIISLj5D9HgYmHHTFcnw', '2025-08-23 17:39:25', NULL, 'parent', 'pending', NULL, NULL, NULL, '2025-08-23 15:39:25', '2025-08-23 15:39:25'),
+(15, 'Emman', NULL, 'Bas', 'emmanbas46@gmail.com', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'default.png', '$2y$12$ny4ePN63Q.BPIH4OHDNLv.IU6fINMFfdxCfUuQrIVqpsHsxHN1VYW', '', '2025-08-23 19:10:27', NULL, 'parent', 'pending', NULL, NULL, NULL, '2025-08-23 17:10:27', '2025-08-23 17:10:27');
 
 --
 -- Indexes for dumped tables
@@ -438,22 +461,13 @@ ALTER TABLE `announcements`
   ADD KEY `user_id` (`user_id`);
 
 --
--- Indexes for table `appointment`
---
-ALTER TABLE `appointment`
-  ADD PRIMARY KEY (`id`);
-
---
 -- Indexes for table `appointments`
 --
 ALTER TABLE `appointments`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `appointment_history`
---
-ALTER TABLE `appointment_history`
-  ADD PRIMARY KEY (`id`);
+  ADD PRIMARY KEY (`appointment_id`),
+  ADD KEY `requester_id` (`requester_id`),
+  ADD KEY `student_id` (`student_id`),
+  ADD KEY `counselor_id` (`counselor_id`);
 
 --
 -- Indexes for table `cache`
@@ -468,10 +482,33 @@ ALTER TABLE `cache_locks`
   ADD PRIMARY KEY (`key`);
 
 --
--- Indexes for table `case_records`
+-- Indexes for table `cases`
 --
-ALTER TABLE `case_records`
-  ADD PRIMARY KEY (`case_id`);
+ALTER TABLE `cases`
+  ADD PRIMARY KEY (`case_id`),
+  ADD KEY `idx_case_type_id` (`case_type_id`);
+
+--
+-- Indexes for table `case_students`
+--
+ALTER TABLE `case_students`
+  ADD PRIMARY KEY (`case_id`,`student_id`),
+  ADD KEY `idx_student_id` (`student_id`);
+
+--
+-- Indexes for table `case_types`
+--
+ALTER TABLE `case_types`
+  ADD PRIMARY KEY (`type_id`),
+  ADD UNIQUE KEY `type_name` (`type_name`);
+
+--
+-- Indexes for table `counseling_notes`
+--
+ALTER TABLE `counseling_notes`
+  ADD PRIMARY KEY (`note_id`),
+  ADD KEY `appointment_id` (`appointment_id`),
+  ADD KEY `user_id` (`user_id`);
 
 --
 -- Indexes for table `counselors`
@@ -539,7 +576,7 @@ ALTER TABLE `sessions`
 ALTER TABLE `students`
   ADD PRIMARY KEY (`s_id`),
   ADD KEY `user_id` (`user_id`),
-  ADD KEY `students_parent_fk` (`parent_id`);
+  ADD KEY `parent_id` (`parent_id`);
 
 --
 -- Indexes for table `users`
@@ -564,10 +601,46 @@ ALTER TABLE `announcements`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
+-- AUTO_INCREMENT for table `appointments`
+--
+ALTER TABLE `appointments`
+  MODIFY `appointment_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+
+--
+-- AUTO_INCREMENT for table `cases`
+--
+ALTER TABLE `cases`
+  MODIFY `case_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `case_types`
+--
+ALTER TABLE `case_types`
+  MODIFY `type_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `counseling_notes`
+--
+ALTER TABLE `counseling_notes`
+  MODIFY `note_id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `migrations`
+--
+ALTER TABLE `migrations`
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=47;
+
+--
+-- AUTO_INCREMENT for table `parents`
+--
+ALTER TABLE `parents`
+  MODIFY `p_id` bigint(50) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+
+--
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
 
 --
 -- Constraints for dumped tables
@@ -586,6 +659,34 @@ ALTER TABLE `announcements`
   ADD CONSTRAINT `announcements_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`);
 
 --
+-- Constraints for table `appointments`
+--
+ALTER TABLE `appointments`
+  ADD CONSTRAINT `appointments_ibfk_1` FOREIGN KEY (`requester_id`) REFERENCES `users` (`id`),
+  ADD CONSTRAINT `appointments_ibfk_2` FOREIGN KEY (`student_id`) REFERENCES `users` (`id`),
+  ADD CONSTRAINT `appointments_ibfk_4` FOREIGN KEY (`counselor_id`) REFERENCES `users` (`id`);
+
+--
+-- Constraints for table `cases`
+--
+ALTER TABLE `cases`
+  ADD CONSTRAINT `fk_case_type` FOREIGN KEY (`case_type_id`) REFERENCES `case_types` (`type_id`) ON UPDATE CASCADE;
+
+--
+-- Constraints for table `case_students`
+--
+ALTER TABLE `case_students`
+  ADD CONSTRAINT `fk_case_students_case` FOREIGN KEY (`case_id`) REFERENCES `cases` (`case_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_case_students_student` FOREIGN KEY (`student_id`) REFERENCES `students` (`s_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Constraints for table `counseling_notes`
+--
+ALTER TABLE `counseling_notes`
+  ADD CONSTRAINT `counseling_notes_ibfk_1` FOREIGN KEY (`appointment_id`) REFERENCES `appointments` (`appointment_id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `counseling_notes_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`);
+
+--
 -- Constraints for table `counselors`
 --
 ALTER TABLE `counselors`
@@ -601,7 +702,7 @@ ALTER TABLE `parents`
 -- Constraints for table `students`
 --
 ALTER TABLE `students`
-  ADD CONSTRAINT `students_parent_fk` FOREIGN KEY (`parent_id`) REFERENCES `parents` (`p_id`),
+  ADD CONSTRAINT `students_ibfk_1` FOREIGN KEY (`parent_id`) REFERENCES `parents` (`p_id`),
   ADD CONSTRAINT `students_user_fk` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`);
 COMMIT;
 

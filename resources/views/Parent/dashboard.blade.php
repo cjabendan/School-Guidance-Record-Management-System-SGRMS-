@@ -1,4 +1,4 @@
-@extends('layouts.main')
+@extends('layouts.parent')
 @section('title', 'SGRMS - School Guidance Records Management System')
 @section('content')
 

@@ -15,41 +15,56 @@ use App\Http\Controllers\Head\HeadStudentController;
 use App\Http\Controllers\Head\HeadParentController; 
 use App\Http\Controllers\Head\HeadReportController;
 use App\Http\Controllers\Head\HeadAppointmentController;
+use App\Http\Controllers\Head\HeadAnnouncementController;
 use App\Http\Controllers\Head\HeadSettingsController;
 
 use App\Http\Controllers\Counselor\CounselorDashboardController;
+
+use App\Http\Controllers\Parents\ParentDashboardController;
+use Illuminate\Routing\Events\RouteMatched;
 
 
 // ========================= Landing Page - Staffs ============================= //
 Route::get('/', [StaffController::class, 'index']);
 
+
+
+
 // ========================= Landing Page - Announcements ============================= //
 Route::get('/announcements', [AnnouncementsController::class, 'index'])->name('announcements.index');
+
+
 
 // =========================== Authentication Routes ===================================== //
 Route::middleware('web')->group(function () {
     Route::post('/login', [LoginController::class, 'login'])->name('login');
 });
 
+
 Route::get('register', [RegisterController::class, 'showForm'])->name('register');
 Route::post('register', [RegisterController::class, 'register']);
 
-// Verification routes
-Route::get('/verify', [RegisterController::class, 'showVerificationForm'])->name('verify.code');
-Route::post('/verify', [RegisterController::class, 'verifyCode'])->name('verify.code.submit');
 
-Route::get('/verify', function () {
-    return view('auth.verify_code');
-})->name('verify.code');
+// Activation link
+Route::get('/activate/{token}', [RegisterController::class, 'activate'])->name('activate');
+
+Route::get('/verify-email', [RegisterController::class, 'showVerificationEmail'])->name('verify');
+Route::get('/success-verification', [RegisterController::class, 'showSuccessEmail'])->name('success');
+Route::post('/verification/resend', [RegisterController::class, 'resendActivationLink'])->name('verification.resend');
 
 
 Route::post('/logout', [LogoutController::class, 'logout'])->name('logout');
+
+
+
 
 // =========================== Dashboard Routes ===================================== //
 Route::middleware('auth')->group(function () {
     Route::get('/Head/dashboard', [HeadDashboardController::class, 'dashboard'])->name('Head.dashboard');
     Route::get('/Counselor/dashboard', [CounselorDashboardController::class, 'dashboard'])->name('Counselor.dashboard');
 });
+
+
 
 // ========================== Administrator (Head) Routes ================================ //
 Route::prefix('Head')->name('Head.')->group(function () {
@@ -73,11 +88,22 @@ Route::prefix('Head')->name('Head.')->group(function () {
 
     // Reports, appointments, settings
     Route::get('/reports', [HeadReportController::class, 'index'])->name('reports.index');
+
     Route::get('/appointments', [HeadAppointmentController::class, 'index'])->name('appointments.index');
+
+    Route::get('/announcements', [HeadAnnouncementController::class, 'index'])->name('announcements.index');
+
     Route::get('/settings', [HeadSettingsController::class, 'index'])->name('settings.index');
 });
 
 // ============================== Counselor Routes ==================================== //
 Route::prefix('Counselor')->name('Counselor.')->group(function () {
     
+});
+
+
+
+// ============================== Parent Routes ==================================== //
+Route::prefix('Parent')->name('Parent.')->group(function () {
+    Route::get('/dashboard', [ParentDashboardController::class, 'dashboard'])->name('dashboard');
 });

@@ -1,4 +1,4 @@
-<div id="loader-overlay" style="display:none;">
+<div class="small-loader-overlay" style="display:none;">
     <div class="dot-spinner">
         <div class="dot-spinner__dot"></div>
         <div class="dot-spinner__dot"></div>
@@ -9,28 +9,25 @@
         <div class="dot-spinner__dot"></div>
         <div class="dot-spinner__dot"></div>
     </div>
-
 </div>
 
-
 <style>
-    #loader-overlay {
-        position: fixed;
+    .small-loader-overlay {
+        position: absolute;
         top: 0;
         left: 0;
-        width: 100vw;
-        height: 100vh;
-        background: rgba(0, 0, 0, 0.3);
-        backdrop-filter: blur(3px);
-        z-index: 2000;
+        width: 100%;
+        height: 100%;
+        z-index: 100;
         display: flex;
         align-items: center;
         justify-content: center;
         transition: opacity 0.3s;
+        pointer-events: none;
     }
 
     .dot-spinner {
-        --uib-size: 2.8rem;
+        --uib-size: 2.2rem;
         --uib-speed: .9s;
         --uib-color: #007bff;
         position: relative;
@@ -136,22 +133,29 @@
 </style>
 
 <script>
-    // Show loader overlay
-    function showLoader() {
-        document.getElementById('loader-overlay').style.display = 'flex';
-    }
-    // Hide loader overlay
-    function hideLoader() {
-        document.getElementById('loader-overlay').style.display = 'none';
-    }
-
-    // Attach to login form submit
-    document.addEventListener('DOMContentLoaded', function() {
-        var loginForm = document.querySelector('.modal-right form');
-        if (loginForm) {
-            loginForm.addEventListener('submit', function() {
-                showLoader();
-            });
+    // Show loader inside a container
+    function showSmallLoader(containerSelector) {
+        var container = document.querySelector(containerSelector);
+        if (!container) return;
+        let loader = container.querySelector('.small-loader-overlay');
+        if (!loader) {
+            loader = document.createElement('div');
+            loader.className = 'small-loader-overlay';
+            loader.innerHTML = document.querySelector('.dot-spinner').outerHTML;
+            container.style.position = 'relative';
+            container.appendChild(loader);
         }
-    });
+        loader.style.display = 'flex';
+        loader.style.pointerEvents = 'auto';
+    }
+    // Hide loader inside a container
+    function hideSmallLoader(containerSelector) {
+        var container = document.querySelector(containerSelector);
+        if (!container) return;
+        let loader = container.querySelector('.small-loader-overlay');
+        if (loader) {
+            loader.style.display = 'none';
+            loader.style.pointerEvents = 'none';
+        }
+    }
 </script>

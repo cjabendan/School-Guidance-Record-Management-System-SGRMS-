@@ -68,10 +68,19 @@ class LoginController extends Controller
         if (Auth::attempt(['email' => $user->email, 'password' => $credentials['password']])) {
             $request->session()->regenerate();
 
-            // Check if user is active
-            if ($user->status !== 'active') {
+            // 🔒 Check if user has verified their email (activation_token is still set)
+            if (!is_null($user->activation_token)) {
+                Auth::logout(); // log them out immediately
                 return back()->withErrors([
-                    'login' => 'Your account is not active.',
+                    'login' => 'Please verify your email before logging in. Check your inbox for the activation link.',
+                ]);
+            }
+
+            // 🔒 Check if user is active
+            if ($user->status !== 'active') {
+                Auth::logout();
+                return back()->withErrors([
+                    'login' => 'Your account is not active. Please contact the administrator.',
                 ]);
             }
 
@@ -116,5 +125,3 @@ class LoginController extends Controller
         ])->onlyInput('login');
     }
 }
-
-

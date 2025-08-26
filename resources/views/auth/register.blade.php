@@ -21,6 +21,7 @@
                 @csrf
                 <div>
                     <p class="reg-title">Create your account</p>
+                    <p class="message">Fill in your details.</p>
 
                 </div>
                 <div class="form-group">

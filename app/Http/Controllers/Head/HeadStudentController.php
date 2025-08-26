@@ -39,7 +39,7 @@ class HeadStudentController extends Controller
                 'students.status',
                 'users.profile_image'
             )
-            ->selectRaw('(SELECT COUNT(*) FROM case_records WHERE student_id = students.s_id) AS case_count');
+            ->selectRaw('(SELECT COUNT(*) FROM cases WHERE student_id = students.s_id) AS case_count');
 
 
         // Apply filters

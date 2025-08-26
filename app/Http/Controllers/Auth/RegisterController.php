@@ -13,10 +13,32 @@ use App\Models\ParentModel;
 
 class RegisterController extends Controller
 {
+    // Resend activation link
+    public function resendActivationLink(Request $request)
+    {
+        $request->validate(['email' => 'required|email|exists:users,email']);
+        $user = User::where('email', $request->email)->first();
+
+        // Only resend if not already active
+        if ($user->status === 'active') {
+            return back()->with('error', 'Account already activated.');
+        }
+
+        // Generate new activation token
+        $user->activation_token = Str::random(64);
+        $user->activation_token_expires_at = now()->addHours(2);
+        $user->save();
+
+        $activationLink = url('/activate/' . $user->activation_token);
+        Mail::to($user->email)->send(new WelcomeEmail($user, $activationLink));
+
+        return back()->with('success', 'A new activation link has been sent to your email.');
+    }
     public function showForm()
     {
         return view('auth.register');
     }
+
     public function register(Request $request)
     {
         User::where('token_expires_at', '<', now())->update([
@@ -46,12 +68,11 @@ class RegisterController extends Controller
         // 1. Create user (parent, pending)
         $user = User::create($data);
 
-        $user->login_token = Str::random(32);
-        $user->token_expires_at = now()->addHours(2);
-        // Generate a 6-digit verification code
-        $user->verification_code = random_int(100000, 999999);
-        $user->verification_code_expires_at = now()->addHours(2);
-        $user->save();
+
+    // Generate activation token for email verification
+    $user->activation_token = Str::random(64);
+    $user->activation_token_expires_at = now()->addHours(2);
+    $user->save();
 
         // 2. Create parent profile linked to user (save user_id in parent table)
         $parent = ParentModel::create([
@@ -59,9 +80,46 @@ class RegisterController extends Controller
             'relationship' => $request->guardian_relationship ?? '',
         ]);
 
-        // 3. Send welcome email with verification code
-        Mail::to($user->email)->send(new WelcomeEmail($user));
 
-        return redirect('/verify')->with('success', 'Your parent account has been created! Please check your email for the verification code.');
+    // 3. Send welcome email with activation link
+    $activationLink = url('/activate/' . $user->activation_token);
+    Mail::to($user->email)->send(new WelcomeEmail($user, $activationLink));
+
+        return redirect('/verify-email')->with('success', 'Your parent account has been created! Please check your email for the activation link.');
+
     }
+
+     public function showVerificationEmail()
+    {
+        return view('auth.verify-email');
+    }
+
+    // Handle activation link
+    public function activate($token)
+    {
+        $user = User::where('activation_token', $token)
+            ->where('activation_token_expires_at', '>', now())
+            ->first();
+
+        if (!$user) {
+            return redirect('/verify')->with('error', 'Invalid or expired activation link.');
+        }
+
+        $user->email_verified_at = now();
+        $user->status = 'active';
+        $user->activation_token = null;
+        $user->activation_token_expires_at = null;
+        $user->save();
+
+        // Send success email
+        Mail::to($user->email)->send(new \App\Mail\SuccessEmail($user));
+
+        return redirect('/success-verification')->with('success', 'Your email has been verified! You can now log in.');
+    }
+
+     public function showSuccessEmail()
+    {
+        return view('auth.success-verification');
+    }
+
 }

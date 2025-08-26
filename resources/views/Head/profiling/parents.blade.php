@@ -32,14 +32,14 @@
                             <tbody id="parentTableBody">
                                 @forelse($parents as $parent)
                                     <tr>
-                                        <td>{{ $parent->guardian_name }}</td>
+                                        <td>{{ $parent->first_name }} {{ $parent->last_name }}</td>
                                         <td>{{ $parent->contact_num }}</td>
                                         <td>{{ $parent->email }}</td>
                                         <td>
                                             @php
-                                                $status = strtolower($parent->account_status ?? '');
+                                                $status = strtolower($parent->status ?? '');
                                             @endphp
-                                            @if (is_null($parent->account_status))
+                                            @if (is_null($parent->status))
                                                 <span class='badge badge-gray'>No Account</span>
                                             @elseif ($status === 'active')
                                                 <span class='badge badge-green'>Has Account</span>

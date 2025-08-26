@@ -18,6 +18,10 @@ class User extends Authenticatable
         'middle_name',
         'last_name',
         'email',
+        'google_id',
+        'google_email',
+        'google_token',
+        'google_refresh_token',
         'contact_num',
         'sex',
         'bod',
@@ -26,12 +30,17 @@ class User extends Authenticatable
         'password',
         'role',
         'profile_image',
-        'status'
+        'status',
+        'activation_token',
+        'activation_token_expires_at',
     ];
 
     protected $hidden = [
         'password',
+        'google_token',
+        'google_refresh_token',
         'remember_token',
+        'activation_token',
         'login_token',
     ];
 

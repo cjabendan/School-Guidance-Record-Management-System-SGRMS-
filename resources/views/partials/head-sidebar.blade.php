@@ -36,7 +36,7 @@
             <ul class="submenu {{ Request::is('Head/counselors*') || Request::is('Head/parents*') || Request::is('Head/students*') ? 'active' : '' }}" id="profiling-submenu">
                 <li class="{{ Request::is('Head/counselors*') ? 'active' : '' }}">
                     <a href="{{ url('Head/counselors') }}">
-                        <i class='bx bxs-user-voice'></i>
+                        <i class="fi fi-sr-review"></i>
                         <span class="text">Counselors</span>
                     </a>
                 </li>
@@ -65,6 +65,12 @@
                 <a href="{{ url('Head/appointments') }}">
                     <i class='bx bxs-calendar'></i>
                     <span class="text">Appointments</span>
+                </a>
+            </li>
+            <li class="{{ Request::is('Head/announcements*') ? 'active' : '' }}">
+                <a href="{{ url('Head/announcements') }}">
+                    <i class='bx bxs-megaphone'></i>
+                    <span class="text">Announcements</span>
                 </a>
             </li>
             <li class="{{ Request::is('Head/settings*') ? 'active' : '' }}">

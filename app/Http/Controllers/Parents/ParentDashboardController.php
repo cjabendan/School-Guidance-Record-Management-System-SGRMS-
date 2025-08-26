@@ -1,13 +1,24 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Parents;
 
 use App\Models\ParentModel;
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class ParentDashboardController extends Controller
 {
+
+    /**
+     * Display the dashboard view.
+     */
+    public function dashboard()
+    {
+        return view('Parent.dashboard');
+    }
+
+
     /**
      * Display a listing of the resource.
      */
@@ -81,11 +92,4 @@ class ParentDashboardController extends Controller
         //
     }
 
-    /**
-     * Display the dashboard view.
-     */
-    public function dashboard()
-    {
-        return view('dashboard.parent');
-    }
 }

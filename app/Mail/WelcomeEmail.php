@@ -14,13 +14,15 @@ class WelcomeEmail extends Mailable
     use Queueable, SerializesModels;
 
     public $user;
+    public $activationLink;
 
     /**
      * Create a new message instance.
      */
-    public function __construct($user)
+    public function __construct($user, $activationLink)
     {
         $this->user = $user;
+        $this->activationLink = $activationLink;
     }
 
     /**
@@ -42,6 +44,7 @@ class WelcomeEmail extends Mailable
             view: 'emails.welcome_verification',
             with: [
                 'user' => $this->user,
+                'activationLink' => $this->activationLink,
             ],
         );
     }
