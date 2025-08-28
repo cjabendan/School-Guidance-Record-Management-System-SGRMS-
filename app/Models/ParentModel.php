@@ -12,19 +12,28 @@ class ParentModel extends Model
 
     protected $fillable = [
         'user_id',
-        'relationship',
     ];
 
-    // Relationship: Guardian` belongs to one User (personal info)
+    // A parent belongs to one User (for personal info like email/contact_num)
     public function user()
     {
         return $this->belongsTo(User::class, 'user_id');
     }
 
-    // Relationship: A parent may have multiple students
+    // A parent may have multiple students (Many-to-Many via pivot table)
     public function students()
     {
-        // Assuming students table has a parent_id column referencing parents.p_id
-        return $this->hasMany(Student::class, 'parent_id', 'p_id');
+        return $this->belongsToMany(
+            Student::class,       // target model
+            'parent_student',     // pivot table
+            'p_id',
+            's_id'
+        )->withPivot('relation');
     }
+
+    public function linkRequests()
+    {
+        return $this->hasMany(ParentLinkRequest::class, 'parent_id');
+    }
+
 }

@@ -1,0 +1,112 @@
+.announcement-container {
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    padding-top: 1rem;
+}
+
+.announcement-management {
+    display: flex;
+    flex-direction: row;
+    padding: 10px 0;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.announcement-management .add-btn {
+    background-color: #1ea7ff;
+    padding: 10px 30px;
+    border: none;
+    font-size: 1rem;
+    line-height: 1.2;
+    border-radius: 7px;
+    color: #ffffff;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.announcement-management .dropdown {
+    width: 130px;
+    line-height: 1.2;
+    box-sizing: border-box;
+    border: none;
+    background-color: #1ea7ff;
+    font-size: 1rem;
+    border-radius: 7px;
+    color: #ffffff;
+    cursor: pointer;
+    font-weight: 500;
+    justify-content: center;
+    align-self: center;
+    padding: 10px 32px 10px 15px;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg width='16' height='16' fill='white' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M4 6l4 4 4-4' stroke='white' stroke-width='2' fill='none'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 16px 16px;
+    outline: none;
+    box-shadow: none;
+}
+
+.announcement-list {
+    width: 100%;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    border-radius: 12px;
+    overflow: hidden;
+    background: #fff;
+}
+
+.announcement-list-header {
+    display: flex;
+    background-color: #1ea7ff;
+    color: white;
+    font-weight: 600;
+    padding: 18px 0 18px 0;
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
+}
+
+.announcement-card {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    min-height: 80px;
+    padding: 18px 0;
+    border-bottom: 1px solid #f0f4fa;
+    background: #fff;
+    box-sizing: border-box;
+    transition: background 0.2s;
+}
+.announcement-card:last-child {
+    border-bottom: none;
+}
+.announcement-card:hover {
+    background: #f6fbff;
+}
+
+.announcement-col {
+    padding: 0 16px;
+    flex: 1;
+    font-size: 1rem;
+    word-break: break-word;
+    display: flex;
+    align-items: center;
+}
+.announcement-col.title {
+    flex: 2;
+    font-weight: 500;
+}
+.announcement-col.actions {
+    flex: 1;
+    gap: 8px;
+}
+.no-announcements-cell {
+    padding: 32px;
+    text-align: center;
+    color: #888;
+    font-size: 1.1rem;
+}

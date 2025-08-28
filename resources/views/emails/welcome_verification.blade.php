@@ -1,4 +1,7 @@
 <div class="container">
+    <div style="text-align:center; margin-bottom:20px;">
+        <img src="{{ asset('images/logo/logo.png') }}" alt="SGRMS Logo" style="max-width:120px;">
+    </div>
     <h1>Welcome to SGRMS, {{ $user->first_name }}!</h1>
     <p>Your account has been created using your email (<strong>{{ $user->email }}</strong>).</p>
     <p>To activate your account, please click the link below:</p>

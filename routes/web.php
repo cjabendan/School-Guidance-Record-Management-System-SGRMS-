@@ -13,7 +13,7 @@ use App\Http\Controllers\Head\HeadDashboardController;
 use App\Http\Controllers\Head\HeadCounselorController;
 use App\Http\Controllers\Head\HeadStudentController;
 use App\Http\Controllers\Head\HeadParentController; 
-use App\Http\Controllers\Head\HeadReportController;
+use App\Http\Controllers\Head\HeadCaseController;
 use App\Http\Controllers\Head\HeadAppointmentController;
 use App\Http\Controllers\Head\HeadAnnouncementController;
 use App\Http\Controllers\Head\HeadSettingsController;
@@ -86,8 +86,8 @@ Route::prefix('Head')->name('Head.')->group(function () {
     // Parents
     Route::get('/parents', [HeadParentController::class, 'index'])->name('parents.index');
 
-    // Reports, appointments, settings
-    Route::get('/reports', [HeadReportController::class, 'index'])->name('reports.index');
+    // Case reports, appointments, settings
+    Route::get('/case', [HeadCaseController::class, 'index'])->name('case.index');
 
     Route::get('/appointments', [HeadAppointmentController::class, 'index'])->name('appointments.index');
 

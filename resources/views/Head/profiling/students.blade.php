@@ -15,7 +15,8 @@
                         <div class="search-bar">
                             <input type="text" id="search" name="search" class="search"
                                 placeholder="Search by ID or Name">
-                            <button class="btn btn-add" onclick="openChooseAddModal()">Add Student</button>
+                            <button class="btn btn-add" style="background:#22c55e;color:#fff;margin-right:8px;" onclick="openAddStudentModal()">Add Student</button>
+                            <button class="btn btn-add" style="background:#22c55e;color:#fff;" onclick="openImportModal()">Import Excel</button>
                         </div>
                     </div>
 
@@ -63,22 +64,23 @@
                                         $mname = trim($row->mname);
                                         $mname = $mname !== '' ? strtoupper(substr($mname, 0, 1)) . '.' : '';
                                         $name = trim($row->lname . ', ' . $row->fname . ' ' . $mname . ' ' . $suffix);
+                                        $profileImage = $row->profile_image ?? 'default.png';
                                     @endphp
 
                                     <tr data-status="{{ strtolower($row->status) }}">
                                         <td><span class="status-circle {{ $statusClass }}"
                                                 style="background: {{ $statusClass }} !important;"></span></td>
-                                        <td>{{ $row->id_num }}</td>
+                                        <td>{{ $row->s_id }}</td>
                                         <td>{{ $name }}</td>
                                         <td>{{ $age }}</td>
                                         <td>{{ $row->educ_level }}</td>
                                         <td>{{ $row->section ?? $row->program }}</td>
                                         <td>
                                             <a href="javascript:void(0);" class="btn btn-view" title="View"
-                                                onclick="openViewStudentModal('{{ $row->id_num }}')">
+                                                onclick="openViewStudentModal('{{ $row->s_id }}')">
                                                 <i class='bx bx-show'></i>
                                             </a>
-                                            <form action="{{ url('Head/students/' . $row->id_num . '/archive') }}"
+                                            <form action="{{ url('Head/students/' . $row->s_id . '/archive') }}"
                                                 method="POST" style="display:inline;">
                                                 @csrf
                                                 <button type="submit" class="btn btn-delete" title="Archive"
@@ -112,7 +114,7 @@
     <div id="importModal" class="modal" style="display:none;">
         <div class="modal-content">
             <h3>Import Students from Excel</h3>
-            <form action="{{ route('students.import') }}" method="POST" enctype="multipart/form-data">
+            <form action="{{ route('Head.students.import') }}" method="POST" enctype="multipart/form-data">
                 @csrf
                 <input type="file" name="students_file" accept=".xlsx,.xls,.csv" required>
                 <button type="submit">Import</button>

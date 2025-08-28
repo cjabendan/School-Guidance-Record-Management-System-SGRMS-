@@ -12,7 +12,7 @@
                     'Head.counselors.show' => 'Counselor Details',
                     'Head.students.index' => 'Students',
                     'Head.parents.index' => 'Parents',
-                    'Head.reports.index' => 'Reports',
+                    'Head.case.index' => 'Case Reports',
                     'Head.appointments.index' => 'Appointments',
                     'Head.announcements.index' => 'Announcements',
                     'Head.settings.index' => 'Settings',

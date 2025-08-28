@@ -9,6 +9,7 @@ class HeadAnnouncementController extends Controller
 {
     public function index()
     {
-        return view('Head.announcements');
+        $announcements = \App\Models\Announcements::orderBy('date_posted', 'desc')->get();
+        return view('Head.announcements', compact('announcements'));
     }
 }

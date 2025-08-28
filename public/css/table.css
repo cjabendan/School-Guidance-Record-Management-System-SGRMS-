@@ -34,7 +34,7 @@
 .table-container table {
     width: 100%;
     border-collapse: collapse;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: 'Poppins UI', Tahoma, Geneva, Verdana, sans-serif;
     font-size: 14px;
     color: #333;
 }
@@ -74,12 +74,7 @@ table tr:hover {
     transition: background 0.2s ease;
 }
 
-.btn-add {
-    background: #2563eb;
-}
-.btn-add:hover {
-    background: #1e40af;
-}
+
 
 .btn-edit {
     background: #f59e0b;

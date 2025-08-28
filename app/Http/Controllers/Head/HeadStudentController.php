@@ -6,10 +6,23 @@ use App\Models\Student;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\DB;
-
+use Maatwebsite\Excel\Facades\Excel;
 
 class HeadStudentController extends Controller
 {
+    public function import(Request $request)
+    {
+        $request->validate([
+            'students_file' => 'required|file|mimes:xlsx,xls,csv',
+        ]);
+
+        try {
+            Excel::import(new \App\Imports\StudentsImport, $request->file('students_file'));
+            return redirect()->back()->with('success', 'Students imported successfully!');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Import failed: ' . $e->getMessage());
+        }
+    }
 
     public function index(Request $request)
     {
@@ -25,21 +38,23 @@ class HeadStudentController extends Controller
             ->leftJoin('users', 'students.user_id', '=', 'users.id')
             ->select(
                 'students.s_id',
-                'users.first_name',
-                'users.middle_name',
-                'users.last_name',
+                'users.first_name as fname',
+                'users.middle_name as mname',
+                'users.last_name as lname',
+                'users.suffix',
                 'users.email',
                 'users.contact_num',
                 'users.sex',
                 'users.bod',
                 'users.address',
+                'students.educ_level',
                 'students.year_level',
                 'students.section',
                 'students.program',
                 'students.status',
                 'users.profile_image'
             )
-            ->selectRaw('(SELECT COUNT(*) FROM cases WHERE student_id = students.s_id) AS case_count');
+            ->selectRaw('(SELECT COUNT(*) FROM cases ) AS case_count');
 
 
         // Apply filters
@@ -62,80 +77,84 @@ class HeadStudentController extends Controller
 
     public function getNextStudentId()
     {
-        $lastStudent = Student::orderByDesc('s_id')->first();
-
-        if ($lastStudent && preg_match('/MA(\d{2})-(\d{4})$/', $lastStudent->id_num, $matches)) {
-            $lastNumber = intval($matches[2]);
-        } else {
-            $lastNumber = 0;
-        }
-
-        $nextNumber = str_pad($lastNumber + 1, 4, '0', STR_PAD_LEFT);
         $currentYear = date('y');
-        $fullId = "MA{$currentYear}-{$nextNumber}";
-
+        // Use direct SQL to get the max number for current year
+        $maxId = Student::where('s_id', 'LIKE', "MA{$currentYear}-%")
+            ->selectRaw("MAX(CAST(SUBSTRING(s_id, 7, 4) AS UNSIGNED)) as max_num")
+            ->value('max_num');
+        $nextNumber = ($maxId ? intval($maxId) : 0) + 1;
+        $fullId = "MA{$currentYear}-" . str_pad($nextNumber, 4, '0', STR_PAD_LEFT);
         return response()->json(['next_id' => $fullId]);
     }
 
     public function addStudent(Request $request)
     {
         $validated = $request->validate([
-            'id_num' => 'required|unique:students,id_num',
-            'lname' => 'required|string|max:50',
-            'fname' => 'required|string|max:50',
-            'mname' => 'nullable|string|max:50',
-            'suffix' => 'nullable|string|max:10',
-            'bod' => 'required|date',
-            'gender' => 'required|in:Male,Female',
-            'address' => 'required|string|max:100',
-            'mobile_num' => 'nullable|string|max:15',
-            'email' => 'nullable|email|max:100',
-            'educ_level' => 'required|string|max:50',
+            's_id' => 'required|unique:students,s_id',
+            'first_name' => 'required|string|max:50',
+            'middle_name' => 'nullable|string|max:50',
+            'last_name' => 'required|string|max:50',
+            'email' => 'required|email|max:255',
+            'contact_num' => 'nullable|string|max:20',
+            'sex' => 'required|in:Male,Female',
+            'bod' => 'nullable|date',
+            'address' => 'nullable|string|max:255',
+            'profile_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'educ_level' => 'nullable|string|max:50',
             'year_level' => 'required|string|max:20',
             'section' => 'nullable|string|max:20',
             'program' => 'nullable|string|max:100',
-            'previous_school' => 'nullable|string|max:255',
-            'previous_school_address' => 'nullable|string|max:255',
+            'status' => 'nullable|string|max:20',
+            'parent_id' => 'nullable|integer',
             'religion' => 'nullable|string|max:100',
             'civil_status' => 'nullable|string|max:50',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
         // Handle image upload
-        if ($request->hasFile('image')) {
-            $image = $request->file('image');
+        if ($request->hasFile('profile_image')) {
+            $image = $request->file('profile_image');
             $imageName = uniqid('stud_') . '.' . $image->getClientOriginalExtension();
             $image->move(public_path('images/stud.img'), $imageName);
             $imagePath = 'images/stud.img/' . $imageName;
         } else {
-            // Use default image if none uploaded
-            $imagePath = 'images/stud.img/circle-user.png';
+            $imagePath = 'images/stud.img/default.png';
         }
 
-        Student::create([
-            'id_num' => $validated['id_num'],
-            'lname' => $validated['lname'],
-            'fname' => $validated['fname'],
-            'mname' => $validated['mname'] ?? null,
-            'suffix' => $validated['suffix'] ?? null,
-            'bod' => $validated['bod'],
-            'sex' => $validated['gender'],
-            'address' => $validated['address'],
-            'mobile_num' => $validated['mobile_num'] ?? null,
-            'email' => $validated['email'] ?? null,
-            'educ_level' => $validated['educ_level'],
+        // Set username and password
+        $username = $validated['s_id'];
+        $password = ucfirst(strtolower($validated['last_name']));
+
+      
+        $user = \App\Models\User::create([
+            'first_name' => $validated['first_name'],
+            'middle_name' => $validated['middle_name'] ?? null,
+            'last_name' => $validated['last_name'],
+            'email' => $validated['email'],
+            'contact_num' => $validated['contact_num'] ?? null,
+            'bod' => $validated['bod'] ?? null,
+            'address' => $validated['address'] ?? null,
+            'profile_image' => $imagePath,
+            'password' => bcrypt($password),
+            'role' => 'student',
+            'status' => $validated['status'] ?? 'active',
+        ]);
+
+       
+        $student = Student::create([
+            's_id' => $validated['s_id'],
+            'user_id' => $user->id,
+            'educ_level' => $validated['educ_level'] ?? null,
             'year_level' => $validated['year_level'],
             'section' => $validated['section'] ?? null,
             'program' => $validated['program'] ?? null,
-            'previous_school' => $validated['previous_school'] ?? null,
-            'previous_school_address' => $validated['previous_school_address'] ?? null,
+            'status' => $validated['status'] ?? 'active',
+            'parent_id' => $validated['parent_id'] ?? null,
             'religion' => $validated['religion'] ?? null,
             'civil_status' => $validated['civil_status'] ?? null,
-            's_image' => $imagePath,
-            'status' => 'active',
         ]);
 
-        return redirect()->back()->with('success', 'Student added successfully!');
+    // return redirect with success message
+    return redirect()->back()->with('success', 'Student added successfully!');
     }
 
     public function showAjax($id_num)
@@ -158,7 +177,7 @@ class HeadStudentController extends Controller
             'suffix' => 'nullable|string|max:10',
             'bod' => 'required|date',
             'gender' => 'required|in:Male,Female',
-            // Add other fields as needed
+           
         ]);
 
         $student->update([
@@ -168,7 +187,7 @@ class HeadStudentController extends Controller
             'suffix' => $validated['suffix'] ?? null,
             'bod' => $validated['bod'],
             'sex' => $validated['gender'],
-            // Add other fields as needed
+            
         ]);
 
         return redirect()->back()->with('success', 'Student updated successfully!');

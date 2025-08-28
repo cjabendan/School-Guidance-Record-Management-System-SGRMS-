@@ -3,12 +3,13 @@
 namespace App\Http\Controllers\Head;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Auth; // <-- Add this line
+use Illuminate\Support\Facades\Auth; 
 
 use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Appointments;
 use App\Models\ParentModel;
+use App\Models\ParentLinkRequest;
 
 class HeadDashboardController extends Controller
 {
@@ -20,6 +21,10 @@ class HeadDashboardController extends Controller
         $totalParents = ParentModel::count(); 
         $totalCounselors = User::where('role', 'counselor')->count();
         $totalCases = class_exists('\App\Models\CaseModel') ? \App\Models\CaseModel::count() : 0;
+
+        $pendingRequests = ParentLinkRequest::with(['parent.user', 'students.student'])
+        ->where('status', 'Pending')
+        ->get();
 
         $userId = Auth::id();
         $filter = $request->input('filter', 'today');
@@ -47,12 +52,13 @@ class HeadDashboardController extends Controller
             return response()->json(['html' => $html]);
         }
 
-        return view('Head.dashboard', compact(
-            'totalStudents',
-            'totalParents',
-            'totalCounselors',
-            'totalCases',
-            'upcomingAppointments'
-        ));
+            return view('Head.dashboard', compact(
+                'totalStudents',
+                'totalParents',
+                'totalCounselors',
+                'totalCases',
+                'upcomingAppointments',
+                'pendingRequests'
+            ));
     }
 }

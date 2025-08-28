@@ -45,8 +45,15 @@ function updateYearLevel() {
             option.text = `Grade ${i}`;
             yearLevelSelect.add(option);
         }
-    } else if (educLevel === "High School" || educLevel === "Senior High School") {
-        for (let i = 7; i <= 12; i++) {
+    } else if (educLevel === "Junior High School") {
+        for (let i = 7; i <= 10; i++) {
+            const option = document.createElement("option");
+            option.value = `Grade ${i}`;
+            option.text = `Grade ${i}`;
+            yearLevelSelect.add(option);
+        }
+    } else if (educLevel === "Senior High School") {
+        for (let i = 11; i <= 12; i++) {
             const option = document.createElement("option");
             option.value = `Grade ${i}`;
             option.text = `Grade ${i}`;
@@ -87,8 +94,15 @@ function updateEditYearLevel(selectedValue) {
             option.text = `Grade ${i}`;
             yearLevelSelect.add(option);
         }
-    } else if (educLevel === "High School" || educLevel === "Senior High School") {
-        for (let i = 7; i <= 12; i++) {
+    } else if (educLevel === "Junior High School") {
+        for (let i = 7; i <= 10; i++) {
+            const option = document.createElement("option");
+            option.value = `Grade ${i}`;
+            option.text = `Grade ${i}`;
+            yearLevelSelect.add(option);
+        }
+    } else if (educLevel === "Senior High School") {
+        for (let i = 11; i <= 12; i++) {
             const option = document.createElement("option");
             option.value = `Grade ${i}`;
             option.text = `Grade ${i}`;
@@ -128,8 +142,14 @@ function closeImportModal() {
 
 function openAddStudentModal() {
     document.getElementById('addStudentModal').style.display = 'block';
-    fetchStudentId();
     updateYearLevel(); // Reset year level options when opening
+    // Always fetch a new unique student ID from the backend
+    fetch('/Head/students/next-id')
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('s_id_display').textContent = data.next_id;
+            document.getElementById('s_id').value = data.next_id;
+        });
 }
 
 function openViewStudentModal(id_num) {
@@ -172,15 +192,16 @@ function closeViewStudentModal() {
 
 function openEditStudentModal() {
     document.getElementById('editStudentModal').style.display = 'block';
-    // Copy image
-    var viewImg = document.getElementById('view_studentImage');
-    var editImg = document.getElementById('edit_studentImage');
-    editImg.src = viewImg.src;
-    // Copy ID
-    document.getElementById('edit_id_num_display').textContent = document.getElementById('view_id_num_display').textContent;
-    document.getElementById('edit_id_num').value = document.getElementById('view_id_num_display').textContent;
-    // Copy text fields
-    document.getElementById('edit_lname').value = document.getElementById('view_lname').textContent;
+        fetch('/Head/students/next-id')
+            .then(response => response.json())
+            .then(data => {
+                // Always set the new unique s_id from backend
+                document.getElementById('s_id_display').textContent = data.next_id;
+                document.getElementById('s_id').value = data.next_id;
+            })
+            .catch(error => {
+                document.getElementById('s_id_display').textContent = 'Error generating ID';
+            });
     document.getElementById('edit_fname').value = document.getElementById('view_fname').textContent;
     document.getElementById('edit_mname').value = document.getElementById('view_mname').textContent;
     document.getElementById('edit_suffix').value = document.getElementById('view_suffix').textContent;

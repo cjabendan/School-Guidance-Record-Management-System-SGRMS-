@@ -4,50 +4,60 @@
         <div class="message-item">
             <div style="display: flex; flex-direction: row; align-items: center; gap: 20px;">
                 <img src="{{ asset('images/user/default.png') }}" alt="User Photo"
-                    style="width: 40px; height: 40px; border-radius: 50%;">
-                <div style="display: flex; flex-direction: column;">
+                    class="user-photo">
+                <div class="message-content">
                     <h2 class="message-sender">Chris Morich</h2>
-                    <p class="message-preview">Hey, are we still on for the ...</p>
+                    <p class="message-preview">Hey, are we still on for the meeting tomorrow?</p>
                 </div>
             </div>
         </div>
         <div class="message-item">
             <div style="display: flex; flex-direction: row; align-items: center; gap: 20px;">
                 <img src="{{ asset('images/user/default.png') }}" alt="User Photo"
-                    style="width: 40px; height: 40px; border-radius: 50%;">
-                <div style="display: flex; flex-direction: column;">
+                    class="user-photo">
+                <div class="message-content">
                     <h2 class="message-sender">Chris Morich</h2>
-                    <p class="message-preview">Hey, are we still on for the ...</p>
+                    <p class="message-preview">Hey, are we still on for the meeting tomorrow?</p>
                 </div>
             </div>
         </div>
         <div class="message-item">
             <div style="display: flex; flex-direction: row; align-items: center; gap: 20px;">
                 <img src="{{ asset('images/user/default.png') }}" alt="User Photo"
-                    style="width: 40px; height: 40px; border-radius: 50%;">
-                <div style="display: flex; flex-direction: column;">
+                    class="user-photo">
+                <div class="message-content">
                     <h2 class="message-sender">Chris Morich</h2>
-                    <p class="message-preview">Hey, are we still on for the ...</p>
+                    <p class="message-preview">Hey, are we still on for the meeting tomorrow?</p>
                 </div>
             </div>
         </div>
         <div class="message-item">
             <div style="display: flex; flex-direction: row; align-items: center; gap: 20px;">
                 <img src="{{ asset('images/user/default.png') }}" alt="User Photo"
-                    style="width: 40px; height: 40px; border-radius: 50%;">
-                <div style="display: flex; flex-direction: column;">
+                    class="user-photo">
+                <div class="message-content">
                     <h2 class="message-sender">Chris Morich</h2>
-                    <p class="message-preview">Hey, are we still on for the ...</p>
+                    <p class="message-preview">Hey, are we still on for the meeting tomorrow?</p>
                 </div>
             </div>
         </div>
         <div class="message-item">
             <div style="display: flex; flex-direction: row; align-items: center; gap: 20px;">
                 <img src="{{ asset('images/user/default.png') }}" alt="User Photo"
-                    style="width: 40px; height: 40px; border-radius: 50%;">
-                <div style="display: flex; flex-direction: column;">
+                    class="user-photo">
+                <div class="message-content">
                     <h2 class="message-sender">Chris Morich</h2>
-                    <p class="message-preview">Hey, are we still on for the ...</p>
+                    <p class="message-preview">Hey, are we still on for the meeting tomorrow?</p>
+                </div>
+            </div>
+        </div>
+        <div class="message-item">
+            <div style="display: flex; flex-direction: row; align-items: center; gap: 20px;">
+                <img src="{{ asset('images/user/default.png') }}" alt="User Photo"
+                    class="user-photo">
+                <div class="message-content">
+                    <h2 class="message-sender">Chris Morich</h2>
+                    <p class="message-preview">Hey, are we still on for the meeting tomorrow?</p>
                 </div>
             </div>
         </div>

@@ -7,10 +7,8 @@ use Illuminate\Http\Request;
 
 class HeadCaseController extends Controller
 {
-    // ...existing methods...
-
     public function index()
     {
-        
+        return view('Head.case');
     }
 }

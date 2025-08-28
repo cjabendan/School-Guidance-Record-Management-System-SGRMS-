@@ -42,7 +42,8 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="3" style="text-align:center;">No upcoming appointments.
+                        <td colspan="3" class="no-appointments-cell">
+                            No upcoming appointments.
                         </td>
                     </tr>
                 @endforelse

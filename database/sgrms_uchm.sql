@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Aug 26, 2025 at 08:20 AM
+-- Generation Time: Aug 28, 2025 at 11:50 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -109,9 +109,9 @@ CREATE TABLE `appointments` (
 --
 
 INSERT INTO `appointments` (`appointment_id`, `requester_id`, `requester_type`, `student_id`, `counselor_id`, `appointment_type`, `reason`, `appointment_datetime`, `location`, `status`) VALUES
-(1, 14, 'Parent', 3, 1, 'Academic Counseling', NULL, '2025-08-25 10:00:00', 'School Guidance Office', 'Pending'),
-(2, 15, 'Parent', 3, 1, 'Personal Counseling', NULL, '2025-08-27 14:00:00', 'School Guidance Office', 'Approved'),
-(3, 13, 'Parent', 3, 1, 'Follow-Up Counseling', NULL, '2025-08-29 09:00:00', 'School Guidance Office', 'Pending');
+(1, 14, 'Parent', 3, 1, 'Academic Counseling', NULL, '2025-08-28 10:00:00', 'School Guidance Office', 'Approved'),
+(2, 15, 'Parent', 3, 1, 'Personal Counseling', NULL, '2025-08-30 14:00:00', 'School Guidance Office', 'Approved'),
+(3, 13, 'Parent', 3, 1, 'Follow-Up Counseling', NULL, '2025-08-28 09:00:00', 'School Guidance Office', 'Approved');
 
 -- --------------------------------------------------------
 
@@ -330,18 +330,63 @@ CREATE TABLE `notifications` (
 
 CREATE TABLE `parents` (
   `p_id` bigint(50) NOT NULL,
-  `user_id` bigint(20) UNSIGNED DEFAULT NULL,
-  `relationship` varchar(50) DEFAULT NULL
+  `user_id` bigint(20) UNSIGNED DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Dumping data for table `parents`
 --
 
-INSERT INTO `parents` (`p_id`, `user_id`, `relationship`) VALUES
-(7, 13, ''),
-(8, 14, ''),
-(9, 15, '');
+INSERT INTO `parents` (`p_id`, `user_id`) VALUES
+(7, 13),
+(8, 14),
+(9, 15),
+(10, 16);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `parent_link_requests`
+--
+
+CREATE TABLE `parent_link_requests` (
+  `request_id` bigint(20) NOT NULL,
+  `parent_id` bigint(20) NOT NULL,
+  `status` enum('Pending','Approved','Rejected') DEFAULT 'Pending',
+  `requested_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `parent_link_requests`
+--
+
+INSERT INTO `parent_link_requests` (`request_id`, `parent_id`, `status`, `requested_at`) VALUES
+(1, 7, 'Pending', '2025-08-27 05:07:47');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `parent_link_request_students`
+--
+
+CREATE TABLE `parent_link_request_students` (
+  `pls_id` bigint(20) NOT NULL,
+  `request_id` bigint(20) NOT NULL,
+  `student_id` varchar(50) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `parent_student`
+--
+
+CREATE TABLE `parent_student` (
+  `ps_id` bigint(20) NOT NULL,
+  `p_id` bigint(20) NOT NULL,
+  `s_id` varchar(50) NOT NULL,
+  `relation` varchar(50) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -384,7 +429,6 @@ CREATE TABLE `students` (
   `section` varchar(20) DEFAULT NULL,
   `program` varchar(100) DEFAULT NULL,
   `status` varchar(20) DEFAULT 'active',
-  `parent_id` bigint(50) DEFAULT NULL,
   `religion` varchar(100) DEFAULT NULL,
   `civil_status` varchar(50) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -400,6 +444,7 @@ CREATE TABLE `users` (
   `first_name` varchar(50) DEFAULT NULL,
   `middle_name` varchar(50) DEFAULT NULL,
   `last_name` varchar(50) DEFAULT NULL,
+  `suffix` varchar(10) DEFAULT NULL,
   `email` varchar(255) NOT NULL,
   `google_id` varchar(255) DEFAULT NULL,
   `google_email` varchar(255) DEFAULT NULL,
@@ -427,14 +472,16 @@ CREATE TABLE `users` (
 -- Dumping data for table `users`
 --
 
-INSERT INTO `users` (`id`, `first_name`, `middle_name`, `last_name`, `email`, `google_id`, `google_email`, `google_token`, `google_refresh_token`, `contact_num`, `sex`, `bod`, `address`, `profile_image`, `password`, `activation_token`, `activation_token_expires_at`, `email_verified_at`, `role`, `status`, `remember_token`, `login_token`, `token_expires_at`, `created_at`, `updated_at`) VALUES
-(1, 'Christine', 'Arquilos', 'Abendan', 'abendan@gmail.com', NULL, NULL, NULL, NULL, '09123456789', 'Female', NULL, NULL, 'christine.png', '$2y$12$4qszi98KSvD9Szf8IU5fnu2W132eqPHcbjE6Y28cY0Ttc4YNaoe1u', NULL, NULL, NULL, 'admin', 'active', NULL, NULL, NULL, '2025-08-08 05:36:51', '2025-08-08 05:36:51'),
-(2, 'Johanna', 'Decena', 'Plameran', 'jb@gmail.com', NULL, NULL, NULL, NULL, '09123456789', 'Female', NULL, NULL, 'johanna.png', '$2y$12$4qszi98KSvD9Szf8IU5fnu2W132eqPHcbjE6Y28cY0Ttc4YNaoe1u', NULL, NULL, NULL, 'counselor', 'active', NULL, NULL, NULL, '2025-06-11 10:42:22', '2025-06-11 10:42:22'),
-(3, 'Divine', 'Villondo', 'Romano', 'dasai@gmail.com', NULL, NULL, NULL, NULL, '123454678', 'Female', '2024-11-14', 'Adadspadk0', 'divine.png', '$2y$12$4qszi98KSvD9Szf8IU5fnu2W132eqPHcbjE6Y28cY0Ttc4YNaoe1u', NULL, NULL, NULL, 'counselor', 'active', NULL, NULL, NULL, '2025-08-09 08:09:50', '2025-08-09 08:09:50'),
-(4, 'asd', 'adsa', 'dsadadsada', 'a@mail.com', NULL, NULL, NULL, NULL, '123456', NULL, NULL, NULL, 'default.png', '$2y$12$6OZPdh1iLGm7SBZlhqmbhuKDdNuV0r/fbmzyEHAjvS916eAdRM.k6', NULL, NULL, NULL, 'counselor', 'pending', NULL, NULL, NULL, '2025-08-22 03:37:24', '2025-08-22 03:37:24'),
-(13, 'Christian James', NULL, 'Abendan', 'chrisbend2004@gmail.com', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'default.png', '$2y$12$E7xvBsMBKeyJim2XIZO4feGg52SUWpZ5v42KczDyhIdS8s8o3Jfpy', NULL, NULL, '2025-08-23 15:35:40', 'parent', 'active', NULL, NULL, NULL, '2025-08-23 15:35:22', '2025-08-23 15:35:40'),
-(14, 'James', NULL, 'Arquilos', 'channity.wr@gmail.com', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'default.png', '$2y$12$HoIntGPUTju./iT8LxMBr.JDReOTCjUN1h/V9iiPFYYXLj.Llwpbm', 'BOmISWlWS40eeiTQWwSU3QtWoTVIvpUuy0uA9m77iViqYIISLj5D9HgYmHHTFcnw', '2025-08-23 17:39:25', NULL, 'parent', 'pending', NULL, NULL, NULL, '2025-08-23 15:39:25', '2025-08-23 15:39:25'),
-(15, 'Emman', NULL, 'Bas', 'emmanbas46@gmail.com', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'default.png', '$2y$12$ny4ePN63Q.BPIH4OHDNLv.IU6fINMFfdxCfUuQrIVqpsHsxHN1VYW', '', '2025-08-23 19:10:27', NULL, 'parent', 'pending', NULL, NULL, NULL, '2025-08-23 17:10:27', '2025-08-23 17:10:27');
+INSERT INTO `users` (`id`, `first_name`, `middle_name`, `last_name`, `suffix`, `email`, `google_id`, `google_email`, `google_token`, `google_refresh_token`, `contact_num`, `sex`, `bod`, `address`, `profile_image`, `password`, `activation_token`, `activation_token_expires_at`, `email_verified_at`, `role`, `status`, `remember_token`, `login_token`, `token_expires_at`, `created_at`, `updated_at`) VALUES
+(1, 'Christine', 'Arquilos', 'Abendan', '', 'abendan@gmail.com', NULL, NULL, NULL, NULL, '09123456789', 'Female', NULL, NULL, 'christine.png', '$2y$12$4qszi98KSvD9Szf8IU5fnu2W132eqPHcbjE6Y28cY0Ttc4YNaoe1u', NULL, NULL, NULL, 'admin', 'active', NULL, NULL, NULL, '2025-08-08 05:36:51', '2025-08-08 05:36:51'),
+(2, 'Johanna', 'Decena', 'Plameran', '', 'jb@gmail.com', NULL, NULL, NULL, NULL, '09123456789', 'Female', NULL, NULL, 'johanna.png', '$2y$12$4qszi98KSvD9Szf8IU5fnu2W132eqPHcbjE6Y28cY0Ttc4YNaoe1u', NULL, NULL, NULL, 'counselor', 'active', NULL, NULL, NULL, '2025-06-11 10:42:22', '2025-06-11 10:42:22'),
+(3, 'Divine', 'Villondo', 'Romano', '', 'dasai@gmail.com', NULL, NULL, NULL, NULL, '123454678', 'Female', '2024-11-14', 'Adadspadk0', 'divine.png', '$2y$12$4qszi98KSvD9Szf8IU5fnu2W132eqPHcbjE6Y28cY0Ttc4YNaoe1u', NULL, NULL, NULL, 'counselor', 'active', NULL, NULL, NULL, '2025-08-09 08:09:50', '2025-08-09 08:09:50'),
+(4, 'asd', 'adsa', 'dsadadsada', '', 'a@mail.com', NULL, NULL, NULL, NULL, '123456', NULL, NULL, NULL, 'default.png', '$2y$12$6OZPdh1iLGm7SBZlhqmbhuKDdNuV0r/fbmzyEHAjvS916eAdRM.k6', NULL, NULL, NULL, 'counselor', 'pending', NULL, NULL, NULL, '2025-08-22 03:37:24', '2025-08-22 03:37:24'),
+(13, 'Christian James', NULL, 'Abendan', '', 'chrisbend2004@gmail.com', NULL, NULL, NULL, NULL, NULL, 'Male', NULL, NULL, 'default.png', '$2y$12$E7xvBsMBKeyJim2XIZO4feGg52SUWpZ5v42KczDyhIdS8s8o3Jfpy', NULL, NULL, '2025-08-23 15:35:40', 'parent', 'active', NULL, NULL, NULL, '2025-08-23 15:35:22', '2025-08-23 15:35:40'),
+(14, 'James', NULL, 'Arquilos', '', 'channity.wr@gmail.com', NULL, NULL, NULL, NULL, NULL, 'Male', NULL, NULL, 'default.png', '$2y$12$HoIntGPUTju./iT8LxMBr.JDReOTCjUN1h/V9iiPFYYXLj.Llwpbm', 'BOmISWlWS40eeiTQWwSU3QtWoTVIvpUuy0uA9m77iViqYIISLj5D9HgYmHHTFcnw', '2025-08-23 17:39:25', NULL, 'parent', 'pending', NULL, NULL, NULL, '2025-08-23 15:39:25', '2025-08-23 15:39:25'),
+(15, 'Emman', NULL, 'Bas', '', 'emmanbas46@gmail.com', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'default.png', '$2y$12$ny4ePN63Q.BPIH4OHDNLv.IU6fINMFfdxCfUuQrIVqpsHsxHN1VYW', '', '2025-08-23 19:10:27', NULL, 'parent', 'pending', NULL, NULL, NULL, '2025-08-23 17:10:27', '2025-08-23 17:10:27'),
+(16, 'johnbert', NULL, 'plameran', '', 'johnbert159@gmail.com', NULL, NULL, NULL, NULL, NULL, 'Male', NULL, NULL, 'default.png', '$2y$12$Qt7QxvNbsWp4Lp3svf23TeZbUNy3O7NPC7/feqpyTSAYY07hRi5Gu', 'HOWvM9m2Nhi9GknjFEOIZmGkHq9RVKp6godlmad5CpZ3dpSSbporAFDxscnSZcE5', '2025-08-26 18:56:54', NULL, 'parent', 'pending', NULL, NULL, NULL, '2025-08-26 16:56:54', '2025-08-26 16:56:54'),
+(17, 'Kenneth', 'Melissa Duran', 'Higgins', NULL, 'ligav@mailinator.com', NULL, NULL, NULL, NULL, '324', NULL, '1979-01-06', 'Unde incididunt even', 'images/stud.img/default.png', '$2y$12$/IyIk1QvvTe98wVXsqxmReoHgXwtLY4sASVTpRRY4WF2GPIQekz7u', NULL, NULL, NULL, 'student', 'active', NULL, NULL, NULL, '2025-08-28 17:42:22', '2025-08-28 17:42:22');
 
 --
 -- Indexes for dumped tables
@@ -557,6 +604,29 @@ ALTER TABLE `parents`
   ADD KEY `user_id` (`user_id`);
 
 --
+-- Indexes for table `parent_link_requests`
+--
+ALTER TABLE `parent_link_requests`
+  ADD PRIMARY KEY (`request_id`),
+  ADD KEY `fk_parent_request` (`parent_id`);
+
+--
+-- Indexes for table `parent_link_request_students`
+--
+ALTER TABLE `parent_link_request_students`
+  ADD PRIMARY KEY (`pls_id`),
+  ADD KEY `fk_request_student` (`request_id`),
+  ADD KEY `fk_student_request` (`student_id`);
+
+--
+-- Indexes for table `parent_student`
+--
+ALTER TABLE `parent_student`
+  ADD PRIMARY KEY (`ps_id`),
+  ADD KEY `fk_parent_ps` (`p_id`),
+  ADD KEY `fk_student_ps` (`s_id`);
+
+--
 -- Indexes for table `password_reset_tokens`
 --
 ALTER TABLE `password_reset_tokens`
@@ -575,8 +645,7 @@ ALTER TABLE `sessions`
 --
 ALTER TABLE `students`
   ADD PRIMARY KEY (`s_id`),
-  ADD KEY `user_id` (`user_id`),
-  ADD KEY `parent_id` (`parent_id`);
+  ADD KEY `user_id` (`user_id`);
 
 --
 -- Indexes for table `users`
@@ -634,13 +703,31 @@ ALTER TABLE `migrations`
 -- AUTO_INCREMENT for table `parents`
 --
 ALTER TABLE `parents`
-  MODIFY `p_id` bigint(50) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+  MODIFY `p_id` bigint(50) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+
+--
+-- AUTO_INCREMENT for table `parent_link_requests`
+--
+ALTER TABLE `parent_link_requests`
+  MODIFY `request_id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
+-- AUTO_INCREMENT for table `parent_link_request_students`
+--
+ALTER TABLE `parent_link_request_students`
+  MODIFY `pls_id` bigint(20) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `parent_student`
+--
+ALTER TABLE `parent_student`
+  MODIFY `ps_id` bigint(20) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
 
 --
 -- Constraints for dumped tables
@@ -699,10 +786,29 @@ ALTER TABLE `parents`
   ADD CONSTRAINT `parents_user_fk` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`);
 
 --
+-- Constraints for table `parent_link_requests`
+--
+ALTER TABLE `parent_link_requests`
+  ADD CONSTRAINT `fk_parent_request` FOREIGN KEY (`parent_id`) REFERENCES `parents` (`p_id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `parent_link_request_students`
+--
+ALTER TABLE `parent_link_request_students`
+  ADD CONSTRAINT `fk_request_student` FOREIGN KEY (`request_id`) REFERENCES `parent_link_requests` (`request_id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `fk_student_request` FOREIGN KEY (`student_id`) REFERENCES `students` (`s_id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `parent_student`
+--
+ALTER TABLE `parent_student`
+  ADD CONSTRAINT `fk_parent_ps` FOREIGN KEY (`p_id`) REFERENCES `parents` (`p_id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `fk_student_ps` FOREIGN KEY (`s_id`) REFERENCES `students` (`s_id`) ON DELETE CASCADE;
+
+--
 -- Constraints for table `students`
 --
 ALTER TABLE `students`
-  ADD CONSTRAINT `students_ibfk_1` FOREIGN KEY (`parent_id`) REFERENCES `parents` (`p_id`),
   ADD CONSTRAINT `students_user_fk` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`);
 COMMIT;
 

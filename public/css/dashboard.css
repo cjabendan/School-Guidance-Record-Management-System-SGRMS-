@@ -25,7 +25,7 @@
     display: grid;
     grid-template-columns: 2fr 1fr;
     grid-template-rows: auto 1fr;
-    gap: 15px;
+    gap: 8px;
     height: 100%;
     padding: 1px 1px;
     min-height: 0; /* Allow children to shrink */
@@ -45,7 +45,7 @@
 .stats {
     display: flex;
     flex-direction: row;
-    gap: 15px;
+    gap: 8px;
 }
 
 .stats-left,
@@ -159,17 +159,21 @@
     padding: 20px;
 }
 
-.events-box h1, .messages-box h1 {
+.events-box h1,
+.messages-box h1 {
     font-size: 1.3rem;
     font-weight: 600;
     color: #003060;
 }
 
-.events-lists, .messages-lists {
+.events-lists {
     display: flex;
     flex-direction: column;
     gap: 10px;
     margin-top: 15px;
+        height: 100%; /* Take full height of parent */
+    max-height: 450px; /* Set a max height for scrolling, adjust as needed */
+    overflow-y: auto;
 }
 
 .event-item {
@@ -185,11 +189,11 @@
 }
 
 .event-item:nth-child(1) {
-    background-color: #1EA7FF; /* Gold */
+    background-color: #1ea7ff; /* Gold */
 }
 
 .event-item:nth-child(2) {
-    background-color: #0083D7; /* GreenYellow */
+    background-color: #0083d7; /* GreenYellow */
 }
 
 .event-item:nth-child(3) {
@@ -197,9 +201,8 @@
 }
 
 .event-item:nth-child(4) {
-    background-color: #C72800; /* DodgerBlue */
+    background-color: #c72800; /* DodgerBlue */
 }
-
 
 .event-item i {
     color: #ffffff;
@@ -217,6 +220,17 @@
 .messages-box {
     height: 59%;
     padding: 0 20px 20px 20px;
+    margin: 5px 0;
+}
+
+.messages-lists {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 10px;
+    height: 100%; /* Take full height of parent */
+    max-height: 450px; /* Set a max height for scrolling, adjust as needed */
+    overflow-y: auto;
 }
 
 .message-item {
@@ -224,13 +238,42 @@
     align-items: center;
     flex-direction: row;
     justify-content: space-between;
-    padding: 15px 20px;
+    padding: 10px 5px;
     border-radius: 5px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
     cursor: pointer;
     transition: background-color 0.2s;
 }
 
+.message-item:hover {
+    background-color: #f5f5f5;
+}
+
+.message-item .user-photo {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+}
+
+.message-content {
+    display: flex;
+    flex-direction: column;
+}
+
+.message-sender, .request-sender {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #003060;
+    letter-spacing: 0.8px;
+}
+
+.message-preview, .request-preview {
+    font-size: 1rem;
+    color: #848688;
+    max-width: 240px; /* Limit width */
+    white-space: nowrap; /* Prevent line breaks */
+    overflow: hidden; /* Hide overflow text */
+    text-overflow: ellipsis; /* Add ellipsis (...) */
+}
 
 /* Bottom Container */
 
@@ -244,7 +287,7 @@
 .flex-bottom {
     display: flex;
     flex-direction: row;
-    gap: 15px;
+    gap: 8px;
     height: 100%;
 }
 
@@ -259,14 +302,13 @@
 .appointments-header,
 .requests-header {
     border-bottom: 1px solid #e0e6ed;
-    padding: 20px;
     width: 100%;
-    height: 80px;
     display: flex;
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
-    box-sizing: border-box;
+    height: 90px;
+    padding: 0 30px;
 }
 
 .appointments-header h2,
@@ -277,6 +319,9 @@
 }
 
 .appointments-header .dropdown {
+    width: 130px;
+      line-height: 1.2;
+    box-sizing: border-box;
     border: none;
     background-color: #1ea7ff;
     font-size: 1rem;
@@ -287,7 +332,7 @@
     font-weight: 500;
     justify-content: center;
     align-self: center;
-    padding: 8px 32px 8px 15px; /* Add right padding for icon */
+    padding: 10px 32px 10px 15px; /* Add right padding for icon */
     appearance: none; /* Remove default arrow */
     -webkit-appearance: none;
     -moz-appearance: none;
@@ -300,6 +345,7 @@
 }
 
 .appointments-table {
+    position: relative;
     height: 100%;
 }
 
@@ -369,7 +415,7 @@
 }
 
 .appointment-action .appointment-link:hover {
-    color: #0056b3;
+    color: #0080ff;
 }
 
 /* Remove conflicting rules */
@@ -379,12 +425,97 @@
     padding: 12px 8px;
 }
 
+.no-appointments-cell {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3em;
+    color: #848688;
+    background: #fff;
+    z-index: 2;
+    border-radius: 10px;
+    padding: 0;
+}
+
 .requests-box {
     display: flex;
     width: 350px;
     flex-direction: column;
     border-radius: 10px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.requests-table {
+    position: relative;
+    height: 100%;
+}
+
+.requests-item {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: background-color 0.2s;
+    height: 120px;
+    align-items: left;
+    padding: 5px 30px;
+}
+
+.request-content {
+    display: flex;
+    align-items: center;
+    padding: 10px 5px;
+    gap: 15px;
+}
+
+.requests-item .user-photo {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+}
+
+.request-actions {
+    display: flex;
+    flex-direction: row;
+    gap: 8px;
+    justify-content: center;
+    align-content: center;
+}
+
+.review-btn {
+    background-color: #1ea7ff;
+    color: #ffffff;
+    border: none;
+    border-radius: 7px;
+    padding: 6px 40px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background-color 0.2s;
+}
+
+.review-btn:hover {
+    background-color: #0080ff;
+}
+
+.reject-btn {
+    background-color: #ffffff;
+    color: #4a4a4a;
+    border: .5px solid #0000004f;
+    border-radius: 7px;
+    padding: 6px 40px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background-color 0.2s;
+}
+
+.reject-btn:hover {
+    background-color: #ff4d4d;
+    border: .5px solid #ffffff;
+    color: #ffffff;
 }
 
 /* Counselor */
