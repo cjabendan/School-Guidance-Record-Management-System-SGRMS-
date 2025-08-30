@@ -31,16 +31,25 @@ class StudentsImport implements ToModel, WithHeadingRow
                 'status' => $row['status'] ?? 'active',
             ]);
 
-            // Create student
+            // Find or create educ_level
+            $educLevelModel = \App\Models\EducLevel::firstOrCreate([
+                'educ_level' => $row['educ_level'] ?? null
+            ]);
+
+            // Find or create year_level (must link to educ_level)
+            $yearLevelModel = \App\Models\YearLevel::firstOrCreate([
+                'year_level' => $row['year_level'] ?? null,
+                'e_id' => $educLevelModel->e_id
+            ]);
+
+            // Create student with y_id
             return new Student([
                 's_id' => $row['s_id'],
                 'user_id' => $user->id,
-                'educ_level' => $row['educ_level'] ?? null,
-                'year_level' => $row['year_level'] ?? null,
+                'y_id' => $yearLevelModel->y_id,
                 'section' => $row['section'] ?? null,
                 'program' => $row['program'] ?? null,
                 'status' => $row['status'] ?? 'active',
-                'parent_id' => $row['parent_id'] ?? null,
                 'religion' => $row['religion'] ?? null,
                 'civil_status' => $row['civil_status'] ?? null,
             ]);
