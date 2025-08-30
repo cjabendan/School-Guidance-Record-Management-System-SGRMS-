@@ -7,7 +7,7 @@
         @forelse($pendingRequests as $request)
             <div class="requests-item">
                 <div class="request-content">
-                    <img src="{{ asset('images/user/' . ($request->parent->user->profile_image ?? 'default.png')) }}" alt="User Photo"
+                    <img src="{{ asset('images/user/' . ($request->parent->user->profile_image ?? 'default.jpg')) }}" alt="User Photo"
                         class="user-photo">
                     <div class="request-details">
                         <h2 class="request-sender">

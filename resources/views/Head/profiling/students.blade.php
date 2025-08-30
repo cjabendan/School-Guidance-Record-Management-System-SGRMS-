@@ -16,7 +16,8 @@
                             <input type="text" id="search" name="search" class="search"
                                 placeholder="Search by ID or Name">
                             <button class="btn btn-add" style="background:#22c55e;color:#fff;margin-right:8px;" onclick="openAddStudentModal()">Add Student</button>
-                            <button class="btn btn-add" style="background:#22c55e;color:#fff;" onclick="openImportModal()">Import Excel</button>
+                            <button class="btn btn-add" style="background:#22c55e;color:#fff;margin-right:8px;" onclick="openImportModal()">Import Excel</button>
+                            <button class="btn btn-add" style="background:#22c55e;color:#fff;" onclick="exportStudentTable()">Export</button>
                         </div>
                     </div>
 
@@ -79,6 +80,10 @@
                                             <a href="javascript:void(0);" class="btn btn-view" title="View"
                                                 onclick="openViewStudentModal('{{ $row->s_id }}')">
                                                 <i class='bx bx-show'></i>
+                                            </a>
+                                            <a href="javascript:void(0);" class="btn btn-edit" title="Edit"
+                                                onclick="openEditStudentModal('{{ $row->s_id }}')">
+                                                <i class='bx bx-edit'></i>
                                             </a>
                                             <form action="{{ url('Head/students/' . $row->s_id . '/archive') }}"
                                                 method="POST" style="display:inline;">

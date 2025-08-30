@@ -26,7 +26,7 @@
                 @csrf
                 <div class="form-row image-name-row">
                     <div class="image-col">
-                        <img id="studentImage" src="{{ asset('images/stud.img/default.png') }}" data-default="{{ asset('images/stud.img/default.png') }}" alt="Student Image" class="student-image-box pro-add-image">
+                        <img id="studentImage" src="{{ asset('images/user/default.jpg') }}" data-default="{{ asset('images/user/default.jpg') }}" alt="Student Image" class="student-image-box pro-add-image">
                         <input type="file" id="profile_image" name="profile_image" accept="image/*" class="pro-add-image-input">
                         <div class="student-id-row pro-add-id-row">
                             <label for="s_id_display" class="add-label" style="margin-bottom:0;">Student ID:</label>
@@ -177,63 +177,63 @@
             <h2 id="viewModalTitle" class="add-modal-title pro-add-title">View Student</h2>
             <div class="form-row image-name-row">
                 <div class="image-col">
-                    <img id="view_studentImage" src="{{ asset('images/stud.img/default.png') }}" data-default="{{ asset('images/stud.img/default.png') }}" alt="Student Image" class="student-image-box pro-add-image">
+                    <img id="view_studentImage" src="{{ asset('images/user/default.png') }}" data-default="{{ asset('images/user/default.png') }}" alt="Student Image" class="student-image-box pro-add-image">
                     <div class="student-id-row pro-add-id-row">
-                        <label for="view_s_id_display" class="add-label" style="margin-bottom:0;">Student ID:</label>
-                        <span id="view_s_id_display" class="pro-add-id-value">Loading...</span>
+                        <label for="view_id_num_display" class="add-label" style="margin-bottom:0;">Student ID:</label>
+                        <span id="view_id_num_display" class="pro-add-id-value">Loading...</span>
                     </div>
                 </div>
                 <div class="name-fields-col">
                     <div class="form-row" style="margin-bottom: 0; gap: 12px;">
                         <div class="add-field-col">
                             <label class="add-label">First Name:</label>
-                            <span id="view_first_name" class="add-input"></span>
+                            <span id="view_fname"></span>
                         </div>
                         <div class="add-field-col">
                             <label class="add-label">Middle Name:</label>
-                            <span id="view_middle_name" class="add-input"></span>
+                            <span id="view_mname"></span>
                         </div>
                         <div class="add-field-col">
                             <label class="add-label">Last Name:</label>
-                            <span id="view_last_name" class="add-input"></span>
+                            <span id="view_lname"></span>
                         </div>
                         <div class="add-field-col">
                             <label class="add-label">Suffix:</label>
-                            <span id="view_suffix" class="add-input"></span>
+                            <span id="view_suffix"></span>
                         </div>
                     </div>
                     <div class="form-row">
                         <div class="add-field-col">
                             <label class="add-label">Email:</label>
-                            <span id="view_email" class="add-input"></span>
+                            <span id="view_email"></span>
                         </div>
                         <div class="add-field-col">
                             <label class="add-label">Contact Number:</label>
-                            <span id="view_contact_num" class="add-input"></span>
+                            <span id="view_mobile_num"></span>
                         </div>
                         <div class="add-field-col">
                             <label class="add-label">Sex:</label>
-                            <span id="view_sex" class="add-input"></span>
+                            <span id="view_gender"></span>
                         </div>
                     </div>
                     <div class="form-row">
                         <div class="add-field-col">
                             <label class="add-label">Birthdate:</label>
-                            <span id="view_bod" class="add-input"></span>
+                            <span id="view_bod"></span>
                         </div>
                         <div class="add-field-col">
                             <label class="add-label">Address:</label>
-                            <span id="view_address" class="add-input"></span>
+                            <span id="view_address"></span>
                         </div>
                         <div class="add-field-col">
                             <label class="add-label">Religion:</label>
-                            <span id="view_religion" class="add-input"></span>
+                            <span id="view_religion"></span>
                         </div>
                     </div>
                     <div class="form-row">
                         <div class="add-field-col">
                             <label class="add-label">Civil Status:</label>
-                            <span id="view_civil_status" class="add-input"></span>
+                            <span id="view_civil_status"></span>
                         </div>
                     </div>
                 </div>
@@ -241,19 +241,19 @@
             <div class="form-row">
                 <div class="add-field-col">
                     <label class="add-label">Educational Level:</label>
-                    <span id="view_educ_level" class="add-input"></span>
+                    <span id="view_educ_level"></span>
                 </div>
                 <div class="add-field-col">
                     <label class="add-label">Year Level:</label>
-                    <span id="view_year_level" class="add-input"></span>
+                    <span id="view_year_level"></span>
                 </div>
                 <div id="view_programField" class="program-section-field add-field-col" style="display: none;">
                     <label class="add-label">Program:</label>
-                    <span id="view_program" class="add-input"></span>
+                    <span id="view_program"></span>
                 </div>
                 <div id="view_sectionField" class="program-section-field add-field-col">
                     <label class="add-label">Section:</label>
-                    <span id="view_section" class="add-input"></span>
+                    <span id="view_section"></span>
                 </div>
             </div>
             <div style="width: 100%; text-align: center; margin: 28px 0 18px 0; position: relative;">
@@ -263,36 +263,36 @@
             <div class="form-row">
                 <div class="add-field-col">
                     <label class="add-label">Father's Name:</label>
-                    <span id="view_father_name" class="add-input"></span>
+                    <span id="view_father_name"></span>
                 </div>
                 <div class="add-field-col">
                     <label class="add-label">Mother's Name:</label>
-                    <span id="view_mother_name" class="add-input"></span>
+                    <span id="view_mother_name"></span>
                 </div>
             </div>
             <div class="form-row">
                 <div class="add-field-col">
                     <label class="add-label">Guardian Name:</label>
-                    <span id="view_guardian_name" class="add-input"></span>
+                    <span id="view_guardian_name"></span>
                 </div>
                 <div class="add-field-col">
                     <label class="add-label">Relationship:</label>
-                    <span id="view_relationship" class="add-input"></span>
+                    <span id="view_relationship"></span>
                 </div>
             </div>
             <div class="form-row">
                 <div class="add-field-col">
                     <label class="add-label">Guardian Contact:</label>
-                    <span id="view_guardian_contact" class="add-input"></span>
+                    <span id="view_guardian_contact"></span>
                 </div>
                 <div class="add-field-col">
                     <label class="add-label">Guardian Email:</label>
-                    <span id="view_guardian_email" class="add-input"></span>
+                    <span id="view_guardian_email"></span>
                 </div>
             </div>
             <div class="pro-add-buttons">
-                <button type="button" class="pro-add-save" onclick="openEditStudentModal()">
-                    <i class="bx bx-edit"></i> Edit
+                <button type="button" class="pro-add-save" onclick="exportStudentInfo()">
+                    <i class="bx bx-export"></i> Export
                 </button>
                 <button type="button" class="btn cancel" onclick="closeViewStudentModal()">Close</button>
             </div>
@@ -316,9 +316,9 @@
             }
         }
 
-
+        // Image preview for Add modal
         (function() {
-            const imageInput = document.getElementById('image');
+            const imageInput = document.getElementById('profile_image');
             const imgPreview = document.getElementById('studentImage');
             if (imageInput) {
                 imageInput.addEventListener('change', function(event) {

@@ -3,7 +3,7 @@
     <div class="messages-lists">
         <div class="message-item">
             <div style="display: flex; flex-direction: row; align-items: center; gap: 20px;">
-                <img src="{{ asset('images/user/default.png') }}" alt="User Photo"
+                <img src="{{ asset('images/user/default.jpg') }}" alt="User Photo"
                     class="user-photo">
                 <div class="message-content">
                     <h2 class="message-sender">Chris Morich</h2>
@@ -13,7 +13,7 @@
         </div>
         <div class="message-item">
             <div style="display: flex; flex-direction: row; align-items: center; gap: 20px;">
-                <img src="{{ asset('images/user/default.png') }}" alt="User Photo"
+                <img src="{{ asset('images/user/default.jpg') }}" alt="User Photo"
                     class="user-photo">
                 <div class="message-content">
                     <h2 class="message-sender">Chris Morich</h2>
@@ -23,7 +23,7 @@
         </div>
         <div class="message-item">
             <div style="display: flex; flex-direction: row; align-items: center; gap: 20px;">
-                <img src="{{ asset('images/user/default.png') }}" alt="User Photo"
+                <img src="{{ asset('images/user/default.jpg') }}" alt="User Photo"
                     class="user-photo">
                 <div class="message-content">
                     <h2 class="message-sender">Chris Morich</h2>
@@ -33,7 +33,7 @@
         </div>
         <div class="message-item">
             <div style="display: flex; flex-direction: row; align-items: center; gap: 20px;">
-                <img src="{{ asset('images/user/default.png') }}" alt="User Photo"
+                <img src="{{ asset('images/user/default.jpg') }}" alt="User Photo"
                     class="user-photo">
                 <div class="message-content">
                     <h2 class="message-sender">Chris Morich</h2>
@@ -43,7 +43,7 @@
         </div>
         <div class="message-item">
             <div style="display: flex; flex-direction: row; align-items: center; gap: 20px;">
-                <img src="{{ asset('images/user/default.png') }}" alt="User Photo"
+                <img src="{{ asset('images/user/default.jpg') }}" alt="User Photo"
                     class="user-photo">
                 <div class="message-content">
                     <h2 class="message-sender">Chris Morich</h2>
@@ -53,7 +53,7 @@
         </div>
         <div class="message-item">
             <div style="display: flex; flex-direction: row; align-items: center; gap: 20px;">
-                <img src="{{ asset('images/user/default.png') }}" alt="User Photo"
+                <img src="{{ asset('images/user/default.jpg') }}" alt="User Photo"
                     class="user-photo">
                 <div class="message-content">
                     <h2 class="message-sender">Chris Morich</h2>

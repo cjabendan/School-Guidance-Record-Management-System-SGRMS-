@@ -22,7 +22,7 @@ class StaffController extends Controller
                 return [
                     'name' => $admin->user->first_name . ' ' . $middleInitial . $admin->user->last_name,
                     'role' => 'School Principal',
-                    'image' => $admin->user->profile_image ?? 'default.png',
+                    'image' => $admin->user->profile_image ?? 'default.jpg',
                 ];
             });
 
@@ -39,7 +39,7 @@ class StaffController extends Controller
                 return [
                     'name' => $counselor->user->first_name . ' ' . $middleInitial . $counselor->user->last_name,
                     'role' => 'Counselor',
-                    'image' => $counselor->user->profile_image ?? 'default.png',
+                    'image' => $counselor->user->profile_image ?? 'default.jpg',
                 ];
             });
 

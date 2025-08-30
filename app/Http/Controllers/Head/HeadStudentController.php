@@ -138,11 +138,11 @@ class HeadStudentController extends Controller
         // Handle image upload
         if ($request->hasFile('profile_image')) {
             $image = $request->file('profile_image');
-            $imageName = uniqid('stud_') . '.' . $image->getClientOriginalExtension();
-            $image->move(public_path('images/stud.img'), $imageName);
-            $imagePath = 'images/stud.img/' . $imageName;
+            $imageName = uniqid('user_') . '.' . $image->getClientOriginalExtension();
+            $image->move(public_path('images/user'), $imageName);
+            $imagePath =  $imageName;
         } else {
-            $imagePath = 'images/stud.img/default.png';
+            $imagePath = 'default.jpg';
         }
 
         // Set username and password
@@ -180,11 +180,88 @@ class HeadStudentController extends Controller
 
     public function showAjax($id_num)
     {
-        $student = Student::where('id_num', $id_num)->firstOrFail();
-        $birthdate = new \DateTime($student->bod);
-        $today = new \DateTime();
-        $student->age = $today->diff($birthdate)->y;
-        return response()->json($student);
+        $student = Student::where('s_id', $id_num)
+            ->leftJoin('users', 'students.user_id', '=', 'users.id')
+            ->leftJoin('year_levels', 'students.y_id', '=', 'year_levels.y_id')
+            ->leftJoin('educ_levels', 'year_levels.e_id', '=', 'educ_levels.e_id')
+            ->select(
+                'students.s_id as id_num',
+                'users.first_name as fname',
+                'users.middle_name as mname',
+                'users.last_name as lname',
+                'users.suffix',
+                'users.email',
+                'users.contact_num as mobile_num',
+                'users.sex as gender',
+                'users.bod',
+                'users.address',
+                'users.profile_image',
+                'educ_levels.educ_level',
+                'year_levels.year_level',
+                'students.section',
+                'students.program',
+                'students.status',
+                'students.religion',
+                'students.civil_status'
+            )
+            ->where('students.s_id', $id_num)
+            ->firstOrFail();
+
+        // Compose image URL
+        if (empty($student->profile_image) || $student->profile_image === 'default.png' || $student->profile_image === 'images/user/default.png') {
+            $image_url = asset('images/user/default.png');
+        } else {
+            // If only filename is stored, prepend path
+            if ($student->profile_image === basename($student->profile_image)) {
+                $image_url = asset('images/user/' . $student->profile_image);
+            } else {
+                $image_url = asset($student->profile_image);
+            }
+        }
+
+        // Calculate age if bod is present
+        $age = null;
+        if ($student->bod) {
+            try {
+                $birthdate = new \DateTime($student->bod);
+                $today = new \DateTime();
+                $age = $today->diff($birthdate)->y;
+            } catch (\Exception $e) {
+                $age = null;
+            }
+        }
+
+        // Return all expected fields for modal
+        return response()->json([
+            'id_num' => $student->id_num,
+            'fname' => $student->fname,
+            'mname' => $student->mname,
+            'lname' => $student->lname,
+            'suffix' => $student->suffix,
+            'email' => $student->email,
+            'mobile_num' => $student->mobile_num,
+            'gender' => $student->gender,
+            'bod' => $student->bod,
+            'address' => $student->address,
+            'image_url' => $image_url,
+            'educ_level' => $student->educ_level,
+            'year_level' => $student->year_level,
+            'section' => $student->section,
+            'program' => $student->program,
+            'status' => $student->status,
+            'religion' => $student->religion,
+            'civil_status' => $student->civil_status,
+            'age' => $age,
+            // Add empty fields for modal compatibility
+            'previous_school' => '',
+            'previous_school_address' => '',
+            'father_name' => '',
+            'mother_name' => '',
+            'guardian_name' => '',
+            'relationship' => '',
+            'guardian_contact' => '',
+            'guardian_email' => ''
+        ]);
     }
 
     public function editStudent(Request $request, $id_num)

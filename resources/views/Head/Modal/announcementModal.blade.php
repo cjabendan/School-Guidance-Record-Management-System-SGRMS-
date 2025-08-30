@@ -9,7 +9,8 @@
         </div>
 
         <!-- Modal Body -->
-        <form id="announcementForm" method="POST" enctype="multipart/form-data">
+        <form id="announcementForm" method="POST" action="{{ route('Head.announcements.store') }}" enctype="multipart/form-data">
+            @csrf
             <div class="form-group">
                 <label for="title">Title</label>
                 <input type="text" id="title" name="title" required>

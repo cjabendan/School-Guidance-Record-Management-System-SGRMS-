@@ -54,11 +54,15 @@
                                     {{ \Carbon\Carbon::parse($announcement->date_posted)->format('M d, Y') }}</div>
                                 <div class="announcement-col status">{{ ucfirst($announcement->status) }}</div>
                                 <div class="announcement-col actions">
-                                    <a href="#" title="View"><span style="font-size:18px;">👁️</span></a>
-                                    <a href="#" title="Edit" style="margin-left:10px;"><span
-                                            style="font-size:18px;">✏️</span></a>
-                                    <a href="#" title="Delete" style="margin-left:10px;"><span
-                                            style="font-size:18px;">🗑️</span></a>
+                                    <a href="#" title="View" class="view-btn">
+                                         <i class='bx bx-show'></i>
+                                    </a>
+                                    <a href="#" title="Edit" class="edit-btn">
+                                        <i class='bx bx-edit'></i>
+                                    </a>
+                                    <a href="#" title="Archive" class="archive-btn">
+                                        <i class='bx bx-archive'></i>
+                                    </a>
                                 </div>
                             </div>
                         @empty

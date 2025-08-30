@@ -13,27 +13,7 @@ use App\Models\ParentModel;
 
 class RegisterController extends Controller
 {
-    // Resend activation link
-    public function resendActivationLink(Request $request)
-    {
-        $request->validate(['email' => 'required|email|exists:users,email']);
-        $user = User::where('email', $request->email)->first();
-
-        // Only resend if not already active
-        if ($user->status === 'active') {
-            return back()->with('error', 'Account already activated.');
-        }
-
-        // Generate new activation token
-        $user->activation_token = Str::random(64);
-        $user->activation_token_expires_at = now()->addHours(2);
-        $user->save();
-
-        $activationLink = url('/activate/' . $user->activation_token);
-        Mail::to($user->email)->send(new WelcomeEmail($user, $activationLink));
-
-        return back()->with('success', 'A new activation link has been sent to your email.');
-    }
+   
     public function showForm()
     {
         return view('auth.register');
@@ -116,6 +96,29 @@ class RegisterController extends Controller
 
         return redirect('/success-verification')->with('success', 'Your email has been verified! You can now log in.');
     }
+
+     // Resend activation link
+    public function resendActivationLink(Request $request)
+    {
+        $request->validate(['email' => 'required|email|exists:users,email']);
+        $user = User::where('email', $request->email)->first();
+
+        // Only resend if not already active
+        if ($user->status === 'active') {
+            return back()->with('error', 'Account already activated.');
+        }
+
+        // Generate new activation token
+        $user->activation_token = Str::random(64);
+        $user->activation_token_expires_at = now()->addHours(2);
+        $user->save();
+
+        $activationLink = url('/activate/' . $user->activation_token);
+        Mail::to($user->email)->send(new WelcomeEmail($user, $activationLink));
+
+        return back()->with('success', 'A new activation link has been sent to your email.');
+    }
+
 
      public function showSuccessEmail()
     {

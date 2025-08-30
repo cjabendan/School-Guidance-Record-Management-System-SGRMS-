@@ -86,12 +86,15 @@ Route::prefix('Head')->name('Head.')->group(function () {
     // Parents
     Route::get('/parents', [HeadParentController::class, 'index'])->name('parents.index');
 
-    // Case reports, appointments, settings
+    // Case reports
     Route::get('/case', [HeadCaseController::class, 'index'])->name('case.index');
 
     Route::get('/appointments', [HeadAppointmentController::class, 'index'])->name('appointments.index');
 
+    // Announcements
     Route::get('/announcements', [HeadAnnouncementController::class, 'index'])->name('announcements.index');
+    Route::post('/announcements', [HeadAnnouncementController::class, 'store'])->name('announcements.store');
+
 
     Route::get('/settings', [HeadSettingsController::class, 'index'])->name('settings.index');
 });
