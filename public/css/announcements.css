@@ -1,34 +1,38 @@
 .announcement-container {
     width: 100%;
     display: flex;
+    height: 100%;
     flex-direction: column;
 }
 
 .announcement-management {
     display: flex;
     flex-direction: row;
-    padding: 10px 0;
     align-items: center;
     justify-content: space-between;
-    gap: 5px;
+    padding-bottom: 10px;
 }
 
-.ann-nav .announcement-filter {
+.announcement-filter {
     display: flex;
     flex-direction: row;
-    justify-content: space-between;
     align-items: center;
-    gap: 1.5rem;
+    gap: 24px; 
 }
 
-.announcement-filter .a-nav {
+.announcement-filter .nav-filters {
+    display: flex;
+    flex-direction: row;
+}
+
+.announcement-filter .nav-filters .a-nav {
     position: relative;
     color: rgba(0, 0, 0, 0.3);
     font-size: 18px;
-    display: inline-block;
     letter-spacing: 1px;
-    padding: 8px 0;
+    padding: 8px;
     transition: color 0.3s;
+    
 }
 
 .announcement-filter .a-nav.active {
@@ -51,17 +55,58 @@
     width: 100%;
 }
 
+
 .announcement-management .search-bar {
     display: flex;
     gap: 10px;
     flex-direction: row;
+    align-items: center;
+}
+
+.toggle-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    width: 180px;
+    background: #f0f4fa;
+    color: #1ea7ff;
+    border: none;
+    border-radius: 7px;
+    padding: 0 22px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+    box-shadow: 0 2px 8px rgba(30,167,255,0.08);
+    outline: none;
+    position: relative;
+    min-width: 140px; /* Fixed width for toggle button */
+    justify-content: center;
+}
+
+.toggle-btn.active {
+    background: #1ea7ff;
+    color: #fff;
+    box-shadow: 0 4px 16px rgba(30,167,255,0.15);
+    font-weight: 600;
+}
+
+.toggle-btn:not(.active):hover {
+    background: #e6f7ff;
+    color: #0080ff;
+}
+
+.toggle-btn i {
+    font-size: 1.2rem;
+    margin-right: 4px;
 }
 
 .announcement-management .add-btn {
     background-color: #1ea7ff;
-    padding: 6px 30px;
+    padding: 8px 22px;
     border: none;
     font-size: 1rem;
+    font-weight: 500;
     line-height: 1.2;
     border-radius: 7px;
     color: #ffffff;

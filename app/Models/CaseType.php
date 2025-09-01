@@ -24,3 +24,4 @@ class CaseType extends Model
         return $this->hasMany(CaseModel::class, 'case_type_id', 'type_id');
     }
 }
+  

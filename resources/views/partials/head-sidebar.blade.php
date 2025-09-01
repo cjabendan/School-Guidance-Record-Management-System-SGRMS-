@@ -55,8 +55,8 @@
             </ul>
 
             <!-- Other menus -->
-            <li class="{{ Request::is('Head/case*') ? 'active' : '' }}">
-                <a href="{{ url('Head/case') }}">
+            <li class="{{ Request::is('Head/cases*') ? 'active' : '' }}">
+                <a href="{{ url('Head/cases') }}">
                     <i class='bx bxs-report'></i>
                     <span class="text">Case Reports</span>
                 </a>

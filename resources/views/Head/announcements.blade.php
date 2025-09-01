@@ -11,14 +11,28 @@
                 <div class="announcement-management">
                     <div class="ann-nav">
                         <div class="announcement-filter" id="announcement-filters">
-                            <a href="{{ route('Head.announcements.index', ['category' => 'recent']) }}"
-                                class="a-nav {{ request('category') == 'recent' || !request()->has('category') ? 'active' : '' }}">Recent</a>
-                            <a href="{{ route('Head.announcements.index', ['category' => 'Announcements']) }}"
-                                class="a-nav {{ request('category') == 'Announcements' ? 'active' : '' }}">Announcements</a>
-                            <a href="{{ route('Head.announcements.index', ['category' => 'Events']) }}"
-                                class="a-nav {{ request('category') == 'Events' ? 'active' : '' }}">Events</a>
-                            <a href="{{ route('Head.announcements.index', ['category' => 'News']) }}"
-                                class="a-nav {{ request('category') == 'News' ? 'active' : '' }}">News</a>
+                            <!-- Table view filters -->
+                            <div class="nav-filters" id="table-filters">
+                                <a href="{{ route('Head.announcements.index', ['category' => 'recent']) }}"
+                                    class="a-nav {{ request('category') == 'recent' || !request()->has('category') ? 'active' : '' }}"
+                                    data-filter="recent">Recent</a>
+                                <a href="{{ route('Head.announcements.index', ['category' => 'Announcements']) }}"
+                                    class="a-nav {{ request('category') == 'Announcements' ? 'active' : '' }}"
+                                    data-filter="Announcements">Announcements</a>
+                                <a href="{{ route('Head.announcements.index', ['category' => 'Events']) }}"
+                                    class="a-nav {{ request('category') == 'Events' ? 'active' : '' }}"
+                                    data-filter="Events">Events</a>
+                                <a href="{{ route('Head.announcements.index', ['category' => 'News']) }}"
+                                    class="a-nav {{ request('category') == 'News' ? 'active' : '' }}"
+                                    data-filter="News">News</a>
+                            </div>
+                            <!-- Calendar view filters 
+                            <div class="nav-filters" id="calendar-filters" style="display:none;">
+                                <a href="#" class="a-nav active" data-filter="day">Day</a>
+                                <a href="#" class="a-nav" data-filter="week">Week</a>
+                                <a href="#" class="a-nav" data-filter="month">Month</a>
+                            </div>
+                            -->
                         </div>
                     </div>
                     <div class="search-bar">
@@ -34,10 +48,14 @@
                             </form>
                         </div>
                         <button class="add-btn" onclick="openModal()">Add Announcement</button>
+                        <button class="toggle-btn" id="toggle-view-btn">
+                            <i class="fi fi-rr-table-layout" id="toggle-icon"></i>
+                            <span id="toggle-label">Table View</span>
+                        </button>
                     </div>
 
                 </div>
-                <div class="announcement-list" id="announcements-list">
+                <div class="announcement-list" id="announcements-list" style="margin-bottom:0;">
                     <div class="announcement-header">
                         <div class="announcement-col title">Title</div>
                         <div class="announcement-col category">Category</div>
@@ -55,7 +73,7 @@
                                 <div class="announcement-col status">{{ ucfirst($announcement->status) }}</div>
                                 <div class="announcement-col actions">
                                     <a href="#" title="View" class="view-btn">
-                                         <i class='bx bx-show'></i>
+                                        <i class='bx bx-show'></i>
                                     </a>
                                     <a href="#" title="Edit" class="edit-btn">
                                         <i class='bx bx-edit'></i>
@@ -71,7 +89,12 @@
                             </div>
                         @endforelse
                     </div>
-
+                </div>
+                <div id="calendar-view" style="display:none; width:100%; margin-bottom:0;">
+                    <div id="calendar" style="margin:0;"></div>
+                    <div id="calendar-empty-message"
+                        style="display:none; text-align:center; color:#888; font-size:1.1rem; padding:32px;">No events to
+                        display.</div>
                 </div>
 
             </div>
@@ -80,10 +103,12 @@
     @include('Head.Modal.announcementModal')
 
 @endsection
+
 <script>
     function openModal() {
         document.getElementById('announcementModal').style.display = 'block';
     }
+
     function closeModal() {
         document.getElementById('announcementModal').style.display = 'none';
     }
@@ -91,8 +116,45 @@
     document.addEventListener('DOMContentLoaded', function() {
         const searchInput = document.getElementById('announcement-search-input');
         const announcementsList = document.getElementById('announcements-list');
+        const calendarView = document.getElementById('calendar-view');
+        const toggleBtn = document.getElementById('toggle-view-btn');
+        const toggleIcon = document.getElementById('toggle-icon');
+        const toggleLabel = document.getElementById('toggle-label');
         const filters = document.getElementById('announcement-filters');
         let timeout = null;
+
+        // Toggle view logic
+        const tableFilters = document.getElementById('table-filters');
+        // State: true = table, false = calendar
+        let isTableView = true;
+
+        function setView(table) {
+            isTableView = table;
+            if (table) {
+                announcementsList.style.display = 'block';
+                calendarView.style.display = 'none';
+                tableFilters.style.display = 'flex';
+                toggleBtn.classList.add('active');
+                toggleIcon.className = 'fi fi-rr-table-layout';
+                toggleLabel.textContent = 'Table view';
+            } else {
+                announcementsList.style.display = 'none';
+                calendarView.style.display = 'block';
+                tableFilters.style.display = 'none';
+                toggleBtn.classList.add('active');
+                toggleIcon.className = 'bx bxs-calendar';
+                toggleLabel.textContent = 'Calendar view';
+                setTimeout(function() {
+                    renderCalendar('month');
+                }, 0);
+            }
+        }
+        // Initial view
+        setView(true);
+        toggleBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            setView(!isTableView);
+        });
 
         // AJAX for search
         if (searchInput) {
@@ -102,48 +164,83 @@
             });
         }
 
-        // AJAX for filters
-        filters.querySelectorAll('a').forEach(link => {
+        // AJAX for table filters (recent/announcements/events/news)
+        tableFilters.querySelectorAll('a').forEach(link => {
             link.addEventListener('click', function(e) {
+                // Only handle filter if table view is active
+                if (!isTableView) return;
                 e.preventDefault();
-                // manually set active class
-                filters.querySelectorAll('a').forEach(l => l.classList.remove('active'));
+                tableFilters.querySelectorAll('a').forEach(l => l.classList.remove('active'));
                 this.classList.add('active');
-                fetchAnnouncements(this.getAttribute('href'));
+                // AJAX fetch announcements for selected filter
+                let category = this.dataset.filter;
+                let url =
+                    `{{ route('Head.announcements.index') }}?category=${encodeURIComponent(category)}`;
+                fetchAnnouncements(url);
             });
         });
+    // Calendar nav filters removed; no JS needed for them
 
         // function to fetch data
         function fetchAnnouncements(url = `{{ route('Head.announcements.index') }}`) {
-            // if no custom url passed, build from search input
-            if (!url) {
-                let search = searchInput.value;
-                let params = new URLSearchParams();
-                if (search.trim() !== '') params.append('search', search.trim());
-                url = `{{ route('Head.announcements.index') }}?` + params.toString();
-            }
+            let search = searchInput ? searchInput.value : '';
+            let params = new URLSearchParams();
+            if (search.trim() !== '') params.append('search', search.trim());
+            url = `{{ route('Head.announcements.index') }}?` + params.toString();
 
             fetch(url)
                 .then(response => response.text())
                 .then(html => {
                     const parser = new DOMParser();
                     const doc = parser.parseFromString(html, 'text/html');
-
-                    // announcements
                     const newList = doc.getElementById('announcements-list');
                     if (newList) {
                         announcementsList.innerHTML = newList.innerHTML;
                     }
-
                 });
-
         }
 
-        // Optional: Close modal when clicking outside modal content
-        window.onclick = function(event) {
-            if (event.target == announcementModal) {
-                announcementModal.style.display = "none";
-            }
+        // FullCalendar integration
+        function renderCalendar(viewType = 'month') {
+            let calendarEl = document.getElementById('calendar');
+            if (!calendarEl) return;
+
+            let initialView = 'dayGridMonth';
+            if (viewType === 'day') initialView = 'timeGridDay';
+            if (viewType === 'week') initialView = 'timeGridWeek';
+            if (viewType === 'month') initialView = 'dayGridMonth';
+
+            let calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: initialView,
+                headerToolbar: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'dayGridMonth,timeGridWeek,timeGridDay,listMonth'
+                },
+                events: '/api/announcements', 
+                selectable: true,
+                editable: false,
+                slotMinTime: "06:00:00", 
+                slotMaxTime: "18:00:00", 
+                allDaySlot: false, 
+                nowIndicator: true, 
+                eventDidMount: function(info) {
+                    // Color code by category
+                    const category = info.event.extendedProps.category;
+                    if (category === 'announcement') {
+                        info.el.style.backgroundColor = '#1ea7ff';
+                        info.el.style.color = '#000';
+                    } else if (category === 'event') {
+                        info.el.style.backgroundColor = '#10b981';
+                        info.el.style.color = '#fff';
+                    } else if (category === 'news') {
+                        info.el.style.backgroundColor = '#fd7238';
+                        info.el.style.color = '#fff';
+                    }
+                }
+            });
+
+            calendar.render();
         }
     });
 </script>

@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class CaseModel extends Model
-{
+{ 
     use HasFactory;
 
     protected $table = 'cases';
@@ -29,12 +29,13 @@ class CaseModel extends Model
         'resolution_notes',
         'resolved_date',
         'follow_up_date',
+        'archived',
     ];
 
     // Case belongs to a CaseType
     public function caseType()
     {
-        return $this->belongsTo(CaseType::class, 'case_type_id', 'type_id');
+        return $this->belongsTo(\App\Models\CaseType::class, 'case_type_id', 'type_id');
     }
 
     // Case belongs to an Admin (reporter)
@@ -46,11 +47,6 @@ class CaseModel extends Model
     // Case has many students (many-to-many)
     public function students()
     {
-        return $this->belongsToMany(
-            Student::class,
-            'case_students',      // pivot table
-            'case_id',            // FK in pivot for this model
-            'student_id'          // FK in pivot for related model
-        );
+        return $this->belongsToMany(\App\Models\Student::class, 'case_students', 'case_id', 'student_id');
     }
 }

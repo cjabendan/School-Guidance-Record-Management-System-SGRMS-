@@ -1,3 +1,5 @@
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.19/index.global.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.19/index.global.min.js"></script>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -17,15 +19,32 @@
     <link rel='stylesheet'
         href='https://cdn-uicons.flaticon.com/3.0.0/uicons-solid-rounded/css/uicons-solid-rounded.css'>
     <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/3.0.0/uicons-regular-rounded/css/uicons-regular-rounded.css'>
+    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet" />
+   
+
     <link rel="stylesheet" href="{{ asset('css/style.css') }}">
     <link rel="stylesheet" href="{{ asset('css/bar.css') }}">
     <link rel="stylesheet" href="{{ asset('css/dashboard.css') }}">
     <link rel="stylesheet" href="{{ asset('css/table.css') }}">
     <link rel="stylesheet" href="{{ asset('css/counsel.css') }}">
     <link rel="stylesheet" href="{{ asset('css/announcements.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/caseModal.css') }}">
+
+     <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.19/index.global.min.js'></script>
     @yield('head')
 </head>
-
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        let calendarEl = document.getElementById('calendar');
+        if (calendarEl) {
+            let calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
+                events: [] // No events, but calendar will still display
+            });
+            calendar.render();
+        }
+    });
+</script>
 <body>
 
     <!-- SIDEBAR -->
@@ -40,7 +59,13 @@
 </body>
 
 @stack('scripts')
+
+       
+</body>
+
+@stack('scripts')
+
 <script src="{{ asset('js/head.js') }}"></script>
 <script src="{{ asset('js/dashboard.js') }}"></script>
-
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </html>

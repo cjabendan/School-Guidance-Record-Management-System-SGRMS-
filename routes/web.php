@@ -86,14 +86,18 @@ Route::prefix('Head')->name('Head.')->group(function () {
     // Parents
     Route::get('/parents', [HeadParentController::class, 'index'])->name('parents.index');
 
-    // Case reports
-    Route::get('/case', [HeadCaseController::class, 'index'])->name('case.index');
+     // Cases
+    Route::get('/cases', [HeadCaseController::class, 'index'])->name('cases.index');
+    Route::post('/addcase', [HeadCaseController::class, 'store'])->name('cases.store');
+    Route::put('/cases/{case}', [HeadCaseController::class, 'update'])->name('cases.update');
+    Route::put('/cases/{case}/archive', [HeadCaseController::class, 'archive'])->name('cases.archive');
 
     Route::get('/appointments', [HeadAppointmentController::class, 'index'])->name('appointments.index');
 
     // Announcements
     Route::get('/announcements', [HeadAnnouncementController::class, 'index'])->name('announcements.index');
     Route::post('/announcements', [HeadAnnouncementController::class, 'store'])->name('announcements.store');
+    Route::get('/api/announcements', [HeadAnnouncementController::class, 'getEvents']);
 
 
     Route::get('/settings', [HeadSettingsController::class, 'index'])->name('settings.index');

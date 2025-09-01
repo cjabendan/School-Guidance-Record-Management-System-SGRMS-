@@ -30,6 +30,7 @@ html {
 .wrapper {
     padding: 0 20px;
     background-color: #ffffff;
+    height: 100%;
 }
 
 :root {
@@ -67,4 +68,66 @@ body.dark {
     margin-left: 3px;
     display: block;
     object-fit: contain;
+}
+
+/* Calendar Styling */
+
+/* Calendar Styling */
+#calendar {
+    width: 100%;
+    height: 800px;
+    font-family: "Poppins", sans-serif;
+    margin: 0 !important;
+    padding: 0 !important;
+    box-sizing: border-box;
+}
+
+/* Header Toolbar  */
+/* Header Toolbar  */
+.fc-header-toolbar {
+    background-color: #1ea7ff;
+    color: #fff;
+    font-weight: 600;
+    padding: 12px   ;
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
+    margin-bottom: 0 !important;
+    margin-top: 0 !important;
+}
+
+/* Buttons */
+
+.fc .fc-button {
+    background-color: #ffffff; /* green background */
+    color: #1ea7ff;
+    border: none;
+    border-radius: 4px;
+    padding: 6px 12px;
+    font-weight: bold;
+}
+
+/* Active button */
+.fc .fc-button.fc-button-active {
+    background-color: #388e3c; /* darker green for active */
+    color: #fff;
+}
+
+.fc .fc-button,
+.fc .fc-button:focus,
+.fc .fc-button:hover,
+.fc .fc-button.fc-button-active {
+    box-shadow: none !important;
+    border: none !important;
+}
+
+/* Hover effect */
+.fc .fc-button:hover {
+    background-color: #66bb6a;
+    color: white;
+}
+
+/* Disabled button */
+.fc .fc-button.fc-button-disabled {
+    background-color: #ccc;
+    color: #888;
 }
