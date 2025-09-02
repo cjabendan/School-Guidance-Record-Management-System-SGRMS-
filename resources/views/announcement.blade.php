@@ -9,14 +9,14 @@
         <div class="announcement-board">
             <div class="announcement-nav">
                 <div class="announcement-filter" id="announcement-filters">
-                    <a href="{{ route('announcements.index', ['category' => 'recent']) }}"
-                        class="a-nav {{ request('category') == 'recent' || !request()->has('category') ? 'active' : '' }}">Recent</a>
-                    <a href="{{ route('announcements.index', ['category' => 'Announcements']) }}"
-                        class="a-nav {{ request('category') == 'Announcements' ? 'active' : '' }}">Announcements</a>
-                    <a href="{{ route('announcements.index', ['category' => 'Events']) }}"
-                        class="a-nav {{ request('category') == 'Events' ? 'active' : '' }}">Events</a>
-                    <a href="{{ route('announcements.index', ['category' => 'News']) }}"
-                        class="a-nav {{ request('category') == 'News' ? 'active' : '' }}">News</a>
+                    <a href="#" class="a-nav {{ request('category') == 'recent' || !request()->has('category') ? 'active' : '' }}"
+                        data-category="recent">Recent</a>
+                    <a href="#" class="a-nav {{ request('category') == 'announcement' ? 'active' : '' }}"
+                        data-category="announcement">Announcements</a>
+                    <a href="#" class="a-nav {{ request('category') == 'event' ? 'active' : '' }}"
+                        data-category="event">Events</a>
+                    <a href="#" class="a-nav {{ request('category') == 'news' ? 'active' : '' }}"
+                        data-category="news">News</a>
                 </div>
                 <div class="announcement-search">
                     <form method="GET" action="{{ route('announcements.index') }}">
@@ -48,46 +48,44 @@
         const announcementsList = document.getElementById('announcements-list');
         const filters = document.getElementById('announcement-filters');
         let timeout = null;
+        let currentCategory = '{{ request('category') ?? 'recent' }}';
 
         // AJAX for search
-        searchInput.addEventListener('input', function() {
-            clearTimeout(timeout);
-            timeout = setTimeout(fetchAnnouncements, 400);
-        });
+        if (searchInput) {
+            searchInput.addEventListener('input', function() {
+                clearTimeout(timeout);
+                timeout = setTimeout(function() {
+                    fetchAnnouncements(currentCategory, searchInput.value);
+                }, 400);
+            });
+        }
 
         // AJAX for filters
         filters.querySelectorAll('a').forEach(link => {
             link.addEventListener('click', function(e) {
                 e.preventDefault();
-                // manually set active class
                 filters.querySelectorAll('a').forEach(l => l.classList.remove('active'));
                 this.classList.add('active');
-                fetchAnnouncements(this.getAttribute('href'));
+                currentCategory = this.dataset.category;
+                fetchAnnouncements(currentCategory, searchInput.value);
             });
         });
 
-        // function to fetch data
-        function fetchAnnouncements(url = `{{ route('announcements.index') }}`) {
-            // if no custom url passed, build from search input
-            if (!url) {
-                let search = searchInput.value;
-                let params = new URLSearchParams();
-                if (search.trim() !== '') params.append('search', search.trim());
-                url = `{{ route('announcements.index') }}?` + params.toString();
-            }
+        function fetchAnnouncements(category = 'recent', search = '') {
+            let params = new URLSearchParams();
+            if (category && category !== 'recent') params.append('category', category);
+            if (search && search.trim() !== '') params.append('search', search.trim());
+            let url = `{{ route('announcements.index') }}?` + params.toString();
 
             fetch(url)
                 .then(response => response.text())
                 .then(html => {
                     const parser = new DOMParser();
                     const doc = parser.parseFromString(html, 'text/html');
-
-                    // announcements
                     const newList = doc.getElementById('announcements-list');
                     if (newList) {
                         announcementsList.innerHTML = newList.innerHTML;
                     }
-
                     // pagination
                     const newPagination = doc.querySelector('.pagination');
                     const oldPagination = document.querySelector('.pagination');

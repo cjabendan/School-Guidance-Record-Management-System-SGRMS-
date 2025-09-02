@@ -97,7 +97,7 @@ Route::prefix('Head')->name('Head.')->group(function () {
     // Announcements
     Route::get('/announcements', [HeadAnnouncementController::class, 'index'])->name('announcements.index');
     Route::post('/announcements', [HeadAnnouncementController::class, 'store'])->name('announcements.store');
-    Route::get('/api/announcements', [HeadAnnouncementController::class, 'getEvents']);
+    Route::get('/api/announcements', [HeadAnnouncementController::class, 'getEvents'])->name('announcements.api');
 
 
     Route::get('/settings', [HeadSettingsController::class, 'index'])->name('settings.index');

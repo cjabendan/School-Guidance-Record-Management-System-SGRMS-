@@ -21,43 +21,68 @@ class HeadAnnouncementController extends Controller
             $query->where('title', 'like', '%' . $request->search . '%');
         }
 
-        // Automatically exclude past events
+        // Exclude past events automatically if filtering by events
         $query->when($request->category === 'event', function ($q) {
             $q->where('end_datetime', '>=', now());
         });
 
         $announcements = $query->orderBy('created_at', 'desc')->get();
 
-        return view('Head.announcements', compact('announcements'));
+        // Calendar events: only Announcements + Events
+        $events = Announcements::where('status', 'active')
+            ->whereIn('category', ['Announcement', 'Event'])
+            ->get();
+
+        return view('Head.announcements', compact('announcements', 'events'));
     }
 
-    public function getEvents()
+    public function getEvents(Request $request)
     {
+        $start = $request->query('start');
+        $end = $request->query('end');
+
         $events = Announcements::where('status', 'active')
-            ->whereIn('category', ['announcement', 'event', 'news'])
+            ->whereIn('category', ['Announcement', 'Event'])
+            ->where(function ($query) use ($start, $end) {
+                $query->where(function ($q) use ($start, $end) {
+                    $q->whereNotNull('start_datetime')
+                        ->whereNotNull('end_datetime')
+                        ->whereDate('start_datetime', '<=', $end)
+                        ->whereDate('end_datetime', '>=', $start);
+                })
+                    ->orWhere(function ($q) use ($start, $end) {
+                        $q->whereNotNull('date_posted')
+                            ->whereDate('date_posted', '>=', $start)
+                            ->whereDate('date_posted', '<=', $end);
+                    });
+            })
             ->get()
-            ->map(function ($announcement) {
-                // For events, use start/end datetime; for announcement/news, use date_posted as all-day
-                if ($announcement->category === 'event' && $announcement->start_datetime && $announcement->end_datetime) {
+            ->map(function ($a) {
+                if ($a->category === 'Event' && $a->start_datetime && $a->end_datetime) {
                     return [
-                        'title' => $announcement->title,
-                        'start' => $announcement->start_datetime,
-                        'end'   => $announcement->end_datetime,
+                        'title' => $a->title,
+                        'start' => \Carbon\Carbon::parse($a->start_datetime)->toIso8601String(),
+                        'end'   => \Carbon\Carbon::parse($a->end_datetime)->toIso8601String(),
                         'allDay' => false,
                         'extendedProps' => [
-                            'category' => $announcement->category,
-                            'status'   => $announcement->status,
+                            'category' => $a->category,
+                            'status' => $a->status,
+                            'description' => $a->description,
                         ]
                     ];
                 } else {
-                    // Announcement or news: show as all-day event on date_posted
+                    // Announcements: partial-day (6:00–20:00)
+                    $start = \Carbon\Carbon::parse($a->date_posted)->setTime(6, 0);
+                    $end = \Carbon\Carbon::parse($a->date_posted)->setTime(20, 0);
                     return [
-                        'title' => $announcement->title,
-                        'start' => $announcement->date_posted,
-                        'allDay' => true,
+                        'title' => $a->title,
+                        'start' => $start->toIso8601String(),
+                        'end'   => $end->toIso8601String(),
+                        'allDay' => false,
                         'extendedProps' => [
-                            'category' => $announcement->category,
-                            'status'   => $announcement->status,
+                            'category' => $a->category,
+                            'status' => $a->status,
+                            'description' => $a->description,
                         ]
                     ];
                 }
@@ -65,14 +90,13 @@ class HeadAnnouncementController extends Controller
 
         return response()->json($events);
     }
-
     public function store(Request $request)
     {
         $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'required|string',
             'link' => 'nullable|url',
-            'category' => 'required|in:announcement,news,event',
+            'category' => 'required|in:Announcement,News,Event',
             'image' => 'nullable|image|max:2048',
             'status' => 'required|in:active,archived',
             'start_datetime' => 'nullable|date|required_if:category,event',
@@ -91,9 +115,12 @@ class HeadAnnouncementController extends Controller
 
         $data['user_id'] = Auth::id();
         $data['date_posted'] = now();
+        $data['category'] = (strtolower($data['category']));
 
         if ($request->hasFile('image')) {
             $data['image'] = $request->file('image')->store('announcements', 'public');
+        } else {
+            $data['image'] = 'default.png';
         }
 
         Announcements::create($data);

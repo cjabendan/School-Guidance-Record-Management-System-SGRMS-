@@ -19,10 +19,6 @@ class User extends Authenticatable
         'last_name',
         'suffix',
         'email',
-        'google_id',
-        'google_email',
-        'google_token',
-        'google_refresh_token',
         'contact_num',
         'sex',
         'bod',
@@ -38,8 +34,6 @@ class User extends Authenticatable
 
     protected $hidden = [
         'password',
-        'google_token',
-        'google_refresh_token',
         'remember_token',
         'activation_token',
         'login_token',

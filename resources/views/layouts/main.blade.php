@@ -29,30 +29,14 @@
     <link rel="stylesheet" href="{{ asset('css/counsel.css') }}">
     <link rel="stylesheet" href="{{ asset('css/announcements.css') }}">
     <link rel="stylesheet" href="{{ asset('css/caseModal.css') }}">
-
-     <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.19/index.global.min.js'></script>
     @yield('head')
 </head>
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        let calendarEl = document.getElementById('calendar');
-        if (calendarEl) {
-            let calendar = new FullCalendar.Calendar(calendarEl, {
-                initialView: 'dayGridMonth',
-                events: [] // No events, but calendar will still display
-            });
-            calendar.render();
-        }
-    });
-</script>
 <body>
 
     <!-- SIDEBAR -->
 
-
     @include('partials.head-sidebar')
     @yield('content')
-
 
 
 
