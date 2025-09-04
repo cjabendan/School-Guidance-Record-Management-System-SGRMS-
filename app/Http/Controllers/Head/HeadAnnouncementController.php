@@ -99,8 +99,8 @@ class HeadAnnouncementController extends Controller
             'category' => 'required|in:Announcement,News,Event',
             'image' => 'nullable|image|max:2048',
             'status' => 'required|in:active,archived',
-            'start_datetime' => 'nullable|date|required_if:category,event',
-            'end_datetime' => 'nullable|date|required_if:category,event|after_or_equal:start_datetime',
+            'start_datetime' => 'nullable|date|required_if:category,Event',
+            'end_datetime' => 'nullable|date|required_if:category,Event|after_or_equal:start_datetime',
         ]);
 
         $data = $request->only([
@@ -115,16 +115,52 @@ class HeadAnnouncementController extends Controller
 
         $data['user_id'] = Auth::id();
         $data['date_posted'] = now();
-        $data['category'] = (strtolower($data['category']));
 
         if ($request->hasFile('image')) {
-            $data['image'] = $request->file('image')->store('announcements', 'public');
-        } else {
-            $data['image'] = 'default.png';
+            $image = $request->file('image');
+            $filename = time() . '_' . $image->getClientOriginalName();
+            $image->move(public_path('images/announcements'), $filename);
+            $data['image'] = $filename;
         }
 
         Announcements::create($data);
 
         return redirect()->route('Head.announcements.index')->with('success', 'Announcement posted!');
+    }
+    public function update(Request $request, $id)
+    {
+        $announcement = Announcements::findOrFail($id);
+
+        $request->validate([
+            'title' => 'required|string|max:255',
+            'description' => 'required|string',
+            'link' => 'nullable|url',
+            'category' => 'required|in:Announcement,News,Event',
+            'image' => 'nullable|image|max:2048',
+            'status' => 'required|in:active,archived',
+            'start_datetime' => 'nullable|date|required_if:category,event',
+            'end_datetime' => 'nullable|date|required_if:category,event|after_or_equal:start_datetime',
+        ]);
+
+        $data = $request->only([
+            'title',
+            'description',
+            'link',
+            'category',
+            'status',
+            'start_datetime',
+            'end_datetime'
+        ]);
+
+        if ($request->hasFile('image')) {
+            $image = $request->file('image');
+            $filename = time() . '_' . $image->getClientOriginalName();
+            $image->move(public_path('images/announcements'), $filename);
+            $data['image'] =  $filename;
+        }
+
+        $announcement->update($data);
+
+        return redirect()->route('Head.announcements.index')->with('success', 'Announcement updated!');
     }
 }

@@ -6,12 +6,9 @@
     <section id="content">
      @include('partials.navbar')
         <div class="wrapper">
-            <!-- HEAD -->
-            <div class="head-title">
-                <div class="left">
-                    <h1>Dashboard</h1>
-                </div>
-            </div>
+         
+
+        </div>
 
 
 @endsection

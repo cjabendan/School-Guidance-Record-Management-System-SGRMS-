@@ -13,18 +13,22 @@ class Appointments extends Model
     protected $primaryKey = 'appointment_id';
 
     protected $fillable = [
-        'requester_id', // uses user ID
+        'requester_id',
         'requester_type',
         'student_id',
-        'counselor_id', // either admin or counselor (use user ID)
-        'appointment_type',
+        'counselor_id',
+        'appointment_type_id',
+        'reason',
         'appointment_datetime',
         'location',
         'status',
+        'rescheduled_count',
+        'last_rescheduled_at',
     ];
 
     protected $casts = [
         'appointment_datetime' => 'datetime',
+        'last_rescheduled_at' => 'datetime',
     ];
 
     // Relationships
@@ -33,25 +37,24 @@ class Appointments extends Model
         return $this->belongsTo(User::class, 'student_id');
     }
 
-    public function admin()
-    {
-        return $this->belongsTo(User::class, 'admin_id');
-    }
-
     public function counselor()
     {
         return $this->belongsTo(User::class, 'counselor_id');
     }
 
+    public function requester()
+    {
+        return $this->belongsTo(User::class, 'requester_id', 'id');
+    }
+
+    public function type()
+    {
+        return $this->belongsTo(AppointmentType::class, 'appointment_type_id');
+    }
+
     public function notes()
     {
         return $this->hasMany(CounselingNotes::class, 'appointment_id');
-    }
-
-   
-     public function requester()
-    {
-        return $this->belongsTo(User::class, 'requester_id', 'id');
     }
 
     // Accessor for requester's full name

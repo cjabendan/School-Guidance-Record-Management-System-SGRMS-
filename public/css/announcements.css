@@ -17,101 +17,19 @@
     display: flex;
     flex-direction: row;
     align-items: center;
-    gap: 24px; 
+    gap: 5px;
 }
-
-.announcement-filter .nav-filters {
-    display: flex;
-    flex-direction: row;
-}
-
-.announcement-filter .nav-filters .a-nav {
-    position: relative;
-    color: rgba(0, 0, 0, 0.3);
-    font-size: 18px;
-    letter-spacing: 1px;
-    padding: 8px;
-    transition: color 0.3s;
-    
-}
-
-.announcement-filter .a-nav.active {
-    color: #1ea7ff;
-    font-weight: 600;
-}
-
-.announcement-filter .a-nav::after {
-    content: "";
-    position: absolute;
-    left: 0;
-    bottom: 0;
-    width: 0;
-    height: 2px;
-    background-color: #1ea7ff;
-    transition: width 0.3s ease;
-}
-
-.announcement-filter .a-nav.active::after {
-    width: 100%;
-}
-
 
 .announcement-management .search-bar {
     display: flex;
-    gap: 10px;
+    gap: 5px;
     flex-direction: row;
     align-items: center;
 }
 
-.toggle-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    width: 180px;
-    background: #f0f4fa;
-    color: #1ea7ff;
-    border: none;
-    border-radius: 7px;
-    padding: 0 22px;
-    font-size: 1rem;
-    font-weight: 500;
-    cursor: pointer;
-    transition: background 0.2s, color 0.2s, box-shadow 0.2s;
-    box-shadow: 0 2px 8px rgba(30,167,255,0.08);
-    outline: none;
-    position: relative;
-    min-width: 140px; /* Fixed width for toggle button */
-    justify-content: center;
-}
-
-.toggle-btn.active {
-    background: #1ea7ff;
-    color: #fff;
-    box-shadow: 0 4px 16px rgba(30,167,255,0.15);
-    font-weight: 600;
-}
-
-.toggle-btn:not(.active):hover {
-    background: #e6f7ff;
-    color: #0080ff;
-}
-
-.toggle-btn i {
-    font-size: 1.2rem;
-    margin-right: 4px;
-}
-
-.announcement-management .add-btn {
-    background-color: #1ea7ff;
-    padding: 8px 22px;
-    border: none;
-    font-size: 1rem;
-    font-weight: 500;
-    line-height: 1.2;
-    border-radius: 7px;
-    color: #ffffff;
-    cursor: pointer;
-    font-weight: 500;
+.search {
+    display: flex;
+    width: 290px;
 }
 
 .ann-search form {
@@ -119,8 +37,8 @@
     align-items: center;
     width: 100%;
     flex-direction: row;
-    border: 0.5px solid rgba(0, 0, 0, 0.3);
-    border-radius: 7px;
+    border: 1px solid #8f8f8f65;
+    border-radius: 5px;
 }
 
 .ann-search input {
@@ -128,7 +46,7 @@
     outline: none;
     flex: 1;
     padding: 6px 12px;
-    border-radius: 7px;
+    border-radius: 5px;
     font-size: 1rem;
 }
 
@@ -144,7 +62,6 @@
     display: flex;
     flex-direction: column;
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
-    border-radius: 12px;
     overflow: hidden;
     background: #fff;
 }
@@ -155,8 +72,8 @@
     color: white;
     font-weight: 600;
     padding: 18px 0 18px 0;
-    border-top-left-radius: 12px;
-    border-top-right-radius: 12px;
+    border-top-left-radius: 7px;
+    border-top-right-radius: 7px;
 }
 
 .announcement-card {
@@ -204,10 +121,6 @@
     font-size: 1.1rem;
 }
 
-.announcement-col.actions {
-    flex: 1;
-    gap: 8px;
-}
 
 .view-btn,
 .edit-btn,
@@ -233,13 +146,12 @@
 .view-btn:hover,
 .edit-btn:hover,
 .archive-btn:hover {
-  opacity: 0.8;
+    opacity: 0.8;
 }
-
 
 /* Announcement Modal Styles */
 
-.modal {
+.modal-announcement {
     display: none;
     position: fixed;
     z-index: 2000;
@@ -259,17 +171,21 @@
 }
 
 @keyframes fadeInBg {
-    from { background: rgba(30, 167, 255, 0); }
-    to   { background: rgba(30, 167, 255, 0.12); }
+    from {
+        background: rgba(30, 167, 255, 0);
+    }
+    to {
+        background: rgba(30, 167, 255, 0.12);
+    }
 }
 
-.modal-content {
+.modal-content-announcement {
     background: #fff;
     border-radius: 16px;
-    box-shadow: 0 8px 32px rgba(30,167,255,0.18);
-    padding: 36px 32px 28px 32px;
+    box-shadow: 0 8px 32px rgba(30, 167, 255, 0.18);
+    padding: 24px 32px 24px 32px;
     width: 100%;
-    max-width: 480px;
+    max-width: 520px;
     margin: 2rem auto;
     position: relative;
     animation: fadeInModal 0.3s ease-in-out;
@@ -279,11 +195,17 @@
 }
 
 @keyframes fadeInModal {
-    from { opacity: 0; transform: scale(0.95);}
-    to   { opacity: 1; transform: scale(1);}
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
 }
 
-.modal-header {
+.modal-header-announcement {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -292,7 +214,7 @@
     padding-bottom: 8px;
 }
 
-.modal-header h2 {
+.modal-header-announcement h2 {
     margin: 0;
     font-size: 1.35rem;
     color: #1ea7ff;
@@ -331,26 +253,6 @@ label {
     letter-spacing: 0.5px;
 }
 
-input,
-textarea,
-select {
-    width: 100%;
-    padding: 10px 12px;
-    border: 1px solid #e6f7ff;
-    border-radius: 8px;
-    font-size: 1rem;
-    background: #f6fbff;
-    transition: border 0.2s;
-    font-family: "Poppins", sans-serif;
-}
-
-input:focus,
-textarea:focus,
-select:focus {
-    border: 1.5px solid #1ea7ff;
-    outline: none;
-    background: #fff;
-}
 
 textarea {
     resize: vertical;
@@ -394,7 +296,7 @@ textarea {
     font-size: 1rem;
     font-weight: 600;
     transition: background 0.2s, color 0.2s;
-    box-shadow: 0 2px 8px rgba(30,167,255,0.08);
+    box-shadow: 0 2px 8px rgba(30, 167, 255, 0.08);
 }
 
 .btn.add,
@@ -429,3 +331,65 @@ input[type="file"] {
 select {
     cursor: pointer;
 }
+
+#image-preview-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+}
+
+#image-preview {
+    max-width: 120px;
+    max-height: 120px;
+    border-radius: 8px;
+    object-fit: cover;
+    box-shadow: 0 2px 8px rgba(30, 167, 255, 0.08);
+}
+
+/* Status styling - match appointments */
+.status-label {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 14px 4px 10px;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 500;
+    gap: 6px;
+}
+
+.status-dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    vertical-align: middle;
+}
+
+.status-approved {
+    background: #e8f5e9;
+    color: #388e3c;
+}
+
+.status-dot.status-approved {
+    background: #4caf50;
+}
+
+.status-declined {
+    background: #ffebee;
+    color: #d32f2f;
+}
+
+.status-dot.status-declined {
+    background: #f44336;
+}
+
+.status-pending {
+    background: #fff8e1;
+    color: #ff9800;
+}
+
+.status-dot.status-pending {
+    background: #ffc107;
+}
+

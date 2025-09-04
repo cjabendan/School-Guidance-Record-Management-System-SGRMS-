@@ -1,0 +1,142 @@
+/* Filter row styling */
+.filter-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    background: #f8f9fa;
+    padding: 1rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    min-width: 180px;
+}
+
+.filter-checkbox {
+    display: flex;
+    align-items: center;
+    min-width: 120px;
+    margin-bottom: 0;
+}
+
+.filter-add-btn {
+    margin-left: auto;
+    min-width: 120px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 900px) {
+    .filter-row {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    .filter-add-btn {
+        margin-left: 0;
+        margin-top: 0.5rem;
+    }
+}
+
+/* Table styling */
+.table-responsive {
+    overflow-x: auto;
+    max-width: 100%;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+    margin-top: 2rem;
+}
+
+.table {
+    min-width: 900px;
+}
+
+.table th, .table td {
+    vertical-align: middle !important;
+    text-align: center;
+}
+
+.table thead {
+    background: #e9ecef;
+}
+
+.btn-sm {
+    min-width: 70px;
+}
+
+/* Modal back button (if you add it) */
+.modal-header .btn-back {
+    margin-right: 1rem;
+}
+
+/* Scrollable table with sticky header */
+.scrollable-table {
+    max-height: 400px; /* adjust as needed */
+    overflow-y: auto;
+    overflow-x: auto;
+    border-radius: 8px;
+    background: #fff;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+}
+
+.scrollable-table thead th {
+    position: sticky;
+    top: 0;
+    background: #e9ecef;
+    z-index: 2;
+}
+/* General button styling */
+.btn {
+    border-radius: 6px;
+    font-weight: 500;
+    transition: all 0.2s ease-in-out;
+}
+
+/* Add Case button (primary) */
+.btn-primary {
+    background: #4e73df;       /* deep blue */
+    border: none;
+}
+.btn-primary:hover {
+    background: #2e59d9;
+}
+
+/* View button (info) */
+.btn-info {
+    background: #36b9cc;       /* teal */
+    border: none;
+    color: #fff;
+}
+.btn-info:hover {
+    background: #2c9faf;
+}
+
+/* Edit button (warning) */
+.btn-warning {
+    background: #f6c23e;       /* gold */
+    border: none;
+    color: #fff;
+}
+.btn-warning:hover {
+    background: #dda20a;
+    color: #fff;
+}
+
+/* Archive button (danger) */
+.btn-danger {
+    background: #e74a3b;       /* red */
+    border: none;
+}
+.btn-danger:hover {
+    background: #c82333;
+}
+
+/* Small buttons uniform sizing */
+.btn-sm {
+    min-width: 80px;
+    padding: 4px 10px;
+}

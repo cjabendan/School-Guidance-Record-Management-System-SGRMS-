@@ -1,19 +1,3 @@
-function openAddModal() {
-    document.getElementById('addStudentModal').style.display = 'block';
-    fetchStudentId();
-}
-
-function closeAddModal() {
-    document.getElementById('addStudentModal').style.display = 'none';
-}
-
-window.onclick = function(event) {
-    var modal = document.getElementById('addStudentModal');
-    if (event.target === modal) {
-        closeAddModal();
-    }
-}
-
 function getYearSuffix(i) {
     if (i === 1) return "st";
     if (i === 2) return "nd";
@@ -70,13 +54,13 @@ function updateYearLevel() {
     }
 }
 
-// For Edit Modal
+
+
 function updateEditYearLevel(selectedValue) {
     const educLevel = document.getElementById("edit_educ_level").value;
     const yearLevelSelect = document.getElementById("edit_year_level");
     yearLevelSelect.innerHTML = "";
 
-    // Add default option
     const defaultOption = document.createElement("option");
     defaultOption.value = "";
     defaultOption.text = "Select Year Level";
@@ -117,124 +101,95 @@ function updateEditYearLevel(selectedValue) {
             yearLevelSelect.add(option);
         }
     }
-    // Set value if provided
     if (selectedValue) {
         yearLevelSelect.value = selectedValue;
     }
 }
 
-function openChooseAddModal() {
-    document.getElementById('chooseAddModal').style.display = 'block';
+// Toggle program field enable/disable
+function toggleProgramField() {
+    const educLevel = document.getElementById('educ_level').value;
+    const programInput = document.getElementById('program');
+    if (educLevel === 'Senior High School') {
+        programInput.disabled = false;
+        programInput.placeholder = "Enter program name";
+    } else {
+        programInput.disabled = true;
+        programInput.value = "";
+        programInput.placeholder = "Program only for Senior High School";
+    }
 }
 
-function closeChooseAddModal() {
-    document.getElementById('chooseAddModal').style.display = 'none';
-}
-
-function openImportModal() {
-    closeChooseAddModal();
-    document.getElementById('importModal').style.display = 'block';
-}
-
-function closeImportModal() {
-    document.getElementById('importModal').style.display = 'none';
-}
-
-function openAddStudentModal() {
-    document.getElementById('addStudentModal').style.display = 'block';
-    updateYearLevel(); // Reset year level options when opening
-    // Always fetch a new unique student ID from the backend
-    fetch('/Head/students/next-id')
-        .then(response => response.json())
-        .then(data => {
-            document.getElementById('s_id_display').textContent = data.next_id;
-            document.getElementById('s_id').value = data.next_id;
+document.addEventListener('DOMContentLoaded', function() {
+    var educLevelInput = document.getElementById('educ_level');
+    if (educLevelInput) {
+        educLevelInput.addEventListener('change', function() {
+            updateYearLevel();
+            toggleProgramField();
         });
-}
+    }
 
-function openViewStudentModal(id_num) {
-    document.getElementById('viewStudentModal').style.display = 'block';
-    fetch(`/Head/students/${id_num}/json`)
-        .then(response => response.json())
-        .then(data => {
-            window.lastViewedStudent = data; // Store for editing
-            document.getElementById('view_studentImage').src = data.image_url || '/images/stud.img/circle-user.png';
-            document.getElementById('view_id_num_display').textContent = data.id_num || '';
-            document.getElementById('view_lname').textContent = data.lname || '';
-            document.getElementById('view_fname').textContent = data.fname || '';
-            document.getElementById('view_mname').textContent = data.mname || '';
-            document.getElementById('view_suffix').textContent = data.suffix || '';
-            document.getElementById('view_bod').textContent = data.bod || '';
-            document.getElementById('view_gender').textContent = data.gender || data.sex || '';
-            document.getElementById('view_religion').textContent = data.religion || '';
-            document.getElementById('view_civil_status').textContent = data.civil_status || '';
-            document.getElementById('view_address').textContent = data.address || '';
-            document.getElementById('view_mobile_num').textContent = data.mobile_num || '';
-            document.getElementById('view_email').textContent = data.email || '';
-            document.getElementById('view_educ_level').textContent = data.educ_level || '';
-            document.getElementById('view_year_level').textContent = data.year_level || '';
-            document.getElementById('view_program').textContent = data.program || '';
-            document.getElementById('view_section').textContent = data.section || '';
-            document.getElementById('view_previous_school').textContent = data.previous_school || '';
-            document.getElementById('view_previous_school_address').textContent = data.previous_school_address || '';
-            document.getElementById('view_father_name').textContent = data.father_name || '';
-            document.getElementById('view_mother_name').textContent = data.mother_name || '';
-            document.getElementById('view_guardian_name').textContent = data.guardian_name || '';
-            document.getElementById('view_relationship').textContent = data.relationship || '';
-            document.getElementById('view_guardian_contact').textContent = data.guardian_contact || '';
-            document.getElementById('view_guardian_email').textContent = data.guardian_email || '';
-        });
-}
+    // Modal close logic with debug logs
+    const closeBtn = document.getElementById('closeAddModalBtn');
+    if (closeBtn) {
+        closeBtn.onclick = function(e) {
+            console.log('X button clicked');
+            e.stopPropagation();
+            window.closeAddModal();
+        };
+    }
+    const modal = document.getElementById('addStudentModal');
+    if (modal) {    
+        modal.onclick = function(event) {
+            if (event.target === modal) {
+                console.log('Modal background clicked');
+                window.closeAddModal();
+            } else {
+                console.log('Modal inner element clicked:', event.target);
+            }
+        };
+    }
+    const modalContent = document.querySelector('#addStudentModal .modal-content');
+    if (modalContent) {
+        modalContent.onclick = function(e) {
+            console.log('Modal content clicked');
+            e.stopPropagation();
+        };
+    }
+});
+//_________________________________________________________________________________________
 
-function closeViewStudentModal() {
-    document.getElementById('viewStudentModal').style.display = 'none';
-}
 
-function openEditStudentModal() {
-    document.getElementById('editStudentModal').style.display = 'block';
-        fetch('/Head/students/next-id')
+// Add/Edit Modal logic
+window.openAddEditModal = function openAddEditModal(mode, studentData = null) {
+    // If edit mode and only s_id is provided, fetch full data via AJAX
+    if (mode === 'edit' && studentData && studentData.s_id && Object.keys(studentData).length === 1) {
+        fetch(`/Head/students/${studentData.s_id}/json`)
             .then(response => response.json())
             .then(data => {
-                // Always set the new unique s_id from backend
-                document.getElementById('s_id_display').textContent = data.next_id;
-                document.getElementById('s_id').value = data.next_id;
-            })
-            .catch(error => {
-                document.getElementById('s_id_display').textContent = 'Error generating ID';
+                if (data.error) {
+                    alert('Student not found!');
+                    return;
+                }
+                window.openAddEditModal('edit', data);
             });
-    document.getElementById('edit_fname').value = document.getElementById('view_fname').textContent;
-    document.getElementById('edit_mname').value = document.getElementById('view_mname').textContent;
-    document.getElementById('edit_suffix').value = document.getElementById('view_suffix').textContent;
-    document.getElementById('edit_bod').value = document.getElementById('view_bod').textContent;
-    document.getElementById('edit_gender').value = document.getElementById('view_gender').textContent;
-    document.getElementById('edit_religion').value = document.getElementById('view_religion').textContent;
-    document.getElementById('edit_civil_status').value = document.getElementById('view_civil_status').textContent;
-    document.getElementById('edit_address').value = document.getElementById('view_address').textContent;
-    document.getElementById('edit_mobile_num').value = document.getElementById('view_mobile_num').textContent;
-    document.getElementById('edit_email').value = document.getElementById('view_email').textContent;
-    // Set educ level and update year level options before setting year level value
-    var educLevel = document.getElementById('view_educ_level').textContent;
-    document.getElementById('edit_educ_level').value = educLevel;
-    updateEditYearLevel();
-    document.getElementById('edit_year_level').value = document.getElementById('view_year_level').textContent;
-    document.getElementById('edit_program').value = document.getElementById('view_program').textContent;
-    document.getElementById('edit_section').value = document.getElementById('view_section').textContent;
-    document.getElementById('edit_previous_school').value = document.getElementById('view_previous_school').textContent;
-    document.getElementById('edit_previous_school_address').value = document.getElementById('view_previous_school_address').textContent;
-    document.getElementById('edit_father_name').value = document.getElementById('view_father_name').textContent;
-    document.getElementById('edit_mother_name').value = document.getElementById('view_mother_name').textContent;
-    document.getElementById('edit_guardian_name').value = document.getElementById('view_guardian_name').textContent;
-    document.getElementById('edit_relationship').value = document.getElementById('view_relationship').textContent;
-    document.getElementById('edit_guardian_contact').value = document.getElementById('view_guardian_contact').textContent;
-    document.getElementById('edit_guardian_email').value = document.getElementById('view_guardian_email').textContent;
-}
-
-// Edit image preview
-(function() {
-    const imageInput = document.getElementById('edit_image');
-    const imgPreview = document.getElementById('edit_studentImage');
+        return;
+    }
+    const modal = document.getElementById('addStudentModal');
+    const form = document.getElementById('addStudentForm');
+    const title = document.getElementById('addModalTitle');
+    const saveBtn = document.getElementById('addEditSaveBtn');
+    const imgPreview = document.getElementById('studentImage');
+    const imageInput = document.getElementById('profile_image');
+    // Reset form
+    form.reset();
+    // Reset image
+    imgPreview.src = imgPreview.getAttribute('data-default');
+    // Remove previous image preview
+    if (imageInput) imageInput.value = "";
+    // Attach image preview event every time modal opens
     if (imageInput) {
-        imageInput.addEventListener('change', function(event) {
+        imageInput.onchange = function(event) {
             const [file] = event.target.files;
             if (file) {
                 imgPreview.src = URL.createObjectURL(file);
@@ -242,24 +197,374 @@ function openEditStudentModal() {
                 imgPreview.src = imgPreview.getAttribute('data-default');
             }
             imgPreview.style.display = 'block';
-        });
+        };
     }
-})();
+    // Set mode
+    if (mode === 'add') {
+        title.textContent = 'Add Student';
+        saveBtn.textContent = 'Save';
 
-// Add event listeners for year level update on educ level change
-document.addEventListener('DOMContentLoaded', function() {
-    var educLevelInput = document.getElementById('educ_level');
-    if (educLevelInput) {
-        educLevelInput.addEventListener('change', updateYearLevel);
+        var methodInput = document.getElementById('_method_input');
+        if (methodInput) methodInput.remove();
+        // Fetch new student ID
+        fetch('/Head/students/next-id')
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('s_id_display').textContent = data.next_id;
+                document.getElementById('s_id').value = data.next_id;
+            });
+    } else if (mode === 'edit' && studentData) {
+        title.textContent = 'Edit Student';
+        saveBtn.textContent = 'Update';
+        
+        form.action = `/Head/students/${studentData.id_num}`;
+        
+        if (!document.getElementById('_method_input')) {
+            const methodInput = document.createElement('input');
+            methodInput.type = 'hidden';
+            methodInput.name = '_method';
+            methodInput.value = 'PUT';
+            methodInput.id = '_method_input';
+            form.appendChild(methodInput);
+        }
+        document.getElementById('s_id_display').textContent = studentData.id_num || '';
+        document.getElementById('s_id').value = studentData.id_num || '';
+        document.getElementById('first_name').value = studentData.fname || '';
+        document.getElementById('middle_name').value = studentData.mname || '';
+        document.getElementById('last_name').value = studentData.lname || '';
+        document.getElementById('suffix').value = studentData.suffix || '';
+        document.getElementById('email').value = studentData.email || '';
+        document.getElementById('contact_num').value = studentData.mobile_num || '';
+        document.getElementById('sex').value = studentData.gender || studentData.sex || '';
+        document.getElementById('bod').value = studentData.bod || '';
+        document.getElementById('address').value = studentData.address || '';
+        document.getElementById('religion').value = studentData.religion || '';
+        document.getElementById('civil_status').value = studentData.civil_status || '';
+        document.getElementById('educ_level').value = studentData.educ_level || '';
+        toggleProgramField();
+        
+        if (typeof updateYearLevel === 'function') {
+            updateYearLevel();
+        }
+        document.getElementById('program').value = studentData.program || '';
+        document.getElementById('year_level').value = studentData.year_level || '';
+        document.getElementById('section').value = studentData.section || '';
+        document.getElementById('father_name').value = studentData.father_name || '';
+        document.getElementById('mother_name').value = studentData.mother_name || '';
+        document.getElementById('guardian_name').value = studentData.guardian_name || '';
+        document.getElementById('relationship').value = studentData.relationship || '';
+        document.getElementById('guardian_contact').value = studentData.guardian_contact || '';
+        document.getElementById('guardian_email').value = studentData.guardian_email || '';
+        // Set image preview if available
+        if (studentData.image_url) {
+            imgPreview.src = studentData.image_url;
+        }
     }
-    var editEducLevelInput = document.getElementById('edit_educ_level');
-    if (editEducLevelInput) {
-        editEducLevelInput.addEventListener('change', function() {
-            updateEditYearLevel();
+    modal.style.display = 'block';
+    console.log('Modal opened');
+}
+// Close modal
+window.closeAddModal = function closeAddModal() {
+    var modal = document.getElementById('addStudentModal');
+    if (modal) {
+        modal.style.display = 'none';
+        console.log('Modal closed');
+    }
+}
+
+
+//_________________________________________________________________________________________
+
+
+// View Modal logic
+window.openViewStudentModal = function openViewStudentModal(s_id) {
+    fetch(`/Head/students/${s_id}/json`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                alert('Student not found!');
+                return;
+            }
+            // Set all fields in the view modal
+            const viewFields = [
+                ['view_s_id_display', data.id_num || data.s_id],
+                ['view_first_name', data.fname],
+                ['view_middle_name', data.mname],
+                ['view_last_name', data.lname],
+                ['view_suffix', data.suffix],
+                ['view_email', data.email],
+                ['view_contact_num', data.mobile_num],
+                ['view_sex', data.gender || data.sex],
+                ['view_bod', data.bod],
+                ['view_address', data.address],
+                ['view_religion', data.religion],
+                ['view_civil_status', data.civil_status],
+                ['view_educ_level', data.educ_level],
+                ['view_program', data.program],
+                ['view_year_level', data.year_level],
+                ['view_section', data.section],
+                ['view_father_name', data.father_name],
+                ['view_mother_name', data.mother_name],
+                ['view_guardian_name', data.guardian_name],
+                ['view_relationship', data.relationship],
+                ['view_guardian_contact', data.guardian_contact],
+                ['view_guardian_email', data.guardian_email],
+            ];
+            for (const [id, value] of viewFields) {
+                const el = document.getElementById(id);
+                if (el) {
+                    let displayValue = value;
+                    if (displayValue === undefined || displayValue === null || displayValue === '' || displayValue === 'N/A') {
+                        // Use 'N/A' for most fields, but 'None' for relationship/contact fields
+                        if (id === 'view_relationship' || id === 'view_guardian_contact' || id === 'view_guardian_email') {
+                            displayValue = 'None';
+                        } else {
+                            displayValue = 'N/A';
+                        }
+                    }
+                    el.textContent = displayValue;
+                } else {
+                    console.warn('Missing view modal element:', id);
+                }
+            }
+            // Set image
+            var img = document.getElementById('viewStudentImage');
+            if (img && data.image_url) {
+                img.src = data.image_url;
+            }
+            // Show modal
+            var modal = document.getElementById('viewStudentModal');
+            if (modal) {
+                modal.style.display = 'block';
+                modal.style.zIndex = 9999;
+                modal.removeAttribute('hidden');
+                modal.classList.remove('hidden');
+                setTimeout(() => {
+                  if (getComputedStyle(modal).display !== 'block') {
+                    modal.style.display = 'block';
+                  }
+                }, 10);
+                console.log('View modal opened');
+            } else {
+                console.log('View modal NOT found in DOM!');
+            }
         });
+}
+
+// Close view modal logic
+document.addEventListener('DOMContentLoaded', function() {
+    var closeBtn = document.getElementById('closeViewModalBtn');
+    var modal = document.getElementById('viewStudentModal');
+    if (closeBtn && modal) {
+        closeBtn.onclick = function(e) {
+            e.stopPropagation();
+            modal.style.display = 'none';
+        };
+        modal.onclick = function(event) {
+            if (event.target === modal) {
+                modal.style.display = 'none';
+            }
+        };
+        var modalContent = document.querySelector('#viewStudentModal .modal-content');
+        if (modalContent) {
+            modalContent.onclick = function(e) {
+                e.stopPropagation();
+            };
+        }
     }
 });
 
-function closeEditStudentModal() {
-    document.getElementById('editStudentModal').style.display = 'none';
+
+// _________________________________________________________________________________________
+
+
+
+// Archive Modal logic 
+window.openArchiveModal = function openArchiveModal(s_id) {
+    window.currentArchiveSId = s_id;
+    var modal = document.getElementById('archiveStudentModal');
+    if (modal) {
+        modal.style.display = 'block';
+    }
 }
+
+window.openArchiveDisableModal = function openArchiveDisableModal() {
+    var modal = document.getElementById('archiveDisableModal');
+    if (modal) {
+        modal.style.display = 'block';
+    }
+}
+
+window.closeArchiveModal = function closeArchiveModal() {
+    var modal = document.getElementById('archiveStudentModal');
+    if (modal) {
+        modal.style.display = 'none';
+    }
+}
+
+window.closeArchiveDisableModal = function closeArchiveDisableModal() {
+    var modal = document.getElementById('archiveDisableModal');
+    if (modal) {
+        modal.style.display = 'none';
+    }
+}
+
+// Archive Only AJAX
+window.archiveStudentOnly = function archiveStudentOnly() {
+    if (!window.currentArchiveSId) return;
+    fetch('/Head/students/archive', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        },
+        body: JSON.stringify({ s_id: window.currentArchiveSId })
+    })
+    .then(res => res.json())
+    .then(data => {
+        window.closeArchiveModal();
+        window.closeArchiveDisableModal();
+        location.reload();
+    });
+}
+
+// Archive and Disable AJAX
+window.archiveStudentAndDisable = function archiveStudentAndDisable() {
+    if (!window.currentArchiveSId) return;
+    fetch('/Head/students/archive-disable', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        },
+        body: JSON.stringify({ s_id: window.currentArchiveSId })
+    })
+    .then(res => res.json())
+    .then(data => {
+        window.closeArchiveModal();
+        window.closeArchiveDisableModal();
+        location.reload();
+    });
+}
+
+
+
+document.addEventListener('click', function(e) {
+    // Archive Modal X button
+    if (e.target && e.target.id === 'closeArchiveModalBtn') {
+        e.stopPropagation();
+        window.closeArchiveModal();
+    }
+    // Archive Modal background
+    if (e.target && e.target.id === 'archiveStudentModal') {
+        window.closeArchiveModal();
+    }
+    // Archive Modal content 
+    if (e.target && e.target.closest && e.target.closest('#archiveStudentModal .modal-content')) {
+        e.stopPropagation();
+    }
+
+    // Archive Disable Modal X button
+    if (e.target && e.target.id === 'closeArchiveDisableModalBtn') {
+        e.stopPropagation();
+        window.closeArchiveDisableModal();
+    }
+    // Archive Disable Modal background
+    if (e.target && e.target.id === 'archiveDisableModal') {
+        window.closeArchiveDisableModal();
+    }
+    // Archive Disable Modal content 
+    if (e.target && e.target.closest && e.target.closest('#archiveDisableModal .modal-content')) {
+        e.stopPropagation();
+    }
+});
+
+// Confirm button logic 
+document.addEventListener('DOMContentLoaded', function() {
+    var confirmBtn = document.getElementById('confirmArchiveBtn');
+    if (confirmBtn) {
+        confirmBtn.onclick = function() {
+            window.closeArchiveModal();
+            window.openArchiveDisableModal();
+        };
+    }
+});
+
+
+// _________________________________________________________________________________________
+
+// Import Modal logic
+window.openImportModal = function openImportModal() {
+    var modal = document.getElementById('importModal');
+    if (modal) {
+        modal.style.display = 'block';
+    }
+}
+
+window.closeImportModal = function closeImportModal() {
+    var modal = document.getElementById('importModal');
+    if (modal) {
+        modal.style.display = 'none';
+    }
+}
+
+// Close import modal on outside click
+document.addEventListener('DOMContentLoaded', function() {
+    var importModal = document.getElementById('importModal');
+    var closeBtn = document.getElementById('closeImportModalBtn');
+    if (closeBtn && importModal) {
+        closeBtn.onclick = function(e) {
+            e.stopPropagation();
+            importModal.style.display = 'none';
+        };
+        importModal.onclick = function(event) {
+            if (event.target === importModal) {
+                importModal.style.display = 'none';
+            }
+        };
+        var modalContent = importModal.querySelector('.modal-content');
+        if (modalContent) {
+            modalContent.onclick = function(e) {
+                e.stopPropagation();
+            };
+        }
+    }
+});
+
+
+// _________________________________________________________________________________________
+
+// Export Modal logic
+window.openExportModal = function openExportModal() {
+    var modal = document.getElementById('exportModal');
+    if (modal) {
+        modal.style.display = 'block';
+    }
+}
+window.closeExportModal = function closeExportModal() {
+    var modal = document.getElementById('exportModal');
+    if (modal) {
+        modal.style.display = 'none';
+    }
+}
+document.addEventListener('DOMContentLoaded', function() {
+    var exportModal = document.getElementById('exportModal');
+    var closeBtn = document.getElementById('closeExportModalBtn');
+    if (closeBtn && exportModal) {
+        closeBtn.onclick = function(e) {
+            e.stopPropagation();
+            exportModal.style.display = 'none';
+        };
+        exportModal.onclick = function(event) {
+            if (event.target === exportModal) {
+                exportModal.style.display = 'none';
+            }
+        };
+        var modalContent = exportModal.querySelector('.modal-content');
+        if (modalContent) {
+            modalContent.onclick = function(e) {
+                e.stopPropagation();
+            };
+        }
+    }
+});

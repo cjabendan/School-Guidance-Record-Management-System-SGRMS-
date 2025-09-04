@@ -6,7 +6,8 @@
     <section id="content">
     @include('partials.navbar')
         <div class="wrapper">
-        
+            
+            </div>
         </div>
     </section>
 

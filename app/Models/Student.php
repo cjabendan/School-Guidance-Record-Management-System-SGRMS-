@@ -14,18 +14,17 @@ class Student extends Model
         's_id',
         'user_id',
         'y_id',
-        'bod',
-        'address',
-        'mobile_num',
-        'email',
         'section',
+        'father_name',
+        'mother_name',
+        'guardian_name',
+        'relationship',
+        'guardian_contact',
+        'guardian_email',
         'program',
-        's_image',
-        'previous_school',
         'status',
-        'parent_id',
         'religion',
-        'civil_status'
+        'civil_status',
     ];
 
     // Relationship: A student belongs to one user (personal info)

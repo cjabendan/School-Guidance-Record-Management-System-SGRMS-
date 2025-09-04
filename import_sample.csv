@@ -1,0 +1,2 @@
+s_id,first_name,middle_name,last_name,suffix,email,contact_num,sex,bod,address,religion,civil_status,educ_level,year_level,section,program,status,father_name,mother_name,guardian_name,relationship,guardian_contact,guardian_email,profile_image
+MA25-0010,Juan,Cruz,Reyes,,juan.reyes@example.com,09190000000,Male,2010-05-20,123 Mango St,Christian,Single,Elementary,Grade 5,5A,,active,Jose Reyes,Ana Reyes,Pedro Cruz,Guardian,09190002222,pedro@example.com,

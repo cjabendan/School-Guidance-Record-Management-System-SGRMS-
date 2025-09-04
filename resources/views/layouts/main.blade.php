@@ -5,6 +5,7 @@
 
 <head>
     <meta charset="utf-8" />
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
     <title>@yield('title', 'SGRMS - School Guidance Records Management System')</title>
 
@@ -28,7 +29,10 @@
     <link rel="stylesheet" href="{{ asset('css/table.css') }}">
     <link rel="stylesheet" href="{{ asset('css/counsel.css') }}">
     <link rel="stylesheet" href="{{ asset('css/announcements.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/appointments.css') }}">
     <link rel="stylesheet" href="{{ asset('css/caseModal.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/case.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/modal.css') }}">
     @yield('head')
 </head>
 <body>

@@ -10,25 +10,12 @@
             <h2>Manage Counselors</h2>
             <div class="profiles-container">
                 <!-- Add new profile box -->
-                <div class="profile-box add-box" onclick="console.log('Clicked'); openFormModal()">
+                <div class="profile-box add-box" onclick="openAddCounselorModal()">
                     <i class='bx bx-plus add-profile-icon'></i>
                     <h2>Add Counselor</h2>
                 </div>
 
-                @forelse($counselors as $counselor)
-                    @php
-                        $fullName = trim("{$counselor->last_name}, {$counselor->first_name} {$counselor->middle_name}");
-                        $img = $counselor->profile_image
-                            ? asset('uploads/users/' . $counselor->profile_image)
-                            : asset('images/user.img/people.png');
-                    @endphp
-                    <div class="profile-box" onclick="openViewCounselModal('{{ $counselor->c_id }}')">
-                        <img src="{{ $img }}" alt="Profile Picture">
-                        <h2>{{ $fullName }}</h2>
-                    </div>
-                @empty
-                    <p>No counselors found.</p>
-                @endforelse
+                @include('components.counselor-card', ['counselors' => $counselors])
 
             </div>
         </main>

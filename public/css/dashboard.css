@@ -17,7 +17,7 @@
 .dashboard-content {
     background-color: #ffffff;
     height: 100%;
-    padding: 10px 20px 0 20px;
+    padding: 0 20px;
     overflow: hidden; /* Prevent overflow */
 }
 

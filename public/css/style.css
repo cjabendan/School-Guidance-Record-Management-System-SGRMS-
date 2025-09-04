@@ -21,6 +21,7 @@ button,
 li {
     font-family: "Poppins", sans-serif;
     cursor: pointer;
+      outline: none;
 }
 
 html {
@@ -70,6 +71,54 @@ body.dark {
     object-fit: contain;
 }
 
+
+/* Improved dropdown styling */
+select {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    border: 1px solid #e6f7ff;
+    background: #f6fbff url("data:image/svg+xml,%3Csvg width='16' height='16' viewBox='0 0 16 16' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M4 6L8 10L12 6' stroke='%231ea7ff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat right 14px center/18px 18px;
+    padding: 10px 38px 10px 12px; /* right padding for arrow */
+    font-family: "Poppins", sans-serif;
+    font-size: 1rem;
+    color: #032b53;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(30,167,255,0.05);
+    transition: border 0.2s, box-shadow 0.2s;
+    cursor: pointer;
+}
+
+select:focus {
+    border: 1.5px solid #1ea7ff;
+    background-color: #fff;
+    box-shadow: 0 4px 16px rgba(30,167,255,0.10);
+    outline: none;
+}
+
+/* Dropdown wrapper for icon */
+.select-wrapper {
+    position: relative;
+    display: inline-block;
+    width: 100%;
+}
+
+.select-wrapper select {
+    width: 100%;
+    padding-right: 40px; /* space for icon */
+}
+
+.select-wrapper .select-icon {
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+    font-size: 1rem;
+    color: #1ea7ff;
+}
+
+
 /* Calendar Styling */
 #calendar {
     width: 100%;
@@ -80,12 +129,11 @@ body.dark {
     box-sizing: border-box;
 }
 
-
 .fc-header-toolbar {
     background-color: #1ea7ff;
     color: #fff;
     font-weight: 600;
-    padding: 12px   ;
+    padding: 12px;
     border-top-left-radius: 12px;
     border-top-right-radius: 12px;
     margin-bottom: 0 !important;
@@ -93,9 +141,8 @@ body.dark {
 }
 
 .fc .fc-toolbar.fc-header-toolbar {
-    margin-bottom: 1rem; 
+    margin-bottom: 1rem;
 }
-
 
 .fc .fc-button {
     background: #ffffff !important;
@@ -108,15 +155,15 @@ body.dark {
 }
 
 .fc .fc-button-group {
-    gap: 0.5rem; 
+    gap: 0.5rem;
 }
 
 .fc .fc-button:focus,
 .fc .fc-button:active,
 .fc .fc-button.fc-button-active {
-    box-shadow: none !important; 
-    border: none !important;      
-    outline: none !important;    
+    box-shadow: none !important;
+    border: none !important;
+    outline: none !important;
 }
 
 /* Hover state */
@@ -127,10 +174,9 @@ body.dark {
 
 /* Active state (selected view) */
 .fc .fc-button.fc-button-active {
-    background: #2563eb !important; 
+    background: #2563eb !important;
     color: #fff !important;
 }
-
 
 /* Prev/Next buttons */
 .fc .fc-prev-button,
@@ -148,7 +194,7 @@ body.dark {
 .fc .fc-scrollgrid,
 .fc .fc-scrollgrid td,
 .fc .fc-scrollgrid th {
-    border: 1px solid #f1f1f1 !important; 
+    border: 1px solid #f1f1f1 !important;
 }
 
 /* White background for all cells */
@@ -160,7 +206,7 @@ body.dark {
 
 /* Highlight for "today" */
 .fc .fc-day-today {
-    background:  rgba(30, 167, 255, 0.1) !important;
+    background: rgba(30, 167, 255, 0.1) !important;
 }
 
 /* Remove weird hover background */
@@ -170,9 +216,179 @@ body.dark {
 }
 
 /* Style header (Mon–Sun, time column) */
-.fc .fc-col-header-cell {
-    background: #ffffff !important;
-    color: #333 !important;
-    font-weight: 600;
-    border-bottom: 2px solid #e5e5e5 !important;
+.fc-list-day-cushion {
+    background-color: #ffffff !important;
+    height: 60px !important;
+    display: flex !important;
+    gap: 10px !important;
+    align-items: center !important;
 }
+
+.fc .fc-list-table > tbody > tr {
+    background: #ffffff;
+    transition: background 0.2s;
+    height: 60px;
+}
+
+.fc .fc-list-table > tbody > tr:hover {
+    background: #e6f7ff;
+}
+
+.fc-list-table td {
+    vertical-align: middle;
+    text-align: center;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+}
+
+.fc-list-table .fc-list-event-time {
+    text-align: center;
+    vertical-align: middle;
+    width: 90px;
+    color: #1ea7ff;
+    font-weight: 600;
+    padding-left: 18px !important;
+    padding-right: 12px !important;
+    margin: 0 !important;
+    display: table-cell;
+}
+
+.fc-list-table .fc-list-event-dot {
+    display: none !important;
+}
+
+.fc .fc-list-event-title {
+    font-size: 1.05rem;
+    color: #032b53;
+    font-weight: 600;
+    padding-left: 8px;
+    vertical-align: middle;
+    letter-spacing: 0.5px;
+}
+
+/* Custom file upload button styling */
+.custom-upload-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: linear-gradient(90deg, #1ea7ff 60%, #0080ff 100%);
+    color: #fff;
+    padding: 10px 22px;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+    box-shadow: 0 2px 8px rgba(30,167,255,0.08);
+    border: none;
+    margin-bottom: 6px;
+}
+
+.custom-upload-btn:hover {
+    background: #0080ff;
+    color: #fff;
+}
+
+.custom-upload-btn i {
+    font-size: 1.2rem;
+}
+
+.file-chosen-text {
+    display: inline-block;
+    margin-left: 12px;
+    color: #1ea7ff;
+    font-size: 0.98rem;
+    font-weight: 500;
+}
+
+/* FIlters */ 
+
+.filters {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-direction: row;
+}
+
+.filters li {
+    background-color: rgba(231, 230, 230, 0.616);
+    padding: 2px;
+    border-radius: 5px;
+    display: flex;
+}
+
+.filters li a {
+    color: rgb(161, 161, 161);
+    padding: 6px 18px;
+    font-size: 1rem;
+    border-radius: 6px;
+    text-decoration: none;
+    transition: background 0.2s, color 0.2s;
+}
+
+.filters li a.active {
+    background: #fff;
+    color: #004280;
+    font-weight: 600;
+}
+
+
+/* You can put this in your style.css */
+#student_search_results {
+    max-height: 220px;
+    overflow-y: auto;
+    z-index: 10520;
+}
+
+/* Buttons */
+.add-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #1ea7ff;
+    color: #ffffff;
+    border: none;
+    border-radius: 5px;
+    padding: 8px 22px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+    box-shadow: 0 2px 8px rgba(30, 167, 255, 0.08);
+    outline: none;
+    position: relative;
+    min-width: 140px;
+    justify-content: center;
+}
+
+.add-btn i {
+    font-size: 0.6rem;
+}
+
+.add-btn.active,
+.add-btn:focus {
+    background: #1ea7ff;
+    color: #fff;
+    box-shadow: 0 4px 16px rgba(30, 167, 255, 0.15);
+    font-weight: 600;
+}
+
+.add-btn:hover {
+    background: #0080ff;
+    color: #ffffff;
+}
+
+.toggle-btn {
+    display: flex;
+    align-items: center;
+    background: #ffffff;
+    border: 1px solid #8f8f8f65;
+    border-radius: 5px;
+    color: #5757578f;
+    padding: 8px 12px;
+    font-size: 1.2rem;
+    font-weight: 500;
+    justify-content: center;
+}
+
+

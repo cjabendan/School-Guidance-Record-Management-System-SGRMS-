@@ -1,27 +1,10 @@
-<!DOCTYPE html>
-<html lang="en">
 
-<head>
-    <meta charset="UTF-8">
-    <link rel="stylesheet" href="{{ asset('css/modal.css') }}">
-</head>
-
-<body>
-
-    <!-- Add Student Modal -->
+    <!-- Add/Edit Student Modal -->
     <div id="addStudentModal" class="modal">
         <div class="modal-content add-modal-content pro-add-modal">
-            <span class="close add-modal-close pro-add-close" onclick="closeAddModal()">&times;</span>
+            <span class="close add-modal-close pro-add-close" id="closeAddModalBtn">&times;</span>
             <h2 id="addModalTitle" class="add-modal-title pro-add-title">Add Student</h2>
-            @if($errors->any())
-                <div class="alert alert-danger">
-                    <ul>
-                        @foreach($errors->all() as $error)
-                            <li>{{ $error }}</li>
-                        @endforeach
-                    </ul>
-                </div>
-            @endif
+
             <form id="addStudentForm" method="POST" action="{{ url('Head/students') }}" enctype="multipart/form-data">
                 @csrf
                 <div class="form-row image-name-row">
@@ -90,19 +73,23 @@
                                 <label for="civil_status" class="add-label">Civil Status:</label>
                                 <input type="text" id="civil_status" name="civil_status" class="add-input">
                             </div>
+                            <div class="add-field-col">
+                                <label for="educ_level" class="add-label">Educational Level:</label>
+                                <select id="educ_level" name="educ_level" class="add-input">
+                                    <option value="">Select Level</option>
+                                    <option value="Kindergarten">Kindergarten</option>
+                                    <option value="Elementary">Elementary</option>
+                                    <option value="Junior High School">Junior High School</option>
+                                    <option value="Senior High School">Senior High School</option>
+                                </select>
+                            </div>
                         </div>
                     </div>
                 </div>
                 <div class="form-row">
                     <div class="add-field-col">
-                        <label for="educ_level" class="add-label">Educational Level:</label>
-                        <select id="educ_level" name="educ_level" class="add-input">
-                            <option value="">Select Level</option>
-                            <option value="Kindergarten">Kindergarten</option>
-                            <option value="Elementary">Elementary</option>
-                            <option value="Junior High School">Junior High School</option>
-                            <option value="Senior High School">Senior High School</option>
-                        </select>
+                        <label for="program" class="add-label">Program:</label>
+                        <input type="text" id="program" name="program" class="add-input" disabled>
                     </div>
                     <div class="add-field-col">
                         <label for="year_level" class="add-label">Year Level:</label>
@@ -110,18 +97,12 @@
                             <option value="">Select Year Level</option>
                         </select>
                     </div>
-                    <div id="programField" class="program-section-field add-field-col" style="display: none;">
-                        <label for="program" class="add-label">Program:</label>
-                        <input type="text" id="program" name="program" placeholder="Enter program name" class="add-input">
-                    </div>
-                    <div id="sectionField" class="program-section-field add-field-col">
+                    <div class="add-field-col">
                         <label for="section" class="add-label">Section:</label>
-                        <input type="text" id="section" name="section" placeholder="Enter section name" class="add-input">
+                        <input type="text" id="section" name="section" class="add-input">
                     </div>
                 </div>
 
-
-                
                 <div style="width: 100%; text-align: center; margin: 28px 0 18px 0; position: relative;">
                     <span style="background: #fff; position: relative; z-index: 1; padding: 0 18px; font-size: 1.08rem; font-weight: 600; color: #2563eb; letter-spacing: 0.04em;">Parent & Guardian Information</span>
                     <hr style="position: absolute; top: 50%; left: 0; width: 100%; border: none; border-top: 2px solid #2563eb; z-index: 0; margin: 0;">
@@ -129,131 +110,132 @@
                 <!-- Row: Father Name, Mother Name -->
                 <div class="form-row">
                     <div class="add-field-col">
-                        <label for="father_name" class="add-label">Father's Name:</label>
-                        <input type="text" id="father_name" name="father_name" placeholder="Enter father's name" class="add-input">
+                        <label for="father_name">Father Name</label>
+                        <input type="text" name="father_name" id="father_name" class="add-input" maxlength="255">
                     </div>
                     <div class="add-field-col">
-                        <label for="mother_name" class="add-label">Mother's Name:</label>
-                        <input type="text" id="mother_name" name="mother_name" placeholder="Enter mother's name" class="add-input">
+                        <label for="mother_name">Mother Name</label>
+                        <input type="text" name="mother_name" id="mother_name" class="add-input" maxlength="255">
                     </div>
                 </div>
 
                 <!-- Row: Guardian Name, Relationship -->
                 <div class="form-row">
                     <div class="add-field-col">
-                        <label for="guardian_name" class="add-label">Guardian Name:</label>
-                        <input type="text" id="guardian_name" name="guardian_name" placeholder="Enter guardian's name" class="add-input">
+                        <label for="guardian_name">Guardian Name</label>
+                        <input type="text" name="guardian_name" id="guardian_name" class="add-input" maxlength="255">
                     </div>
                     <div class="add-field-col">
-                        <label for="relationship" class="add-label">Relationship:</label>
-                        <input type="text" id="relationship" name="relationship" placeholder="e.g. Mother, Father, Guardian" class="add-input">
+                        <label for="relationship">Relationship</label>
+                        <input type="text" name="relationship" id="relationship" class="add-input" maxlength="255">
                     </div>
                 </div>
 
                 <!-- Row: Guardian Contact, Guardian Email -->
                 <div class="form-row">
                     <div class="add-field-col">
-                        <label for="guardian_contact" class="add-label">Guardian Contact:</label>
-                        <input type="text" id="guardian_contact" name="guardian_contact" placeholder="Enter guardian's contact number" class="add-input">
+                        <label for="guardian_contact">Guardian Contact</label>
+                        <input type="text" name="guardian_contact" id="guardian_contact" class="add-input" maxlength="255">
                     </div>
                     <div class="add-field-col">
-                        <label for="guardian_email" class="add-label">Guardian Email:</label>
-                        <input type="email" id="guardian_email" name="guardian_email" placeholder="Enter guardian's email" class="add-input">
+                        <label for="guardian_email">Guardian Email</label>
+                        <input type="email" name="guardian_email" id="guardian_email" class="add-input" maxlength="255">
                     </div>
                 </div>
 
                 <div class="pro-add-buttons">
-                    <button type="submit" class="pro-add-save">Save</button>
+                    <button type="submit" id="addEditSaveBtn" class="pro-add-save">Save</button>
                 </div>
             </form>
-
         </div>
     </div>
 
+<!---------------------------------------------------------------------------------------->
+
     <!-- View Student Modal -->
-    <div id="viewStudentModal" class="modal" style="display:none;">
+    <div id="viewStudentModal" class="modal">
         <div class="modal-content add-modal-content pro-add-modal">
-            <span class="close add-modal-close pro-add-close" onclick="closeViewStudentModal()">&times;</span>
+            <span class="close add-modal-close pro-add-close" id="closeViewModalBtn">&times;</span>
             <h2 id="viewModalTitle" class="add-modal-title pro-add-title">View Student</h2>
             <div class="form-row image-name-row">
                 <div class="image-col">
-                    <img id="view_studentImage" src="{{ asset('images/user/default.png') }}" data-default="{{ asset('images/user/default.png') }}" alt="Student Image" class="student-image-box pro-add-image">
+                    <img id="viewStudentImage" src="{{ asset('images/user/default.jpg') }}" data-default="{{ asset('images/user/default.jpg') }}" alt="Student Image" class="student-image-box pro-add-image">
                     <div class="student-id-row pro-add-id-row">
-                        <label for="view_id_num_display" class="add-label" style="margin-bottom:0;">Student ID:</label>
-                        <span id="view_id_num_display" class="pro-add-id-value">Loading...</span>
+                        <label class="add-label" style="margin-bottom:0;">Student ID:</label>
+                        <span id="view_s_id_display" class="pro-add-id-value">Loading...</span>
                     </div>
                 </div>
                 <div class="name-fields-col">
                     <div class="form-row" style="margin-bottom: 0; gap: 12px;">
                         <div class="add-field-col">
                             <label class="add-label">First Name:</label>
-                            <span id="view_fname"></span>
+                            <span id="view_first_name" class="view-field"></span>
                         </div>
                         <div class="add-field-col">
                             <label class="add-label">Middle Name:</label>
-                            <span id="view_mname"></span>
+                            <span id="view_middle_name" class="view-field"></span>
                         </div>
                         <div class="add-field-col">
                             <label class="add-label">Last Name:</label>
-                            <span id="view_lname"></span>
+                            <span id="view_last_name" class="view-field"></span>
                         </div>
                         <div class="add-field-col">
                             <label class="add-label">Suffix:</label>
-                            <span id="view_suffix"></span>
+                            <span id="view_suffix" class="view-field"></span>
                         </div>
                     </div>
                     <div class="form-row">
                         <div class="add-field-col">
                             <label class="add-label">Email:</label>
-                            <span id="view_email"></span>
+                            <span id="view_email" class="view-field"></span>
                         </div>
                         <div class="add-field-col">
                             <label class="add-label">Contact Number:</label>
-                            <span id="view_mobile_num"></span>
+                            <span id="view_contact_num" class="view-field"></span>
                         </div>
                         <div class="add-field-col">
                             <label class="add-label">Sex:</label>
-                            <span id="view_gender"></span>
+                            <span id="view_sex" class="view-field"></span>
                         </div>
                     </div>
                     <div class="form-row">
                         <div class="add-field-col">
                             <label class="add-label">Birthdate:</label>
-                            <span id="view_bod"></span>
+                            <span id="view_bod" class="view-field"></span>
                         </div>
                         <div class="add-field-col">
                             <label class="add-label">Address:</label>
-                            <span id="view_address"></span>
+                            <span id="view_address" class="view-field"></span>
                         </div>
                         <div class="add-field-col">
                             <label class="add-label">Religion:</label>
-                            <span id="view_religion"></span>
+                            <span id="view_religion" class="view-field"></span>
                         </div>
                     </div>
                     <div class="form-row">
                         <div class="add-field-col">
                             <label class="add-label">Civil Status:</label>
-                            <span id="view_civil_status"></span>
+                            <span id="view_civil_status" class="view-field"></span>
+                        </div>
+                        <div class="add-field-col">
+                            <label class="add-label">Educational Level:</label>
+                            <span id="view_educ_level" class="view-field"></span>
                         </div>
                     </div>
                 </div>
             </div>
             <div class="form-row">
                 <div class="add-field-col">
-                    <label class="add-label">Educational Level:</label>
-                    <span id="view_educ_level"></span>
+                    <label class="add-label">Program:</label>
+                    <span id="view_program" class="view-field"></span>
                 </div>
                 <div class="add-field-col">
                     <label class="add-label">Year Level:</label>
-                    <span id="view_year_level"></span>
+                    <span id="view_year_level" class="view-field"></span>
                 </div>
-                <div id="view_programField" class="program-section-field add-field-col" style="display: none;">
-                    <label class="add-label">Program:</label>
-                    <span id="view_program"></span>
-                </div>
-                <div id="view_sectionField" class="program-section-field add-field-col">
+                <div class="add-field-col">
                     <label class="add-label">Section:</label>
-                    <span id="view_section"></span>
+                    <span id="view_section" class="view-field"></span>
                 </div>
             </div>
             <div style="width: 100%; text-align: center; margin: 28px 0 18px 0; position: relative;">
@@ -262,103 +244,111 @@
             </div>
             <div class="form-row">
                 <div class="add-field-col">
-                    <label class="add-label">Father's Name:</label>
-                    <span id="view_father_name"></span>
+                    <label class="add-label">Father Name</label>
+                    <span id="view_father_name" class="view-field"></span>
                 </div>
                 <div class="add-field-col">
-                    <label class="add-label">Mother's Name:</label>
-                    <span id="view_mother_name"></span>
+                    <label class="add-label">Mother Name</label>
+                    <span id="view_mother_name" class="view-field"></span>
                 </div>
             </div>
             <div class="form-row">
                 <div class="add-field-col">
-                    <label class="add-label">Guardian Name:</label>
-                    <span id="view_guardian_name"></span>
+                    <label class="add-label">Guardian Name</label>
+                    <span id="view_guardian_name" class="view-field"></span>
                 </div>
                 <div class="add-field-col">
-                    <label class="add-label">Relationship:</label>
-                    <span id="view_relationship"></span>
+                    <label class="add-label">Relationship</label>
+                    <span id="view_relationship" class="view-field"></span>
                 </div>
             </div>
             <div class="form-row">
                 <div class="add-field-col">
-                    <label class="add-label">Guardian Contact:</label>
-                    <span id="view_guardian_contact"></span>
+                    <label class="add-label">Guardian Contact</label>
+                    <span id="view_guardian_contact" class="view-field"></span>
                 </div>
                 <div class="add-field-col">
-                    <label class="add-label">Guardian Email:</label>
-                    <span id="view_guardian_email"></span>
+                    <label class="add-label">Guardian Email</label>
+                    <span id="view_guardian_email" class="view-field"></span>
                 </div>
-            </div>
-            <div class="pro-add-buttons">
-                <button type="button" class="pro-add-save" onclick="exportStudentInfo()">
-                    <i class="bx bx-export"></i> Export
-                </button>
-                <button type="button" class="btn cancel" onclick="closeViewStudentModal()">Close</button>
             </div>
         </div>
     </div>
 
-    <script src="{{ asset('js/studentModal.js') }}"></script>
-    <script>
 
-        function toggleFields() {
-            const educLevel = document.getElementById('educ_level').value;
-            const programField = document.getElementById('programField');
-            const sectionField = document.getElementById('sectionField');
+<!---------------------------------------------------------------------------------------->
 
-            if (educLevel === 'College') {
-                programField.style.display = 'block';
-                sectionField.style.display = 'none';
-            } else {
-                programField.style.display = 'none';
-                sectionField.style.display = 'block';
-            }
-        }
+<!-- Archive Modal -->
+<div id="archiveStudentModal" class="modal" style="display:none;">
+    <div class="modal-content add-modal-content pro-add-modal" style="max-width:400px;">
+        <span class="close add-modal-close pro-add-close" id="closeArchiveModalBtn">&times;</span>
+        <h2 class="add-modal-title pro-add-title">Archive Student</h2>
+        <p style="font-size:1.08rem; margin-bottom:24px;">Are you sure you want to archive this student?</p>
+        <div class="pro-add-buttons" style="justify-content:center;">
+            <button type="button" class="pro-add-save" id="confirmArchiveBtn">Confirm</button>
+            <button type="button" class="pro-add-save" style="background:#e11d48;" onclick="closeArchiveModal()">Cancel</button>
+        </div>
+    </div>
+</div>
 
-        // Image preview for Add modal
-        (function() {
-            const imageInput = document.getElementById('profile_image');
-            const imgPreview = document.getElementById('studentImage');
-            if (imageInput) {
-                imageInput.addEventListener('change', function(event) {
-                    const [file] = event.target.files;
-                    if (file) {
-                        imgPreview.src = URL.createObjectURL(file);
-                    } else {
-                        imgPreview.src = imgPreview.getAttribute('data-default');
-                    }
-                    imgPreview.style.display = 'block';
-                });
-            }
-            // Always show the default image when modal opens
-            imgPreview.src = imgPreview.getAttribute('data-default');
-            imgPreview.style.display = 'block';
-        })();
+<!-- Archive Disable Modal -->
+<div id="archiveDisableModal" class="modal" style="display:none;">
+    <div class="modal-content add-modal-content pro-add-modal" style="max-width:420px;">
+        <span class="close add-modal-close pro-add-close" id="closeArchiveDisableModalBtn">&times;</span>
+        <h2 class="add-modal-title pro-add-title">Archive Student</h2>
+        <p style="font-size:1.08rem; margin-bottom:24px;">Do you also want to disable this student’s login account?</p>
+        <div class="pro-add-buttons" style="justify-content:center;">
+            <button type="button" class="pro-add-save" id="archiveOnlyBtn" onclick="archiveStudentOnly()">Archive Only</button>
+            <button type="button" class="pro-add-save" style="background:#e11d48;" id="archiveAndDisableBtn" onclick="archiveStudentAndDisable()">Archive and Disable</button>
+            <button type="button" class="pro-add-save" style="background:#64748b;" onclick="closeArchiveDisableModal()">Cancel</button>
+        </div>
+    </div>
+</div>
 
-        function openModal() {
-            document.getElementById("studentModal").style.display = "block";
-            fetchStudentId();
-        }
 
-        function closeModal() {
-            document.getElementById("studentModal").style.display = "none";
-        }
+<!---------------------------------------------------------------------------------------->
 
-        function fetchStudentId() {
-            const sIdDisplay = document.getElementById('s_id_display');
-            const sIdHidden = document.getElementById('s_id');
-            fetch('/Head/students/next-id')
-                .then(response => response.json())
-                .then(data => {
-                    sIdDisplay.textContent = data.next_id;
-                    sIdHidden.value = data.next_id;
-                })
-                .catch(error => {
-                    sIdDisplay.textContent = 'Error generating ID';
-                });
-        }
-    </script>
-</body>
+<!-- Import Modal -->
+<div id="importModal" class="modal" style="display:none;">
+    <div class="modal-content add-modal-content pro-add-modal">
+        <span class="close add-modal-close pro-add-close" id="closeImportModalBtn">&times;</span>
+        <h2 class="add-modal-title pro-add-title">Import Students</h2>
+            <form action="{{ route('Head.students.import') }}" method="POST" enctype="multipart/form-data">
+                @csrf
+                <div class="form-row">
+                    <div class="add-field-col" style="flex:2;">
+                        <label for="students_file" class="add-label">Select CSV/Excel File:</label>
+                        <input type="file" name="students_file" id="students_file" accept=".csv,.xlsx,.xls" required style="margin-top:8px;">
+                    </div>
+                </div>
+                <div class="pro-add-buttons">
+                    <button type="submit" class="pro-add-save">Import</button>
+                </div>
+            </form>
+    </div>
+</div>
 
-</html>
+
+<!---------------------------------------------------------------------------------------->
+
+<!-- Export Modal -->
+<div id="exportModal" class="modal" style="display:none;">
+    <div class="modal-content add-modal-content pro-add-modal" style="max-width:400px;">
+        <span class="close add-modal-close pro-add-close" id="closeExportModalBtn">&times;</span>
+        <h2 class="add-modal-title pro-add-title">Export Students</h2>
+        <form id="exportForm" method="GET" action="{{ route('Head.students.export') }}" target="_blank">
+            <div class="form-row" style="margin-bottom: 18px;">
+                <label for="export_format" class="add-label">Select Format:</label>
+                <select id="export_format" name="format" class="add-input" required>
+                    <option value="pdf">PDF</option>
+                    <option value="csv">CSV</option>
+                    <option value="excel">Excel</option>
+                </select>
+            </div>
+            <div class="pro-add-buttons" style="justify-content:center;">
+                <button type="submit" class="pro-add-save">Export</button>
+                <button type="button" class="pro-add-save" style="background:#e11d48;" onclick="closeExportModal()">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>

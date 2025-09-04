@@ -24,13 +24,13 @@
                         </td>
                         <td class="appointment-details-col">
                             <div class="appointment-details-flex">
-                                <p class="appointment-type">{{ $appointment->appointment_type }}
+                                <p class="appointment-type">{{ $appointment->type->type_name ?? 'N/A' }}
                                 </p>
                                 <span class="appointment-requester">
                                     {{ $appointment->requester_name }}
                                 </span>
                             </div>
-                        </td>
+                        </td>   
                         <td class="appointment-actions-col">
                             <div class="appointment-date">
                                 {{ $appointment->appointment_datetime->format('M d, Y') }}

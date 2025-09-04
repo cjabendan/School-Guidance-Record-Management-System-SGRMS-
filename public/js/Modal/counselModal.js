@@ -1,17 +1,51 @@
-// open Add Modal
-function openFormModal() {
-    document.getElementById('formModal').style.display = 'block';
-}
+document.addEventListener('DOMContentLoaded', function() {
 
-// close Add Modal
-function closeFormModal() {
-    document.getElementById('formModal').style.display = 'none';
-}
+window.openAddCounselorModal = window.openFormModal;
+    const imageInput = document.getElementById('counselor_profile_image');
+    const imgPreview = document.getElementById('counselorImage');
+    if (imageInput && imgPreview) {
+        imageInput.addEventListener('change', function(event) {
+            const [file] = event.target.files;
+            if (file) {
+                imgPreview.src = URL.createObjectURL(file);
+            } else {
+                imgPreview.src = imgPreview.getAttribute('data-default');
+            }
+            imgPreview.style.display = 'block';
+        });
+        imgPreview.src = imgPreview.getAttribute('data-default');
+        imgPreview.style.display = 'block';
+    }
 
+    var modal = document.getElementById('formModal');
+    var closeBtn = modal ? modal.querySelector('.close') : null;
+    if (closeBtn && modal) {
+        closeBtn.onclick = function(e) {
+            e.stopPropagation();
+            window.closeFormModal();
+        };
+        modal.onclick = function(event) {
+            if (event.target === modal) {
+                window.closeFormModal();
+            }
+        };
+        var modalContent = modal.querySelector('.modal-content');
+        if (modalContent) {
+            modalContent.onclick = function(e) {
+                e.stopPropagation();
+            };
+        }
+    }
+});
 
 window.openFormModal = function () {
-    const viewModal = document.getElementById('viewCounselorModal');
-    const modal = document.getElementById('formModal');
+    fetch('/Head/counselors/next-id')
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('c_id_display').textContent = data.next_c_id;
+            document.getElementById('c_id').value = data.next_c_id;
+        });
+    var modal = document.getElementById('formModal');
     if (modal) {
         modal.style.display = 'block';
     } else {
@@ -20,8 +54,7 @@ window.openFormModal = function () {
 };
 
 window.closeFormModal = function () {
-    const viewModal = document.getElementById('viewCounselorModal');
-    const modal = document.getElementById('formModal');
+    var modal = document.getElementById('formModal');
     if (modal) {
         modal.style.display = 'none';
     } else {
@@ -29,49 +62,60 @@ window.closeFormModal = function () {
     }
 };
 
-function openViewCounselModal(counselorId) {
-    fetch(`/Head/counselors/${counselorId}`)
-        .then(response => {
-            if (!response.ok) throw new Error('Failed to load counselor info.');
-            return response.json();
-        })
+
+//____________________________________________________________________________________
+
+
+// View Counselor Modal 
+window.openViewCounselModal = function(c_id) {
+    fetch(`/Head/counselors/${c_id}/json`)
+        .then(response => response.json())
         .then(data => {
-
-            window.editCounselorData = data;
-
-            document.getElementById('view_fullname').textContent = `${data.lname}, ${data.fname} ${data.mname}`;
-            document.getElementById('view_email').textContent = data.email;
-            document.getElementById('view_contact').textContent = data.contact_num;
-            document.getElementById('view_department').textContent = data.c_level;
-            document.getElementById('view_c_image').src = data.profile_image
-                ? '/uploads/users/' + data.profile_image
-                : '/images/user.img/people.png';
-            document.getElementById('viewCounselorModal').style.display = 'block';
-        })
-        .catch(error => {
-            alert(error.message);
+            if (data.error) {
+                alert('Counselor not found!');
+                return;
+            }
+            document.getElementById('view_c_id_display').textContent = data.c_id || '';
+            document.getElementById('view_counselor_fname').textContent = data.fname || '';
+            document.getElementById('view_counselor_mname').textContent = data.mname || '';
+            document.getElementById('view_counselor_lname').textContent = data.lname || '';
+            document.getElementById('view_counselor_email').textContent = data.email || '';
+            document.getElementById('view_counselor_contact_num').textContent = data.contact_num || '';
+            var img = document.getElementById('viewCounselorImage');
+            if (img && data.profile_image_url) {
+                img.src = data.profile_image_url;
+            }
+            var modal = document.getElementById('viewCounselorModal');
+            if (modal) {
+                modal.style.display = 'block';
+            }
         });
-}
+};
 
-function closeViewCounselorModal() {
-    document.getElementById('viewCounselorModal').style.display = 'none';
-}
-
-function openEditFromViewModal() {
-    const data = window.editCounselorData;
-    if (!data) {
-        alert('No counselor data loaded.');
-        return;
+window.closeViewCounselorModal = function() {
+    var modal = document.getElementById('viewCounselorModal');
+    if (modal) {
+        modal.style.display = 'none';
     }
-
-    document.getElementById('edit_id').value = data.c_id;
-    document.getElementById('edit_lname').value = data.lname;
-    document.getElementById('edit_fname').value = data.fname;
-    document.getElementById('edit_mname').value = data.mname;
-    document.getElementById('edit_email').value = data.email;
-    document.getElementById('edit_contact').value = data.contact_num;
-    document.getElementById('edit_c_level').value = data.c_level;
-
-    closeViewCounselorModal();
-    document.getElementById('editModal').style.display = 'block';
-}
+};
+document.addEventListener('DOMContentLoaded', function() {
+    var modal = document.getElementById('viewCounselorModal');
+    var closeBtn = modal ? modal.querySelector('.close') : null;
+    if (closeBtn && modal) {
+        closeBtn.onclick = function(e) {
+            e.stopPropagation();
+            window.closeViewCounselorModal();
+        };
+        modal.onclick = function(event) {
+            if (event.target === modal) {
+                window.closeViewCounselorModal();
+            }
+        };
+        var modalContent = modal.querySelector('.modal-content');
+        if (modalContent) {
+            modalContent.onclick = function(e) {
+                e.stopPropagation();
+            };
+        }
+    }
+});

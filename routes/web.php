@@ -14,6 +14,7 @@ use App\Http\Controllers\Head\HeadCounselorController;
 use App\Http\Controllers\Head\HeadStudentController;
 use App\Http\Controllers\Head\HeadParentController; 
 use App\Http\Controllers\Head\HeadCaseController;
+use App\Http\Controllers\Head\HeadCounselingController;
 use App\Http\Controllers\Head\HeadAppointmentController;
 use App\Http\Controllers\Head\HeadAnnouncementController;
 use App\Http\Controllers\Head\HeadSettingsController;
@@ -21,8 +22,10 @@ use App\Http\Controllers\Head\HeadSettingsController;
 use App\Http\Controllers\Counselor\CounselorDashboardController;
 
 use App\Http\Controllers\Parents\ParentDashboardController;
+use App\Http\Controllers\Parents\ParentChildController;
 use Illuminate\Routing\Events\RouteMatched;
 
+use App\Http\Controllers\Head\StudentController;
 
 // ========================= Landing Page - Staffs ============================= //
 Route::get('/', [StaffController::class, 'index']);
@@ -62,6 +65,7 @@ Route::post('/logout', [LogoutController::class, 'logout'])->name('logout');
 Route::middleware('auth')->group(function () {
     Route::get('/Head/dashboard', [HeadDashboardController::class, 'dashboard'])->name('Head.dashboard');
     Route::get('/Counselor/dashboard', [CounselorDashboardController::class, 'dashboard'])->name('Counselor.dashboard');
+    Route::get('/Parent/dashboard', [ParentDashboardController::class, 'dashboard'])->name('Parent.dashboard');
 });
 
 
@@ -72,16 +76,21 @@ Route::prefix('Head')->name('Head.')->group(function () {
     // Counselors
     Route::get('/counselors', [HeadCounselorController::class, 'index'])->name('counselors.index');
     Route::post('/counselors', [HeadCounselorController::class, 'store'])->name('counselors.store');
+    Route::get('/counselors/{c_id}/json', [HeadCounselorController::class, 'showAjax']);
+    Route::get('/counselors/next-id', [HeadCounselorController::class, 'getNextCounselorId'])->name('counselors.next-id');
     Route::get('/counselors/{id}', [HeadCounselorController::class, 'show'])->name('counselors.show');
     Route::put('/counselors/{id}', [HeadCounselorController::class, 'update'])->name('counselors.update');
 
     // Students
     Route::get('/students', [HeadStudentController::class, 'index'])->name('students.index');
+    Route::get('/students/export', [HeadStudentController::class, 'export'])->name('students.export');
     Route::get('/students/next-id', [HeadStudentController::class, 'getNextStudentId'])->name('students.next-id');
     Route::post('/students', [HeadStudentController::class, 'addStudent'])->name('students.store');
     Route::post('/students/import', [HeadStudentController::class, 'import'])->name('students.import');
     Route::get('/students/{id_num}/json', [HeadStudentController::class, 'showAjax'])->name('students.show-json');
     Route::put('/students/{id_num}', [HeadStudentController::class, 'editStudent'])->name('students.update');
+    Route::post('/students/archive', [HeadStudentController::class, 'archiveStudent'])->name('students.archive');
+    Route::post('/students/archive-disable', [HeadStudentController::class, 'archiveAndDisableStudent'])->name('students.archive-disable');
 
     // Parents
     Route::get('/parents', [HeadParentController::class, 'index'])->name('parents.index');
@@ -91,6 +100,10 @@ Route::prefix('Head')->name('Head.')->group(function () {
     Route::post('/addcase', [HeadCaseController::class, 'store'])->name('cases.store');
     Route::put('/cases/{case}', [HeadCaseController::class, 'update'])->name('cases.update');
     Route::put('/cases/{case}/archive', [HeadCaseController::class, 'archive'])->name('cases.archive');
+    Route::get('/students/search', [HeadCaseController::class, 'searchStudent'])->name('students.search');
+
+    // Counseling
+    Route::get('/counseling', [HeadCounselingController::class, 'index'])->name('counseling.index');
 
     Route::get('/appointments', [HeadAppointmentController::class, 'index'])->name('appointments.index');
 
@@ -98,7 +111,7 @@ Route::prefix('Head')->name('Head.')->group(function () {
     Route::get('/announcements', [HeadAnnouncementController::class, 'index'])->name('announcements.index');
     Route::post('/announcements', [HeadAnnouncementController::class, 'store'])->name('announcements.store');
     Route::get('/api/announcements', [HeadAnnouncementController::class, 'getEvents'])->name('announcements.api');
-
+    Route::put('/announcements/{announcement}', [HeadAnnouncementController::class, 'update'])->name('announcements.update');
 
     Route::get('/settings', [HeadSettingsController::class, 'index'])->name('settings.index');
 });
@@ -112,5 +125,6 @@ Route::prefix('Counselor')->name('Counselor.')->group(function () {
 
 // ============================== Parent Routes ==================================== //
 Route::prefix('Parent')->name('Parent.')->group(function () {
-    Route::get('/dashboard', [ParentDashboardController::class, 'dashboard'])->name('dashboard');
+
+   Route::get('/child', [ParentChildController::class, 'index'])->name('child.index');
 });

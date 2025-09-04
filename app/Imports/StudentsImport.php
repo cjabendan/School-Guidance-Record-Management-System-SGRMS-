@@ -25,7 +25,7 @@ class StudentsImport implements ToModel, WithHeadingRow
                 'sex' => $row['sex'] ?? '',
                 'bod' => $row['bod'] ?? null,
                 'address' => $row['address'] ?? '',
-                'profile_image' => 'default.png',
+                'profile_image' => $row['profile_image'] ?? 'default.png',
                 'password' => Hash::make(ucfirst(strtolower($row['last_name'] ?? 'password'))),
                 'role' => 'student',
                 'status' => $row['status'] ?? 'active',

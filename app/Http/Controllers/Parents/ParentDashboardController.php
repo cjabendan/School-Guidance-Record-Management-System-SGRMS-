@@ -34,7 +34,6 @@ class ParentDashboardController extends Controller
                 'users.last_name',
                 'users.contact_num',
                 'users.email',
-                'parents.guardian_relationship',
                 'users.profile_image',
                 'users.username'
             )

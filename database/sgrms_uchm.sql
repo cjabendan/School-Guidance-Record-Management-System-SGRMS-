@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Sep 02, 2025 at 03:55 AM
+-- Generation Time: Sep 04, 2025 at 07:16 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -80,9 +80,8 @@ CREATE TABLE `announcements` (
 --
 
 INSERT INTO `announcements` (`id`, `user_id`, `title`, `description`, `link`, `category`, `image`, `date_posted`, `start_datetime`, `end_datetime`, `status`, `created_at`, `updated_at`) VALUES
-(1, 1, 'Sit veritatis porro', 'Voluptas soluta volu', 'https://www.quqikenuryk.ws', 'Announcement', 'default.png', '2025-09-01', NULL, NULL, 'active', '2025-08-31 21:18:23', '2025-09-01 10:40:07'),
-(2, 1, 'Nisi aut laboriosam', 'Ut et consectetur v', 'https://www.jyqewyhuf.biz', 'Event', 'default.png', '2025-09-01', '2025-09-04 07:29:00', '2025-09-06 19:29:00', 'active', '2025-08-31 23:29:20', '2025-09-01 10:40:09'),
-(3, 1, 'Omnis voluptatibus c', 'Nihil et voluptates', 'https://www.vutuzuruzetuv.cc', 'News', 'default.png', '2025-09-01', NULL, NULL, 'active', '2025-09-01 02:38:23', '2025-09-01 10:40:11');
+(1, 1, '🎉Congratulations to Batch 2024–2025!', 'We proudly celebrate the achievements of our graduating students. Your hard work, dedication, and perseverance have brought you to this milestone.\r\n\r\nWishing you success and happiness in all your future endeavors!\r\n\r\n#Batch2024_2025 #GraduationCelebration', NULL, 'News', '1756801532_a3.jpg', '2025-09-02', NULL, NULL, 'active', '2025-09-02 00:25:32', '2025-09-03 17:39:55'),
+(2, 1, 'Join a School Club Today!', 'School Club Registration is now open! Sign up to discover new interests, develop your talents, and enjoy activities with friends.', NULL, 'Event', '1756808028_a1.jpg', '2025-09-02', '2025-09-04 07:00:00', '2025-09-06 07:00:00', 'active', '2025-09-02 02:13:48', '2025-09-03 18:47:19');
 
 -- --------------------------------------------------------
 
@@ -96,21 +95,46 @@ CREATE TABLE `appointments` (
   `requester_type` enum('Parent','Student') NOT NULL,
   `student_id` bigint(20) UNSIGNED NOT NULL,
   `counselor_id` bigint(20) UNSIGNED DEFAULT NULL,
-  `appointment_type` enum('Personal Counseling','Career Guidance','Academic Counseling','Conflict Resolution','Family-Related Counseling','Behavioral Counseling','Peer Relationship Counseling','Other','Follow-Up Counseling') NOT NULL,
+  `appointment_type_id` int(11) UNSIGNED DEFAULT NULL,
   `reason` text DEFAULT NULL,
   `appointment_datetime` datetime NOT NULL,
   `location` varchar(255) DEFAULT 'School Guidance Office',
-  `status` enum('Pending','Approved','Cancelled','Completed') DEFAULT 'Pending'
+  `status` enum('Pending','Approved','Cancelled','Completed') DEFAULT 'Pending',
+  `rescheduled_count` int(10) UNSIGNED NOT NULL DEFAULT 0,
+  `last_rescheduled_at` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `appointments`
 --
 
-INSERT INTO `appointments` (`appointment_id`, `requester_id`, `requester_type`, `student_id`, `counselor_id`, `appointment_type`, `reason`, `appointment_datetime`, `location`, `status`) VALUES
-(1, 14, 'Parent', 3, 1, 'Academic Counseling', NULL, '2025-08-28 10:00:00', 'School Guidance Office', 'Approved'),
-(2, 15, 'Parent', 3, 1, 'Personal Counseling', NULL, '2025-08-30 14:00:00', 'School Guidance Office', 'Approved'),
-(3, 13, 'Parent', 3, 1, 'Follow-Up Counseling', NULL, '2025-08-28 09:00:00', 'School Guidance Office', 'Approved');
+INSERT INTO `appointments` (`appointment_id`, `requester_id`, `requester_type`, `student_id`, `counselor_id`, `appointment_type_id`, `reason`, `appointment_datetime`, `location`, `status`, `rescheduled_count`, `last_rescheduled_at`) VALUES
+(1, 91, 'Parent', 92, 1, 2, NULL, '2025-09-03 18:00:00', 'School Guidance Office', 'Approved', 0, NULL),
+(2, 91, 'Parent', 92, 1, 1, NULL, '2025-08-30 14:00:00', 'School Guidance Office', 'Approved', 0, NULL),
+(3, 91, 'Parent', 92, 1, 1, NULL, '2025-08-28 09:00:00', 'School Guidance Office', 'Approved', 0, NULL);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `appointment_types`
+--
+
+CREATE TABLE `appointment_types` (
+  `id` int(11) UNSIGNED NOT NULL,
+  `type_name` varchar(100) NOT NULL,
+  `description` text DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `appointment_types`
+--
+
+INSERT INTO `appointment_types` (`id`, `type_name`, `description`, `created_at`, `updated_at`) VALUES
+(1, 'Personal Counseling', 'Individual guidance session for personal matters', '2025-09-02 09:03:18', '2025-09-02 09:03:18'),
+(2, 'Career Guidance', 'Guidance session focused on career planning and advice', '2025-09-02 09:03:18', '2025-09-02 09:03:18'),
+(3, 'Academic Counseling', 'Guidance related to academic performance and planning', '2025-09-02 09:03:18', '2025-09-02 09:03:18');
 
 -- --------------------------------------------------------
 
@@ -219,7 +243,10 @@ CREATE TABLE `counselors` (
 
 INSERT INTO `counselors` (`c_id`, `user_id`) VALUES
 ('MA25-C001', 2),
-('MA25-C002', 3);
+('MA25-C002', 3),
+('MA25-C003', 100),
+('MA25-C004', 101),
+('MA25-C005', 102);
 
 -- --------------------------------------------------------
 
@@ -386,7 +413,7 @@ CREATE TABLE `parent_link_requests` (
 --
 
 INSERT INTO `parent_link_requests` (`request_id`, `parent_id`, `status`, `requested_at`) VALUES
-(1, 1, 'Pending', '2025-08-27 05:07:47');
+(1, 1, 'Pending', '2025-09-03 09:41:48');
 
 -- --------------------------------------------------------
 
@@ -399,6 +426,13 @@ CREATE TABLE `parent_link_request_students` (
   `request_id` bigint(20) NOT NULL,
   `student_id` varchar(50) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `parent_link_request_students`
+--
+
+INSERT INTO `parent_link_request_students` (`pls_id`, `request_id`, `student_id`) VALUES
+(1, 1, 'MA25-0001');
 
 -- --------------------------------------------------------
 
@@ -454,15 +488,27 @@ CREATE TABLE `students` (
   `program` varchar(100) DEFAULT NULL,
   `status` varchar(20) DEFAULT 'active',
   `religion` varchar(100) DEFAULT NULL,
-  `civil_status` varchar(50) DEFAULT NULL
+  `civil_status` varchar(50) DEFAULT NULL,
+  `father_name` varchar(255) DEFAULT NULL,
+  `mother_name` varchar(255) DEFAULT NULL,
+  `guardian_name` varchar(255) DEFAULT NULL,
+  `relationship` varchar(255) DEFAULT NULL,
+  `guardian_contact` varchar(255) DEFAULT NULL,
+  `guardian_email` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Dumping data for table `students`
 --
 
-INSERT INTO `students` (`s_id`, `user_id`, `y_id`, `section`, `program`, `status`, `religion`, `civil_status`) VALUES
-('MA25-0001', 92, 9, 'Sapiente eum aperiam', NULL, 'active', 'Id autem eos ea nost', 'Autem adipisci nobis');
+INSERT INTO `students` (`s_id`, `user_id`, `y_id`, `section`, `program`, `status`, `religion`, `civil_status`, `father_name`, `mother_name`, `guardian_name`, `relationship`, `guardian_contact`, `guardian_email`) VALUES
+('MA25-0001', 92, 9, 'Sapiente eum aperiam', NULL, 'active', 'Id autem eos ea nost', 'Autem adipisci nobis', 'dasdasdasd', NULL, NULL, NULL, NULL, NULL),
+('MA25-0002', 93, 11, 'Ad dolores et eum se', NULL, 'active', 'Quisquam amet natus', 'Sit nesciunt offici', 'Jenna Mcbride', 'Blythe Simon', 'Kiara Willis', 'Consequat Quibusdam optio et odit quidem quaerat incidunt', 'Sit inventore id deleniti voluptatem Rerum anim omnis reprehenderit dolores odit qui saepe repellendus', 'hikagiku@mailinator.com'),
+('MA25-0003', 94, 3, 'Eligendi non iste es', NULL, 'active', 'Eum id saepe perfer', 'Nostrud sit adipisi', 'Jessamine Sharp', 'Ifeoma Donaldson', 'Zeph Travis', 'Vero et vel corporis consequat Quis velit amet illo dicta exercitationem labore culpa qui', 'Quis excepteur qui reiciendis sint inventore', 'qylo@mailinator.com'),
+('MA25-0010', 95, 7, '5A', NULL, 'inactive', 'Christian', 'Single', NULL, NULL, NULL, NULL, NULL, NULL),
+('MA25-0011', 97, 2, 'Nobis in nostrum sun', NULL, 'active', 'Ratione quod in aliq', 'Id irure et rerum de', 'Hillary Oneil', 'Rama Sharpe', 'Colleen Anthony', 'Exercitationem tempor modi temporibus ipsum corrupti', 'Illo fugiat quos voluptatibus sed dolore labore sint labore nisi mollit magnam at ex qui aut', 'molucoqe@mailinator.com'),
+('MA25-0012', 98, 11, 'Aut sed a ut laborum', NULL, 'active', 'Fugiat veniam offi', 'Fugit ipsum magnam', 'Florence Kane', 'Amal Spence', 'Kareem Pennington', 'Inventore earum in ut aut id laboris culpa voluptates hic ipsum nulla', 'Sit in reprehenderit nostrud vero aliquam deserunt laborum Aut', 'vafoputut@mailinator.com'),
+('MA25-0013', 99, 6, 'Quasi quibusdam sit', NULL, 'active', 'Eu fuga Et pariatur', 'Consectetur dolor sa', 'Ina Workman', 'Morgan Preston', 'Odysseus Sanchez', 'In error id omnis sunt officiis nihil soluta tenetur sed', 'Labore incididunt vitae saepe nesciunt a voluptas repudiandae dignissimos debitis harum soluta dolorum', 'murowodef@mailinator.com');
 
 -- --------------------------------------------------------
 
@@ -504,7 +550,16 @@ INSERT INTO `users` (`id`, `first_name`, `middle_name`, `last_name`, `suffix`, `
 (2, 'Johanna', 'Decena', 'Plameran', '', 'jb@gmail.com', '09123456789', 'Female', NULL, NULL, 'johanna.png', '$2y$12$4qszi98KSvD9Szf8IU5fnu2W132eqPHcbjE6Y28cY0Ttc4YNaoe1u', NULL, NULL, NULL, 'counselor', 'active', NULL, NULL, NULL, '2025-06-11 10:42:22', '2025-06-11 10:42:22'),
 (3, 'Divine', 'Villondo', 'Romano', '', 'dasai@gmail.com', '123454678', 'Female', '2024-11-14', 'Adadspadk0', 'divine.png', '$2y$12$4qszi98KSvD9Szf8IU5fnu2W132eqPHcbjE6Y28cY0Ttc4YNaoe1u', NULL, NULL, NULL, 'counselor', 'active', NULL, NULL, NULL, '2025-08-09 08:09:50', '2025-08-09 08:09:50'),
 (91, 'Christian James', NULL, 'Abendan', NULL, 'chrisbend2004@gmail.com', NULL, 'Male', NULL, NULL, 'default.jpg', '$2y$12$uoak2LLvUcRdh8v6cTBuienhINN5lUNq5nCcR8YXFlPgeWle1fRZe', NULL, NULL, '2025-08-30 04:06:53', 'parent', 'active', NULL, NULL, NULL, '2025-08-30 04:06:33', '2025-08-30 04:06:53'),
-(92, 'Rama', 'Ryder Underwood', 'Hendrix', NULL, 'pibofykag@mailinator.com', '657', NULL, '2002-03-10', 'Rerum nihil est tem', 'default.jpg', '$2y$12$Ujm44aLgrd3.0bUUlOf/oO7KbOwbHqEQxND3qNg91IrnTRySLfKJS', NULL, NULL, NULL, 'student', 'active', NULL, NULL, NULL, '2025-08-30 04:59:02', '2025-08-30 04:59:02');
+(92, 'Rama', 'Ryder Underwood', 'Hendrix', NULL, 'pibofykag@mailinator.com', '657', 'Male', '2002-03-10', 'Rerum nihil est tem', 'default.jpg', '$2y$12$Ujm44aLgrd3.0bUUlOf/oO7KbOwbHqEQxND3qNg91IrnTRySLfKJS', NULL, NULL, NULL, 'student', 'active', NULL, NULL, NULL, '2025-08-30 04:59:02', '2025-09-03 18:07:50'),
+(93, 'Hillary', 'Alfreda Dawson', 'Maldonado', NULL, 'gegepefan@mailinator.com', '154', 'Male', '1986-07-06', 'Sit ullamco ratione', 'default.jpg', '$2y$12$9jHbYZJResPS4T8lgm5H4OAXVbBK8Z3hboxuvzW/KweDKhifaNzyq', NULL, NULL, NULL, 'student', 'active', NULL, NULL, NULL, '2025-09-03 18:08:12', '2025-09-03 18:10:01'),
+(94, 'Alika', 'Allegra Branch', 'Shepard', NULL, 'dusyz@mailinator.com', '111', 'Female', '2017-11-23', 'Ducimus eu quia ut', 'default.jpg', '$2y$12$mhyzVJtE4xlDGvOpuqMqV.diRJVqoEpWAVlHLQb9LYcC3GjyrwdKy', NULL, NULL, NULL, 'student', 'active', NULL, NULL, NULL, '2025-09-03 18:10:16', '2025-09-03 18:10:16'),
+(95, 'Juan', 'Cruz', 'Reyes', '', 'juan.reyes@example.com', '09190000000', 'Male', '2010-05-20', '123 Mango St', 'default.png', '$2y$12$Z5rrYTbhOfuLE8WalDzasueG1gXNh7EHyBRfKgn45g0u30wUdOK62', NULL, NULL, NULL, 'student', 'active', NULL, NULL, NULL, '2025-09-03 19:38:46', '2025-09-03 19:38:46'),
+(97, 'Jillian', 'Dorian Marks', 'Stafford', NULL, 'tysoquniq@mailinator.com', '404', 'Female', '1999-03-18', 'Corporis quos enim h', 'default.jpg', '$2y$12$5N23OwBaPSxAZu.Sbq36WehhnyVmHGlmLrPXaXE9RnONzarHY13WS', NULL, NULL, NULL, 'student', 'active', NULL, NULL, NULL, '2025-09-03 19:46:28', '2025-09-03 19:46:28'),
+(98, 'Chelsea', 'Tucker Huber', 'Sullivan', NULL, 'xegegebewe@mailinator.com', '498', 'Male', '2014-04-24', 'Quam eveniet volupt', 'user_68b90da3a7e98.jpg', '$2y$12$Xf0TP75YsLe0TRSf8iBkbe7AkkSz.7QZ5AHOcsBiFPe3xYMgER.Fm', NULL, NULL, NULL, 'student', 'active', NULL, NULL, NULL, '2025-09-03 19:55:15', '2025-09-03 19:55:15'),
+(99, 'Madeson', 'Justina Macdonald', 'Henry', NULL, 'byfidufyx@mailinator.com', '275', 'Female', '2005-12-20', 'Non eum qui non rem', 'user_68b90dbcadb72.jpg', '$2y$12$OkGRGxIWxmRWlhp7Wrm.7OKgNzzlBQTFgupowN7Khec/cCIRIsO4O', NULL, NULL, NULL, 'student', 'active', NULL, NULL, NULL, '2025-09-03 19:55:40', '2025-09-03 19:55:40'),
+(100, 'Catherine', 'Hop Wiley', 'Owens', NULL, 'wowod@mailinator.com', '923', NULL, NULL, NULL, '1756962664_68b91f688dc7c.jpg', '$2y$12$29bg/bOmPgzn3d3lJWCkCOTfG6rpueUZje/PuWFiHcs5XPWkmHpQe', NULL, NULL, NULL, 'counselor', 'pending', NULL, NULL, NULL, '2025-09-03 21:11:04', '2025-09-03 21:11:04'),
+(101, 'Ifeoma', 'Lacota Woodard', 'Nielsen', NULL, 'lovekolyda@mailinator.com', '27', NULL, NULL, NULL, '1756962826_68b9200ae5039.jpg', '$2y$12$/7c9aLX.6uyXHb4/zjfb1eBn8a74LNYBtm5X0XHnd8gX2Ed533A56', NULL, NULL, NULL, 'counselor', 'pending', NULL, NULL, NULL, '2025-09-03 21:13:47', '2025-09-03 21:13:47'),
+(102, 'Nerea', 'Cairo Park', 'Eaton', NULL, 'gigomatut@mailinator.com', '736', NULL, NULL, NULL, 'default.jpg', '$2y$12$n76uH8Q5I5mE30P1MJPsweOajH6Gri8JqC9C79OsMWcglH8cVTlsm', NULL, NULL, NULL, 'counselor', 'pending', NULL, NULL, NULL, '2025-09-03 21:14:51', '2025-09-03 21:14:51');
 
 -- --------------------------------------------------------
 
@@ -569,7 +624,14 @@ ALTER TABLE `appointments`
   ADD PRIMARY KEY (`appointment_id`),
   ADD KEY `requester_id` (`requester_id`),
   ADD KEY `student_id` (`student_id`),
-  ADD KEY `counselor_id` (`counselor_id`);
+  ADD KEY `counselor_id` (`counselor_id`),
+  ADD KEY `fk_appointment_type` (`appointment_type_id`);
+
+--
+-- Indexes for table `appointment_types`
+--
+ALTER TABLE `appointment_types`
+  ADD PRIMARY KEY (`id`);
 
 --
 -- Indexes for table `cache`
@@ -745,6 +807,12 @@ ALTER TABLE `appointments`
   MODIFY `appointment_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
+-- AUTO_INCREMENT for table `appointment_types`
+--
+ALTER TABLE `appointment_types`
+  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+
+--
 -- AUTO_INCREMENT for table `cases`
 --
 ALTER TABLE `cases`
@@ -790,7 +858,7 @@ ALTER TABLE `parent_link_requests`
 -- AUTO_INCREMENT for table `parent_link_request_students`
 --
 ALTER TABLE `parent_link_request_students`
-  MODIFY `pls_id` bigint(20) NOT NULL AUTO_INCREMENT;
+  MODIFY `pls_id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `parent_student`
@@ -802,7 +870,7 @@ ALTER TABLE `parent_student`
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=93;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=103;
 
 --
 -- AUTO_INCREMENT for table `year_levels`
@@ -826,7 +894,8 @@ ALTER TABLE `admins`
 ALTER TABLE `appointments`
   ADD CONSTRAINT `appointments_ibfk_1` FOREIGN KEY (`requester_id`) REFERENCES `users` (`id`),
   ADD CONSTRAINT `appointments_ibfk_2` FOREIGN KEY (`student_id`) REFERENCES `users` (`id`),
-  ADD CONSTRAINT `appointments_ibfk_4` FOREIGN KEY (`counselor_id`) REFERENCES `users` (`id`);
+  ADD CONSTRAINT `appointments_ibfk_4` FOREIGN KEY (`counselor_id`) REFERENCES `users` (`id`),
+  ADD CONSTRAINT `fk_appointment_type` FOREIGN KEY (`appointment_type_id`) REFERENCES `appointment_types` (`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 --
 -- Constraints for table `cases`

@@ -10,3 +10,10 @@ class CaseStudent extends Pivot
     public $incrementing = false;
     public $timestamps = false;
 }
+
+
+
+
+
+
+

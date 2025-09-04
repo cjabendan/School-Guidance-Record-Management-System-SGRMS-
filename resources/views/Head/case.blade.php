@@ -2,22 +2,17 @@
 @section('title', 'SGRMS - School Guidance Records Management System')
 @section('content')
 
-
     <!-- MAIN CONTENT -->
     <section id="content">
         @include('partials.navbar')
         <div class="wrapper">
             <div class="head-title">
-                <div class="right">
-                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addCaseModal">
-                        Add Case
-                    </button>
-                </div>
+                <!-- Removed the upper right Add Case button -->
 
-                <!-- Add filter dropdown here -->
-                <form method="GET" action="{{ route('Head.cases.index') }}" class="mb-3">
-                    <div class="row g-2 align-items-end">
-                        <div class="col">
+                <!-- Filter dropdowns and Add Case button in one row -->
+                <form method="GET" action="{{ route('Head.cases.index') }}">
+                    <div class="filter-row">
+                        <div class="filter-group">
                             <label for="filter_type" class="form-label">Case Type</label>
                             <select name="filter_type" id="filter_type" class="form-select" onchange="this.form.submit()">
                                 <option value="">All Types</option>
@@ -28,7 +23,7 @@
                                 @endforeach
                             </select>
                         </div>
-                        <div class="col">
+                        <div class="filter-group">
                             <label for="filter_status" class="form-label">Status</label>
                             <select name="filter_status" id="filter_status" class="form-select" onchange="this.form.submit()">
                                 <option value="">All Statuses</option>
@@ -39,7 +34,7 @@
                                 @endforeach
                             </select>
                         </div>
-                        <div class="col">
+                        <div class="filter-group">
                             <label for="filter_severity" class="form-label">Severity</label>
                             <select name="filter_severity" id="filter_severity" class="form-select" onchange="this.form.submit()">
                                 <option value="">All Severities</option>
@@ -50,19 +45,24 @@
                                 @endforeach
                             </select>
                         </div>
-                        <div class="col-auto d-flex align-items-center">
-                            <div class="form-check mb-2">
-                                <input class="form-check-input" type="checkbox" name="archived" value="1" id="archived"
-                                    {{ request('archived') == '1' ? 'checked' : '' }} onchange="this.form.submit()">
-                                <label class="form-check-label" for="archived">
-                                    Archived Only
-                                </label>
-                            </div>
+                        <div class="filter-checkbox">
+                            <input class="form-check-input" type="checkbox" name="archived" value="1" id="archived"
+                                {{ request('archived') == '1' ? 'checked' : '' }} onchange="this.form.submit()">
+                            <label class="form-check-label ms-2" for="archived">
+                                Archived Only
+                            </label>
+                        </div>
+                        <div class="filter-add-btn">
+                            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addCaseModal">
+                                Add Case
+                            </button>
                         </div>
                     </div>
                 </form>
             </div>
-            <div class="table-responsive mt-4">
+
+            <!-- Scrollable table -->
+            <div class="table-responsive mt-4 scrollable-table">
                 <table class="table table-bordered">
                     <thead>
                         <tr>

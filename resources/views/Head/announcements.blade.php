@@ -12,17 +12,21 @@
                     <div class="ann-nav">
                         <div class="announcement-filter" id="announcement-filters">
                             <!-- Table view filters -->
-                            <div class="nav-filters" id="table-filters">
-                                <a href="#"
-                                    class="a-nav {{ request('category') == 'recent' || !request()->has('category') ? 'active' : '' }}"
-                                    data-filter="recent">Recent</a>
-                                <a href="#" class="a-nav {{ request('category') == 'announcement' ? 'active' : '' }}"
-                                    data-filter="announcement">Announcements</a>
-                                <a href="#" class="a-nav {{ request('category') == 'event' ? 'active' : '' }}"
-                                    data-filter="event">Events</a>
-                                <a href="#" class="a-nav {{ request('category') == 'news' ? 'active' : '' }}"
-                                    data-filter="news">News</a>
+                            <div class="filters" id="table-filters">
+                                <li>
+                                    <a href="#"
+                                        class="a-nav {{ request('category') == 'recent' || !request()->has('category') ? 'active' : '' }}"
+                                        data-filter="recent">Recent</a>
+                                    <a href="#"
+                                        class="a-nav {{ request('category') == 'announcement' ? 'active' : '' }}"
+                                        data-filter="announcement">Announcements</a>
+                                    <a href="#" class="a-nav {{ request('category') == 'event' ? 'active' : '' }}"
+                                        data-filter="event">Events</a>
+                                    <a href="#" class="a-nav {{ request('category') == 'news' ? 'active' : '' }}"
+                                        data-filter="news">News</a>
+                                </li>
                             </div>
+                             <button class="add-btn" onclick="openModal()"><i class="fi fi-br-plus"></i>Add Announcement</button>
                         </div>
                     </div>
                     <div class="search-bar">
@@ -37,10 +41,10 @@
                                 <button type="submit" style="display:none"></button>
                             </form>
                         </div>
-                        <button class="add-btn" onclick="openModal()">Add Announcement</button>
+                       
                         <button class="toggle-btn" id="toggle-view-btn">
                             <i class="fi fi-rr-table-layout" id="toggle-icon"></i>
-                            <span id="toggle-label">Table View</span>
+                            <span id="toggle-label"></span>
                         </button>
                     </div>
                 </div>
@@ -62,10 +66,50 @@
                                 <div class="announcement-col date">
                                     {{ \Carbon\Carbon::parse($announcement->date_posted)->format('M d, Y') }}
                                 </div>
-                                <div class="announcement-col status">{{ ucfirst($announcement->status) }}</div>
+                                <div class="announcement-col status">
+                                    @php
+                                        $status = strtolower($announcement->status);
+                                        $dotClass = match ($status) {
+                                            'active' => 'status-dot status-approved',
+                                            'archived' => 'status-dot status-declined',
+                                            'pending' => 'status-dot status-pending',
+                                            default => 'status-dot',
+                                        };
+                                        $labelClass = match ($status) {
+                                            'active' => 'status-label status-approved',
+                                            'archived' => 'status-label status-declined',
+                                            'pending' => 'status-label status-pending',
+                                            default => 'status-label',
+                                        };
+                                    @endphp
+                                    <span class="{{ $labelClass }}">
+                                        <span class="{{ $dotClass }}"></span>
+                                        {{ ucfirst($announcement->status) }}
+                                    </span>
+                                </div>
                                 <div class="announcement-col actions">
-                                    <a href="#" title="View" class="view-btn"><i class='bx bx-show'></i></a>
-                                    <a href="#" title="Edit" class="edit-btn"><i class='bx bx-edit'></i></a>
+                                    <a href="#" title="View" class="view-btn"
+                                        onclick="openAnnouncementModal({{ $announcement->id }}, 'view')"
+                                        data-id="{{ $announcement->id }}" data-title="{{ $announcement->title }}"
+                                        data-description="{{ $announcement->description }}"
+                                        data-link="{{ $announcement->link }}"
+                                        data-category="{{ $announcement->category }}"
+                                        data-status="{{ $announcement->status }}" data-image="{{ $announcement->image }}"
+                                        data-date_posted="{{ $announcement->date_posted }}"
+                                        data-start_datetime="{{ $announcement->start_datetime }}"
+                                        data-end_datetime="{{ $announcement->end_datetime }}"><i
+                                            class='bx bx-show'></i></a>
+                                    <a href="#" title="Edit" class="edit-btn"
+                                        onclick="openAnnouncementModal({{ $announcement->id }}, 'edit')"
+                                        data-id="{{ $announcement->id }}" data-title="{{ $announcement->title }}"
+                                        data-description="{{ $announcement->description }}"
+                                        data-link="{{ $announcement->link }}"
+                                        data-category="{{ $announcement->category }}"
+                                        data-status="{{ $announcement->status }}" data-image="{{ $announcement->image }}"
+                                        data-date_posted="{{ $announcement->date_posted }}"
+                                        data-start_datetime="{{ $announcement->start_datetime }}"
+                                        data-end_datetime="{{ $announcement->end_datetime }}"><i
+                                            class='bx bx-edit'></i></a>
                                     <a href="#" title="Archive" class="archive-btn"><i class='bx bx-archive'></i></a>
                                 </div>
                             </div>
@@ -119,16 +163,14 @@
                 announcementsList.style.display = 'block';
                 calendarView.style.display = 'none';
                 tableFilters.style.display = 'flex';
-                toggleBtn.classList.remove('active');
-                toggleIcon.className = 'fi fi-rr-table-layout';
-                toggleLabel.textContent = 'Table view';
+                toggleIcon.className = 'fi fi-sr-table-layout';
+                
             } else {
                 announcementsList.style.display = 'none';
                 calendarView.style.display = 'block';
                 tableFilters.style.display = 'none';
-                toggleBtn.classList.add('active');
                 toggleIcon.className = 'bx bxs-calendar';
-                toggleLabel.textContent = 'Calendar view';
+              
                 setTimeout(renderCalendar, 0);
             }
         }
@@ -180,20 +222,20 @@
         }
 
         function renderCalendar() {
-            let calendarEl = document.getElementById('calendar');
+            const calendarEl = document.getElementById('calendar');
             if (!calendarEl) return;
 
             if (calendar) calendar.destroy();
 
-            // normalize backend events
+            // Normalize backend events
             let rawEvents = @json($events);
 
             let formattedEvents = rawEvents.map(item => {
                 if (item.category === "Event") {
+                    // Properly parse event start/end
                     return {
                         title: item.title,
-                        start: item.start_datetime ? new Date(item.start_datetime).toISOString() : item
-                            .date_posted,
+                        start: item.start_datetime ? new Date(item.start_datetime).toISOString() : null,
                         end: item.end_datetime ? new Date(item.end_datetime).toISOString() : null,
                         allDay: false,
                         category: item.category,
@@ -201,18 +243,23 @@
                         color: "#10b981"
                     };
                 } else {
+                    // Announcements: treat as partial-day (6:00–20:00)
+                    const start = new Date(item.date_posted);
+                    start.setHours(6, 0, 0);
+                    const end = new Date(item.date_posted);
+                    end.setHours(20, 0, 0);
+
                     return {
                         title: `[${item.category}] ${item.title}`,
-                        start: item.date_posted,
-                        end: null,
-                        allDay: false,
+                        start: start.toISOString(),
+                        end: end.toISOString(),
+                        allDay: false, // false so it shows in week/day view
                         category: item.category,
                         description: item.description,
                         color: "#1ea7ff"
                     };
                 }
             });
-
 
             calendar = new FullCalendar.Calendar(calendarEl, {
                 initialView: 'dayGridMonth',
@@ -225,31 +272,40 @@
 
                 eventContent: function(arg) {
                     let category = arg.event.extendedProps.category.toLowerCase();
-                    let color = '#1ea7ff'; // default Announcement
+                    let color = '#1ea7ff'; // default: Announcement
+                    let iconClass = 'bx bxs-megaphone'; // default icon
 
-                    if (category === 'announcement') color = '#1ea7ff';
-                    if (category === 'event') color = '#10b981';
+                    if (category === 'announcement') {
+                        color = '#1ea7ff';
+                        iconClass = 'bx bxs-megaphone';
+                    } else if (category === 'event') {
+                        color = '#10b981';
+                        iconClass = 'bx bxs-calendar-event';
+                    }
 
                     return {
                         html: `
-                <div style="
-                    background:${color};
-                    color:#fff;
-                    padding:4px 6px;
-                    border-radius:6px;
-                    font-size:0.85rem;
-                    font-weight:500;
-                    box-shadow:0 1px 3px rgba(0,0,0,0.15);
-                    white-space:nowrap;
-                    overflow:hidden;
-                    text-overflow:ellipsis;
-                ">
-                    ${arg.event.title}
-                </div>
-                `
+        <div style="
+            background: ${color};
+            color: #fff;
+            padding: 8px 12px;
+            border-radius: 7px;
+            font-size: 1rem;
+            font-weight: 600;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: flex;
+            align-items: center;     
+            gap: 6px;    
+        ">
+            <i class='${iconClass}' style='margin-right:6px;'></i>
+            ${arg.event.title}
+        </div>
+        `
                     };
                 },
-
                 selectable: true,
                 editable: false,
                 slotMinTime: "06:00:00",

@@ -22,7 +22,12 @@
                     <span class="text">Dashboard</span>
                 </a>
             </li>
-
+            <li class="{{ Request::is('Parent/child*') ? 'active' : '' }}">
+                <a href="{{ url('Parent/child') }}">
+                    <i class="fi fi-sr-student"></i>
+                    <span class="text">My Child</span>
+                </a>
+            </li>
             <li class="{{ Request::is('Parent/appointments*') ? 'active' : '' }}">
                 <a href="{{ url('Parent/appointments') }}">
                     <i class='bx bxs-calendar'></i>

@@ -3,32 +3,33 @@
 namespace App\Http\Controllers\Head;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Auth; 
+use Illuminate\Support\Facades\Auth;
 
 use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Appointments;
 use App\Models\ParentModel;
+use App\Models\CaseModel;
 use App\Models\ParentLinkRequest;
 
 class HeadDashboardController extends Controller
 {
     public function dashboard(Request $request)
     {
-        
+
         // Count stats
         $totalStudents = User::where('role', 'student')->count();
-        $totalParents = ParentModel::count(); 
+        $totalParents = ParentModel::count();
         $totalCounselors = User::where('role', 'counselor')->count();
-        $totalCases = class_exists('\App\Models\CaseModel') ? \App\Models\CaseModel::count() : 0;
+        $totalCases = CaseModel::count();
 
         $pendingRequests = ParentLinkRequest::with(['parent.user', 'students.student'])
-        ->where('status', 'Pending')
-        ->get();
+            ->where('status', 'Pending')
+            ->get();
 
         $userId = Auth::id();
         $filter = $request->input('filter', 'today');
-        $query = Appointments::with(['student', 'admin', 'counselor', 'requester'])
+        $query = Appointments::with(['student', 'counselor', 'requester', 'type'])
             ->where('counselor_id', $userId)
             ->where('status', 'approved')
             ->where('appointment_datetime', '>', now());
@@ -39,7 +40,8 @@ class HeadDashboardController extends Controller
             $query->whereDate('appointment_datetime', now()->addDay()->toDateString());
         } elseif ($filter === 'week') {
             $query->whereBetween('appointment_datetime', [
-                now()->startOfWeek(), now()->endOfWeek()
+                now()->startOfWeek(),
+                now()->endOfWeek()
             ]);
         } else {
             $query->where('appointment_datetime', '>', now());
@@ -52,13 +54,13 @@ class HeadDashboardController extends Controller
             return response()->json(['html' => $html]);
         }
 
-            return view('Head.dashboard', compact(
-                'totalStudents',
-                'totalParents',
-                'totalCounselors',
-                'totalCases',
-                'upcomingAppointments',
-                'pendingRequests'
-            ));
+        return view('Head.dashboard', compact(
+            'totalStudents',
+            'totalParents',
+            'totalCounselors',
+            'totalCases',
+            'upcomingAppointments',
+            'pendingRequests'
+        ));
     }
 }

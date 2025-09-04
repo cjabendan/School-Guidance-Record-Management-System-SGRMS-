@@ -12,7 +12,8 @@
                     'Head.counselors.show' => 'Counselor Details',
                     'Head.students.index' => 'Students',
                     'Head.parents.index' => 'Parents',
-                    'Head.case.index' => 'Case Reports',
+                    'Head.cases.index' => 'Case Reports',
+                    'Head.counseling.index' => 'Counseling',
                     'Head.appointments.index' => 'Appointments',
                     'Head.announcements.index' => 'Announcements',
                     'Head.settings.index' => 'Settings',
@@ -28,11 +29,11 @@
                 // Parent sidebar mapping
                 $parentPages = [
                     'Parent.dashboard' => 'Dashboard',
+                    'Parent.child.index' => 'My Children',
                     'Parent.appointments.index' => 'Appointments',
                     'Parent.settings.index' => 'Settings',
                 ];
 
-                // Merge all for fallback
                 $allPages = array_merge($headPages, $counselorPages, $parentPages);
 
                 $page = $allPages[$routeName] ?? 'Welcome';

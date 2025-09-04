@@ -8,9 +8,12 @@ class Counselor extends Model
 {
     protected $table = 'counselors';
     protected $primaryKey = 'c_id';
+    public $incrementing = false;
+    protected $keyType = 'string';
     public $timestamps = false;
 
     protected $fillable = [
+        'c_id',
         'user_id'
     ];
 

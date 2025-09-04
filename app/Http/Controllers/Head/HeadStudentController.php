@@ -2,6 +2,10 @@
 
 namespace App\Http\Controllers\Head;
 
+use Illuminate\Support\Facades\Log;
+
+use Barryvdh\DomPDF\Facade\Pdf;
+
 use App\Models\Student;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -10,28 +14,16 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class HeadStudentController extends Controller
 {
-    public function import(Request $request)
-    {
-        $request->validate([
-            'students_file' => 'required|file|mimes:xlsx,xls,csv',
-        ]);
-
-        try {
-            Excel::import(new \App\Imports\StudentsImport, $request->file('students_file'));
-            return redirect()->back()->with('success', 'Students imported successfully!');
-        } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Import failed: ' . $e->getMessage());
-        }
-    }
 
     public function index(Request $request)
     {
         $filter = $request->query('status', 'active');
 
         $educLevelMap = [
-            'college' => 'College',
-            'highschool' => 'High School',
-            'elementary' => 'Elementary'
+            'seniorhigh' => 'Senior High School',
+            'juniorhigh' => 'Junior High School',
+            'elementary' => 'Elementary',
+            'kindergarten' => 'Kindergarten',
         ];
 
         $query = DB::table('students')
@@ -54,7 +46,13 @@ class HeadStudentController extends Controller
                 'students.section',
                 'students.program',
                 'students.status',
-                'users.profile_image'
+                'users.profile_image',
+                'students.father_name',
+                'students.mother_name',
+                'students.guardian_name',
+                'students.relationship',
+                'students.guardian_contact',
+                'students.guardian_email'
             )
             ->selectRaw('(SELECT COUNT(*) FROM cases ) AS case_count');
 
@@ -62,8 +60,8 @@ class HeadStudentController extends Controller
         if (array_key_exists($filter, $educLevelMap)) {
             $query->where('educ_levels.educ_level', $educLevelMap[$filter])
                 ->where('students.status', 'active');
-        } elseif (in_array($filter, ['inactive', 'archived'])) {
-            $query->where('students.status', $filter);
+        } elseif ($filter === 'inactive') {
+            $query->where('students.status', 'inactive');
         } else {
             $query->where('students.status', 'active');
         }
@@ -79,7 +77,7 @@ class HeadStudentController extends Controller
     public function getNextStudentId()
     {
         $currentYear = date('y');
-        // Use direct SQL to get the max number for current year
+        
         $maxId = Student::where('s_id', 'LIKE', "MA{$currentYear}-%")
             ->selectRaw("MAX(CAST(SUBSTRING(s_id, 7, 4) AS UNSIGNED)) as max_num")
             ->value('max_num');
@@ -108,41 +106,38 @@ class HeadStudentController extends Controller
             'status' => 'nullable|string|max:20',
             'religion' => 'nullable|string|max:100',
             'civil_status' => 'nullable|string|max:50',
+            'father_name' => 'nullable|string|max:255',
+            'mother_name' => 'nullable|string|max:255',
+            'guardian_name' => 'nullable|string|max:255',
+            'relationship' => 'nullable|string|max:255',
+            'guardian_contact' => 'nullable|string|max:255',
+            'guardian_email' => 'nullable|string|max:255',
         ]);
 
         // Insert or get educ_level
         $educLevel = DB::table('educ_levels')->where('educ_level', $validated['educ_level'])->first();
-        if (!$educLevel) {
-            $e_id = DB::table('educ_levels')->insertGetId([
-                'educ_level' => $validated['educ_level'],
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
-        } else {
-            $e_id = $educLevel->e_id;
-        }
+        $e_id = $educLevel ? $educLevel->e_id : DB::table('educ_levels')->insertGetId([
+            'educ_level' => $validated['educ_level'],
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
 
         // Insert or get year_level
         $yearLevel = DB::table('year_levels')->where('year_level', $validated['year_level'])->where('e_id', $e_id)->first();
-        if (!$yearLevel) {
-            $y_id = DB::table('year_levels')->insertGetId([
-                'year_level' => $validated['year_level'],
-                'e_id' => $e_id,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
-        } else {
-            $y_id = $yearLevel->y_id;
-        }
+        $y_id = $yearLevel ? $yearLevel->y_id : DB::table('year_levels')->insertGetId([
+            'year_level' => $validated['year_level'],
+            'e_id' => $e_id,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
 
         // Handle image upload
+        $imagePath = 'default.jpg';
         if ($request->hasFile('profile_image')) {
             $image = $request->file('profile_image');
             $imageName = uniqid('user_') . '.' . $image->getClientOriginalExtension();
             $image->move(public_path('images/user'), $imageName);
-            $imagePath =  $imageName;
-        } else {
-            $imagePath = 'default.jpg';
+            $imagePath = $imageName;
         }
 
         // Set username and password
@@ -155,6 +150,7 @@ class HeadStudentController extends Controller
             'last_name' => $validated['last_name'],
             'email' => $validated['email'],
             'contact_num' => $validated['contact_num'] ?? null,
+            'sex' => $validated['sex'],
             'bod' => $validated['bod'] ?? null,
             'address' => $validated['address'] ?? null,
             'profile_image' => $imagePath,
@@ -163,24 +159,32 @@ class HeadStudentController extends Controller
             'status' => $validated['status'] ?? 'active',
         ]);
 
-        $student = Student::create([
+        Student::create([
             's_id' => $validated['s_id'],
             'user_id' => $user->id,
             'y_id' => $y_id,
             'section' => $validated['section'] ?? null,
+            'father_name' => $validated['father_name'] ?? null,
+            'mother_name' => $validated['mother_name'] ?? null,
+            'guardian_name' => $validated['guardian_name'] ?? null,
+            'relationship' => $validated['relationship'] ?? null,
+            'guardian_contact' => $validated['guardian_contact'] ?? null,
+            'guardian_email' => $validated['guardian_email'] ?? null,
             'program' => $validated['program'] ?? null,
             'status' => $validated['status'] ?? 'active',
             'religion' => $validated['religion'] ?? null,
             'civil_status' => $validated['civil_status'] ?? null,
         ]);
 
-        // return redirect with success message
         return redirect()->back()->with('success', 'Student added successfully!');
     }
 
-    public function showAjax($id_num)
+    //_________________________________________________________________________________
+
+
+    public function showAjax($s_id)
     {
-        $student = Student::where('s_id', $id_num)
+        $student = DB::table('students')
             ->leftJoin('users', 'students.user_id', '=', 'users.id')
             ->leftJoin('year_levels', 'students.y_id', '=', 'year_levels.y_id')
             ->leftJoin('educ_levels', 'year_levels.e_id', '=', 'educ_levels.e_id')
@@ -195,101 +199,281 @@ class HeadStudentController extends Controller
                 'users.sex as gender',
                 'users.bod',
                 'users.address',
-                'users.profile_image',
                 'educ_levels.educ_level',
                 'year_levels.year_level',
                 'students.section',
                 'students.program',
                 'students.status',
+                'users.profile_image',
+                'students.father_name',
+                'students.mother_name',
+                'students.guardian_name',
+                'students.relationship',
+                'students.guardian_contact',
+                'students.guardian_email',
                 'students.religion',
                 'students.civil_status'
             )
-            ->where('students.s_id', $id_num)
-            ->firstOrFail();
+            ->where('students.s_id', $s_id)
+            ->first();
 
-        // Compose image URL
-        if (empty($student->profile_image) || $student->profile_image === 'default.png' || $student->profile_image === 'images/user/default.png') {
-            $image_url = asset('images/user/default.png');
-        } else {
-            // If only filename is stored, prepend path
-            if ($student->profile_image === basename($student->profile_image)) {
-                $image_url = asset('images/user/' . $student->profile_image);
-            } else {
-                $image_url = asset($student->profile_image);
-            }
+        if (!$student) {
+            return response()->json(['error' => 'Student not found'], 404);
         }
 
-        // Calculate age if bod is present
-        $age = null;
-        if ($student->bod) {
-            try {
-                $birthdate = new \DateTime($student->bod);
-                $today = new \DateTime();
-                $age = $today->diff($birthdate)->y;
-            } catch (\Exception $e) {
-                $age = null;
-            }
-        }
+        // Add image URL
+        $student->image_url = asset('images/user/' . ($student->profile_image ?? 'default.jpg'));
 
-        // Return all expected fields for modal
-        return response()->json([
-            'id_num' => $student->id_num,
-            'fname' => $student->fname,
-            'mname' => $student->mname,
-            'lname' => $student->lname,
-            'suffix' => $student->suffix,
-            'email' => $student->email,
-            'mobile_num' => $student->mobile_num,
-            'gender' => $student->gender,
-            'bod' => $student->bod,
-            'address' => $student->address,
-            'image_url' => $image_url,
-            'educ_level' => $student->educ_level,
-            'year_level' => $student->year_level,
-            'section' => $student->section,
-            'program' => $student->program,
-            'status' => $student->status,
-            'religion' => $student->religion,
-            'civil_status' => $student->civil_status,
-            'age' => $age,
-            // Add empty fields for modal compatibility
-            'previous_school' => '',
-            'previous_school_address' => '',
-            'father_name' => '',
-            'mother_name' => '',
-            'guardian_name' => '',
-            'relationship' => '',
-            'guardian_contact' => '',
-            'guardian_email' => ''
-        ]);
+        return response()->json($student);
     }
 
-    public function editStudent(Request $request, $id_num)
+        // Update student info (edit modal)
+    public function editStudent(Request $request, $s_id)
     {
-        $student = Student::where('id_num', $id_num)->firstOrFail();
-
         $validated = $request->validate([
-            'lname' => 'required|string|max:50',
-            'fname' => 'required|string|max:50',
-            'mname' => 'nullable|string|max:50',
-            'suffix' => 'nullable|string|max:10',
-            'bod' => 'required|date',
-            'gender' => 'required|in:Male,Female',
-           
+            'first_name' => 'required|string|max:50',
+            'middle_name' => 'nullable|string|max:50',
+            'last_name' => 'required|string|max:50',
+            'email' => 'required|email|max:255',
+            'contact_num' => 'nullable|string|max:20',
+            'sex' => 'required|in:Male,Female',
+            'bod' => 'nullable|date',
+            'address' => 'nullable|string|max:255',
+            'profile_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'educ_level' => 'required|string|max:50',
+            'year_level' => 'required|string|max:50',
+            'section' => 'nullable|string|max:20',
+            'program' => 'nullable|string|max:100',
+            'status' => 'nullable|string|max:20',
+            'religion' => 'nullable|string|max:100',
+            'civil_status' => 'nullable|string|max:50',
+            'father_name' => 'nullable|string|max:255',
+            'mother_name' => 'nullable|string|max:255',
+            'guardian_name' => 'nullable|string|max:255',
+            'relationship' => 'nullable|string|max:255',
+            'guardian_contact' => 'nullable|string|max:255',
+            'guardian_email' => 'nullable|string|max:255',
         ]);
 
-        $student->update([
-            'lname' => $validated['lname'],
-            'fname' => $validated['fname'],
-            'mname' => $validated['mname'] ?? null,
-            'suffix' => $validated['suffix'] ?? null,
-            'bod' => $validated['bod'],
-            'sex' => $validated['gender'],
-            
+        // Find student and user
+        $student = \App\Models\Student::where('s_id', $s_id)->firstOrFail();
+        $user = $student->user;
+
+        // Update or get educ_level
+        $educLevel = DB::table('educ_levels')->where('educ_level', $validated['educ_level'])->first();
+        $e_id = $educLevel ? $educLevel->e_id : DB::table('educ_levels')->insertGetId([
+            'educ_level' => $validated['educ_level'],
+            'created_at' => now(),
+            'updated_at' => now(),
         ]);
+        // Update or get year_level
+        $yearLevel = DB::table('year_levels')->where('year_level', $validated['year_level'])->where('e_id', $e_id)->first();
+        $y_id = $yearLevel ? $yearLevel->y_id : DB::table('year_levels')->insertGetId([
+            'year_level' => $validated['year_level'],
+            'e_id' => $e_id,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        // Handle image upload
+        if ($request->hasFile('profile_image')) {
+            $image = $request->file('profile_image');
+            $imageName = uniqid('user_') . '.' . $image->getClientOriginalExtension();
+            $image->move(public_path('images/user'), $imageName);
+            $user->profile_image = $imageName;
+        }
+
+        // Update user
+        $user->first_name = $validated['first_name'];
+        $user->middle_name = $validated['middle_name'] ?? null;
+        $user->last_name = $validated['last_name'];
+        $user->email = $validated['email'];
+        $user->contact_num = $validated['contact_num'] ?? null;
+        $user->sex = $validated['sex'];
+        $user->bod = $validated['bod'] ?? null;
+        $user->address = $validated['address'] ?? null;
+        $user->status = $validated['status'] ?? 'active';
+        $user->save();
+
+        // Update student
+        $student->y_id = $y_id;
+        $student->section = $validated['section'] ?? null;
+        $student->father_name = $validated['father_name'] ?? null;
+        $student->mother_name = $validated['mother_name'] ?? null;
+        $student->guardian_name = $validated['guardian_name'] ?? null;
+        $student->relationship = $validated['relationship'] ?? null;
+        $student->guardian_contact = $validated['guardian_contact'] ?? null;
+        $student->guardian_email = $validated['guardian_email'] ?? null;
+        $student->program = $validated['program'] ?? null;
+        $student->status = $validated['status'] ?? 'active';
+        $student->religion = $validated['religion'] ?? null;
+        $student->civil_status = $validated['civil_status'] ?? null;
+        $student->save();
 
         return redirect()->back()->with('success', 'Student updated successfully!');
     }
+
+//_____________________________________________________________________________
+
+    // Archive student 
+    public function archiveStudent(Request $request)
+    {
+        $s_id = $request->input('s_id');
+        $student = Student::where('s_id', $s_id)->first();
+        if (!$student) {
+            return response()->json(['error' => 'Student not found'], 404);
+        }
+        $student->status = 'inactive';
+        $student->save();
+        return response()->json(['success' => true, 'message' => 'Student archived (inactive)']);
+    }
+
+    // Archive and disable student 
+    public function archiveAndDisableStudent(Request $request)
+    {
+        $s_id = $request->input('s_id');
+        $student = Student::where('s_id', $s_id)->first();
+        if (!$student) {
+            return response()->json(['error' => 'Student not found'], 404);
+        }
+        $student->status = 'inactive';
+        $student->save();
+        if ($student->user_id) {
+            $user = \App\Models\User::find($student->user_id);
+            if ($user) {
+                $user->status = 'inactive';
+                $user->save();
+            }
+        }
+        return response()->json(['success' => true, 'message' => 'Student and user account archived (inactive)']);
+    }
+
+
+//_____________________________________________________________________________
+
+    // Import Students
+    public function import(Request $request)
+    {
+        $validated = $request->validate([
+            'students_file' => 'required|file|mimes:xlsx,xls,csv',
+        ]);
+
+        $file = $request->file('students_file');
+        if (!$file || !$file->isValid()) {
+            return redirect()->back()->with('error', 'No valid file uploaded.');
+        }
+
+        try {
+            Excel::import(new \App\Imports\StudentsImport, $file);
+            return redirect()->back()->with('success', 'Students imported successfully!');
+        } catch (\Maatwebsite\Excel\Validators\ValidationException $e) {
+            $failures = $e->failures();
+            $messages = collect($failures)->map(function($failure) {
+                return 'Row ' . $failure->row() . ': ' . implode(', ', $failure->errors());
+            })->implode(' | ');
+            return redirect()->back()->with('error', 'Import failed: ' . $messages);
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Import failed: ' . $e->getMessage());
+        }
+    }
+
+//_____________________________________________________________________________
+
+    // Export students as PDF, CSV, or Excel
+    public function export(Request $request)
+    {
+        $filter = $request->query('status', 'active');
+        $educLevelMap = [
+            'seniorhigh' => 'Senior High School',
+            'juniorhigh' => 'Junior High School',
+            'elementary' => 'Elementary',
+            'kindergarten' => 'Kindergarten',
+        ];
+        $query = DB::table('students')
+            ->leftJoin('users', 'students.user_id', '=', 'users.id')
+            ->leftJoin('year_levels', 'students.y_id', '=', 'year_levels.y_id')
+            ->leftJoin('educ_levels', 'year_levels.e_id', '=', 'educ_levels.e_id')
+            ->select(
+                'students.s_id',
+                'users.first_name as fname',
+                'users.middle_name as mname',
+                'users.last_name as lname',
+                'users.suffix',
+                'users.email',
+                'users.contact_num',
+                'users.sex',
+                'users.bod',
+                'users.address',
+                'educ_levels.educ_level',
+                'year_levels.year_level',
+                'students.section',
+                'students.program',
+                'students.status',
+                'users.profile_image',
+                'students.father_name',
+                'students.mother_name',
+                'students.guardian_name',
+                'students.relationship',
+                'students.guardian_contact',
+                'students.guardian_email'
+            );
+        if (array_key_exists($filter, $educLevelMap)) {
+            $query->where('educ_levels.educ_level', $educLevelMap[$filter])
+                ->where('students.status', 'active');
+        } elseif ($filter === 'inactive') {
+            $query->where('students.status', 'inactive');
+        } else {
+            $query->where('students.status', 'active');
+        }
+        $students = $query->orderBy('users.last_name')->get();
+
+        $format = $request->query('format', 'csv');
+        $columns = [
+            's_id', 'fname', 'mname', 'lname', 'suffix', 'email', 'contact_num', 'sex', 'bod', 'address',
+            'educ_level', 'year_level', 'section', 'program', 'status', 'profile_image',
+            'father_name', 'mother_name', 'guardian_name', 'relationship', 'guardian_contact', 'guardian_email'
+        ];
+
+        if ($format === 'pdf') {
+            $html = view('Head.profiling.export_pdf', compact('students', 'columns'))->render();
+            $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadHTML($html)->setPaper('a4', 'landscape');
+            $filename = 'students_export_' . $filter . '_' . date('Ymd_His') . '.pdf';
+            return $pdf->download($filename);
+        } elseif ($format === 'excel') {
+            // Excel export using Laravel Excel
+            $exportData = [];
+            foreach ($students as $student) {
+                $row = [];
+                foreach ($columns as $col) {
+                    $row[$col] = $student->$col ?? '';
+                }
+                $exportData[] = $row;
+            }
+            $filename = 'students_export_' . $filter . '_' . date('Ymd_His') . '.xlsx';
+            return \Maatwebsite\Excel\Facades\Excel::download(new \App\Exports\StudentsExport($exportData, $columns), $filename);
+        } else {
+            // Default: CSV
+            $filename = 'students_export_' . $filter . '_' . date('Ymd_His') . '.csv';
+            $headers = [
+                'Content-Type' => 'text/csv',
+                'Content-Disposition' => "attachment; filename=\"$filename\""
+            ];
+            $callback = function() use ($students, $columns) {
+                $file = fopen('php://output', 'w');
+                fputcsv($file, $columns);
+                foreach ($students as $student) {
+                    $row = [];
+                    foreach ($columns as $col) {
+                        $row[] = $student->$col ?? '';
+                    }
+                    fputcsv($file, $row);
+                }
+                fclose($file);
+            };
+            return response()->stream($callback, 200, $headers);
+        }
+    }
 }
+   
 
 

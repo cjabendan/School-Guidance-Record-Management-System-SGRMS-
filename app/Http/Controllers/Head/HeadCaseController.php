@@ -1,11 +1,13 @@
 <?php
 
 namespace App\Http\Controllers\Head;
+
 use App\Http\Controllers\Controller;
 
 use Illuminate\Http\Request;
 use App\Models\CaseModel;
 use Illuminate\Support\Facades\DB;
+use App\Models\Student;
 
 class HeadCaseController extends Controller
 {
@@ -14,17 +16,17 @@ class HeadCaseController extends Controller
         $type = DB::select("SHOW COLUMNS FROM cases WHERE Field = 'status'")[0]->Type;
         preg_match('/enum\((.*)\)/', $type, $matches);
         $enum = [];
-        foreach(explode(',', $matches[1]) as $value){
+        foreach (explode(',', $matches[1]) as $value) {
             $enum[] = trim($value, "'");
         }
-        return $enum;   
+        return $enum;
     }
     private function getSeverityEnumValues()
     {
         $type = DB::select("SHOW COLUMNS FROM cases WHERE Field = 'severity'")[0]->Type;
         preg_match('/enum\((.*)\)/', $type, $matches);
         $enum = [];
-        foreach(explode(',', $matches[1]) as $value){
+        foreach (explode(',', $matches[1]) as $value) {
             $enum[] = trim($value, "'");
         }
         return $enum;
@@ -72,6 +74,7 @@ class HeadCaseController extends Controller
             'filed_date' => 'required|date',
             'filed_time' => 'required',
             'status' => 'required|string',
+            'involved_students' => 'required|string', // comma-separated student IDs
         ]);
 
         // Handle "Other" case type
@@ -84,7 +87,7 @@ class HeadCaseController extends Controller
         } else {
             $case_type_id = $request->case_type_id;
         }
- 
+
         // Create the case
         $case = CaseModel::create([
             'case_type_id' => $case_type_id,
@@ -103,7 +106,18 @@ class HeadCaseController extends Controller
             'follow_up_date' => $request->follow_up_date,
         ]);
 
-        return redirect()->route('Head.case')->with('success', 'Case added successfully!');
+        // Link involved students
+        $studentIds = array_map('trim', explode(',', $request->involved_students));
+        foreach ($studentIds as $studentId) {
+            if ($studentId) {
+                DB::table('case_students')->insert([
+                    'case_id' => $case->case_id,
+                    'student_id' => $studentId,
+                ]);
+            }
+        }
+
+        return redirect()->route('Head.cases.index')->with('success', 'Case added successfully!');
     }
 
     public function update(Request $request, $case_id)
@@ -148,7 +162,7 @@ class HeadCaseController extends Controller
             'follow_up_date' => $request->follow_up_date,
         ]);
 
-        return redirect()->route('Head.cases')->with('success', 'Case updated successfully!');
+        return redirect()->route('Head.cases.index')->with('success', 'Case updated successfully!');
     }
 
     public function archive($case_id)
@@ -157,9 +171,30 @@ class HeadCaseController extends Controller
         $case->archived = true;
         $case->save();
 
-        return redirect()->route('Head.cases')->with('success', 'Case archived successfully!');
+        return redirect()->route('Head.cases.index')->with('success', 'Case archived successfully!');
+    }
+
+    public function searchStudent(Request $request)
+    {
+        $query = $request->input('q');
+
+        $students = \App\Models\Student::with('user')
+            ->where('s_id', 'like', "%{$query}%")
+            ->orWhereHas('user', function ($q) use ($query) {
+                $q->where('first_name', 'like', "%{$query}%")
+                  ->orWhere('last_name', 'like', "%{$query}%");
+            })
+            ->limit(10)
+            ->get();
+
+        $results = $students->map(function ($student) {
+            $fullName = trim(($student->user->first_name ?? '') . ' ' . ($student->user->last_name ?? ''));
+            return [
+                'id' => (string) $student->s_id, // Use s_id as string
+                'text' => "{$fullName} | {$student->s_id}", // Show name and s_id
+            ];
+        });
+
+        return response()->json($results);
     }
 }
-    
-
-
