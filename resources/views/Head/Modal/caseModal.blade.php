@@ -308,6 +308,7 @@
 $(function() {
     let selectedStudents = [];
 
+
     function renderResults(items) {
         const $results = $("#student_search_results");
         $results.empty();
@@ -316,6 +317,7 @@ $(function() {
             return;
         }
         items.forEach(item => {
+            // Always use student s_id for data-id
             $results.append(
                 `<button type="button" class="list-group-item list-group-item-action" data-id="${item.id}" data-text="${item.text}">${item.text}</button>`
             );
@@ -334,6 +336,7 @@ $(function() {
             dataType: "json",
             data: { q: query },
             success: function(data) {
+                // Ensure each item.id is student s_id
                 renderResults(data);
             }
         });
@@ -341,6 +344,7 @@ $(function() {
 
     // Handle click on result
     $("#student_search_results").on("click", ".list-group-item", function() {
+        // Always use student s_id for selection
         const id = $(this).data("id");
         const text = $(this).data("text");
         if (!selectedStudents.includes(id)) {

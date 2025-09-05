@@ -8,6 +8,8 @@ class Student extends Model
 {
     protected $table = 'students';
     protected $primaryKey = 's_id';
+    public $incrementing = false; // Add this line!
+    protected $keyType = 'string'; // Add this line!
     public $timestamps = false;
 
     protected $fillable = [

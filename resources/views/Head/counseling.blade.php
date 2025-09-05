@@ -7,10 +7,10 @@
     <section id="content">
         @include('partials.navbar')
         <div class="wrapper">
-            <div class="counseling-container">
-                <div class="counseling-management">
-                    <div class="counseling-nav">
-                        <div class="counseling-filter">
+            <div class="table-container">
+                <div class="table-management">
+                    <div class="table-nav">
+                        <div class="table-filter">
                             <div class="filters">
                                 <li>
                                     <a href="#" class="active">All</a>
@@ -19,16 +19,16 @@
                                     <a href="#">Resolved</a>
                                 </li>
                             </div>
-                            <button class="add-btn" data-bs-toggle="modal" data-bs-target="#addCaseModal"
-                            ><i class="fi fi-br-plus"></i>Add Counseling Note</button>
+                            <button class="add-btn" data-bs-toggle="modal" data-bs-target="#addCaseModal"><i
+                                    class="fi fi-br-plus"></i>Add Counseling Note</button>
                         </div>
                     </div>
-                    <div class="search-bar">
-                        <div class="counseling-search">
+                    <div class="table-bar">
+                        <div class="table-search">
                             <form method="GET" action="">
                                 <i class="fi fi-br-search"></i>
                                 <input type="text" name="search" value="{{ request('search') }}"
-                                    placeholder="Search counseling notes..." id="counseling-search-input">
+                                    placeholder="Search counseling..." id="counseling-search-input">
                                 @if (request('category'))
                                     <input type="hidden" name="category" value="{{ request('category') }}">
                                 @endif
@@ -37,42 +37,43 @@
                         </div>
 
                         <button class="toggle-btn" id="toggle-view-btn">
-                              <i class="fi fi-br-bars-filter" id="toggle-icon"></i>
+                            <i class="fi fi-br-bars-filter" id="toggle-icon"></i>
                             <span id="toggle-label"></span>
                         </button>
                     </div>
                 </div>
 
                 <!-- Table view -->
-                <div class="counseling-list" id="counseling-list" style="margin-bottom:0;">
-                    <div class="counseling-header">
-                        <div class="counseling-col title">Case ID</div>
-                        <div class="counseling-col category">Type</div>
-                        <div class="counseling-col">Severity</div>
-                        <div class="counseling-col status">Status</div>
-                        <div class="counseling-col date">Filed Date</div>
-                        <div class="counseling-col">Notes</div>
-                        <div class="counseling-col actions">Actions</div>
+                <div class="table-list" id="counseling-list" style="margin-bottom:0;">
+                    <div class="table-header">
+                        <div class="table-col title">Case ID</div>
+                        <div class="table-col category">Type</div>
+                        <div class="table-col">Severity</div>
+                        <div class="table-col status">Status</div>
+                        <div class="table-col date">Filed Date</div>
+                        <div class="table-col">Notes</div>
+                        <div class="table-col actions">Actions</div>
                     </div>
-                    <div class="counseling-table">
+                    <div class="table">
                         @forelse($counselings as $counseling)
-                            <div class="counseling-card">
-                                <div class="counseling-col title">{{ $counseling->case_id }}</div>
-                                <div class="counseling-col category">{{ $counseling->caseType->type_name ?? 'N/A' }}</div>
-                                <div class="counseling-col">{{ $counseling->severity }}</div>
-                                <div class="counseling-col status">
+                            <div class="table-card">
+                                <div class="table-col title">{{ $counseling->case_id }}</div>
+                                <div class="table-col category">{{ $counseling->caseType->type_name ?? 'N/A' }}</div>
+                                <div class="table-col">{{ $counseling->severity }}</div>
+                                <div class="table-col status">
                                     <span class="status-label status-{{ strtolower($counseling->status) }}">
                                         <span class="status-dot status-{{ strtolower($counseling->status) }}"></span>
                                         {{ ucfirst($counseling->status) }}
                                     </span>
                                 </div>
-                                <div class="counseling-col date">{{ $counseling->filed_date }}</div>
-                                <div class="counseling-col">
+                                <div class="table-col date">{{ $counseling->filed_date }}</div>
+                                <div class="table-col">
                                     @php
                                         $notes = $counseling->notes ?? [];
                                     @endphp
-                                    @if(count($notes) > 0)
-                                        <span style="font-weight:500; color:#1ea7ff;">{{ count($notes) }} note{{ count($notes) > 1 ? 's' : '' }}</span>
+                                    @if (count($notes) > 0)
+                                        <span style="font-weight:500; color:#1ea7ff;">{{ count($notes) }}
+                                            note{{ count($notes) > 1 ? 's' : '' }}</span>
                                         <br>
                                         <span style="font-size:0.95em; color:#555;">
                                             {{ Str::limit($notes[0]->observations ?? '', 40) }}
@@ -81,7 +82,7 @@
                                         <span style="color:#888;">No notes</span>
                                     @endif
                                 </div>
-                                <div class="counseling-col actions" style="display:flex; gap:8px;">
+                                <div class="table-col actions">
                                     <button type="button" class="view-btn" data-bs-toggle="modal"
                                         data-bs-target="#viewcounselingModal{{ $counseling->case_id }}">View</button>
                                     <button type="button" class="edit-btn" data-bs-toggle="modal"
@@ -90,7 +91,7 @@
                                 </div>
                             </div>
                         @empty
-                            <div class="no-case-cell">No counseling notes found.</div>
+                            <div class="no-table-cell">No counseling notes found.</div>
                         @endforelse
                     </div>
                 </div>

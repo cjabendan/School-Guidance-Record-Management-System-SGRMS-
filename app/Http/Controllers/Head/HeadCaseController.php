@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use App\Models\CaseModel;
 use Illuminate\Support\Facades\DB;
 use App\Models\Student;
+use Illuminate\Support\Facades\Log;
 
 class HeadCaseController extends Controller
 {
@@ -108,6 +109,8 @@ class HeadCaseController extends Controller
 
         // Link involved students
         $studentIds = array_map('trim', explode(',', $request->involved_students));
+        Log::info('Submitted involved_students:', ['raw' => $request->involved_students]);
+        Log::info('Parsed studentIds:', ['ids' => $studentIds]);
         foreach ($studentIds as $studentId) {
             if ($studentId) {
                 DB::table('case_students')->insert([

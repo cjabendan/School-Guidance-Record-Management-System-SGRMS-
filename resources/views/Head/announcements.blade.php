@@ -7,10 +7,10 @@
         @include('partials.navbar')
 
         <div class="wrapper">
-            <div class="announcement-container">
-                <div class="announcement-management">
+            <div class="table-container">
+                <div class="table-management">
                     <div class="ann-nav">
-                        <div class="announcement-filter" id="announcement-filters">
+                        <div class="table-filter" id="announcement-filters">
                             <!-- Table view filters -->
                             <div class="filters" id="table-filters">
                                 <li>
@@ -30,7 +30,7 @@
                         </div>
                     </div>
                     <div class="search-bar">
-                        <div class="ann-search">
+                        <div class="table-search">
                             <form method="GET" action="{{ route('Head.announcements.index') }}">
                                 <i class="fi fi-br-search"></i>
                                 <input type="text" name="search" value="{{ request('search') }}"
@@ -50,23 +50,23 @@
                 </div>
 
                 <!-- Table view -->
-                <div class="announcement-list" id="announcements-list" style="margin-bottom:0;">
-                    <div class="announcement-header">
-                        <div class="announcement-col title">Title</div>
-                        <div class="announcement-col category">Category</div>
-                        <div class="announcement-col date">Date Posted</div>
-                        <div class="announcement-col status">Status</div>
-                        <div class="announcement-col actions">Actions</div>
+                <div class="table-list" id="announcements-list" style="margin-bottom:0;">
+                    <div class="table-header">
+                        <div class="table-col title">Title</div>
+                        <div class="table-col category">Category</div>
+                        <div class="table-col date">Date Posted</div>
+                        <div class="table-col status">Status</div>
+                        <div class="table-col actions">Actions</div>
                     </div>
-                    <div class="announcement-table">
+                    <div class="table">
                         @forelse($announcements as $announcement)
-                            <div class="announcement-card" id="announcement-card">
-                                <div class="announcement-col title">{{ $announcement->title }}</div>
-                                <div class="announcement-col category">{{ $announcement->category }}</div>
-                                <div class="announcement-col date">
+                            <div class="table-card" id="announcement-card">
+                                <div class="table-col title">{{ $announcement->title }}</div>
+                                <div class="table-col category">{{ $announcement->category }}</div>
+                                <div class="table-col date">
                                     {{ \Carbon\Carbon::parse($announcement->date_posted)->format('M d, Y') }}
                                 </div>
-                                <div class="announcement-col status">
+                                <div class="table-col status">
                                     @php
                                         $status = strtolower($announcement->status);
                                         $dotClass = match ($status) {
@@ -87,7 +87,7 @@
                                         {{ ucfirst($announcement->status) }}
                                     </span>
                                 </div>
-                                <div class="announcement-col actions">
+                                <div class="table-col actions">
                                     <a href="#" title="View" class="view-btn"
                                         onclick="openAnnouncementModal({{ $announcement->id }}, 'view')"
                                         data-id="{{ $announcement->id }}" data-title="{{ $announcement->title }}"
@@ -114,7 +114,7 @@
                                 </div>
                             </div>
                         @empty
-                            <div class="no-announcements-cell">No announcements found.</div>
+                            <div class="no-table-cell">No announcements found.</div>
                         @endforelse
                     </div>
                 </div>
@@ -163,13 +163,13 @@
                 announcementsList.style.display = 'block';
                 calendarView.style.display = 'none';
                 tableFilters.style.display = 'flex';
-                toggleIcon.className = 'fi fi-sr-table-layout';
+                toggleIcon.className = 'fi fi-rr-table-layout';
                 
             } else {
                 announcementsList.style.display = 'none';
                 calendarView.style.display = 'block';
                 tableFilters.style.display = 'none';
-                toggleIcon.className = 'bx bxs-calendar';
+                toggleIcon.className = 'fi fi-rr-calendar-day';
               
                 setTimeout(renderCalendar, 0);
             }
