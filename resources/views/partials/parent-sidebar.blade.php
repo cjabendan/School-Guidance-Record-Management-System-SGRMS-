@@ -25,7 +25,7 @@
             <li class="{{ Request::is('Parent/child*') ? 'active' : '' }}">
                 <a href="{{ url('Parent/child') }}">
                     <i class="fi fi-sr-student"></i>
-                    <span class="text">My Child</span>
+                    <span class="text">My Children</span>
                 </a>
             </li>
             <li class="{{ Request::is('Parent/appointments*') ? 'active' : '' }}">

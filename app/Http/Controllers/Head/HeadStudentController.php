@@ -131,13 +131,13 @@ class HeadStudentController extends Controller
             'updated_at' => now(),
         ]);
 
-        // Handle image upload
+        // Handle image upload 
         $imagePath = 'default.jpg';
         if ($request->hasFile('profile_image')) {
             $image = $request->file('profile_image');
-            $imageName = uniqid('user_') . '.' . $image->getClientOriginalExtension();
-            $image->move(public_path('images/user'), $imageName);
-            $imagePath = $imageName;
+            $originalName = $image->getClientOriginalName();
+            $image->move(public_path('images/user'), $originalName);
+            $imagePath = $originalName;
         }
 
         // Set username and password
@@ -275,12 +275,12 @@ class HeadStudentController extends Controller
             'updated_at' => now(),
         ]);
 
-        // Handle image upload
+        // Handle image upload (save with original filename)
         if ($request->hasFile('profile_image')) {
             $image = $request->file('profile_image');
-            $imageName = uniqid('user_') . '.' . $image->getClientOriginalExtension();
-            $image->move(public_path('images/user'), $imageName);
-            $user->profile_image = $imageName;
+            $originalName = $image->getClientOriginalName();
+            $image->move(public_path('images/user'), $originalName);
+            $user->profile_image = $originalName;
         }
 
         // Update user

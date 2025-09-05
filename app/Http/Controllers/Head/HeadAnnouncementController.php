@@ -121,6 +121,8 @@ class HeadAnnouncementController extends Controller
             $filename = time() . '_' . $image->getClientOriginalName();
             $image->move(public_path('images/announcements'), $filename);
             $data['image'] = $filename;
+        }else {
+            $data['image'] = 'default.png'; 
         }
 
         Announcements::create($data);

@@ -22,8 +22,8 @@ class HeadParentController extends Controller
                 'users.last_name',
                 'users.contact_num',
                 'users.email',
-                'parents.relationship',
                 'users.profile_image',
+                'users.status'
             )
             ->get(); // or use ->paginate(10) for pagination
 

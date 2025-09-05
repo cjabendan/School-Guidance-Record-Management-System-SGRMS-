@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Parents;
 use App\Models\ParentModel;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use App\Models\Announcements;
 use Illuminate\Support\Facades\DB;
 
 class ParentDashboardController extends Controller
@@ -15,7 +16,8 @@ class ParentDashboardController extends Controller
      */
     public function dashboard()
     {
-        return view('Parent.dashboard');
+        $announcements = Announcements::orderByDesc('date_posted')->take(10)->get();
+        return view('Parent.dashboard', compact('announcements'));
     }
 
 

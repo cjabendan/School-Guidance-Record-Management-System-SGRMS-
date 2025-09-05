@@ -25,9 +25,9 @@
                             {{ $prefix ? $prefix . ' ' : '' }}{{ $lastName }}
                         </h2>
                         <p class="request-preview">
-                            Link to student:
+                            Link to:
                             @foreach($request->students as $pls)
-                                {{ $pls->student->user->first_name ?? 'Unknown' }} {{ $pls->student->user->last_name ?? '' }} (ID: {{ $pls->student_id }})
+                                {{ $pls->student_id }}
                                 @if(!$loop->last), @endif
                             @endforeach
                         </p>

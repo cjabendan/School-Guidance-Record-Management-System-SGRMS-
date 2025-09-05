@@ -59,12 +59,13 @@ class HeadCounselorController extends Controller
             'profile_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
-        // Handle profile image upload
+        // Handle profile image upload (save with original filename)
         $profileImageName = 'default.jpg';
         if ($request->hasFile('profile_image')) {
             $file = $request->file('profile_image');
-            $profileImageName = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
-            $file->move(public_path('images/user'), $profileImageName);
+            $originalName = $file->getClientOriginalName();
+            $file->move(public_path('images/user'), $originalName);
+            $profileImageName = $originalName;
         }
 
         // Use a transaction to ensure both user and counselor are created
@@ -118,12 +119,22 @@ class HeadCounselorController extends Controller
     public function update(Request $request)
     {
         $counselor = Counselor::findOrFail($request->input('c_id'));
-        // Only update user info, not counselor table
         $user = $counselor->user;
+
         $user->first_name = $request->input('fname');
         $user->middle_name = $request->input('mname');
         $user->last_name = $request->input('lname');
         $user->contact_num = $request->input('contact_num');
+        $user->email = $request->input('email');
+
+        // Handle profile image upload (save with original filename)
+        if ($request->hasFile('profile_image')) {
+            $file = $request->file('profile_image');
+            $originalName = $file->getClientOriginalName();
+            $file->move(public_path('images/user'), $originalName);
+            $user->profile_image = $originalName;
+        }
+
         $user->save();
 
         return redirect()->back()->with('success', 'Counselor updated successfully!');

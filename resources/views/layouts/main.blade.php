@@ -28,6 +28,7 @@
     <link rel="stylesheet" href="{{ asset('css/dashboard.css') }}">
     <link rel="stylesheet" href="{{ asset('css/table.css') }}">
     <link rel="stylesheet" href="{{ asset('css/counsel.css') }}">
+        <link rel="stylesheet" href="{{ asset('css/counseling.css') }}">
     <link rel="stylesheet" href="{{ asset('css/announcements.css') }}">
     <link rel="stylesheet" href="{{ asset('css/appointments.css') }}">
     <link rel="stylesheet" href="{{ asset('css/caseModal.css') }}">
