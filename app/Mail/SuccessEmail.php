@@ -22,5 +22,8 @@ class SuccessEmail extends Mailable
         return $this->subject('Your Parent Account is Activated!')
             ->view('emails.success_email')
             ->with(['user' => $this->user]);
+
+        return $this->subject('Parent Account Successfully Created')
+            ->view('emails.success_email');
     }
 }

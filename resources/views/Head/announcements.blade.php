@@ -26,7 +26,8 @@
                                         data-filter="news">News</a>
                                 </li>
                             </div>
-                             <button class="add-btn" onclick="openModal()"><i class="fi fi-br-plus"></i>Add Announcement</button>
+                            <button class="add-btn" onclick="openModal()"><i class="fi fi-br-plus"></i>Add
+                                Announcement</button>
                         </div>
                     </div>
                     <div class="search-bar">
@@ -41,7 +42,7 @@
                                 <button type="submit" style="display:none"></button>
                             </form>
                         </div>
-                       
+
                         <button class="toggle-btn" id="toggle-view-btn">
                             <i class="fi fi-rr-table-layout" id="toggle-icon"></i>
                             <span id="toggle-label"></span>
@@ -164,13 +165,13 @@
                 calendarView.style.display = 'none';
                 tableFilters.style.display = 'flex';
                 toggleIcon.className = 'fi fi-rr-table-layout';
-                
+
             } else {
                 announcementsList.style.display = 'none';
                 calendarView.style.display = 'block';
                 tableFilters.style.display = 'none';
                 toggleIcon.className = 'fi fi-rr-calendar-day';
-              
+
                 setTimeout(renderCalendar, 0);
             }
         }

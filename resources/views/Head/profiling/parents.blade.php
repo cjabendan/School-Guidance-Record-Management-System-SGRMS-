@@ -18,8 +18,7 @@
                                     <a href="#" class="a-nav" data-filter="inactive">Inactive</a>
                                 </li>
                             </div>
-                            <button class="add-btn"><i class="fi fi-br-plus"></i>Add
-                                Parent</button>
+                            <button class="add-btn" id="addParentBtn"><i class="fi fi-br-plus"></i>Add Parent</button>
                         </div>
                     </div>
                     <div class="search-bar">
@@ -89,5 +88,9 @@
         </div>
     </section>
 
+        <!-- Add Parent Modal -->
+    @include('Head.Modal.parentModal')
+
+    <script src="{{ asset('js/Modal/parentModal.js') }}"></script>
 
 @endsection

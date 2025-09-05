@@ -90,6 +90,7 @@ class HeadAnnouncementController extends Controller
 
         return response()->json($events);
     }
+    
     public function store(Request $request)
     {
         $request->validate([

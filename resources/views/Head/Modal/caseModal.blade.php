@@ -9,18 +9,16 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                  <div class="mb-3">
-
+                 <!-- Student Search Input with tags/chips inside the input field -->
+                    <div class="mb-3" style="position:relative;">
                         <label for="student_search" class="form-label">Search Student</label>
-                        <input type="text" id="student_search" class="form-control"
-                            placeholder="Type name or ID" value="{{ request('search') }}">
-                        <!-- Hidden input for saving IDs -->
-                        <input type="hidden" name="involved_students" id="involved_students" >
-                        <!-- Container for selected students -->
-                        <div id="selected_students" class="mt-2"></div>
-                        <div id="student_search_results" class="list-group position-absolute w-100" style="z-index: 10520; display: none;"></div>
-                        
-
+                        <div id="student-tag-input" class="student-tag-input">
+                            <!-- Tags will be inserted here by JS -->
+                            <input type="text" id="student_search" class="form-control student-search-input"
+                                placeholder="Type name or ID" autocomplete="off">
+                        </div>
+                        <input type="hidden" name="involved_students" id="involved_students">
+                        <div id="student_search_results" class="list-group" style="display: none;"></div>
                     </div>
                     <div class="mb-3">
                         <label for="case_type_id" class="form-label">Type</label>
@@ -308,6 +306,17 @@
 $(function() {
     let selectedStudents = [];
 
+    function renderTags() {
+        const $tagInput = $("#student-tag-input");
+        $tagInput.find(".student-tag").remove();
+        selectedStudents.forEach(student => {
+            $(`<span class="student-tag" data-id="${student.id}">
+                ${student.text}
+                <span class="remove-tag" title="Remove">&times;</span>
+            </span>`).insertBefore($("#student_search"));
+        });
+        $("#involved_students").val(selectedStudents.map(s => s.id).join(','));
+    }
 
     function renderResults(items) {
         const $results = $("#student_search_results");
@@ -317,7 +326,6 @@ $(function() {
             return;
         }
         items.forEach(item => {
-            // Always use student s_id for data-id
             $results.append(
                 `<button type="button" class="list-group-item list-group-item-action" data-id="${item.id}" data-text="${item.text}">${item.text}</button>`
             );
@@ -336,35 +344,31 @@ $(function() {
             dataType: "json",
             data: { q: query },
             success: function(data) {
-                // Ensure each item.id is student s_id
-                renderResults(data);
+                // Filter out already selected students
+                const filtered = data.filter(item => !selectedStudents.some(s => s.id == item.id));
+                renderResults(filtered);
             }
         });
     });
 
     // Handle click on result
     $("#student_search_results").on("click", ".list-group-item", function() {
-        // Always use student s_id for selection
         const id = $(this).data("id");
         const text = $(this).data("text");
-        if (!selectedStudents.includes(id)) {
-            selectedStudents.push(id);
-            $("#selected_students").append(
-                `<span class="badge bg-primary me-1 mb-1">${text} <a href="#" class="text-white ms-1 remove-student" data-id="${id}">&times;</a></span>`
-            );
-            $("#involved_students").val(selectedStudents.join(','));
+        if (!selectedStudents.some(s => s.id == id)) {
+            selectedStudents.push({id, text});
+            renderTags();
         }
         $("#student_search").val('');
         $("#student_search_results").hide();
+        $("#student_search").focus();
     });
 
-    // Remove student from selection
-    $("#selected_students").on("click", ".remove-student", function(e) {
-        e.preventDefault();
-        const id = $(this).data("id");
-        selectedStudents = selectedStudents.filter(sid => sid !== id);
-        $(this).parent().remove();
-        $("#involved_students").val(selectedStudents.join(','));
+    // Remove student tag
+    $("#student-tag-input").on("click", ".remove-tag", function(e) {
+        const id = $(this).parent().data("id");
+        selectedStudents = selectedStudents.filter(s => s.id != id);
+        renderTags();
     });
 
     // Hide results when clicking outside

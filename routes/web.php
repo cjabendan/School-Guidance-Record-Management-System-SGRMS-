@@ -94,6 +94,7 @@ Route::prefix('Head')->name('Head.')->group(function () {
 
     // Parents
     Route::get('/parents', [HeadParentController::class, 'index'])->name('parents.index');
+    Route::post('/parents/add', [HeadParentController::class, 'store'])->name('parents.add');
 
      // Cases
     Route::get('/cases', [HeadCaseController::class, 'index'])->name('cases.index');

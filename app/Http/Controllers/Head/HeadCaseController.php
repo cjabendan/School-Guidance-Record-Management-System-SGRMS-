@@ -8,7 +8,6 @@ use Illuminate\Http\Request;
 use App\Models\CaseModel;
 use Illuminate\Support\Facades\DB;
 use App\Models\Student;
-use Illuminate\Support\Facades\Log;
 
 class HeadCaseController extends Controller
 {
@@ -35,7 +34,7 @@ class HeadCaseController extends Controller
 
     public function index(Request $request)
     {
-        $query = CaseModel::orderBy('case_id', 'desc');
+        $query = CaseModel::with('caseType')->orderBy('case_id', 'desc');
 
         // Filter by archived status
         if ($request->filled('archived') && $request->archived == '1') {
@@ -57,6 +56,17 @@ class HeadCaseController extends Controller
         // Filter by severity
         if ($request->filled('filter_severity')) {
             $query->where('severity', $request->filter_severity);
+        }
+
+        // Search by case ID or case type
+        if ($request->filled('search')) {
+            $search = $request->input('search');
+            $query->where(function($q) use ($search) {
+                $q->where('case_id', 'LIKE', "%$search%")
+                ->orWhereHas('caseType', function($q2) use ($search) {
+                    $q2->where('type_name', 'LIKE', "%$search%");
+                });
+            });
         }
 
         $cases = $query->get();
@@ -109,8 +119,6 @@ class HeadCaseController extends Controller
 
         // Link involved students
         $studentIds = array_map('trim', explode(',', $request->involved_students));
-        Log::info('Submitted involved_students:', ['raw' => $request->involved_students]);
-        Log::info('Parsed studentIds:', ['ids' => $studentIds]);
         foreach ($studentIds as $studentId) {
             if ($studentId) {
                 DB::table('case_students')->insert([

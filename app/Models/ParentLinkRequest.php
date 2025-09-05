@@ -8,12 +8,14 @@ class ParentLinkRequest extends Model
 {
     protected $table = 'parent_link_requests';
     protected $primaryKey = 'request_id';
-    public $timestamps = false; // we only have requested_at, not updated_at/created_at
+    public $timestamps = false; 
 
     protected $fillable = [
         'parent_id',
         'status',
-        'requested_at'
+        'requested_at',
+        'email',
+        'number'
     ];
 
     public function parent()

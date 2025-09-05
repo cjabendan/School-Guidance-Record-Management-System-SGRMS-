@@ -14,9 +14,9 @@
                             <div class="filters">
                                 <li>
                                     <a href="#" class="active">All</a>
-                                    <a href="#">Pending</a>
-                                    <a href="#">Under Investigation</a>
-                                    <a href="#">Resolved</a>
+                                    <a href="#">Minor Offense</a>
+                                    <a href="#">Major Offense</a>
+                                    <a href="#">Grave Offense</a>
                                 </li>
                             </div>
                             <button class="add-btn" data-bs-toggle="modal" data-bs-target="#addCaseModal"
@@ -28,7 +28,7 @@
                             <form method="GET" action="">
                                 <i class="fi fi-br-search"></i>
                                 <input type="text" name="search" value="{{ request('search') }}"
-                                    placeholder="Search cases..." id="announcement-search-input">
+                                    placeholder="Search cases..." id="case-search-input">
                                 @if (request('category'))
                                     <input type="hidden" name="category" value="{{ request('category') }}">
                                 @endif
@@ -49,7 +49,6 @@
                         <div class="table-col title">Case ID</div>
                         <div class="table-col category">Type</div>
                         <div class="table-col">Severity</div>
-                        <div class="table-col status">Status</div>
                         <div class="table-col date">Filed Date</div>
                         <div class="table-col actions">Actions</div>
                     </div>
@@ -59,12 +58,6 @@
                                 <div class="table-col title">{{ $case->case_id }}</div>
                                 <div class="table-col category">{{ $case->caseType->type_name ?? 'N/A' }}</div>
                                 <div class="table-col">{{ $case->severity }}</div>
-                                <div class="table-col status">
-                                    <span class="status-label status-{{ strtolower($case->status) }}">
-                                        <span class="status-dot status-{{ strtolower($case->status) }}"></span>
-                                        {{ ucfirst($case->status) }}
-                                    </span>
-                                </div>
                                 <div class="table-col date">{{ $case->filed_date }}</div>
                                 <div class="table-col actions" style="display:flex; gap:8px;">
                                     <button type="button" class="view-btn" data-bs-toggle="modal"
@@ -90,4 +83,25 @@
         </div>
     </section>
     @include('Head.Modal.caseModal')
+
+    <script>
+$(document).ready(function() {
+    $('#case-search-input').on('input', function() {
+        let query = $(this).val();
+        $.ajax({
+            url: "{{ route('Head.cases.index') }}",
+            type: "GET",
+            data: { search: query },
+            success: function(response) {
+                // Parse the returned HTML and update the table
+                let html = $(response).find('#cases-list').html();
+                $('#cases-list').html(html);
+            }
+        });
+    });
+});
+</script>
+
 @endsection
+
+
