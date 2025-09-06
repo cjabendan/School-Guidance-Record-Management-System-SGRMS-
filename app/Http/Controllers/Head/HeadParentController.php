@@ -11,6 +11,7 @@ use App\Models\User;
 use App\Models\ParentModel;
 
 class HeadParentController extends Controller
+
 {
 
     // Display the list of parents //
@@ -27,7 +28,8 @@ class HeadParentController extends Controller
                 'users.contact_num',
                 'users.email',
                 'users.profile_image',
-                'users.status'
+                'users.status',
+                'users.sex'
             )
             ->get(); // or use ->paginate(10) for pagination
 
@@ -79,5 +81,75 @@ class HeadParentController extends Controller
             DB::rollBack();
             return response()->json(['success' => false, 'message' => $e->getMessage()]);
         }
+    }
+
+
+    // Get parent data for edit modal (AJAX)
+    public function get($id)
+    {
+        $parent = DB::table('parents')
+            ->leftJoin('users', 'parents.user_id', '=', 'users.id')
+            ->select(
+                'parents.p_id',
+                'users.first_name',
+                'users.middle_name',
+                'users.last_name',
+                'users.sex',
+                'users.contact_num',
+                'users.email'
+            )
+            ->where('parents.p_id', $id)
+            ->first();
+        if ($parent) {
+            return response()->json(['success' => true, 'parent' => $parent]);
+        } else {
+            return response()->json(['success' => false, 'message' => 'Parent not found.']);
+        }
+    }
+
+    // Update parent data (AJAX)
+    public function update(Request $request, $id)
+    {
+        $request->validate([
+            'first_name' => 'required|string|max:255',
+            'middle_name' => 'nullable|string|max:255',
+            'last_name' => 'required|string|max:255',
+            'contact_num' => 'nullable|string|max:20',
+            'sex' => 'required|in:Male,Female',
+            'email' => 'required|email',
+        ]);
+
+        $parent = DB::table('parents')->where('p_id', $id)->first();
+        if (!$parent) {
+            return response()->json(['success' => false, 'message' => 'Parent not found.']);
+        }
+        $user = User::find($parent->user_id);
+        if (!$user) {
+            return response()->json(['success' => false, 'message' => 'User not found.']);
+        }
+        $user->first_name = $request->first_name;
+        $user->middle_name = $request->middle_name;
+        $user->last_name = $request->last_name;
+        $user->sex = $request->sex;
+        $user->contact_num = $request->contact_num;
+        $user->email = $request->email;
+        $user->save();
+        return response()->json(['success' => true, 'message' => 'Parent updated successfully.']);
+    }
+
+    // Archive (set parent account to inactive)
+    public function archive(Request $request, $id)
+    {
+        $parent = ParentModel::find($id);
+        if (!$parent) {
+            return response()->json(['success' => false, 'message' => 'Parent not found.']);
+        }
+        $user = $parent->user;
+        if ($user) {
+            $user->status = 'inactive';
+            $user->save();
+            return response()->json(['success' => true, 'message' => 'Parent account archived (set to inactive).']);
+        }
+        return response()->json(['success' => false, 'message' => 'User not found for parent.']);
     }
 }

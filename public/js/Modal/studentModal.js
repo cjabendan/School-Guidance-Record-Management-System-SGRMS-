@@ -1,3 +1,18 @@
+// Delete profile image logic for edit modal
+document.addEventListener('DOMContentLoaded', function() {
+    var deleteBtn = document.getElementById('deleteProfileImageBtn');
+    var studentImage = document.getElementById('studentImage');
+    var deleteField = document.getElementById('delete_profile_image');
+    if (deleteBtn && studentImage && deleteField) {
+        deleteBtn.addEventListener('click', function() {
+            var defaultSrc = studentImage.getAttribute('data-default');
+            if (studentImage.src !== defaultSrc) {
+                studentImage.src = defaultSrc;
+                deleteField.value = '1';
+            }
+        });
+    }
+});
 function getYearSuffix(i) {
     if (i === 1) return "st";
     if (i === 2) return "nd";
@@ -534,37 +549,43 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // _________________________________________________________________________________________
 
-// Export Modal logic
-window.openExportModal = function openExportModal() {
-    var modal = document.getElementById('exportModal');
-    if (modal) {
-        modal.style.display = 'block';
-    }
+// Student export 
+const exportBtn = document.getElementById('exportDropdownBtn');
+const exportMenu = document.getElementById('exportDropdownMenu');
+if (exportBtn && exportMenu) {
+    exportBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        exportMenu.style.display = exportMenu.style.display === 'block' ? 'none' : 'block';
+    });
+    document.addEventListener('click', function() {
+        exportMenu.style.display = 'none';
+    });
+    // Dropdown hover effect
+    document.querySelectorAll('.dropdown-item').forEach(function(item) {
+        item.addEventListener('mouseover', function() {
+            this.style.background = '#f3f4f6';
+        });
+        item.addEventListener('mouseout', function() {
+            this.style.background = 'none';
+        });
+    });
 }
-window.closeExportModal = function closeExportModal() {
-    var modal = document.getElementById('exportModal');
-    if (modal) {
-        modal.style.display = 'none';
+function downloadExport(format) {
+    if (exportMenu) exportMenu.style.display = 'none';
+    let url = new URL(window.location.origin + '/Head/students/export');
+    url.searchParams.set('format', format);
+    // Add status filter if present
+    const statusTab = document.querySelector('.tab.active');
+    if (statusTab && statusTab.href.includes('status=')) {
+        const status = new URL(statusTab.href).searchParams.get('status');
+        if (status) url.searchParams.set('status', status);
     }
+    // Use anchor to force download
+    const a = document.createElement('a');
+    a.href = url.toString();
+    a.setAttribute('download', 'students_export.' + (format === 'pdf' ? 'pdf' : 'xlsx'));
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
 }
-document.addEventListener('DOMContentLoaded', function() {
-    var exportModal = document.getElementById('exportModal');
-    var closeBtn = document.getElementById('closeExportModalBtn');
-    if (closeBtn && exportModal) {
-        closeBtn.onclick = function(e) {
-            e.stopPropagation();
-            exportModal.style.display = 'none';
-        };
-        exportModal.onclick = function(event) {
-            if (event.target === exportModal) {
-                exportModal.style.display = 'none';
-            }
-        };
-        var modalContent = exportModal.querySelector('.modal-content');
-        if (modalContent) {
-            modalContent.onclick = function(e) {
-                e.stopPropagation();
-            };
-        }
-    }
-});
+

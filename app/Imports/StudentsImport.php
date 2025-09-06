@@ -52,6 +52,12 @@ class StudentsImport implements ToModel, WithHeadingRow
                 'status' => $row['status'] ?? 'active',
                 'religion' => $row['religion'] ?? null,
                 'civil_status' => $row['civil_status'] ?? null,
+                'father_name' => $row['father_name'] ?? null,
+                'mother_name' => $row['mother_name'] ?? null,
+                'guardian_name' => $row['guardian_name'] ?? null,
+                'relationship' => $row['relationship'] ?? null,
+                'guardian_contact' => $row['guardian_contact'] ?? null,
+                'guardian_email' => $row['guardian_email'] ?? null,
             ]);
         } catch (\Throwable $e) {
             $this->errors[] = [

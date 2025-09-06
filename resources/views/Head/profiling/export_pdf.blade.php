@@ -8,23 +8,47 @@
 </head>
 <body>
     <h2>Student Export</h2>
-    <table>
-        <thead>
-            <tr>
-                @foreach ($columns as $col)
-                    <th>{{ ucwords(str_replace('_', ' ', $col)) }}</th>
-                @endforeach
-            </tr>
-        </thead>
-        <tbody>
-            @foreach ($students as $student)
+        <table>
+            <thead>
                 <tr>
-                    @foreach ($columns as $col)
-                        <td>{{ $student->$col ?? '' }}</td>
-                    @endforeach
+                    <th>Student ID</th>
+                    <th>Full Name</th>
+                    <th>Year Level</th>
+                    <th>Section</th>
+                    <th>Gender</th>
+                    <th>Date of Birth</th>
+                    <th>Contact Number</th>
+                    <th>Email Address</th>
+                    <th>Address</th>
+                    <th>Father's Name</th>
+                    <th>Mother's Name</th>
+                    <th>Guardian's Name</th>
+                    <th>Relationship</th>
+                    <th>Guardian Contact</th>
+                    <th>Guardian Email</th>
                 </tr>
-            @endforeach
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+                @foreach ($students as $student)
+                    <tr>
+                        <td>{{ $student->s_id ?? '' }}</td>
+                        <td>{{ trim(($student->lname ?? '') . ', ' . ($student->fname ?? '') . ' ' . ($student->mname ?? '') . ' ' . ($student->suffix ?? '')) }}</td>
+                        <td>{{ $student->year_level ?? '' }}</td>
+                        <td>{{ $student->section ?? '' }}</td>
+                        <td>{{ $student->sex ?? '' }}</td>
+                        <td>{{ $student->bod ? date('F d, Y', strtotime($student->bod)) : '' }}</td>
+                        <td>{{ $student->contact_num ?? '' }}</td>
+                        <td>{{ $student->email ?? '' }}</td>
+                        <td>{{ $student->address ?? '' }}</td>
+                        <td>{{ $student->father_name ?? '' }}</td>
+                        <td>{{ $student->mother_name ?? '' }}</td>
+                        <td>{{ $student->guardian_name ?? '' }}</td>
+                        <td>{{ $student->relationship ?? '' }}</td>
+                        <td>{{ $student->guardian_contact ?? '' }}</td>
+                        <td>{{ $student->guardian_email ?? '' }}</td>
+                    </tr>
+                @endforeach
+            </tbody>
+        </table>
 </body>
 </html>

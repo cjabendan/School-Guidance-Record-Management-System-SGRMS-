@@ -1,34 +1,34 @@
 
 @forelse($appointments as $appointment)
-    <div class="appointment-item">
-        <div class="appointment-col type">
+    <div class="table-card">
+        <div class="table-col type">
             {{ $appointment->type ? $appointment->type->type_name : 'N/A' }}
         </div>
-        <div class="appointment-col requester">
+        <div class="table-col requester">
             @if ($appointment->requester)
                 {{ $appointment->requester->first_name }} {{ $appointment->requester->last_name }}
             @else
                 N/A
             @endif
         </div>
-        <div class="appointment-col student">
+        <div class="table-col student">
             @if ($appointment->student)
                 {{ $appointment->student->first_name }} {{ $appointment->student->last_name }}
             @else
                 N/A
             @endif
         </div>
-        <div class="appointment-col datetime">
+        <div class="table-col datetime">
             {{ $appointment->appointment_datetime ? $appointment->appointment_datetime->format('M d, Y h:i A') : 'N/A' }}
         </div>
-        <div class="appointment-col counselor">
+        <div class="table-col counselor">
             @if ($appointment->counselor)
                 {{ $appointment->counselor->first_name }} {{ $appointment->counselor->last_name }}
             @else
                 N/A
             @endif
         </div>
-        <div class="appointment-col status">
+        <div class="table-col status">
             @php
                 $status = strtolower($appointment->status);
                 $dotClass = match ($status) {
@@ -56,7 +56,7 @@
                 </span>
             @endif
         </div>
-        <div class="appointment-col actions">
+        <div class="table-col actions">
             <a href="#" title="View" class="view-btn"
                 onclick="openAppointmentModal({{ $appointment->appointment_id }}, 'view')">
                 <i class='bx bx-show'></i>
@@ -68,7 +68,7 @@
         </div>
     </div>
 @empty
-    <div class="no-appointments-cell">
+    <div class="no-table-cell">
         No appointments to display.
     </div>
 @endforelse

@@ -13,6 +13,7 @@
                     'Head.students.index' => 'Students',
                     'Head.parents.index' => 'Parents',
                     'Head.cases.index' => 'Case Reports',
+                    'Head.messages.index' => 'Messages',
                     'Head.counseling.index' => 'Counseling',
                     'Head.appointments.index' => 'Appointments',
                     'Head.announcements.index' => 'Announcements',

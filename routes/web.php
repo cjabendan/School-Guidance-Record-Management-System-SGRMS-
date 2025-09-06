@@ -14,6 +14,7 @@ use App\Http\Controllers\Head\HeadCounselorController;
 use App\Http\Controllers\Head\HeadStudentController;
 use App\Http\Controllers\Head\HeadParentController; 
 use App\Http\Controllers\Head\HeadCaseController;
+use App\Http\Controllers\Head\HeadMessageController;
 use App\Http\Controllers\Head\HeadCounselingController;
 use App\Http\Controllers\Head\HeadAppointmentController;
 use App\Http\Controllers\Head\HeadAnnouncementController;
@@ -95,6 +96,9 @@ Route::prefix('Head')->name('Head.')->group(function () {
     // Parents
     Route::get('/parents', [HeadParentController::class, 'index'])->name('parents.index');
     Route::post('/parents/add', [HeadParentController::class, 'store'])->name('parents.add');
+    Route::get('/parents/{id}/get', [HeadParentController::class, 'get'])->name('parents.get');
+    Route::post('/parents/{id}/update', [HeadParentController::class, 'update'])->name('parents.update');
+
 
      // Cases
     Route::get('/cases', [HeadCaseController::class, 'index'])->name('cases.index');
@@ -103,8 +107,15 @@ Route::prefix('Head')->name('Head.')->group(function () {
     Route::put('/cases/{case}/archive', [HeadCaseController::class, 'archive'])->name('cases.archive');
     Route::get('/students/search', [HeadCaseController::class, 'searchStudent'])->name('students.search');
 
+    // Messages
+    Route::get('/messages', [HeadMessageController::class, 'index'])->name('messages.index');
+
+
     // Counseling
     Route::get('/counseling', [HeadCounselingController::class, 'index'])->name('counseling.index');
+
+
+
 
     Route::get('/appointments', [HeadAppointmentController::class, 'index'])->name('appointments.index');
 

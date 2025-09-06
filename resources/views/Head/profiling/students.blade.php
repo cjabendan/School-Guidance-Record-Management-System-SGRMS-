@@ -32,7 +32,13 @@
                         </form>
                     </div>
                     <button class="toggle-btn" onclick="openImportModal()"><i class="fi fi-rr-document-circle-arrow-up"></i></i></button>
-                    <button class="toggle-btn" onclick="openExportModal()"><i class="fi fi-rr-file-download"></i></button>
+                    <div class="dropdown" style="display:inline-block;position:relative;">
+                        <button class="toggle-btn" id="exportDropdownBtn" style="padding:8px 12px;border-radius:6px;background:#2563eb;color:#fff;border:none;box-shadow:0 1px 4px rgba(0,0,0,0.05);"><i class="fi fi-rr-file-download"></i></button>
+                        <div id="exportDropdownMenu" class="dropdown-menu" style="display:none;position:absolute;right:0;top:110%;z-index:1000;background:#fff;border-radius:8px;border:1px solid #e5e7eb;padding:4px 0;min-width:140px;box-shadow:0 4px 16px rgba(0,0,0,0.08);">
+                            <a href="#" class="dropdown-item" onclick="downloadExport('pdf')" style="display:block;padding:10px 18px;color:#222;text-decoration:none;font-size:15px;transition:background 0.2s;border:none;background:none;cursor:pointer;">Export as PDF</a>
+                            <a href="#" class="dropdown-item" onclick="downloadExport('excel')" style="display:block;padding:10px 18px;color:#222;text-decoration:none;font-size:15px;transition:background 0.2s;border:none;background:none;cursor:pointer;">Export as Excel</a>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="table-list" id="student-list" style="margin-bottom:0;">
@@ -48,8 +54,22 @@
                 <div class="table">
                     @foreach ($students as $row)
                         @php
-                            $caseCount = (int) $row->case_count;
-                            $statusClass = $caseCount === 0 ? 'green' : ($caseCount <= 2 ? 'orange' : 'red');
+                            // Default: green circle for all students
+                            $statusClass = 'green';
+                            $statusColor = 'green';
+                            // If student has a case record, use severity for color
+                            if (!empty($row->case_severity)) {
+                                if (strtolower($row->case_severity) === 'low') {
+                                    $statusClass = 'green';
+                                    $statusColor = 'green';
+                                } elseif (strtolower($row->case_severity) === 'intermediate') {
+                                    $statusClass = 'yellow';
+                                    $statusColor = 'yellow';
+                                } elseif (strtolower($row->case_severity) === 'severe') {
+                                    $statusClass = 'red';
+                                    $statusColor = 'red';
+                                }
+                            }
                             $suffix = $row->suffix !== 'N/A' ? $row->suffix : '';
                             $mname = trim($row->mname);
                             $mname = $mname !== '' ? strtoupper(substr($mname, 0, 1)) . '.' : '';
@@ -58,7 +78,7 @@
                         @endphp
                             <div class="table-card">
                                 <div class="table-col title">
-                                    <span class="status-circle {{ $statusClass }}" style="background: {{ $statusClass }} !important; vertical-align: middle; margin-right: 6px;"></span>
+                                    <span class="status-circle {{ $statusClass }}" style="background: {{ $statusColor }} !important; vertical-align: middle; margin-right: 6px;"></span>
                                     {{ $row->s_id }}
                                 </div>
                             <div class="table-col">{{ $name }}</div>
@@ -91,5 +111,6 @@
     @include('Head.Modal.studentModal')
 
     <script src="{{ asset('js/head.js') }}"></script>
+    <script src="{{ asset('js/Modal/studentModal.js') }}"></script>
     <script src="{{ asset('js/Modal/studentModal.js') }}"></script>
 @endsection

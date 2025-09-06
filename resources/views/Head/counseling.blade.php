@@ -14,9 +14,9 @@
                             <div class="filters">
                                 <li>
                                     <a href="#" class="active">All</a>
-                                    <a href="#">Pending</a>
-                                    <a href="#">Under Investigation</a>
-                                    <a href="#">Resolved</a>
+                                    <a href="#">Alarming</a>
+                                    <a href="#">Moderate</a>
+                                    <a href="#">Low</a>
                                 </li>
                             </div>
                             <button class="add-btn" data-bs-toggle="modal" data-bs-target="#addCaseModal"><i
@@ -46,48 +46,31 @@
                 <!-- Table view -->
                 <div class="table-list" id="counseling-list" style="margin-bottom:0;">
                     <div class="table-header">
-                        <div class="table-col title">Case ID</div>
+                        <div class="table-col title">Note ID</div>
                         <div class="table-col category">Type</div>
-                        <div class="table-col">Severity</div>
-                        <div class="table-col status">Status</div>
                         <div class="table-col date">Filed Date</div>
-                        <div class="table-col">Notes</div>
+                        <div class="table-col status">Remarks</div>
                         <div class="table-col actions">Actions</div>
                     </div>
                     <div class="table">
                         @forelse($counselings as $counseling)
                             <div class="table-card">
-                                <div class="table-col title">{{ $counseling->case_id }}</div>
+                                <div class="table-col title">{{ $counseling->note_id }}</div>
                                 <div class="table-col category">{{ $counseling->caseType->type_name ?? 'N/A' }}</div>
-                                <div class="table-col">{{ $counseling->severity }}</div>
+                                <div class="table-col">{{ $counseling->created_at }}</div>
                                 <div class="table-col status">
-                                    <span class="status-label status-{{ strtolower($counseling->status) }}">
-                                        <span class="status-dot status-{{ strtolower($counseling->status) }}"></span>
-                                        {{ ucfirst($counseling->status) }}
+                                    <span class="status-label status-{{ strtolower($counseling->remarks) }}">
+                                        <span class="status-dot status-{{ strtolower($counseling->remarks) }}"></span>
+                                        {{ ucfirst($counseling->remarks) }}
                                     </span>
                                 </div>
-                                <div class="table-col date">{{ $counseling->filed_date }}</div>
-                                <div class="table-col">
-                                    @php
-                                        $notes = $counseling->notes ?? [];
-                                    @endphp
-                                    @if (count($notes) > 0)
-                                        <span style="font-weight:500; color:#1ea7ff;">{{ count($notes) }}
-                                            note{{ count($notes) > 1 ? 's' : '' }}</span>
-                                        <br>
-                                        <span style="font-size:0.95em; color:#555;">
-                                            {{ Str::limit($notes[0]->observations ?? '', 40) }}
-                                        </span>
-                                    @else
-                                        <span style="color:#888;">No notes</span>
-                                    @endif
-                                </div>
+                        
                                 <div class="table-col actions">
                                     <button type="button" class="view-btn" data-bs-toggle="modal"
-                                        data-bs-target="#viewcounselingModal{{ $counseling->case_id }}">View</button>
+                                        data-bs-target="#viewcounselingModal{{ $counseling->case_id }}"><i class='bx bx-show'></i></button>
                                     <button type="button" class="edit-btn" data-bs-toggle="modal"
-                                        data-bs-target="#editcounselingModal{{ $counseling->case_id }}">Edit</button>
-                                    <button type="button" class="archive-btn">Archive</button>
+                                        data-bs-target="#editcounselingModal{{ $counseling->case_id }}"><i class='bx bx-edit'></i></button>
+                                    <button type="button" class="archive-btn"><i class='bx bx-archive'></i></button>
                                 </div>
                             </div>
                         @empty

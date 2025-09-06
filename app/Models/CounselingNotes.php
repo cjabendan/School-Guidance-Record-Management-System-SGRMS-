@@ -17,6 +17,7 @@ class CounselingNotes extends Model
         'user_id',
         'observations',
         'recommendations',
+        'remarks',
         'follow_up_needed',
         'follow_up_date',
     ];

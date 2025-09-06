@@ -61,12 +61,19 @@
                     <span class="text">Case Reports</span>
                 </a>
             </li>
+            <li class="{{ Request::is('Head/messages*') ? 'active' : '' }}">
+                <a href="{{ url('Head/messages') }}">
+                    <i class="fi fi-sr-comment"></i>
+                    <span class="text">Messages</span>
+                </a>
+            </li>
             <li class="{{ Request::is('Head/counseling*') ? 'active' : '' }}">
                 <a href="{{ url('Head/counseling') }}">
                    <i class="fi fi-sr-journal-alt"></i>
                     <span class="text">Counseling</span>
                 </a>
             </li>
+        
             <li class="{{ Request::is('Head/appointments*') ? 'active' : '' }}">
                 <a href="{{ url('Head/appointments') }}">
                     <i class='bx bxs-calendar'></i>

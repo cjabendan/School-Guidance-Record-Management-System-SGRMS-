@@ -30,6 +30,12 @@ class HeadStudentController extends Controller
             ->leftJoin('users', 'students.user_id', '=', 'users.id')
             ->leftJoin('year_levels', 'students.y_id', '=', 'year_levels.y_id')
             ->leftJoin('educ_levels', 'year_levels.e_id', '=', 'educ_levels.e_id')
+            // Join case_students and cases to get severity
+            ->leftJoin('case_students', 'students.s_id', '=', 'case_students.student_id')
+            ->leftJoin('cases', function($join) {
+                $join->on('case_students.case_id', '=', 'cases.case_id')
+                    ->where('cases.archived', '=', 0);
+            })
             ->select(
                 'students.s_id',
                 'users.first_name as fname',
@@ -52,9 +58,36 @@ class HeadStudentController extends Controller
                 'students.guardian_name',
                 'students.relationship',
                 'students.guardian_contact',
-                'students.guardian_email'
-            )
-            ->selectRaw('(SELECT COUNT(*) FROM cases ) AS case_count');
+                'students.guardian_email',
+                // Get the most severe case for each student
+                DB::raw('MAX(CASE WHEN cases.severity = "Severe" THEN 3 WHEN cases.severity = "Intermediate" THEN 2 WHEN cases.severity = "Low" THEN 1 ELSE 0 END) as severity_rank'),
+                DB::raw('MAX(cases.severity) as case_severity'),
+                DB::raw('COUNT(cases.case_id) as case_count')
+            );
+        $query->groupBy(
+            'students.s_id',
+            'users.first_name',
+            'users.middle_name',
+            'users.last_name',
+            'users.suffix',
+            'users.email',
+            'users.contact_num',
+            'users.sex',
+            'users.bod',
+            'users.address',
+            'educ_levels.educ_level',
+            'year_levels.year_level',
+            'students.section',
+            'students.program',
+            'students.status',
+            'users.profile_image',
+            'students.father_name',
+            'students.mother_name',
+            'students.guardian_name',
+            'students.relationship',
+            'students.guardian_contact',
+            'students.guardian_email'
+        );
 
         // Apply filters
         if (array_key_exists($filter, $educLevelMap)) {
@@ -309,8 +342,7 @@ class HeadStudentController extends Controller
         $student->religion = $validated['religion'] ?? null;
         $student->civil_status = $validated['civil_status'] ?? null;
         $student->save();
-
-        return redirect()->back()->with('success', 'Student updated successfully!');
+    return response()->json(['success' => true, 'message' => 'Student updated successfully!']);
     }
 
 //_____________________________________________________________________________
@@ -438,7 +470,9 @@ class HeadStudentController extends Controller
             $html = view('Head.profiling.export_pdf', compact('students', 'columns'))->render();
             $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadHTML($html)->setPaper('a4', 'landscape');
             $filename = 'students_export_' . $filter . '_' . date('Ymd_His') . '.pdf';
-            return $pdf->download($filename);
+            return response($pdf->output(), 200)
+                ->header('Content-Type', 'application/pdf')
+                ->header('Content-Disposition', 'attachment; filename="' . $filename . '"');
         } elseif ($format === 'excel') {
             // Excel export using Laravel Excel
             $exportData = [];

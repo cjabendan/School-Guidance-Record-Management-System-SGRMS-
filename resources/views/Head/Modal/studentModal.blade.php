@@ -9,8 +9,14 @@
                 @csrf
                 <div class="form-row image-name-row">
                     <div class="image-col">
-                        <img id="studentImage" src="{{ asset('images/user/default.jpg') }}" data-default="{{ asset('images/user/default.jpg') }}" alt="Student Image" class="student-image-box pro-add-image">
+                        <div style="position: relative; display: inline-block;">
+                            <img id="studentImage" src="{{ asset('images/user/default.jpg') }}" data-default="{{ asset('images/user/default.jpg') }}" alt="Student Image" class="student-image-box pro-add-image">
+                            <button type="button" id="deleteProfileImageBtn" title="Delete Profile Image" style="position: absolute; top: 8px; right: 8px; background: #fff; border: none; border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; box-shadow: 0 1px 4px rgba(0,0,0,0.12); cursor: pointer;">
+                                <i class="fi fi-rr-trash" style="color: #e53e3e; font-size: 1.2rem;"></i>
+                            </button>
+                        </div>
                         <input type="file" id="profile_image" name="profile_image" accept="image/*" class="pro-add-image-input">
+                        <input type="hidden" id="delete_profile_image" name="delete_profile_image" value="0">
                         <div class="student-id-row pro-add-id-row">
                             <label for="s_id_display" class="add-label" style="margin-bottom:0;">Student ID:</label>
                             <span id="s_id_display" class="pro-add-id-value">Loading...</span>
@@ -331,24 +337,3 @@
 
 <!---------------------------------------------------------------------------------------->
 
-<!-- Export Modal -->
-<div id="exportModal" class="modal" style="display:none;">
-    <div class="modal-content add-modal-content pro-add-modal" style="max-width:400px;">
-        <span class="close add-modal-close pro-add-close" id="closeExportModalBtn">&times;</span>
-        <h2 class="add-modal-title pro-add-title">Export Students</h2>
-        <form id="exportForm" method="GET" action="{{ route('Head.students.export') }}" target="_blank">
-            <div class="form-row" style="margin-bottom: 18px;">
-                <label for="export_format" class="add-label">Select Format:</label>
-                <select id="export_format" name="format" class="add-input" required>
-                    <option value="pdf">PDF</option>
-                    <option value="csv">CSV</option>
-                    <option value="excel">Excel</option>
-                </select>
-            </div>
-            <div class="pro-add-buttons" style="justify-content:center;">
-                <button type="submit" class="pro-add-save">Export</button>
-                <button type="button" class="pro-add-save" style="background:#e11d48;" onclick="closeExportModal()">Cancel</button>
-            </div>
-        </form>
-    </div>
-</div>
