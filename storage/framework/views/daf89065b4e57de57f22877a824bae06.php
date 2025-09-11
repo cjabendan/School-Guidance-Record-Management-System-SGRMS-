@@ -15,35 +15,22 @@
     <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/3.0.0/uicons-bold-rounded/css/uicons-bold-rounded.css'>
     <link rel='stylesheet'
         href='https://cdn-uicons.flaticon.com/3.0.0/uicons-solid-rounded/css/uicons-solid-rounded.css'>
-    <link rel="stylesheet"
-        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,1,0" />
     <link rel="stylesheet" href="<?php echo e(asset('css/style.css')); ?>">
-    <link rel="stylesheet" href="<?php echo e(asset('css/bar.css')); ?>">
-    <link rel="stylesheet" href="<?php echo e(asset('css/dashboard-parent.css')); ?>">
-    <link rel="stylesheet" href="<?php echo e(asset('css/table.css')); ?>">
-    <link rel="stylesheet" href="<?php echo e(asset('css/chatbot.css')); ?>">
+    <link rel="stylesheet" href="<?php echo e(asset('css/register.css')); ?>">
     <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet" />
+    
+    <link rel="stylesheet" href="<?php echo e(asset('css/style.css')); ?>">
+    <link rel="stylesheet" href="<?php echo e(asset('css/register.css')); ?>">
     <?php echo $__env->yieldContent('head'); ?>
 </head>
 
 <body>
 
-    <!-- SIDEBAR -->
-
-    <?php echo $__env->make('partials.parent-sidebar', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
-    <?php echo $__env->make('components.chatbot', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
-    <?php echo $__env->make('components.child-link', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
     <?php echo $__env->yieldContent('content'); ?>
 
 
-
-
 </body>
-
-<?php echo $__env->yieldPushContent('scripts'); ?>
-<script src="<?php echo e(asset('js/head.js')); ?>"></script>
-<script src="<?php echo e(asset('js/dashboard.js')); ?>"></script>
-<script src="<?php echo e(asset('js/chatbot.js')); ?>"></script>
+<script src="<?php echo e(asset('js/register.js')); ?>"></script>
 
 </html>
-<?php /**PATH C:\Users\Administrator\School-Guidance-Record-Management-System-SGRMS-\resources\views/layouts/parent.blade.php ENDPATH**/ ?>
+<?php /**PATH C:\Users\Administrator\School-Guidance-Record-Management-System-SGRMS-\resources\views/layouts/reg.blade.php ENDPATH**/ ?>

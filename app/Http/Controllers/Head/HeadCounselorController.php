@@ -10,25 +10,25 @@ use Illuminate\Support\Facades\DB;
 
 class HeadCounselorController extends Controller
 {
-        public function index()
+    // Activate counselor (set user status to active)
+    public function activate(Request $request, $c_id)
     {
-        $counselors = DB::table('counselors')
-            ->leftJoin('users', 'counselors.user_id', '=', 'users.id')
-            ->select(
-                'counselors.c_id',
-                'users.first_name',
-                'users.middle_name',
-                'users.last_name',
-                'users.contact_num',
-                'users.email',
-                DB::raw('COALESCE(users.profile_image, "") as profile_image')
-            )
-            ->get();
-
-        return view('Head.profiling.counselors', compact('counselors'));
+        $counselor = Counselor::where('c_id', $c_id)->first();
+        if (!$counselor) {
+            return response()->json(['error' => 'Counselor not found (c_id invalid)'], 404);
+        }
+        $user = $counselor->user;
+        if (!$user) {
+            return response()->json(['error' => 'User not found for this counselor'], 404);
+        }
+        try {
+            $user->status = 'active';
+            $user->save();
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Failed to update status: ' . $e->getMessage()], 500);
+        }
+        return response()->json(['success' => true]);
     }
-
-
     // Get next available counselor ID 
     public function getNextCounselorId()
     {
@@ -47,6 +47,24 @@ class HeadCounselorController extends Controller
         return response()->json(['next_c_id' => $nextId]);
     }
 
+    public function index()
+    {
+        $counselors = DB::table('counselors')
+            ->leftJoin('users', 'counselors.user_id', '=', 'users.id')
+            ->select(
+                'counselors.c_id',
+                'users.first_name',
+                'users.middle_name',
+                'users.last_name',
+                'users.contact_num',
+                'users.email',
+                'users.status',
+                DB::raw('COALESCE(users.profile_image, "") as profile_image')
+            )
+            ->get();
+
+        return view('Head.profiling.counselors', compact('counselors'));
+    }
 
     public function store(Request $request)
     {
@@ -54,6 +72,7 @@ class HeadCounselorController extends Controller
             'lname' => 'required|string',
             'fname' => 'required|string',
             'mname' => 'nullable|string',
+            'sex' => 'required|in:Male,Female',
             'email' => 'required|email|unique:users,email',
             'contact_num' => 'required|string',
             'password' => 'required|string|min:6',
@@ -81,7 +100,8 @@ class HeadCounselorController extends Controller
                 'middle_name' => $request->mname,
                 'last_name' => $request->lname,
                 'contact_num' => $request->contact_num,
-                'status' => 'Pending',
+                'sex' => $request->sex,
+                'status' => 'Active',
                 'profile_image' => $profileImageName,
             ]);
 
@@ -158,15 +178,39 @@ class HeadCounselorController extends Controller
             return response()->json(['error' => 'Counselor not found'], 404);
         }
         $user = $counselor->user;
-        $profile_image_url = asset('images/user/' . ($user && $user->profile_image ? $user->profile_image : 'default.jpg'));
+        $profile_image_url = asset('images/user/default.jpg');
+        if ($user && !empty($user->profile_image)) {
+            $profile_image_url = asset('images/user/' . $user->profile_image);
+        }
         return response()->json([
             'c_id' => $counselor->c_id,
             'fname' => $user ? $user->first_name : '',
             'mname' => $user ? $user->middle_name : '',
             'lname' => $user ? $user->last_name : '',
+            'sex' => $user ? $user->sex : '',
             'email' => $user ? $user->email : '',
             'contact_num' => $user ? $user->contact_num : '',
             'profile_image_url' => $profile_image_url,
         ]);
+    }
+
+    // Archive counselor (set user status to inactive)
+    public function archive(Request $request, $c_id)
+    {
+        $counselor = Counselor::where('c_id', $c_id)->first();
+        if (!$counselor) {
+            return response()->json(['error' => 'Counselor not found (c_id invalid)'], 404);
+        }
+        $user = $counselor->user;
+        if (!$user) {
+            return response()->json(['error' => 'User not found for this counselor'], 404);
+        }
+        try {
+            $user->status = 'inactive';
+            $user->save();
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Failed to update status: ' . $e->getMessage()], 500);
+        }
+        return response()->json(['success' => true]);
     }
 }

@@ -60,7 +60,7 @@ class HeadStudentController extends Controller
                 'students.relationship',
                 'students.guardian_contact',
                 'students.guardian_email',
-                // Get the most severe case for each student
+                
                 DB::raw('MAX(CASE WHEN cases.severity = "Severe" THEN 3 WHEN cases.severity = "Intermediate" THEN 2 WHEN cases.severity = "Low" THEN 1 ELSE 0 END) as severity_rank'),
                 DB::raw('MAX(cases.severity) as case_severity'),
                 DB::raw('COUNT(cases.case_id) as case_count')

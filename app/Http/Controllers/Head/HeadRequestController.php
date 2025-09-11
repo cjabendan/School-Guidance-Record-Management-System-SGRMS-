@@ -69,31 +69,44 @@ class HeadRequestController extends Controller
         return view('Head.requests', compact('allRequests'));
     }
 
-    // Approve link request and link students to parent
-    public function approve($id)
+    public function approve($type, $id)
     {
-        $linkRequest = ParentLinkRequest::with('students')->findOrFail($id);
+        if ($type === 'child link') {
+            $linkRequest = ParentLinkRequest::with('students')->findOrFail($id);
 
-        $linkRequest->status = 'approved';
-        $linkRequest->rejection_reason = null;
-        $linkRequest->save();
+            $linkRequest->status = 'approved';
+            $linkRequest->rejection_reason = null;
+            $linkRequest->save();
 
-        foreach ($linkRequest->students as $studentRequest) {
-            $exists = ParentStudent::where('p_id', $linkRequest->parent_id)
-                ->where('s_id', $studentRequest->student_id)
-                ->exists();
+            foreach ($linkRequest->students as $studentRequest) {
+                $exists = ParentStudent::where('p_id', $linkRequest->parent_id)
+                    ->where('s_id', $studentRequest->student_id)
+                    ->exists();
 
-            if (!$exists) {
-                ParentStudent::create([
-                    'p_id'     => $linkRequest->parent_id,
-                    's_id'     => $studentRequest->student_id,
-                    'relation' => 'Parent', // dynamic if needed
-                ]);
+                if (!$exists) {
+                    ParentStudent::create([
+                        'p_id'     => $linkRequest->parent_id,
+                        's_id'     => $studentRequest->student_id,
+                        'relation' => 'Parent', // dynamic if needed
+                    ]);
+                }
             }
-        }
 
-        return redirect()->back()->with('success', 'Request approved and students linked successfully.');
+            return redirect()->back()->with('success', 'Request approved and students linked successfully.');
+        } elseif ($type === 'document') {
+            $docRequest = DocumentRequest::findOrFail($id);
+            $docRequest->status = 'approved';
+            $docRequest->save();
+
+            return redirect()->back()->with('success', 'Document request approved successfully.');
+        } else {
+            abort(404);
+        }
     }
+
+
+
+
 
     // Reject link request with reason
     public function reject(Request $request, $id)
@@ -107,14 +120,7 @@ class HeadRequestController extends Controller
     }
 
     // Approve document request
-    public function approveDocument($id)
-    {
-        $docRequest = DocumentRequest::findOrFail($id);
-        $docRequest->status = 'approved';
-        $docRequest->save();
-
-        return redirect()->back()->with('success', 'Document request approved successfully.');
-    }
+    public function approveDocument($id) {}
 
     // Reject document request
     public function rejectDocument(Request $request, $id)
@@ -124,6 +130,18 @@ class HeadRequestController extends Controller
         $docRequest->rejection_reason = $request->input('reason');
         $docRequest->save();
 
-        return redirect()->back()->with('success', 'Document request rejected successfully.');
+        return redirect()->back()->with('success', 'Document   request rejected successfully.');
+    }
+
+    public function show($type, $id)
+    {
+        if ($type === 'child link') {
+            $request = ParentLinkRequest::with(['parent.user', 'students.student.user'])->findOrFail($id);
+        } elseif ($type === 'document') {
+            $request = DocumentRequest::with(['parent.user', 'drs.student.user'])->findOrFail($id);
+        } else {
+            abort(404);
+        }
+        return view('components.requestView', compact('request', 'type'));
     }
 }

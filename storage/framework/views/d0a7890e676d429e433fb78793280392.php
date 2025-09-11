@@ -3,17 +3,17 @@
             <div class="counselor-modal-content">
                 <span class="close add-modal-close pro-add-close" onclick="closeFormModal()">&times;</span>
                 <h2 class="add-modal-title pro-add-title">Counselor</h2>
-                <form id="addCounselorForm" method="POST" action="{{ route('Head.counselors.store') }}" enctype="multipart/form-data">
-                    @csrf
+                <form id="addCounselorForm" method="POST" action="<?php echo e(route('Head.counselors.store')); ?>" enctype="multipart/form-data">
+                    <?php echo csrf_field(); ?>
                     <div class="counselor-row">
                         <div class="counselor-image-col">
-                            <img id="counselorImage" src="{{ asset('images/user/default.jpg') }}" data-default="{{ asset('images/user/default.jpg') }}" alt="Counselor Image" class="pro-add-image">
+                            <img id="counselorImage" src="<?php echo e(asset('images/user/default.jpg')); ?>" data-default="<?php echo e(asset('images/user/default.jpg')); ?>" alt="Counselor Image" class="pro-add-image">
                             <input type="file" id="counselor_profile_image" name="profile_image" accept="image/*" class="pro-add-image-input">
                         </div>
                         <div class="counselor-fields-col">
                             <div class="counselor-field-row">
                                  <label for="c_id_display" class="add-label">Counselor ID:</label>
-                                 <span id="c_id_display" class="pro-add-id-value">{{ $nextCounselorId ?? 'Auto' }}</span>
+                                 <span id="c_id_display" class="pro-add-id-value"><?php echo e($nextCounselorId ?? 'Auto'); ?></span>
                                  <input type="hidden" id="c_id" name="c_id" value="">
                                  <button type="button" id="activateCounselorBtn" class="pro-add-save" style="margin-left:12px; display:none;" onclick="activateCounselorStatus()">Activate</button>
                             </div>
@@ -72,7 +72,7 @@
         <h2 class="add-modal-title pro-add-title">view Counselor Profile</h2>
         <div class="counselor-row">
             <div class="counselor-image-col">
-                <img id="viewCounselorImage" src="{{ asset('images/user/default.jpg') }}" data-default="{{ asset('images/user/default.jpg') }}" alt="Counselor Image" class="pro-add-image">
+                <img id="viewCounselorImage" src="<?php echo e(asset('images/user/default.jpg')); ?>" data-default="<?php echo e(asset('images/user/default.jpg')); ?>" alt="Counselor Image" class="pro-add-image">
             </div>
             <div class="counselor-fields-col">
                 <div class="counselor-field-row">
@@ -126,4 +126,4 @@
             <button type="button" class="archive-cancel-btn" onclick="closeArchiveConfirmModal()">Cancel</button>
         </div>
     </div>
-</div>
+</div><?php /**PATH C:\Users\Administrator\School-Guidance-Record-Management-System-SGRMS-\resources\views/Head/Modal/counselModal.blade.php ENDPATH**/ ?>

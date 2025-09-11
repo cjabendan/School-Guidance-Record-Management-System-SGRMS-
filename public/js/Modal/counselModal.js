@@ -19,6 +19,15 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 // Helper: set form to add or edit mode
 function setCounselorFormMode(mode, data = null) {
+    // Set modal title based on mode
+    var modalTitle = document.querySelector('.add-modal-title.pro-add-title');
+    if (modalTitle) {
+        if (mode === 'edit') {
+            modalTitle.textContent = 'Edit Counselor Details';
+        } else {
+            modalTitle.textContent = 'New Counselor';
+        }
+    }
     const form = document.getElementById('addCounselorForm');
     let methodInput = document.getElementById('_method_patch');
     if (mode === 'edit' && data) {
@@ -44,39 +53,60 @@ function setCounselorFormMode(mode, data = null) {
         document.getElementById('counselor_lname').value = data.lname || '';
         document.getElementById('counselor_email').value = data.email || '';
         document.getElementById('counselor_contact_num').value = data.contact_num || '';
+        // Set sex radio button
+        if (data.sex) {
+            var maleRadio = document.getElementById('counselor_sex_male');
+            var femaleRadio = document.getElementById('counselor_sex_female');
+            if (maleRadio) maleRadio.checked = (data.sex.toLowerCase() === 'male');
+            if (femaleRadio) femaleRadio.checked = (data.sex.toLowerCase() === 'female');
+        }
         // Password field left blank for security
         document.getElementById('counselor_password').value = '';
         // Image preview (optional, not changing file input)
         if (data.profile_image_url) {
             document.getElementById('counselorImage').src = data.profile_image_url;
         }
-    } else {
-        // Set form action to store route
-        form.action = `/Head/counselors/store`;
-        // Remove _method input if exists
-        if (methodInput) methodInput.remove();
-        // Reset fields
-        form.reset();
-        // Reset image preview
-        const imgPreview = document.getElementById('counselorImage');
-        if (imgPreview) {
-            imgPreview.src = imgPreview.getAttribute('data-default');
+        // Set status field and show/hide activate button
+        var activateBtn = document.getElementById('activateCounselorBtn');
+        if (activateBtn) {
+            if (data._fromPastTable) {
+                activateBtn.style.display = '';
+            } else {
+                activateBtn.style.display = 'none';
+            }
         }
-        // Fetch and set next ID
-        fetch('/Head/counselors/next-id')
-            .then(response => response.json())
-            .then(data => {
-                document.getElementById('c_id_display').textContent = data.next_c_id;
-                document.getElementById('c_id').value = data.next_c_id;
-            });
+// Activate counselor status logic
+window.activateCounselorStatus = function() {
+    var c_id = document.getElementById('c_id').value;
+    fetch(`/Head/counselors/${c_id}/activate`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        },
+        body: JSON.stringify({ c_id: c_id })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            window.closeFormModal();
+            location.reload();
+        } else {
+            alert(data.error || 'Failed to activate counselor.');
+        }
+    })
+    .catch(() => {
+        alert('Failed to activate counselor.');
+    });
+}
     }
 }
 
 // Edit Counselor: open add modal in edit mode with data
 window.editCounselorFromView = function(c_id) {
-    // Close view modal
+    // Accept second argument: fromPastTable
+    var fromPastTable = arguments.length > 1 ? arguments[1] : false;
     window.closeViewCounselorModal();
-    // Fetch counselor data
     fetch(`/Head/counselors/${c_id}/json`)
         .then(response => response.json())
         .then(data => {
@@ -84,8 +114,8 @@ window.editCounselorFromView = function(c_id) {
                 alert('Counselor not found!');
                 return;
             }
+            if (fromPastTable) data._fromPastTable = true;
             setCounselorFormMode('edit', data);
-            // Open add/edit modal
             var modal = document.getElementById('formModal');
             if (modal) modal.style.display = 'block';
     });
@@ -157,96 +187,24 @@ document.addEventListener('DOMContentLoaded', function() {
 
 window.openFormModal = function () {
     setCounselorFormMode('add');
-    var modal = document.getElementById('formModal');
-    if (modal) {
-        modal.style.display = 'block';
-    } else {
-        console.error("Modal not found!");
-    }
-};
-
-window.closeFormModal = function () {
-    var modal = document.getElementById('formModal');
-    if (modal) {
-        modal.style.display = 'none';
-    } else {
-        console.error("Modal not found!");
-    }
-};
-
-// View Counselor Modal 
-window.openViewCounselModal = function(c_id) {
-    fetch(`/Head/counselors/${c_id}/json`)
-        .then(response => response.json())
-        .then(data => {
-            if (data.error) {
-                alert('Counselor not found!');
-                return;
-            }
-            document.getElementById('view_c_id_display').textContent = data.c_id || '';
-            document.getElementById('view_counselor_fname').textContent = data.fname || '';
-            document.getElementById('view_counselor_mname').textContent = data.mname || '';
-            document.getElementById('view_counselor_lname').textContent = data.lname || '';
-            document.getElementById('view_counselor_email').textContent = data.email || '';
-            document.getElementById('view_counselor_contact_num').textContent = data.contact_num || '';
-            var img = document.getElementById('viewCounselorImage');
-            if (img && data.profile_image_url) {
-                img.src = data.profile_image_url;
-            }
-            var modal = document.getElementById('viewCounselorModal');
-            if (modal) {
-                modal.style.display = 'block';
-            }
-        });
-};
-
-window.closeViewCounselorModal = function() {
-    var modal = document.getElementById('viewCounselorModal');
-    if (modal) {
-        modal.style.display = 'none';
-    }
-};
-document.addEventListener('DOMContentLoaded', function() {
-
-window.openAddCounselorModal = window.openFormModal;
-    const imageInput = document.getElementById('counselor_profile_image');
-    const imgPreview = document.getElementById('counselorImage');
-    if (imageInput && imgPreview) {
-        imageInput.addEventListener('change', function(event) {
-            const [file] = event.target.files;
-            if (file) {
-                imgPreview.src = URL.createObjectURL(file);
-            } else {
-                imgPreview.src = imgPreview.getAttribute('data-default');
-            }
-            imgPreview.style.display = 'block';
-        });
+    // Clear all fields explicitly to prevent leftover data
+    document.getElementById('c_id_display').textContent = '';
+    document.getElementById('c_id').value = '';
+    document.getElementById('counselor_lname').value = '';
+    document.getElementById('counselor_fname').value = '';
+    document.getElementById('counselor_mname').value = '';
+    document.getElementById('counselor_email').value = '';
+    document.getElementById('counselor_contact_num').value = '';
+    if (document.getElementById('counselor_sex_male')) document.getElementById('counselor_sex_male').checked = false;
+    if (document.getElementById('counselor_sex_female')) document.getElementById('counselor_sex_female').checked = false;
+    if (document.getElementById('counselor_password')) document.getElementById('counselor_password').value = '';
+    var imgPreview = document.getElementById('counselorImage');
+    if (imgPreview) {
         imgPreview.src = imgPreview.getAttribute('data-default');
-        imgPreview.style.display = 'block';
     }
-
-    var modal = document.getElementById('formModal');
-    var closeBtn = modal ? modal.querySelector('.close') : null;
-    if (closeBtn && modal) {
-        closeBtn.onclick = function(e) {
-            e.stopPropagation();
-            window.closeFormModal();
-        };
-        modal.onclick = function(event) {
-            if (event.target === modal) {
-                window.closeFormModal();
-            }
-        };
-        var modalContent = modal.querySelector('.modal-content');
-        if (modalContent) {
-            modalContent.onclick = function(e) {
-                e.stopPropagation();
-            };
-        }
-    }
-});
-
-window.openFormModal = function () {
+    var activateBtn = document.getElementById('activateCounselorBtn');
+    if (activateBtn) activateBtn.style.display = 'none';
+    // Fetch next available counselor ID and set it
     fetch('/Head/counselors/next-id')
         .then(response => response.json())
         .then(data => {
@@ -271,11 +229,27 @@ window.closeFormModal = function () {
 };
 
 
+// Edit Counselor Modal logic
+function openEditCounselorModal(counselorId) {
+    // Show modal
+    document.getElementById('editCounselorModal').style.display = 'flex';
+    // Set form action with correct ID
+    var form = document.getElementById('editCounselorForm');
+    form.action = '/Head/counselors/' + counselorId;
+    // Also set hidden input value
+    document.getElementById('edit_c_id').value = counselorId;
+    // You can also populate other fields here if needed
+}
+function closeFormModal() {
+    document.getElementById('editCounselorModal').style.display = 'none';
+}
+
+
 //____________________________________________________________________________________
 
 
 // View Counselor Modal 
-window.openViewCounselModal = function(c_id) {
+window.openViewCounselModal = function(c_id, readonly = false) {
     fetch(`/Head/counselors/${c_id}/json`)
         .then(response => response.json())
         .then(data => {
@@ -287,6 +261,7 @@ window.openViewCounselModal = function(c_id) {
             document.getElementById('view_counselor_fname').textContent = data.fname || '';
             document.getElementById('view_counselor_mname').textContent = data.mname || '';
             document.getElementById('view_counselor_lname').textContent = data.lname || '';
+            document.getElementById('view_counselor_sex').textContent = data.sex || '';
             document.getElementById('view_counselor_email').textContent = data.email || '';
             document.getElementById('view_counselor_contact_num').textContent = data.contact_num || '';
             var img = document.getElementById('viewCounselorImage');
@@ -297,8 +272,22 @@ window.openViewCounselModal = function(c_id) {
             if (modal) {
                 modal.style.display = 'block';
             }
+            // Show/hide buttons based on readonly
+            var editBtn = document.getElementById('editCounselorBtn');
+            var archiveBtn = document.getElementById('archiveCounselorBtn');
+            if (readonly) {
+                if (editBtn) editBtn.style.display = 'none';
+                if (archiveBtn) archiveBtn.style.display = 'none';
+            } else {
+                if (editBtn) editBtn.style.display = '';
+                if (archiveBtn) archiveBtn.style.display = '';
+            }
         });
 };
+
+function openViewCounselModalReadonly(c_id) {
+    openViewCounselModal(c_id, true);
+}
 
 window.closeViewCounselorModal = function() {
     var modal = document.getElementById('viewCounselorModal');
@@ -327,3 +316,59 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 });
+
+// Archive Counselor logic
+window.showArchiveConfirmModal = function(c_id) {
+    window._archiveCounselorId = c_id;
+    var modal = document.getElementById('archiveConfirmModal');
+    if (modal) modal.style.display = 'block';
+};
+window.closeArchiveConfirmModal = function() {
+    var modal = document.getElementById('archiveConfirmModal');
+    if (modal) modal.style.display = 'none';
+    window._archiveCounselorId = null;
+};
+window.confirmArchiveCounselor = function() {
+    var c_id = window._archiveCounselorId;
+    if (!c_id) return;
+    fetch('/Head/counselors/' + c_id + '/archive', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        },
+        body: JSON.stringify({ c_id: c_id })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            window.closeArchiveConfirmModal();
+            window.closeViewCounselorModal();
+            location.reload();
+        } else {
+            let msg = data.error || 'Failed to archive counselor.';
+            showArchiveError(msg);
+        }
+    })
+    .catch(() => {
+        showArchiveError('Failed to archive counselor.');
+    });
+};
+
+window.showArchiveError = function(msg) {
+    var modal = document.getElementById('archiveConfirmModal');
+    if (modal) {
+        let err = modal.querySelector('.archive-error-msg');
+        if (!err) {
+            err = document.createElement('div');
+            err.className = 'archive-error-msg';
+            err.style.color = '#e11d48';
+            err.style.margin = '12px 0 0 0';
+            err.style.textAlign = 'center';
+            modal.querySelector('.counselor-modal-content').appendChild(err);
+        }
+        err.textContent = msg;
+    } else {
+        alert(msg);
+    }
+};

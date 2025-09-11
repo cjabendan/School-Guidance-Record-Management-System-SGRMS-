@@ -64,9 +64,11 @@
                                 </div>
                                 <div class="table-col actions">
                                     <?php if($req['status'] === 'Pending'): ?>
-                                        <a href="" class=" view-btn">Review</a>
-                                        <button class="btn btn-danger btn-sm reject-btn" data-id="<?php echo e($req['id']); ?>"
-                                            data-type="<?php echo e($req['type']); ?>">Reject</button>
+                                        <a href="<?php echo e(route('Head.requests.show', ['type' => strtolower($req['type']), 'id' => $req['id']])); ?>"
+                                            class="view-btn">Review</a>
+                                        <button class="btn btn-danger btn-sm reject-btn"
+                                            onclick="location.href='<?php echo e(route('Head.requests.show', ['type' => strtolower($req['type']), 'id' => $req['id']])); ?>'"
+                                            data-id="<?php echo e($req['id']); ?>" data-type="<?php echo e($req['type']); ?>">Reject</button>
                                     <?php endif; ?>
                                 </div>
                             </div>

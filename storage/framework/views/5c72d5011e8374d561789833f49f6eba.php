@@ -139,7 +139,36 @@
 
 <script>
     function openModal() {
-        document.getElementById('announcementModal').style.display = 'block';
+        const modal = document.getElementById('announcementModal');
+        const form = document.getElementById('announcementForm');
+        const modalTitle = document.getElementById('modalTitle');
+        const saveBtn = document.getElementById('saveBtn');
+        const removeImageBtn = document.getElementById('remove-image-btn');
+
+        // Reset form fields
+        form.reset();
+        document.getElementById('announcement_id').value = '';
+        document.getElementById('form-method').value = 'POST';
+        form.action = '<?php echo e(route('Head.announcements.store')); ?>';
+
+        // Enable all fields
+        Array.from(form.elements).forEach(el => el.disabled = false);
+
+        // Hide event fields
+        document.getElementById('event-fields').style.display = 'none';
+
+        // Reset image preview
+        document.getElementById('image-preview').src = '';
+        document.getElementById('image-preview-wrapper').style.display = 'none';
+        document.querySelector('.custom-upload-btn').style.display = 'inline-block';
+        document.getElementById('file-chosen').style.display = 'inline-block';
+
+        // Set modal title/button
+        modalTitle.textContent = 'Add Announcement';
+        saveBtn.style.display = 'inline-block';
+        removeImageBtn.style.display = 'inline-block';
+
+        modal.style.display = 'block';
     }
 
     function closeModal() {

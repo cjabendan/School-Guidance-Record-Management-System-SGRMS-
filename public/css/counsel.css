@@ -1,61 +1,383 @@
+/* =========================
+   Counselor Card 
+========================= */
 .profiles-container {
     display: flex;
     flex-wrap: wrap;
-    gap: 20px;
+    gap: 24px;
     margin-top: 25px;
+    justify-content: flex-start;
 }
 
 .profile-box {
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    padding: 15px;
+    border: 1.5px solid #e5e7eb;
+    border-radius: 12px;
+    background: #fff;
+    box-shadow: 0 4px 16px rgba(37,99,235,0.07);
+    padding: 18px 16px 16px 16px;
     text-align: center;
     cursor: pointer;
-    width: 200px;
-    height: 220px;
+    width: 220px;
+    min-width: 220px;
+    max-width: 220px;
+    height: 260px;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    transition: box-shadow 0.3s ease;
-    background-color: #fff;
+    transition: box-shadow 0.2s, border 0.2s;
+    position: relative;
 }
-
 .profile-box:hover {
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    box-shadow: 0 8px 32px rgba(37,99,235,0.13);
+    border-color: #2563eb;
 }
-
 .profile-box img {
     width: 100px;
     height: 100px;
     border-radius: 50%;
     object-fit: cover;
-    margin-bottom: 10px;
+    margin-bottom: 12px;
+    border: 3px solid #2563eb;
+    background: #f8fafc;
+    box-shadow: 0 2px 8px rgba(37,99,235,0.08);
 }
-
 .profile-box h2 {
-    font-size: 16px;
-    color: #333;
+    font-size: 1.08rem;
+    color: #2563eb;
+    font-weight: 700;
     margin: 0;
+    margin-bottom: 4px;
+    letter-spacing: 0.02em;
+    text-align: center;
+    word-break: break-word;
 }
 
+/* Add Counselor Card ( + ) */
 .add-box {
-    background-color: #f5f5f5;
-    border: 2px dashed #4CAF50;
+    background-color: #f3f4f6;
+    border: 2px dashed #2563eb;
+    border-radius: 12px;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    width: 220px;
+    min-width: 220px;
+    max-width: 220px;
+    height: 260px;
+    cursor: pointer;
+    transition: border 0.2s, background 0.2s;
+    position: relative;
 }
-
+.add-box:hover {
+    background-color: #e0e7ff;
+    border-color: #1d4ed8;
+}
 .add-box .add-profile-icon {
-    font-size: 48px;
-    color: #4CAF50;
+    font-size: 2.8rem;
+    color: #2563eb;
     margin-bottom: 10px;
+    font-weight: 700;
+}
+.add-box h2 {
+    font-size: 1.08rem;
+    color: #2563eb;
+    font-weight: 700;
+    margin: 0;
+    margin-bottom: 4px;
+    letter-spacing: 0.02em;
+    text-align: center;
 }
 
-.add-box h2 {
+/* =========================
+   Counselor Modal Form 
+========================= */
+.counselor-modal {
+    display: none;
+    position: fixed;
+    z-index: 2100;
+    left: 0;
+    top: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.55);
+    box-sizing: border-box;
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    align-items: center;
+    justify-content: center;
+    overflow-y: auto;
+    padding: 0;
+}
+.counselor-modal-content {
+    background: #fff;
+    border-radius: 14px;
+    box-shadow: 0 8px 32px rgba(37,99,235,0.13);
+    padding: 38px 36px 28px 36px;
+    width: 540px;
+    height: 90%;
+    margin: 2rem auto;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.counselor-modal-title {
+    font-size: 1.7rem;
+    font-weight: 700;
+    color: #2563eb;
+    margin-bottom: 24px;
+    text-align: center;
+    letter-spacing: 1px;
+}
+.counselor-row {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+    align-items: flex-start;
+    width: 100%;
+    box-sizing: border-box;
+    margin-bottom: 18px;
+}
+.counselor-image-col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 500px;
+    box-sizing: border-box;
+    padding-right: 18px;
+}
+.counselor-image-col img.pro-add-image {
+    width: 110px;
+    height: 110px;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 3px solid #2563eb;
+    background: #f8fafc;
+    box-shadow: 0 2px 12px rgba(37,99,235,0.10);
+    margin-bottom: 14px;
+}
+.counselor-image-col input.pro-add-image-input {
+    margin-top: 8px;
+    width: 120px;
+    font-size: 1rem;
+    color: #334155;
+    border: 1.5px solid #cbd5e1;
+    border-radius: 7px;
+    padding: 7px 10px;
+    background: #fff;
+    box-shadow: 0 1px 4px rgba(37,99,235,0.04);
+    transition: border 0.2s;
+}
+.counselor-image-col input.pro-add-image-input:focus {
+    border: 1.5px solid #2563eb;
+    outline: none;
+}
+.counselor-fields-col {
+    flex: 1 1 0;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding-left: 32px;
+    box-sizing: border-box;
+}
+.counselor-field-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 0;
+}
+.counselor-field-row label.add-label {
+    font-weight: 700;
+    color: #1e293b;
+    font-size: 1.08rem;
+    min-width: 120px;
+    margin-bottom: 0;
+    letter-spacing: 0.01em;
+}
+.counselor-field-row input.add-input,
+.counselor-field-row select.add-input {
+    flex: 1 1 0;
+    padding: 8px 12px;
+    border-radius: 6px;
+    border: 1px solid #d1d5db;
+    font-size: 1rem;
+    background: #f8fafc;
+    color: #222;
+    transition: border 0.2s;
+}
+.counselor-field-row input.add-input:focus,
+.counselor-field-row select.add-input:focus {
+    border-color: #2563eb;
+    outline: none;
+    background: #fff;
+}
+.counselor-field-row .pro-add-id-value {
+    font-family: monospace;
+    font-size: 1.1em;
+    color: #2563eb;
+    background: #e0e7ff;
+    padding: 2px 8px;
+    border-radius: 6px;
+    display: inline-block;
+}
+.counselor-field-row .view-field {
+    font-size: 1.08rem;
+    color: #374151;
+    font-weight: 500;
+    word-break: break-word;
+}
+.pro-add-buttons {
+    width: 100%;
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 18px;
+}
+.pro-add-save {
+    background: #2563eb;
+    color: #fff;
+    font-weight: 700;
+    border-radius: 6px;
+    padding: 10px 32px;
+    font-size: 1.08rem;
+    border: none;
+    box-shadow: 0 2px 8px rgba(37,99,235,0.08);
+    transition: background 0.2s;
+    cursor: pointer;
+}
+.pro-add-save:hover {
+    background: #1e40af;
+}
+.close.add-modal-close.pro-add-close {
+    position: absolute;
+    top: 18px;
+    right: 24px;
+    font-size: 1.7rem;
+    color: #2563eb;
+    background: none;
+    border: none;
+    cursor: pointer;
+    z-index: 10;
+    transition: color 0.2s;
+}
+.close.add-modal-close.pro-add-close:hover {
+    color: #e11d48;
+}
+
+/* =========================
+   Archive Confirm Modal
+========================= */
+.archive-confirm-content {
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 8px 32px rgba(37,99,235,0.13);
+    padding: 38px 36px 28px 36px;
+    width: 500px;
+    height: 25%;
+    margin: 2rem auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+}
+.archive-confirm-content h3 {
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: #e11d48;
+    margin-bottom: 18px;
+    text-align: center;
+    letter-spacing: 1px;
+}
+.archive-confirm-content p {
+    font-size: 1.08rem;
+    color: #374151;
+    margin-bottom: 24px;
+    text-align: center;
+}
+.archive-confirm-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    width: 100%;
+}
+.archive-confirm-btn {
+    background: #e11d48;
+    color: #fff;
+    font-weight: 700;
+    border-radius: 6px;
+    padding: 10px 28px;
+    font-size: 1.08rem;
+    border: none;
+    box-shadow: 0 2px 8px rgba(225,29,72,0.08);
+    transition: background 0.2s;
+    cursor: pointer;
+}
+.archive-confirm-btn:hover {
+    background: #be123c;
+}
+.archive-cancel-btn {
+    background: #f3f4f6;
+    color: #374151;
+    font-weight: 700;
+    border-radius: 6px;
+    padding: 10px 28px;
+    font-size: 1.08rem;
+    border: none;
+    box-shadow: 0 2px 8px rgba(37,99,235,0.08);
+    transition: background 0.2s;
+    cursor: pointer;
+}
+.archive-cancel-btn:hover {
+    background: #e0e7ff;
+}
+
+/* ______________________________________________________________________________ */
+
+/* Pagination Styles */
+.pagination {
+    display: flex;
+    flex-direction: row;
+    justify-content: right;
+    align-items: center;
+    padding-top: 1.3rem;
+    gap: 0.5rem;
+}
+
+.pagination-links,
+.pagination .page-item > a,
+.pagination .page-item > span {
+    background: #fff;
+    color: #1ea7ff;
+    border-radius: 6px;
+    padding: 8px 18px;
     font-size: 16px;
-    color: #4CAF50;
-    margin: 0;
+    border: 1px solid #bcd6f7;
+    font-weight: 500;
+    text-decoration: none;
+    transition: background 0.2s, color 0.2s, border 0.2s;
+    margin: 0 2px;
+    display: flex;
+    align-items: center;
+}
+
+.pagination .page-item.active .pagination-links,
+.pagination .page-item.active > span {
+    background: #1ea7ff;
+    color: #fff;
+    border-color: #1ea7ff;
+}
+
+.pagination .pagination-links:hover,
+.pagination .page-item > a:hover {
+    background: #0080ff;
+    color: #fff;
+    border-color: #0080ff;
+}
+
+.pagination .page-item.disabled .pagination-links,
+.pagination .page-item.disabled > span {
+    color: #bcd6f7;
+    background: #f5faff;
+    border-color: #bcd6f7;
+    cursor: not-allowed;
 }

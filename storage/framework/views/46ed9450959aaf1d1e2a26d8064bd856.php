@@ -7,8 +7,8 @@
         <?php $__empty_1 = true; $__currentLoopData = $pendingRequests; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $request): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
             <div class="requests-item">
                 <div class="request-content">
-                    <img src="<?php echo e(asset('images/user/' . ($request->parent->user->profile_image ?? 'default.jpg'))); ?>" alt="User Photo"
-                        class="user-photo">
+                    <img src="<?php echo e(asset('images/user/' . ($request->parent->user->profile_image ?? 'default.jpg'))); ?>"
+                        alt="User Photo" class="user-photo">
                     <div class="request-details">
                         <h2 class="request-sender">
                             <?php
@@ -30,14 +30,19 @@
                             <?php $__currentLoopData = $request->students; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $pls): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                 <?php echo e($pls->student_id); ?>
 
-                                <?php if(!$loop->last): ?>, <?php endif; ?>
+                                <?php if(!$loop->last): ?>
+                                    ,
+                                <?php endif; ?>
                             <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                         </p>
                     </div>
                 </div>
                 <div class="request-actions">
-                    <button class="review-btn">Review</button>
-                    <button class="reject-btn">Reject</button>
+                    <a href="<?php echo e(route('head.requests.show', ['type' => strtolower($req['type']), 'id' => $req['id']])); ?>"
+                        class="view-btn">Review</a>
+                    <button class="btn btn-danger btn-sm reject-btn"
+                        onclick="location.href='<?php echo e(route('head.requests.show', ['type' => strtolower($req['type']), 'id' => $req['id']])); ?>'"
+                        data-id="<?php echo e($req['id']); ?>" data-type="<?php echo e($req['type']); ?>">Reject</button>
                 </div>
             </div>
         <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>

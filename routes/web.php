@@ -84,6 +84,8 @@ Route::prefix('Head')->name('Head.')->group(function () {
     Route::get('/counselors/next-id', [HeadCounselorController::class, 'getNextCounselorId'])->name('counselors.next-id');
     Route::get('/counselors/{id}', [HeadCounselorController::class, 'show'])->name('counselors.show');
     Route::put('/counselors/{id}', [HeadCounselorController::class, 'update'])->name('counselors.update');
+    Route::post('/counselors/{c_id}/archive', [HeadCounselorController::class, 'archive'])->name('counselors.archive');
+    Route::post('/counselors/{c_id}/activate', [HeadCounselorController::class, 'activate'])->name('counselors.activate');
 
     // Students
     Route::get('/students', [HeadStudentController::class, 'index'])->name('students.index');
@@ -120,7 +122,11 @@ Route::prefix('Head')->name('Head.')->group(function () {
 
     // Requests
     Route::get('/requests', [HeadRequestController::class, 'index'])->name('requests.index');
+    Route::get('/requests/{type}/{id}', [HeadRequestController::class, 'show'])->name('requests.show');
+    Route::post('/requests/{type}/{id}/approve', [HeadRequestController::class, 'approve'])->name('requests.approve');
+    Route::post('/requests/{type}/{id}/reject', [HeadRequestController::class, 'reject'])->name('requests.reject');
 
+    // Appointments
     Route::get('/appointments', [HeadAppointmentController::class, 'index'])->name('appointments.index');
 
     // Announcements

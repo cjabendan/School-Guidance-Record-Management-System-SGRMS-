@@ -32,6 +32,7 @@
 
     @include('partials.parent-sidebar')
     @include('components.chatbot')
+    @include('components.child-link')
     @yield('content')
 
 

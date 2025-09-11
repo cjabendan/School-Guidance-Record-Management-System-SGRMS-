@@ -63,9 +63,11 @@
                                 </div>
                                 <div class="table-col actions">
                                     @if ($req['status'] === 'Pending')
-                                        <a href="" class=" view-btn">Review</a>
-                                        <button class="btn btn-danger btn-sm reject-btn" data-id="{{ $req['id'] }}"
-                                            data-type="{{ $req['type'] }}">Reject</button>
+                                        <a href="{{ route('Head.requests.show', ['type' => strtolower($req['type']), 'id' => $req['id']]) }}"
+                                            class="view-btn">Review</a>
+                                        <button class="btn btn-danger btn-sm reject-btn"
+                                            onclick="location.href='{{ route('Head.requests.show', ['type' => strtolower($req['type']), 'id' => $req['id']]) }}'"
+                                            data-id="{{ $req['id'] }}" data-type="{{ $req['type'] }}">Reject</button>
                                     @endif
                                 </div>
                             </div>

@@ -8,7 +8,6 @@
     height: 100vh;
     background-color: rgba(0, 0, 0, 0.6);
     box-sizing: border-box;
-    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
     align-items: center;
     justify-content: center;
     overflow-y: auto;
@@ -199,7 +198,6 @@
     margin-top: 10px;
     width: 220px;
     font-size: 1.04rem;
-    font-family: "Inter", "Segoe UI", Arial, sans-serif;
     color: #334155;
     border: 1.5px solid #cbd5e1;
     border-radius: 7px;
@@ -222,7 +220,6 @@
     margin-bottom: 6px;
 }
 .pro-add-id-label {
-    font-family: "Inter", "Segoe UI", Arial, sans-serif;
     font-size: 1.08rem;
     font-weight: 600;
     color: #2563eb;
@@ -230,7 +227,6 @@
     margin: 0;
 }
 .pro-add-id-value {
-    font-family: "Inter", "Segoe UI", Arial, sans-serif;
     font-size: 1.13rem;
     font-weight: 700;
     color: #2563eb;
@@ -281,7 +277,6 @@
     background: #f8fafc;
     border-radius: 18px;
     box-shadow: 0 8px 32px rgba(37, 99, 235, 0.13);
-    font-family: "Segoe UI", "Roboto", Arial, sans-serif;
     padding: 40px 44px 32px 44px;
     margin: 2.5rem auto;
 }
@@ -292,7 +287,6 @@
     letter-spacing: 1px;
     margin-bottom: 28px;
     text-align: center;
-    font-family: "Segoe UI", "Roboto", Arial, sans-serif;
 }
 .pro-add-close {
     font-size: 2.1rem;
@@ -555,7 +549,6 @@
     background: #f8fafc;
     border-radius: 18px;
     box-shadow: 0 8px 32px rgba(37, 99, 235, 0.13);
-    font-family: "Segoe UI", "Roboto", Arial, sans-serif;
     padding: 40px 44px 32px 44px;
     margin: 2.5rem auto;
 }
@@ -577,7 +570,6 @@
     letter-spacing: 1px;
     margin-bottom: 28px;
     text-align: center;
-    font-family: "Segoe UI", "Roboto", Arial, sans-serif;
 }
 
 .view-image-row {
