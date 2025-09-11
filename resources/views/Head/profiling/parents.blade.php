@@ -89,7 +89,7 @@
     </section>
 
         <!-- Add Parent Modal -->
-    @include('Head.Modal.parentModal')
+    @include('Head.modal.parentModal')
 
     <script src="{{ asset('js/Modal/parentModal.js') }}"></script>
 

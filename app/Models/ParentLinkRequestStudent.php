@@ -12,13 +12,15 @@ class ParentLinkRequestStudent extends Model
 
     protected $fillable = [
         'request_id',
-        'student_id'
+        'student_id',
+        'student_name',
     ];
 
-    public function request()
+    public function linkRequest()
     {
-        return $this->belongsTo(ParentLinkRequest::class, 'request_id');
+        return $this->belongsTo(ParentLinkRequest::class, 'request_id', 'request_id');
     }
+
 
     public function student()
     {

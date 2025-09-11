@@ -17,7 +17,8 @@ class HeadStudentController extends Controller
 
     public function index(Request $request)
     {
-        $filter = $request->query('status', 'active');
+    $filter = $request->query('status', 'active');
+    $search = $request->query('search');
 
         $educLevelMap = [
             'seniorhigh' => 'Senior High School',
@@ -99,9 +100,24 @@ class HeadStudentController extends Controller
             $query->where('students.status', 'active');
         }
 
-        // Order by last name from users table
-        $students = $query->orderBy('users.last_name')->get();
+        // Add search filter
+        if ($search) {
+            $query->where(function($q) use ($search) {
+                $q->where('students.s_id', 'like', "%$search%")
+                  ->orWhere('users.first_name', 'like', "%$search%")
+                  ->orWhere('users.last_name', 'like', "%$search%")
+                  ->orWhere('users.middle_name', 'like', "%$search%")
+                  ->orWhere('students.section', 'like', "%$search%")
+                  ->orWhere('students.program', 'like', "%$search%")
+                  ;
+            });
+        }
 
+    $students = $query->orderBy('users.last_name')->paginate(10);
+
+        if ($request->ajax()) {
+            return view('Head.profiling.students', compact('students', 'filter'))->render();
+        }
         return view('Head.profiling.students', compact('students', 'filter'));
     }
 
@@ -119,6 +135,29 @@ class HeadStudentController extends Controller
         return response()->json(['next_id' => $fullId]);
     }
 
+
+    public function getStudentCases($s_id)
+    {
+        $cases = DB::table('case_students')
+            ->join('cases', 'case_students.case_id', '=', 'cases.case_id')
+            ->where('case_students.student_id', $s_id)
+            ->where('cases.archived', 0)
+            ->select(
+                'cases.presenting_problem as case_title',
+                'cases.severity',
+                'cases.filed_date as date_reported',     
+                'cases.status',
+                'cases.description'
+            )
+            ->orderBy('cases.filed_date', 'desc')
+            ->get();
+
+        return response()->json($cases);
+    }
+
+//_________________________________________________________________________________
+
+    //Add Student
     public function addStudent(Request $request)
     {
         $validated = $request->validate([
@@ -209,7 +248,10 @@ class HeadStudentController extends Controller
             'civil_status' => $validated['civil_status'] ?? null,
         ]);
 
-        return redirect()->back()->with('success', 'Student added successfully!');
+            if ($request->ajax()) {
+                return response()->json(['success' => true, 'message' => 'Student added successfully!']);
+            }
+            return redirect()->back()->with('success', 'Student added successfully!');
     }
 
     //_________________________________________________________________________________
@@ -260,7 +302,10 @@ class HeadStudentController extends Controller
         return response()->json($student);
     }
 
-        // Update student info (edit modal)
+
+//_________________________________________________________________________________
+
+    // Update student
     public function editStudent(Request $request, $s_id)
     {
         $validated = $request->validate([
@@ -291,6 +336,12 @@ class HeadStudentController extends Controller
         // Find student and user
         $student = \App\Models\Student::where('s_id', $s_id)->firstOrFail();
         $user = $student->user;
+
+        // Handle photo deletion
+        if ($request->has('delete_photo') && $request->input('delete_photo') == '1') {
+            $user->profile_image = 'default.jpg';
+            $user->save();
+        }
 
         // Update or get educ_level
         $educLevel = DB::table('educ_levels')->where('educ_level', $validated['educ_level'])->first();
@@ -342,7 +393,12 @@ class HeadStudentController extends Controller
         $student->religion = $validated['religion'] ?? null;
         $student->civil_status = $validated['civil_status'] ?? null;
         $student->save();
-    return response()->json(['success' => true, 'message' => 'Student updated successfully!']);
+
+        if ($request->ajax()) {
+            return response()->json(['success' => true, 'message' => 'Student updated successfully!']);
+        }
+        return redirect()->back()->with('success', 'Student updated successfully!');
+
     }
 
 //_____________________________________________________________________________
@@ -407,7 +463,9 @@ class HeadStudentController extends Controller
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Import failed: ' . $e->getMessage());
         }
-    }
+
+        }
+
 
 //_____________________________________________________________________________
 
@@ -466,45 +524,67 @@ class HeadStudentController extends Controller
             'father_name', 'mother_name', 'guardian_name', 'relationship', 'guardian_contact', 'guardian_email'
         ];
 
+        // Set filename based on educ level
+        $filterValue = strtolower($filter);
+        if ($filterValue === 'elementary') {
+            $filenameBase = 'Elementary_List';
+        } elseif ($filterValue === 'juniorhigh') {
+            $filenameBase = 'Junior_List';
+        } elseif ($filterValue === 'seniorhigh') {
+            $filenameBase = 'Senior_List';
+        } elseif ($filterValue === 'kindergarten') {
+            $filenameBase = 'Kinder_List';
+        } elseif ($filterValue === 'inactive') {
+            $filenameBase = 'Inactive_Students_List';
+        } else {
+            $filenameBase = 'Student_List';
+        }
+
+        // Prepare data for export
+        $exportData = [];
+        foreach ($students as $student) {
+            $row = [];
+            foreach ($columns as $col) {
+                $row[$col] = $student->$col ?? '';
+            }
+            $exportData[] = $row;
+        }
+
+        // Export logic
         if ($format === 'pdf') {
-            $html = view('Head.profiling.export_pdf', compact('students', 'columns'))->render();
+            $html = view('Head.profiling.export_pdf', compact('students', 'columns', 'filter'))->render();
             $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadHTML($html)->setPaper('a4', 'landscape');
-            $filename = 'students_export_' . $filter . '_' . date('Ymd_His') . '.pdf';
+            $filename = $filenameBase . '.pdf';
             return response($pdf->output(), 200)
                 ->header('Content-Type', 'application/pdf')
                 ->header('Content-Disposition', 'attachment; filename="' . $filename . '"');
-        } elseif ($format === 'excel') {
-            // Excel export using Laravel Excel
-            $exportData = [];
-            foreach ($students as $student) {
-                $row = [];
-                foreach ($columns as $col) {
-                    $row[$col] = $student->$col ?? '';
-                }
-                $exportData[] = $row;
-            }
-            $filename = 'students_export_' . $filter . '_' . date('Ymd_His') . '.xlsx';
-            return \Maatwebsite\Excel\Facades\Excel::download(new \App\Exports\StudentsExport($exportData, $columns), $filename);
-        } else {
-            // Default: CSV
-            $filename = 'students_export_' . $filter . '_' . date('Ymd_His') . '.csv';
+        } elseif ($format === 'xlsx' || $format === 'xls') {
+            $filename = $filenameBase . '.' . $format;
+            $excelFormat = $format === 'xlsx'
+                ? \Maatwebsite\Excel\Excel::XLSX
+                : \Maatwebsite\Excel\Excel::XLS;
+            return \Maatwebsite\Excel\Facades\Excel::download(
+                new \App\Exports\StudentsExport($exportData, $columns),
+                $filename,
+                $excelFormat
+            );
+        } elseif ($format === 'csv') {
+            $filename = $filenameBase . '.csv';
             $headers = [
                 'Content-Type' => 'text/csv',
                 'Content-Disposition' => "attachment; filename=\"$filename\""
             ];
-            $callback = function() use ($students, $columns) {
+            $callback = function() use ($exportData, $columns) {
                 $file = fopen('php://output', 'w');
                 fputcsv($file, $columns);
-                foreach ($students as $student) {
-                    $row = [];
-                    foreach ($columns as $col) {
-                        $row[] = $student->$col ?? '';
-                    }
+                foreach ($exportData as $row) {
                     fputcsv($file, $row);
                 }
                 fclose($file);
             };
             return response()->stream($callback, 200, $headers);
+        } else {
+            return response()->json(['error' => 'Invalid export format'], 400);
         }
     }
 }

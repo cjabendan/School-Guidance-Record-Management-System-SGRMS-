@@ -6,7 +6,7 @@
     <section id="content">
         @include('partials.navbar')
         <!-- COUNSELORS MANAGEMENT -->
-        <main class="wrapper">
+        <div class="wrapper">
             <h2>Manage Counselors</h2>
             <div class="profiles-container">
                 <!-- Add new profile box -->
@@ -18,10 +18,10 @@
                 @include('components.counselor-card', ['counselors' => $counselors])
 
             </div>
-        </main>
+        </div>
     </section>
 
-    @include('Head.Modal.counselModal')
+    @include('Head.modal.counselModal')
 
     <script src="{{ asset('js/head.js') }}"></script>
     <script src="{{ asset('js/Modal/counselModal.js') }}"></script>

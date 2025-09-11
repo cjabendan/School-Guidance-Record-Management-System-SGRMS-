@@ -64,8 +64,15 @@
     scrollbar-width: none;
 }
 
+.flex-side {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100%;
+}
+
 .sidebar .brand {
-    height: 70px;
+    height: 80px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -155,8 +162,7 @@
     height: 100%;
     display: flex;
     align-items: center;
-
-    font-size: 16px;
+    font-size: 18px;
     color: #ffffff;
     white-space: nowrap;
     overflow-x: hidden;
@@ -209,6 +215,11 @@
 /* ==================== LOGOUT FIX ==================== */
 
 /* Logout form wrapper stays full width */
+
+.bottom-side {
+    margin: 0 5px 20px 0;
+}
+
 #sidebar .side-menu li .logout-form {
     margin: 0;
     width: 100%;

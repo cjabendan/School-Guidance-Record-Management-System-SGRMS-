@@ -15,10 +15,13 @@
     <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/3.0.0/uicons-bold-rounded/css/uicons-bold-rounded.css'>
     <link rel='stylesheet'
         href='https://cdn-uicons.flaticon.com/3.0.0/uicons-solid-rounded/css/uicons-solid-rounded.css'>
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,1,0" />
     <link rel="stylesheet" href="{{ asset('css/style.css') }}">
     <link rel="stylesheet" href="{{ asset('css/bar.css') }}">
     <link rel="stylesheet" href="{{ asset('css/dashboard-parent.css') }}">
     <link rel="stylesheet" href="{{ asset('css/table.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/chatbot.css') }}">
     <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet" />
     @yield('head')
 </head>
@@ -28,6 +31,7 @@
     <!-- SIDEBAR -->
 
     @include('partials.parent-sidebar')
+    @include('components.chatbot')
     @yield('content')
 
 
@@ -38,5 +42,6 @@
 @stack('scripts')
 <script src="{{ asset('js/head.js') }}"></script>
 <script src="{{ asset('js/dashboard.js') }}"></script>
+<script src="{{ asset('js/chatbot.js') }}"></script>
 
 </html>

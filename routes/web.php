@@ -12,10 +12,11 @@ use App\Http\Controllers\AnnouncementsController;
 use App\Http\Controllers\Head\HeadDashboardController;
 use App\Http\Controllers\Head\HeadCounselorController;
 use App\Http\Controllers\Head\HeadStudentController;
-use App\Http\Controllers\Head\HeadParentController; 
+use App\Http\Controllers\Head\HeadParentController;
 use App\Http\Controllers\Head\HeadCaseController;
-use App\Http\Controllers\Head\HeadMessageController;
 use App\Http\Controllers\Head\HeadCounselingController;
+use App\Http\Controllers\Head\HeadMessageController;
+use App\Http\Controllers\Head\HeadRequestController;
 use App\Http\Controllers\Head\HeadAppointmentController;
 use App\Http\Controllers\Head\HeadAnnouncementController;
 use App\Http\Controllers\Head\HeadSettingsController;
@@ -24,6 +25,7 @@ use App\Http\Controllers\Counselor\CounselorDashboardController;
 
 use App\Http\Controllers\Parents\ParentDashboardController;
 use App\Http\Controllers\Parents\ParentChildController;
+use App\Http\Controllers\Parents\ParentRequestController;
 use Illuminate\Routing\Events\RouteMatched;
 
 use App\Http\Controllers\Head\StudentController;
@@ -35,8 +37,11 @@ Route::get('/', [StaffController::class, 'index']);
 
 
 // ========================= Landing Page - Announcements ============================= //
-Route::get('/announcements', [AnnouncementsController::class, 'index'])->name('announcements.index');
+Route::get('/announcements', [AnnouncementsController::class, 'index'])
+    ->name('announcements.index');
 
+Route::get('/announcements/view/{id}', [AnnouncementsController::class, 'view'])
+    ->name('announcements.view');
 
 
 // =========================== Authentication Routes ===================================== //
@@ -58,8 +63,6 @@ Route::post('/verification/resend', [RegisterController::class, 'resendActivatio
 
 
 Route::post('/logout', [LogoutController::class, 'logout'])->name('logout');
-
-
 
 
 // =========================== Dashboard Routes ===================================== //
@@ -92,6 +95,7 @@ Route::prefix('Head')->name('Head.')->group(function () {
     Route::put('/students/{id_num}', [HeadStudentController::class, 'editStudent'])->name('students.update');
     Route::post('/students/archive', [HeadStudentController::class, 'archiveStudent'])->name('students.archive');
     Route::post('/students/archive-disable', [HeadStudentController::class, 'archiveAndDisableStudent'])->name('students.archive-disable');
+    Route::get('/students/{s_id}/cases', [HeadStudentController::class, 'getStudentCases']);
 
     // Parents
     Route::get('/parents', [HeadParentController::class, 'index'])->name('parents.index');
@@ -100,22 +104,22 @@ Route::prefix('Head')->name('Head.')->group(function () {
     Route::post('/parents/{id}/update', [HeadParentController::class, 'update'])->name('parents.update');
 
 
-     // Cases
+    // Cases
     Route::get('/cases', [HeadCaseController::class, 'index'])->name('cases.index');
     Route::post('/addcase', [HeadCaseController::class, 'store'])->name('cases.store');
     Route::put('/cases/{case}', [HeadCaseController::class, 'update'])->name('cases.update');
     Route::put('/cases/{case}/archive', [HeadCaseController::class, 'archive'])->name('cases.archive');
     Route::get('/students/search', [HeadCaseController::class, 'searchStudent'])->name('students.search');
 
-    // Messages
-    Route::get('/messages', [HeadMessageController::class, 'index'])->name('messages.index');
-
-
     // Counseling
     Route::get('/counseling', [HeadCounselingController::class, 'index'])->name('counseling.index');
 
 
+    // Messages
+    Route::get('/messages', [HeadMessageController::class, 'index'])->name('messages.index');
 
+    // Requests
+    Route::get('/requests', [HeadRequestController::class, 'index'])->name('requests.index');
 
     Route::get('/appointments', [HeadAppointmentController::class, 'index'])->name('appointments.index');
 
@@ -129,14 +133,17 @@ Route::prefix('Head')->name('Head.')->group(function () {
 });
 
 // ============================== Counselor Routes ==================================== //
-Route::prefix('Counselor')->name('Counselor.')->group(function () {
-    
-});
+Route::prefix('Counselor')->name('Counselor.')->group(function () {});
 
 
 
 // ============================== Parent Routes ==================================== //
-Route::prefix('Parent')->name('Parent.')->group(function () {
+Route::prefix('Parent')->name('Parent.')->middleware('auth')->group(function () {
 
-   Route::get('/child', [ParentChildController::class, 'index'])->name('child.index');
+    Route::get('/child', [ParentChildController::class, 'index'])->name('child.index');
+    Route::post('/children/link-request', [ParentChildController::class, 'sendLinkRequest'])->name('link.request');
+    Route::get('/children/search-students', [ParentChildController::class, 'searchStudents'])->name('search.students');
+
+    // Requests
+    Route::get('/requests', [ParentRequestController::class, 'index'])->name('requests.index');
 });

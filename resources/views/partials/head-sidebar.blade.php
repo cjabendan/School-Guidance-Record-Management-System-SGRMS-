@@ -6,107 +6,118 @@
     );
 </script>
 
-<section id="sidebar" class="sidebar @if(request()->cookie('sidebarState') === 'hide') hide @endif">    
-    <div>
-        <a href="#" class="brand">
-            <img src="{{ asset('images/logo/1.png') }}" class="brand-logo" alt="SGRMS Logo">
-        </a>
-    </div>
+<section id="sidebar" class="sidebar @if (request()->cookie('sidebarState') === 'hide') hide @endif">
+    <div class="flex-side">
+        <div>
+            <a href="#" class="brand">
+                <img src="{{ asset('images/logo/1.png') }}" class="brand-logo" alt="SGRMS Logo">
+            </a>
 
-    <div>
-        <ul class="side-menu top">
-            <!-- Dashboard -->
-            <li class="{{ Request::is('Head/dashboard') ? 'active' : '' }}">
-                <a href="{{ url('Head/dashboard') }}">
-                    <i class='bx bxs-dashboard'></i>
-                    <span class="text">Dashboard</span>
-                </a>
-            </li>
-
-            <!-- Profiling (main link) -->
-            <li class="{{ Request::is('Head/counselors*') || Request::is('Head/parents*') || Request::is('Head/students*') ? 'active' : '' }}">
-                <a href="#" id="profiling-link">
-                    <i class='bx bxs-user'></i>
-                    <span class="text">Profiling</span>
-                    <i class='bx bx-chevron-down' style="margin-left:auto;"></i>
-                </a>
-            </li>
-
-            <!-- Profiling submenu -->
-            <ul class="submenu {{ Request::is('Head/counselors*') || Request::is('Head/parents*') || Request::is('Head/students*') ? 'active' : '' }}" id="profiling-submenu">
-                <li class="{{ Request::is('Head/counselors*') ? 'active' : '' }}">
-                    <a href="{{ url('Head/counselors') }}">
-                        <i class="fi fi-sr-review"></i>
-                        <span class="text">Counselors</span>
+            <ul class="side-menu top">
+                <!-- Dashboard -->
+                <li class="{{ Request::is('Head/dashboard') ? 'active' : '' }}">
+                    <a href="{{ url('Head/dashboard') }}">
+                        <i class='bx bxs-dashboard'></i>
+                        <span class="text">Dashboard</span>
                     </a>
                 </li>
-                <li class="{{ Request::is('Head/parents*') ? 'active' : '' }}">
-                    <a href="{{ url('Head/parents') }}">
-                        <i class="fi fi-sr-users"></i>
-                        <span class="text">Parents</span>
+
+                <!-- Profiling (main link) -->
+                <li
+                    class="{{ Request::is('Head/counselors*') || Request::is('Head/parents*') || Request::is('Head/students*') ? 'active' : '' }}">
+                    <a href="#" id="profiling-link">
+                        <i class='bx bxs-user'></i>
+                        <span class="text">Profiling</span>
+                        <i class='bx bx-chevron-down' style="margin-left:auto;"></i>
                     </a>
                 </li>
-                <li class="{{ Request::is('Head/students*') ? 'active' : '' }}">
-                    <a href="{{ url('Head/students') }}">
-                        <i class="fi fi-sr-student"></i>
-                        <span class="text">Students</span>
+
+                <!-- Profiling submenu -->
+                <ul class="submenu {{ Request::is('Head/counselors*') || Request::is('Head/parents*') || Request::is('Head/students*') ? 'active' : '' }}"
+                    id="profiling-submenu">
+                    <li class="{{ Request::is('Head/counselors*') ? 'active' : '' }}">
+                        <a href="{{ url('Head/counselors') }}">
+                            <i class="fi fi-sr-review"></i>
+                            <span class="text">Counselors</span>
+                        </a>
+                    </li>
+                    <li class="{{ Request::is('Head/parents*') ? 'active' : '' }}">
+                        <a href="{{ url('Head/parents') }}">
+                            <i class="fi fi-sr-users"></i>
+                            <span class="text">Parents</span>
+                        </a>
+                    </li>
+                    <li class="{{ Request::is('Head/students*') ? 'active' : '' }}">
+                        <a href="{{ url('Head/students') }}">
+                            <i class="fi fi-sr-student"></i>
+                            <span class="text">Students</span>
+                        </a>
+                    </li>
+                </ul>
+
+                <!-- Other menus -->
+                <li class="{{ Request::is('Head/cases*') ? 'active' : '' }}">
+                    <a href="{{ url('Head/cases') }}">
+                        <i class='bx bxs-report'></i>
+                        <span class="text">Case Reports</span>
+                    </a>
+                </li>
+                   <li class="{{ Request::is('Head/counseling*') ? 'active' : '' }}">
+                    <a href="{{ url('Head/counseling') }}">
+                        <i class="fi fi-sr-journal-alt"></i>
+                        <span class="text">Counseling</span>
+                    </a>
+                </li>
+                <li class="{{ Request::is('Head/messages*') ? 'active' : '' }}">
+                    <a href="{{ url('Head/messages') }}">
+                        <i class="fi fi-sr-comment"></i>
+                        <span class="text">Messages</span>
+                    </a>
+                </li>
+             
+                <li class="{{ Request::is('Head/requests*') ? 'active' : '' }}">
+                    <a href="{{ url('Head/requests') }}">
+                        <i class="fi fi-sr-inbox"></i>
+                        <span class="text">Requests</span>
+                    </a>
+                </li>
+                <li class="{{ Request::is('Head/appointments*') ? 'active' : '' }}">
+                    <a href="{{ url('Head/appointments') }}">
+                        <i class='bx bxs-calendar'></i>
+                        <span class="text">Appointments</span>
+                    </a>
+                </li>
+                <li class="{{ Request::is('Head/announcements*') ? 'active' : '' }}">
+                    <a href="{{ url('Head/announcements') }}">
+                        <i class='bx bxs-megaphone'></i>
+                        <span class="text">Announcements</span>
+                    </a>
+                </li>
+
+
+                <li class="{{ Request::is('Head/settings*') ? 'active' : '' }}">
+                    <a href="{{ url('Head/settings') }}">
+                        <i class='bx bxs-cog'></i>
+                        <span class="text">Settings</span>
                     </a>
                 </li>
             </ul>
+        </div>
 
-            <!-- Other menus -->
-            <li class="{{ Request::is('Head/cases*') ? 'active' : '' }}">
-                <a href="{{ url('Head/cases') }}">
-                    <i class='bx bxs-report'></i>
-                    <span class="text">Case Reports</span>
-                </a>
-            </li>
-            <li class="{{ Request::is('Head/messages*') ? 'active' : '' }}">
-                <a href="{{ url('Head/messages') }}">
-                    <i class="fi fi-sr-comment"></i>
-                    <span class="text">Messages</span>
-                </a>
-            </li>
-            <li class="{{ Request::is('Head/counseling*') ? 'active' : '' }}">
-                <a href="{{ url('Head/counseling') }}">
-                   <i class="fi fi-sr-journal-alt"></i>
-                    <span class="text">Counseling</span>
-                </a>
-            </li>
-        
-            <li class="{{ Request::is('Head/appointments*') ? 'active' : '' }}">
-                <a href="{{ url('Head/appointments') }}">
-                    <i class='bx bxs-calendar'></i>
-                    <span class="text">Appointments</span>
-                </a>
-            </li>
-            <li class="{{ Request::is('Head/announcements*') ? 'active' : '' }}">
-                <a href="{{ url('Head/announcements') }}">
-                    <i class='bx bxs-megaphone'></i>
-                    <span class="text">Announcements</span>
-                </a>
-            </li>
-            <li class="{{ Request::is('Head/settings*') ? 'active' : '' }}">
-                <a href="{{ url('Head/settings') }}">
-                    <i class='bx bxs-cog'></i>
-                    <span class="text">Settings</span>
-                </a>
-            </li>
-        </ul>
+        <div class="bottom-side">
+            <ul class="side-menu">
+                <!-- Logout -->
+                <li>
+                    <form method="POST" action="{{ route('logout') }}" class="logout-form">
+                        @csrf
+                        <button type="submit">
+                            <i class="fi fi-br-exit"></i>
+                            <span class="text">Logout</span>
+                        </button>
+                    </form>
+                </li>
+            </ul>
+        </div>
     </div>
 
-    <div>
-        <ul class="side-menu">
-            <!-- Logout -->
-            <li>
-                <form method="POST" action="{{ route('logout') }}" class="logout-form">
-                    @csrf
-                    <button type="submit">
-                        <i class="fi fi-br-exit"></i>
-                        <span class="text">Logout</span>
-                    </button>
-                </form>
-            </li>
-        </ul>
-    </div>
 </section>

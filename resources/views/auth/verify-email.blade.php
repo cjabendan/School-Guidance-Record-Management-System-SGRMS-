@@ -11,7 +11,12 @@
                         needed.
                         Please verify your email address by clicking the link we sent to:
                     </p>
-                    <p class="email">sample@gmail.com</p>
+                    <p class="email">
+                        <a href="https://mail.google.com/mail/u/0/#inbox" target="_blank"
+                            style="color:#1ea7ff;text-decoration:underline;">
+                            {{ session('registered_email') }}
+                        </a>
+                    </p>
                     <p class="note">If you didn't receive the email, please check your spam folder.</p>
 
                 </div>
@@ -19,10 +24,10 @@
             <div class="footer">
                 <div class="resendEmail">
                     <form method="POST" action="{{ route('verification.resend') }}">
-                    @csrf
-                    <p class="resendNote">Didn’t receive the email?</p>
-                    <a href="#" class="resend">Resend Email Link</a>
-                </form>
+                        @csrf
+                        <p class="resendNote">Didn’t receive the email?</p>
+                        <a href="#" class="resend">Resend Email Link</a>
+                    </form>
                 </div>
             </div>
         </div>
@@ -138,8 +143,8 @@
     }
 
     .footer {
-       background-color: #f9f9f9;
-       padding: 1rem;  
+        background-color: #f9f9f9;
+        padding: 1rem;
     }
 
     .resendEmail {

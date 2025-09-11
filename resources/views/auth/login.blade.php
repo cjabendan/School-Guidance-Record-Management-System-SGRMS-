@@ -42,7 +42,7 @@
                 </div>
                 <button type="submit" class="log-btn">Login</button>
                 <div class="signup-link">
-                    <p>No account or a parent?<a href="{{ url('register') }}">Sign up</a></p>
+                    <p>No account or a parent?<a href="{{ url('/register') }}">Sign up</a></p>
                 </div>
             </form>
         </div>

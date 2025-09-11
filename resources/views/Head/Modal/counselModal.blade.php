@@ -100,7 +100,7 @@
                         </div>
 
 
-        <!-- Add Counselor Modal -->
+        <!-- Edit Counselor Modal -->
         <div id="formModal" class="modal">
             <div class="modal-content add-modal-content pro-add-modal">
                 <span class="close add-modal-close pro-add-close" onclick="closeFormModal()">&times;</span>
@@ -158,58 +158,4 @@
         </div>
 
 <!------------------------------------------------------------------------>
-
-        <!-- View Counselor Modal -->
-        <div id="viewCounselorModal" class="modal" style="display:none;">
-            <div class="modal-content add-modal-content pro-add-modal">
-                <span class="close add-modal-close pro-add-close" onclick="window.closeViewCounselorModal()">&times;</span>
-                <h2 class="add-modal-title pro-add-title" style="text-align:center; font-size: 1.5rem; font-weight: bold; color: #1e3a8a; margin-bottom: 18px;">View Counselor</h2>
-                <div class="form-row image-name-row">
-                    <div class="image-col">
-                        <img id="viewCounselorImage" src="{{ asset('images/user/default.jpg') }}" data-default="{{ asset('images/user/default.jpg') }}" alt="Counselor Image" class="student-image-box pro-add-image">
-                        <div class="student-id-row pro-add-id-row">
-                            <label class="add-label" style="margin-bottom:0; font-weight:600; color:#1e3a8a; letter-spacing:1px;">Counselor ID:</label>
-                            <span id="view_c_id_display" class="pro-add-id-value" style="font-family:monospace; font-size:1.1em; color:#0a2540; background:#f3f6fa; padding:2px 8px; border-radius:6px;">Loading...</span>
-                        </div>
-                    </div>
-                    <div class="name-fields-col">
-                        <div class="form-row" style="margin-bottom: 0; gap: 12px;">
-                            <div class="add-field-col">
-                                <label class="add-label">First Name:</label>
-                                <span id="view_counselor_fname" class="view-field"></span>
-                            </div>
-                            <div class="add-field-col">
-                                <label class="add-label">Middle Name:</label>
-                                <span id="view_counselor_mname" class="view-field"></span>
-                            </div>
-                            <div class="add-field-col">
-                                <label class="add-label">Last Name:</label>
-                                <span id="view_counselor_lname" class="view-field"></span>
-                            </div>
-                        </div>
-                        <div class="form-row">
-                            <div class="add-field-col">
-                                <label class="add-label">Email:</label>
-                                <span id="view_counselor_email" class="view-field"></span>
-                            </div>
-                            <div class="add-field-col">
-                                <label class="add-label">Contact Number:</label>
-                                <span id="view_counselor_contact_num" class="view-field"></span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="pro-add-buttons">
-                    <button type="button" class="pro-add-save" id="editCounselorBtn"
-                        onclick="editCounselorFromView(document.getElementById('view_c_id_display').textContent)">Edit</button>
-                </div>
-            </div>
-        </div>
-                    </div>
-                </div>
-                <div class="pro-add-buttons">
-                    <button type="button" class="pro-add-save" id="editCounselorBtn"
-                        onclick="editCounselorFromView(document.getElementById('view_c_id_display').textContent)">Edit</button>
-                </div>
-            </div>
-        </div>
+s

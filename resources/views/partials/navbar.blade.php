@@ -15,6 +15,7 @@
                     'Head.cases.index' => 'Case Reports',
                     'Head.messages.index' => 'Messages',
                     'Head.counseling.index' => 'Counseling',
+                    'Head.requests.index' => 'Requests',
                     'Head.appointments.index' => 'Appointments',
                     'Head.announcements.index' => 'Announcements',
                     'Head.settings.index' => 'Settings',
@@ -31,6 +32,8 @@
                 $parentPages = [
                     'Parent.dashboard' => 'Dashboard',
                     'Parent.child.index' => 'My Children',
+                    'Parent.messages.index' => 'Messages',
+                    'Parent.requests.index' => 'Requests',
                     'Parent.appointments.index' => 'Appointments',
                     'Parent.settings.index' => 'Settings',
                 ];

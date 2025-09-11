@@ -2,20 +2,20 @@
 
 @section('content')
     {{-- Home Section --}}
-    @include('sections.home')
+    @include('landing-sections.home')
 
     {{-- Highlight Section --}}
 
     {{-- About Section --}}
-    @include('sections.about')
+    @include('landing-sections.about')
 
     {{-- Services Section --}}
-    @include('sections.services')
+    @include('landing-sections.services')
 
     {{-- Meet Our Staff --}}
-    @include('sections.staff')
+    @include('landing-sections.staff')
 
     {{-- FAQ Section --}}
-    @include('sections.faq')
+    @include('landing-sections.faq')
 
 @endsection

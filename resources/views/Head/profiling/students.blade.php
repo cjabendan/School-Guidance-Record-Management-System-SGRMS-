@@ -34,30 +34,30 @@
                     <button class="toggle-btn" onclick="openImportModal()"><i class="fi fi-rr-document-circle-arrow-up"></i></i></button>
                     <div class="dropdown" style="display:inline-block;position:relative;">
                         <button class="toggle-btn" id="exportDropdownBtn" style="padding:8px 12px;border-radius:6px;background:#2563eb;color:#fff;border:none;box-shadow:0 1px 4px rgba(0,0,0,0.05);"><i class="fi fi-rr-file-download"></i></button>
-                        <div id="exportDropdownMenu" class="dropdown-menu" style="display:none;position:absolute;right:0;top:110%;z-index:1000;background:#fff;border-radius:8px;border:1px solid #e5e7eb;padding:4px 0;min-width:140px;box-shadow:0 4px 16px rgba(0,0,0,0.08);">
+                        <div id="exportDropdownMenu" class="dropdown-menu" style="display:none;position:absolute;right:0;top:110%;z-index:1000;background:#fff;border-radius:8px;border:1px solid #e5e7eb;padding:4px 0;min-width:180px;box-shadow:0 4px 16px rgba(0,0,0,0.08);">
                             <a href="#" class="dropdown-item" onclick="downloadExport('pdf')" style="display:block;padding:10px 18px;color:#222;text-decoration:none;font-size:15px;transition:background 0.2s;border:none;background:none;cursor:pointer;">Export as PDF</a>
-                            <a href="#" class="dropdown-item" onclick="downloadExport('excel')" style="display:block;padding:10px 18px;color:#222;text-decoration:none;font-size:15px;transition:background 0.2s;border:none;background:none;cursor:pointer;">Export as Excel</a>
+                            <a href="#" class="dropdown-item" onclick="downloadExport('xlsx')" style="display:block;padding:10px 18px;color:#222;text-decoration:none;font-size:15px;transition:background 0.2s;border:none;background:none;cursor:pointer;">Export as Excel (.xlsx)</a>
+                            <a href="#" class="dropdown-item" onclick="downloadExport('xls')" style="display:block;padding:10px 18px;color:#222;text-decoration:none;font-size:15px;transition:background 0.2s;border:none;background:none;cursor:pointer;">Export as Excel (.xls)</a>
+                            <a href="#" class="dropdown-item" onclick="downloadExport('csv')" style="display:block;padding:10px 18px;color:#222;text-decoration:none;font-size:15px;transition:background 0.2s;border:none;background:none;cursor:pointer;">Export as CSV</a>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="table-list" id="student-list" style="margin-bottom:0;">
-                <div class="table-header">
-                    <div class="table-col title">Student ID</div>
-                    <div class="table-col">Name</div>
-                    <div class="table-col">Sex</div>
-                    <div class="table-col">Educational Level</div>
-                    <div class="table-col">Year Level</div>
-                    <div class="table-col">Section</div>
-                    <div class="table-col actions">Actions</div>
-                </div>
+            <div class="table-header">
+                <div class="table-col title">Student ID</div>
+                <div class="table-col">Name</div>
+                <div class="table-col">Sex</div>
+                <div class="table-col">Educational Level</div>
+                <div class="table-col">Year Level</div>
+                <div class="table-col">Section</div>
+                <div class="table-col actions">Actions</div>
+            </div>
+            <div id="student-list">
                 <div class="table">
                     @foreach ($students as $row)
                         @php
-                            // Default: green circle for all students
                             $statusClass = 'green';
                             $statusColor = 'green';
-                            // If student has a case record, use severity for color
                             if (!empty($row->case_severity)) {
                                 if (strtolower($row->case_severity) === 'low') {
                                     $statusClass = 'green';
@@ -76,11 +76,11 @@
                             $name = trim($row->lname . ', ' . $row->fname . ' ' . $mname . ' ' . $suffix);
                             $profileImage = $row->profile_image ?? 'default.png';
                         @endphp
-                            <div class="table-card">
-                                <div class="table-col title">
-                                    <span class="status-circle {{ $statusClass }}" style="background: {{ $statusColor }} !important; vertical-align: middle; margin-right: 6px;"></span>
-                                    {{ $row->s_id }}
-                                </div>
+                        <div class="table-card">
+                            <div class="table-col title">
+                                <span class="status-circle {{ $statusClass }}" style="background: {{ $statusColor }} !important; vertical-align: middle; margin-right: 6px;"></span>
+                                {{ $row->s_id }}
+                            </div>
                             <div class="table-col">{{ $name }}</div>
                             <div class="table-col">{{ $row->sex }}</div>
                             <div class="table-col">{{ $row->educ_level }}</div>
@@ -100,7 +100,9 @@
                         </div>
                     @endforeach
                 </div>
-                <ul id="pagination-student" class="pagination"></ul>
+                @if ($students instanceof \Illuminate\Pagination\LengthAwarePaginator)
+                    @component('components.student-pagination', ['paginator' => $students]) @endcomponent
+                @endif
             </div>
         </div>
         </div>
@@ -113,4 +115,31 @@
     <script src="{{ asset('js/head.js') }}"></script>
     <script src="{{ asset('js/Modal/studentModal.js') }}"></script>
     <script src="{{ asset('js/Modal/studentModal.js') }}"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.getElementById('student-search-input');
+            const tableList = document.getElementById('student-list');
+            let searchTimeout = null;
+            searchInput.addEventListener('input', function() {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(function() {
+                    const query = searchInput.value;
+                    const url = new URL(window.location.href);
+                    url.searchParams.set('search', query);
+                    fetch(url, {
+                        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                    })
+                    .then(response => response.text())
+                    .then(html => {
+                        const parser = new DOMParser();
+                        const doc = parser.parseFromString(html, 'text/html');
+                        const newTable = doc.getElementById('student-list');
+                        if (newTable && tableList) {
+                            tableList.innerHTML = newTable.innerHTML;
+                        }
+                    });
+                }, 300);
+            });
+        });
+    </script>
 @endsection

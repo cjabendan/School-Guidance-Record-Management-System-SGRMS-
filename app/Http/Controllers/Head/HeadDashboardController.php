@@ -19,7 +19,7 @@ class HeadDashboardController extends Controller
 
         // Count stats
         $totalStudents = User::where('role', 'student')->count();
-        $totalParents = ParentModel::count();
+        $totalParents = User::where('role', 'parent')->count();
         $totalCounselors = User::where('role', 'counselor')->count();
         $totalCases = CaseModel::count();
 

@@ -304,7 +304,6 @@ section {
     padding-top: 4rem;
 }
 
-
 .about-left img {
     width: 700px;
     height: 700px;
@@ -318,7 +317,7 @@ section {
 }
 
 .about-row i {
-    font-size: 30px;
+    font-size: 1.4rem;
     color: #1ea7ff;
     margin-right: 1rem;
     display: flex;
@@ -327,22 +326,22 @@ section {
 }
 
 .about-row h4 {
-    font-size: 1.1rem;
+    font-size: 1.4rem;
     color: #1ea7ff;
     font-weight: 500;
 }
 
 .about-right h2 {
-    font-size: 2.8rem;
+    font-size: 2.4rem;
     color: #000000;
     margin-bottom: 1rem;
     font-weight: 500;
 }
 
 .about-right p {
-    font-size: 1.3rem;
+    font-size: 1.2rem;
     color: #6d7375;
-    line-height: 2;
+    line-height: 1.8;
     margin-bottom: 1.5rem;
 }
 
@@ -355,7 +354,7 @@ section {
     padding: 0.8rem 2rem;
     border: none;
     border-radius: 5px;
-    font-size: 1.25rem;
+    font-size: 1rem;
     font-weight: 500;
     cursor: pointer;
     transition: background 0.2s;
@@ -407,7 +406,7 @@ section {
     flex: 0 1 calc((100% - 4rem) / 3);
     max-width: 400px;
     min-width: 400px;
-    height: 420px;
+    height: 380px;
     background: #ffffff;
     border-radius: 10px;
     padding: 50px 30px;
@@ -536,6 +535,7 @@ section {
     display: flex;
     flex-direction: column;
     align-items: center;
+    margin: 0.8rem 0 0 0;
 }
 
 .staff-content h2 {
@@ -544,7 +544,6 @@ section {
     text-align: center;
     font-weight: 700;
     letter-spacing: 3.5px;
-    margin-bottom: 0.5rem;
 }
 
 .staff-content .p {
@@ -565,8 +564,8 @@ section {
 }
 
 .staff-card {
-    width: 410px;
-    height: 580px;
+    width: 400px;
+    height: 560px;
     background: rgb(255, 255, 255);
     border-radius: 10px;
     padding: 20px;
@@ -576,7 +575,7 @@ section {
 }
 
 .staff-card:hover {
-    transform: translateY(-10px);
+    transform: translateY(-4px);
 }
 
 .staff-card img {
@@ -618,20 +617,19 @@ section {
     width: 100%;
     align-items: center;
     justify-content: center;
-    margin-top: 40px;
     gap: 10px;
 }
 
 .mail-btn {
     background-color: transparent;
     border: 1px solid #1ea7ff;
-    padding: 4px 8px 1px 8px;
+    padding: 5px 8px 1px 8px;
     border-radius: 7px;
     font-size: 16px;
 }
 
 .mail-btn i {
-    font-size: 24px;
+    font-size: 22px;
     color: #1ea7ff;
 }
 
@@ -642,7 +640,7 @@ section {
     font-size: 16px;
     font-weight: 500;
     letter-spacing: 1px;
-    padding: 10px 60px;
+    padding: 10px 57px;
 }
 
 .book-btn:hover {
@@ -692,8 +690,8 @@ section {
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
-    gap: 2rem;
-    margin-bottom: 10px;
+    gap: 1.5rem;
+    margin-bottom: 7px;
 }
 
 .announcement-filter .a-nav {
@@ -776,7 +774,6 @@ section {
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     position: relative;
     transition: transform 0.3s ease;
-
     cursor: pointer;
 }
 
@@ -901,7 +898,7 @@ section {
     -webkit-line-clamp: 2; /* number of lines to show */
     -webkit-box-orient: vertical;
 }
-    
+
 /* FAQ Section  */
 .faq-section {
     min-height: 100vh;
@@ -1016,7 +1013,7 @@ section {
     max-width: 1200px;
     height: 380px;
     background: linear-gradient(to right, #15a3ff, #0058af);
-    border-radius: 40px;
+    border-radius: 18px;
 }
 
 .flex-cta {
@@ -1097,16 +1094,133 @@ section {
 /* Footer styles  */
 footer {
     background: #263238;
-    display: flex;
-    text-align: center;
-    justify-content: center;
-    align-items: center;
-    height: 170px;
-}
-
-footer p {
+    padding-top: 4rem;
+    padding-bottom: 2.5rem;
     color: #fff;
 }
+.footer-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+}
+.footer-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 3rem;
+}
+@media (min-width: 768px) {
+    .footer-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+@media (min-width: 1024px) {
+    .footer-grid {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 4rem;
+    }
+}
+
+.footer-logo {
+    height: 60px;
+    width: 60px;
+    border-radius: 0.5rem;
+    background-color: #fff;
+    filter: brightness(1);
+    transition: filter 0.3s;
+}
+.footer-logo:hover {
+    filter: brightness(1.15);
+}
+
+.footer-desc {
+    color: #b0bec5;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    margin: 1.2rem 0;
+    transition: color 0.3s;
+}
+.footer-section:hover .footer-desc {
+    color: #fff;
+}
+.footer-social {
+    display: flex;
+    gap: 1.2rem;
+}
+.footer-social-link {
+    color: #b0bec5;
+    font-size: 1.25rem;
+    transition: color 0.3s, transform 0.3s;
+}
+.footer-social-link.facebook:hover {
+    color: #1877f2;
+    transform: scale(1.1) translateY(-3px);
+}
+.footer-social-link.twitter:hover {
+    color: #1da1f2;
+    transform: scale(1.1) translateY(-3px);
+}
+.footer-social-link.gmail:hover {
+    color: #db4437;
+    transform: scale(1.1) translateY(-3px);
+}
+.footer-title {
+    font-size: 1.25rem;
+    font-weight: bold;
+    margin-bottom: 1.5rem;
+    color: #e0e0e0;
+    transition: color 0.3s;
+}
+
+.footer-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+.footer-link {
+    color: #b0bec5;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.8rem;
+    text-decoration: none;
+    padding-left: 0;
+}
+
+.footer-link:hover {
+    color: #fff;
+}
+
+.footer-bottom {
+    margin-top: 4rem;
+    padding-top: 2rem;
+    border-top: 1px solid #37474f;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+}
+.footer-certificates {
+    display: flex;
+    gap: 1.5rem;
+    margin-bottom: 1rem;
+}
+.footer-certificate {
+    height: 40px;
+    border-radius: 0.5rem;
+    transition: opacity 0.3s;
+}
+.footer-certificate:hover {
+    opacity: 0.8;
+}
+.footer-copyright {
+    color: #b0bec5;
+    font-size: 0.95rem;
+    transition: color 0.3s;
+}
+.footer-copyright:hover {
+    color: #fff;
+}
+
 /* Modal styles  */
 
 .login-modal {
@@ -1122,7 +1236,8 @@ footer p {
     align-items: center;
 }
 
-.login-modal.show {
+.login-modal.show,
+.register-modal.show {
     display: flex;
 }
 
@@ -1322,6 +1437,7 @@ footer p {
 .toggle-password:hover {
     color: #0080ff;
 }
+
 
 /* Pagination styles */
 .pagination {

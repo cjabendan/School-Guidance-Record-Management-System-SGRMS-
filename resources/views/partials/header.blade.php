@@ -7,6 +7,7 @@
         <a class="nav-link" href="{{ url('/#about') }}">About</a>
         <a class="nav-link" href="{{ url('/#services') }}">Services</a>
         <a class="nav-link" href="{{ url('/#staff') }}">Meet Our Staff</a>
+        <a class="nav-link" href="{{ url('/#faq') }}">FAQ's</a>
         <a class="nav-link" href="{{ url('announcements') }}">Announcements</a>
     </nav>
     <div class="navigation">

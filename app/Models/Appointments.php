@@ -15,7 +15,6 @@ class Appointments extends Model
     protected $fillable = [
         'requester_id',
         'requester_type',
-        'student_id',
         'counselor_id',
         'appointment_type_id',
         'reason',
@@ -32,10 +31,11 @@ class Appointments extends Model
     ];
 
     // Relationships
-    public function student()
+    public function students()
     {
-        return $this->belongsTo(User::class, 'student_id');
+        return $this->belongsToMany(Student::class, 'appointment_students', 'appointment_id', 'student_user_id');
     }
+
 
     public function counselor()
     {

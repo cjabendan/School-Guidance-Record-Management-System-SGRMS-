@@ -30,5 +30,9 @@ class AnnouncementsController extends Controller
         return view('announcement', compact('announcements'));
     }
 
-    
+    public function view($id)
+    {
+        $announcement = Announcements::findOrFail($id);
+        return view('components.announcement-view', compact('announcement'));
+    }
 }

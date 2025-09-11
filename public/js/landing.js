@@ -65,12 +65,18 @@ function openLoginModal() {
 function closeLoginModal() {
     document.querySelector(".login-modal").classList.remove("show");
 }
+
 window.onclick = function (event) {
-    const modal = document.querySelector(".login-modal");
-    if (event.target === modal) {
+    const loginModal = document.querySelector(".login-modal");
+    const registerModal = document.querySelector(".register-modal");
+    if (event.target === loginModal) {
         closeLoginModal();
     }
+    if (event.target === registerModal) {
+        closeRegisterModal();
+    }
 };
+
 function togglePassword() {
     const passwordInput = document.getElementById("login-password");
     const icon = document.getElementById("togglePasswordIcon");

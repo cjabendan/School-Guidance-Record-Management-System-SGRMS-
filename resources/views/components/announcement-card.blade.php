@@ -1,4 +1,4 @@
-<div class="announcement-box">
+<div class="announcement-box" onclick="openAnnouncementModal({{ $announcement->id }})">
     <div class="a-arrow">
         <i class="fi fi-rr-arrow-small-right"></i>
     </div>
@@ -14,7 +14,7 @@
             <p>
                 {{ \Illuminate\Support\Str::limit($announcement->description, 180, '...') }}
                 @if (strlen($announcement->description) > 180)
-                    <a href="">Read more</a>
+                    <a href="javascript:void(0);" onclick="openAnnouncementModal({{ $announcement->id }})">Read more</a>
                 @endif
             </p>
         </div>

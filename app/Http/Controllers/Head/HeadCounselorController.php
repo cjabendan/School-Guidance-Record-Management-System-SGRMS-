@@ -10,6 +10,25 @@ use Illuminate\Support\Facades\DB;
 
 class HeadCounselorController extends Controller
 {
+        public function index()
+    {
+        $counselors = DB::table('counselors')
+            ->leftJoin('users', 'counselors.user_id', '=', 'users.id')
+            ->select(
+                'counselors.c_id',
+                'users.first_name',
+                'users.middle_name',
+                'users.last_name',
+                'users.contact_num',
+                'users.email',
+                DB::raw('COALESCE(users.profile_image, "") as profile_image')
+            )
+            ->get();
+
+        return view('Head.profiling.counselors', compact('counselors'));
+    }
+
+
     // Get next available counselor ID 
     public function getNextCounselorId()
     {
@@ -28,23 +47,6 @@ class HeadCounselorController extends Controller
         return response()->json(['next_c_id' => $nextId]);
     }
 
-    public function index()
-    {
-        $counselors = DB::table('counselors')
-            ->leftJoin('users', 'counselors.user_id', '=', 'users.id')
-            ->select(
-                'counselors.c_id',
-                'users.first_name',
-                'users.middle_name',
-                'users.last_name',
-                'users.contact_num',
-                'users.email',
-                DB::raw('COALESCE(users.profile_image, "") as profile_image')
-            )
-            ->get();
-
-        return view('Head.profiling.counselors', compact('counselors'));
-    }
 
     public function store(Request $request)
     {

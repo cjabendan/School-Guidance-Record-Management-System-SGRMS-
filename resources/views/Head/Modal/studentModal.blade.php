@@ -162,7 +162,7 @@
     <div id="viewStudentModal" class="modal">
         <div class="modal-content add-modal-content pro-add-modal">
             <span class="close add-modal-close pro-add-close" id="closeViewModalBtn">&times;</span>
-            <h2 id="viewModalTitle" class="add-modal-title pro-add-title">View Student</h2>
+            <h2 class="add-modal-title pro-add-title">Student Information</h2>
             <div class="form-row image-name-row">
                 <div class="image-col">
                     <img id="viewStudentImage" src="{{ asset('images/user/default.jpg') }}" data-default="{{ asset('images/user/default.jpg') }}" alt="Student Image" class="student-image-box pro-add-image">
@@ -278,6 +278,37 @@
                     <span id="view_guardian_email" class="view-field"></span>
                 </div>
             </div>
+
+            <h3 style="color:#e11d48; margin-bottom:12px;"><i class="fi fi-rr-folder"></i> Case Records</h3>
+            <div id="view_case_records"></div>
+            <div id="case_record_template" style="display:none;">
+                <div class="case-record-row">
+                    <div class="case-record-col">
+                        <label class="case-record-label">Case Title:</label>
+                        <span class="case-title case-record-value"></span>
+                    </div>
+                    <div class="case-record-col">
+                        <label class="case-record-label">Severity:</label>
+                        <span class="case-severity case-record-value"></span>
+                    </div>
+                </div>
+                <div class="case-record-row">
+                    <div class="case-record-col">
+                        <label class="case-record-label">Date:</label>
+                        <span class="case-date case-record-value"></span>
+                    </div>
+                    <div class="case-record-col">
+                        <label class="case-record-label">Status:</label>
+                        <span class="case-status case-record-value"></span>
+                    </div>
+                </div>
+                <div class="case-record-row">
+                    <div class="case-record-col" style="width:100%;">
+                        <label class="case-record-label">Description:</label>
+                        <span class="case-description case-record-description"></span>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -323,7 +354,7 @@
                 @csrf
                 <div class="form-row">
                     <div class="add-field-col" style="flex:2;">
-                        <label for="students_file" class="add-label">Select CSV/Excel File:</label>
+                        <label for="students_file" class="add-label">Select File:</label>
                         <input type="file" name="students_file" id="students_file" accept=".csv,.xlsx,.xls" required style="margin-top:8px;">
                     </div>
                 </div>

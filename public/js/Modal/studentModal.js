@@ -218,7 +218,6 @@ window.openAddEditModal = function openAddEditModal(mode, studentData = null) {
     if (mode === 'add') {
         title.textContent = 'Add Student';
         saveBtn.textContent = 'Save';
-
         var methodInput = document.getElementById('_method_input');
         if (methodInput) methodInput.remove();
         // Fetch new student ID
@@ -231,9 +230,7 @@ window.openAddEditModal = function openAddEditModal(mode, studentData = null) {
     } else if (mode === 'edit' && studentData) {
         title.textContent = 'Edit Student';
         saveBtn.textContent = 'Update';
-        
-        form.action = `/Head/students/${studentData.id_num}`;
-        
+        // DO NOT set form.action here
         if (!document.getElementById('_method_input')) {
             const methodInput = document.createElement('input');
             methodInput.type = 'hidden';
@@ -257,7 +254,6 @@ window.openAddEditModal = function openAddEditModal(mode, studentData = null) {
         document.getElementById('civil_status').value = studentData.civil_status || '';
         document.getElementById('educ_level').value = studentData.educ_level || '';
         toggleProgramField();
-        
         if (typeof updateYearLevel === 'function') {
             updateYearLevel();
         }
@@ -277,6 +273,42 @@ window.openAddEditModal = function openAddEditModal(mode, studentData = null) {
     }
     modal.style.display = 'block';
     console.log('Modal opened');
+
+    // Attach AJAX submit for both add and edit
+    saveBtn.onclick = function(e) {
+        e.preventDefault();
+        var formData = new FormData(form);
+        let url = '';
+        let method = '';
+        if (mode === 'add') {
+            url = '/Head/students';
+            method = 'POST';
+        } else if (mode === 'edit' && studentData) {
+            url = '/Head/students/' + (studentData.id_num || studentData.s_id);
+            method = 'POST'; // Laravel expects POST with _method=PUT
+            formData.append('_method', 'PUT');
+        }
+        fetch(url, {
+            method: method,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            },
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success || data.message) {
+                window.closeAddModal();
+                location.reload();
+            } else {
+                alert('Save failed!');
+            }
+        })
+        .catch(() => {
+            alert('An error occurred while saving.');
+        });
+    };
 }
 // Close modal
 window.closeAddModal = function closeAddModal() {
@@ -330,7 +362,6 @@ window.openViewStudentModal = function openViewStudentModal(s_id) {
                 if (el) {
                     let displayValue = value;
                     if (displayValue === undefined || displayValue === null || displayValue === '' || displayValue === 'N/A') {
-                        // Use 'N/A' for most fields, but 'None' for relationship/contact fields
                         if (id === 'view_relationship' || id === 'view_guardian_contact' || id === 'view_guardian_email') {
                             displayValue = 'None';
                         } else {
@@ -338,8 +369,6 @@ window.openViewStudentModal = function openViewStudentModal(s_id) {
                         }
                     }
                     el.textContent = displayValue;
-                } else {
-                    console.warn('Missing view modal element:', id);
                 }
             }
             // Set image
@@ -352,35 +381,60 @@ window.openViewStudentModal = function openViewStudentModal(s_id) {
             if (modal) {
                 modal.style.display = 'block';
                 modal.style.zIndex = 9999;
-                modal.removeAttribute('hidden');
-                modal.classList.remove('hidden');
-                setTimeout(() => {
-                  if (getComputedStyle(modal).display !== 'block') {
-                    modal.style.display = 'block';
-                  }
-                }, 10);
-                console.log('View modal opened');
-            } else {
-                console.log('View modal NOT found in DOM!');
             }
+
+            // Fetch case records and display
+            fetch(`/Head/students/${s_id}/cases`)
+                .then(response => response.json())
+                .then(cases => {
+                    console.log('Case records response:', cases);
+                    const caseRecordsDiv = document.getElementById('view_case_records');
+                    const template = document.getElementById('case_record_template');
+                    if (caseRecordsDiv) {
+                        caseRecordsDiv.innerHTML = '';
+                        if (!cases || cases.length === 0) {
+                            caseRecordsDiv.innerHTML = '<div style="color:#64748b;">No case records found.</div>';
+                        } else {
+                            cases.forEach(c => {
+                                if (!template) return;
+                                const clone = template.cloneNode(true);
+                                clone.style.display = '';
+                                // Fill in values
+                                clone.querySelector('.case-title').textContent = c.case_title || 'Case';
+                                clone.querySelector('.case-severity').innerHTML = `<span style='font-weight:500;'>Severity:</span> <span style='color:${c.severity === 'Severe' ? '#e11d48' : c.severity === 'Intermediate' ? '#f59e42' : '#2563eb'}; font-weight:600;'>${c.severity || 'N/A'}</span>`;
+                                clone.querySelector('.case-date').innerHTML = `<span style='font-weight:500;'>Date:</span> ${c.filed_date || c.date_reported || 'N/A'}`;
+                                clone.querySelector('.case-status').innerHTML = `<span style='font-weight:500;'>Status:</span> ${c.status || 'N/A'}`;
+                                clone.querySelector('.case-description').textContent = c.description || '';
+                                caseRecordsDiv.appendChild(clone);
+                            });
+                        }
+                    } else {
+                        console.warn('view_case_records div not found in modal!');
+                    }
+                })
+                .catch(err => {
+                    console.error('Error fetching case records:', err);
+                });
         });
 }
 
-// Close view modal logic
+// Close logic for view modal
 document.addEventListener('DOMContentLoaded', function() {
+    var viewModal = document.getElementById('viewStudentModal');
     var closeBtn = document.getElementById('closeViewModalBtn');
-    var modal = document.getElementById('viewStudentModal');
-    if (closeBtn && modal) {
+    if (closeBtn && viewModal) {
         closeBtn.onclick = function(e) {
             e.stopPropagation();
-            modal.style.display = 'none';
+            viewModal.style.display = 'none';
         };
-        modal.onclick = function(event) {
-            if (event.target === modal) {
-                modal.style.display = 'none';
+    }
+    if (viewModal) {
+        viewModal.onclick = function(event) {
+            if (event.target === viewModal) {
+                viewModal.style.display = 'none';
             }
         };
-        var modalContent = document.querySelector('#viewStudentModal .modal-content');
+        var modalContent = viewModal.querySelector('.modal-content');
         if (modalContent) {
             modalContent.onclick = function(e) {
                 e.stopPropagation();
@@ -388,7 +442,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 });
-
 
 // _________________________________________________________________________________________
 

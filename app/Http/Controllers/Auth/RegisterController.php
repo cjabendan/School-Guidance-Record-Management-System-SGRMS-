@@ -13,7 +13,7 @@ use App\Models\ParentModel;
 
 class RegisterController extends Controller
 {
-   
+
     public function showForm()
     {
         return view('auth.register');
@@ -30,6 +30,12 @@ class RegisterController extends Controller
             'last_name' => 'required|string|max:255',
             'first_name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
+            'phonenumber' => [
+                'required',
+                'unique:users,contact_num',
+                'regex:/^\d{10}$/',
+            ],
+            'gender' => 'required|in:Male,Female',
             'password' => [
                 'required',
                 'string',
@@ -44,15 +50,19 @@ class RegisterController extends Controller
         $data['role'] = 'parent';
         $data['status'] = 'pending';
         $data['password'] = bcrypt($data['password']);
+        $data['contact_num'] = '+63' . $data['phonenumber'];
+        $data['sex'] = $data['gender'];
+
+        unset($data['phonenumber'], $data['gender']);
 
         // 1. Create user (parent, pending)
         $user = User::create($data);
 
 
-    // Generate activation token for email verification
-    $user->activation_token = Str::random(64);
-    $user->activation_token_expires_at = now()->addHours(2);
-    $user->save();
+        // Generate activation token for email verification
+        $user->activation_token = Str::random(64);
+        $user->activation_token_expires_at = now()->addHours(2);
+        $user->save();
 
         // 2. Create parent profile linked to user (save user_id in parent table)
         $parent = ParentModel::create([
@@ -61,15 +71,18 @@ class RegisterController extends Controller
         ]);
 
 
-    // 3. Send welcome email with activation link
-    $activationLink = url('/activate/' . $user->activation_token);
-    Mail::to($user->email)->send(new WelcomeEmail($user, $activationLink));
+        // 3. Send welcome email with activation link
+        $activationLink = url('/activate/' . $user->activation_token);
+        Mail::to($user->email)->send(new WelcomeEmail($user, $activationLink));
 
-        return redirect('/verify-email')->with('success', 'Your parent account has been created! Please check your email for the activation link.');
+        session(['registered_email' => $user->email]);
 
+        return redirect('/verify-email')
+            ->with('success', 'Your parent account has been created! Please check your email for the activation link.')
+            ->with('registered_email', $user->email);
     }
 
-     public function showVerificationEmail()
+    public function showVerificationEmail()
     {
         return view('auth.verify-email');
     }
@@ -97,7 +110,7 @@ class RegisterController extends Controller
         return redirect('/success-verification')->with('success', 'Your email has been verified! You can now log in.');
     }
 
-     // Resend activation link
+    // Resend activation link
     public function resendActivationLink(Request $request)
     {
         $request->validate(['email' => 'required|email|exists:users,email']);
@@ -120,9 +133,8 @@ class RegisterController extends Controller
     }
 
 
-     public function showSuccessEmail()
+    public function showSuccessEmail()
     {
         return view('auth.success-verification');
     }
-
 }

@@ -9,11 +9,11 @@ class Student extends Model
     protected $table = 'students';
     protected $primaryKey = 's_id';
     public $incrementing = false;
-    protected $keyType = 'string'; 
+    protected $keyType = 'string';
     public $timestamps = false;
 
     protected $fillable = [
-        's_id',
+        's_id', // VARCHAR(50)
         'user_id',
         'y_id',
         'section',
@@ -29,24 +29,31 @@ class Student extends Model
         'civil_status',
     ];
 
-    // Relationship: A student belongs to one user (personal info)
+    // ✅ A student belongs to one user (personal info)
     public function user()
     {
         return $this->belongsTo(User::class, 'user_id');
     }
 
-    // Relationship: Many-to-Many with parents
-    public function parents()
+    public function yearLevel()
     {
-        return $this->belongsToMany(
-            ParentModel::class,
-            'parent_student',
-            'student_id',
-            'parent_id'
-        )->withTimestamps();
+        return $this->belongsTo(YearLevel::class, 'y_id', 'y_id');
     }
 
+    // ✅ Many-to-Many with parents (pivot has relation)
+    public function parents()
+    {
+        return $this->belongsToMany(ParentModel::class, 'parent_student', 's_id', 'p_id')
+            ->withPivot('relation');
+    }
 
+    // ✅ Reverse of ParentModel->children
+    public function parentLinks()
+    {
+        return $this->hasMany(ParentStudent::class, 's_id', 's_id');
+    }
+
+    // ✅ Link requests (extra feature you added)
     public function linkRequests()
     {
         return $this->hasManyThrough(
@@ -57,5 +64,17 @@ class Student extends Model
             's_id',         // Local key on students
             'request_id'    // Local key on parent_link_request_students
         );
+    }
+
+    // ✅ Appointments (many-to-many)
+    public function appointments()
+    {
+        return $this->belongsToMany(Appointments::class, 'appointment_students', 'student_user_id', 'appointment_id');
+    }
+
+    // ✅ Cases (reverse of ParentModel->cases, assuming you have CaseModel)
+    public function cases()
+    {
+        return $this->hasMany(CaseModel::class, 'student_id', 's_id');
     }
 }

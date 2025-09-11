@@ -8,14 +8,17 @@ class ParentLinkRequest extends Model
 {
     protected $table = 'parent_link_requests';
     protected $primaryKey = 'request_id';
-    public $timestamps = false; 
+    public $timestamps = false;
+    protected $dates = ['requested_at'];
+
 
     protected $fillable = [
         'parent_id',
         'status',
         'requested_at',
         'email',
-        'number'
+        'number',
+        'rejection_reason'
     ];
 
     public function parent()
@@ -25,6 +28,6 @@ class ParentLinkRequest extends Model
 
     public function students()
     {
-        return $this->hasMany(ParentLinkRequestStudent::class, 'request_id');
+        return $this->hasMany(ParentLinkRequestStudent::class, 'request_id', 'request_id');
     }
 }

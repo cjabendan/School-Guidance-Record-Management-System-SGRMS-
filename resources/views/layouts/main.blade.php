@@ -33,7 +33,7 @@
     <link rel="stylesheet" href="{{ asset('css/appointments.css') }}">
     <link rel="stylesheet" href="{{ asset('css/caseModal.css') }}">
     <link rel="stylesheet" href="{{ asset('css/case.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/modal.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/student.css') }}">
     @yield('head')
 </head>
 <body>

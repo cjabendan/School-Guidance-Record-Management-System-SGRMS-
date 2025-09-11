@@ -31,7 +31,8 @@ class HeadParentController extends Controller
                 'users.status',
                 'users.sex'
             )
-            ->get(); // or use ->paginate(10) for pagination
+            ->orderBy('p_id', 'desc')
+            ->paginate(10);
 
         return view('Head.profiling.parents', compact('parents'));
     }

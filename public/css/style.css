@@ -425,9 +425,9 @@ select:focus {
     border: 1px solid #8f8f8f65;
     border-radius: 5px;
     color: #5757578f;
-    padding: 8px 12px;
-    font-size: 1.2rem;
-    font-weight: 500;
+    padding: 10px;
+    font-size: 1rem;
+    font-weight: 200;
     justify-content: center;
 }
 
