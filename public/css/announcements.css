@@ -162,6 +162,11 @@
     animation: fadeInBg 0.3s;
 }
 
+.modal-announcement[style*="display: block"] {
+    display: flex !important;
+}
+
+
 @keyframes fadeInBg {
     from {
         background: rgba(30, 167, 255, 0);
@@ -417,7 +422,7 @@ select {
     font-family: "Lobster", cursive;
     font-size: 72px;
     line-height: 72px;
-    
+
     margin-bottom: 24px;
     text-shadow: black 1px 0 15px;
     color: white;

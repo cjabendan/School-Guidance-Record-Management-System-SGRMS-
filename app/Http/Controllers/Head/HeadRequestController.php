@@ -7,14 +7,19 @@ use Illuminate\Http\Request;
 use App\Models\ParentLinkRequest;
 use App\Models\DocumentRequest;
 use App\Models\ParentStudent;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
 class HeadRequestController extends Controller
 {
-    public function index()
+    // Load requests
+    public function index(Request $request)
     {
-        // Load child link requests
+        $status = $request->query('status', 'pending');
+        $type   = $request->query('type', 'all');
+
         $linkRequests = ParentLinkRequest::with(['parent.user', 'students.student.user'])
+            ->when($status !== 'all', fn($q) => $q->where('status', $status))
             ->get()
             ->map(function ($req) {
                 $sex = strtolower($req->parent->user->sex ?? '');
@@ -22,56 +27,52 @@ class HeadRequestController extends Controller
                 $lastName = $req->parent->user->last_name ?? 'Unknown';
 
                 return [
-                    'id' => $req->request_id,
-                    'type' => 'Child Link',
-                    'students' => $req->students->map(
-                        fn($s) =>
-                        $s->student->user
-                            ? $s->student->user->first_name . ' ' . $s->student->user->last_name
-                            : $s->student_id
-                    )->toArray(),
-                    'parent_name' => trim($prefix . ' ' . $lastName),
+                    'id'           => $req->request_id,
+                    'type'         => 'child-link',
+                    'display_type' => 'Child Link',
+                    'status'       => ucfirst($req->status),
                     'requested_at' => $req->requested_at
-                        ? \Carbon\Carbon::parse($req->requested_at)->format('M d, Y')
+                        ? Carbon::parse($req->requested_at)->format('M d, Y')
                         : 'N/A',
-                    'status' => ucfirst($req->status),
+                    'parent_name'  => trim($prefix . ' ' . $lastName),
                 ];
             });
 
-        // Load document requests
-        $documentRequests = DocumentRequest::with(['parent.user', 'drs.student.user'])
+        $documentRequests = DocumentRequest::with(['parent.user'])
+            ->when($status !== 'all', fn($q) => $q->where('status', $status))
             ->get()
             ->map(function ($req) {
-                $sex = strtolower($req->parent->user->sex ?? '');
-                $prefix = $sex === 'male' ? 'Mr.' : ($sex === 'female' ? 'Ms.' : '');
-                $lastName = $req->parent->user->last_name ?? 'Unknown';
-
                 return [
-                    'id' => $req->request_id,
-                    'type' => 'Document',
-                    'students' => $req->drs->map(
-                        fn($d) =>
-                        $d->student->user
-                            ? $d->student->user->first_name . ' ' . $d->student->user->last_name
-                            : $d->s_id
-                    )->toArray(),
-                    'parent_name' => trim($prefix . ' ' . $lastName),
+                    'id'           => $req->id,
+                    'type'         => 'document',
+                    'display_type' => 'Document Request',
+                    'status'       => ucfirst($req->status),
                     'requested_at' => $req->requested_at
-                        ? \Carbon\Carbon::parse($req->requested_at)->format('M d, Y')
+                        ? Carbon::parse($req->requested_at)->format('M d, Y')
                         : 'N/A',
-                    'status' => ucfirst($req->status),
+                    'parent_name'  => trim($req->parent->user->first_name . ' ' . $req->parent->user->last_name),
                 ];
             });
 
-        // Merge all requests
-        $allRequests = $linkRequests->merge($documentRequests);
+        $allRequests = $linkRequests->concat($documentRequests);
 
-        return view('Head.requests', compact('allRequests'));
+        if ($type !== 'all') {
+            $allRequests = $allRequests->where('type', $type);
+        }
+
+        // AJAX → JSON response
+        if ($request->ajax()) {
+            return response()->json($allRequests->values());
+        }
+
+        return view('Head.requests', compact('allRequests', 'status', 'type'));
     }
 
-    public function approve($type, $id)
+   
+    // Approve request
+    public function approve(Request $request, $type, $id)
     {
-        if ($type === 'child link') {
+        if ($type === 'child-link') {
             $linkRequest = ParentLinkRequest::with('students')->findOrFail($id);
 
             $linkRequest->status = 'approved';
@@ -87,61 +88,98 @@ class HeadRequestController extends Controller
                     ParentStudent::create([
                         'p_id'     => $linkRequest->parent_id,
                         's_id'     => $studentRequest->student_id,
-                        'relation' => 'Parent', // dynamic if needed
+                        'relation' => 'Parent',
                     ]);
                 }
+            }
+
+            if ($request->ajax()) {
+                return response()->json(['success' => true, 'message' => 'Request approved and students linked successfully.']);
             }
 
             return redirect()->back()->with('success', 'Request approved and students linked successfully.');
         } elseif ($type === 'document') {
             $docRequest = DocumentRequest::findOrFail($id);
             $docRequest->status = 'approved';
+            $docRequest->rejection_reason = null;
             $docRequest->save();
+
+            if ($request->ajax()) {
+                return response()->json(['success' => true, 'message' => 'Document request approved successfully.']);
+            }
 
             return redirect()->back()->with('success', 'Document request approved successfully.');
         } else {
-            abort(404);
+            abort(404, 'Unknown request type');
         }
     }
 
 
-
-
-
-    // Reject link request with reason
-    public function reject(Request $request, $id)
+    // Reject request
+    public function reject(Request $request, $type, $id)
     {
-        $linkRequest = ParentLinkRequest::findOrFail($id);
-        $linkRequest->status = 'rejected';
-        $linkRequest->rejection_reason = $request->input('reason');
-        $linkRequest->save();
+        if ($type === 'child-link') {
+            $linkRequest = ParentLinkRequest::findOrFail($id);
+            $linkRequest->status = 'rejected';
+            $linkRequest->rejection_reason = $request->input('reason');
+            $linkRequest->save();
 
-        return redirect()->back()->with('success', 'Request rejected successfully.');
-    }
+            if ($request->ajax()) {
+                return response()->json(['success' => true]);
+            }
+            return redirect()->back()->with('success', 'Request rejected successfully.');
+        } elseif ($type === 'document') {
+            $docRequest = DocumentRequest::findOrFail($id);
+            $docRequest->status = 'rejected';
+            $docRequest->rejection_reason = $request->input('reason');
+            $docRequest->save();
 
-    // Approve document request
-    public function approveDocument($id) {}
-
-    // Reject document request
-    public function rejectDocument(Request $request, $id)
-    {
-        $docRequest = DocumentRequest::findOrFail($id);
-        $docRequest->status = 'rejected';
-        $docRequest->rejection_reason = $request->input('reason');
-        $docRequest->save();
-
-        return redirect()->back()->with('success', 'Document   request rejected successfully.');
+            if ($request->ajax()) {
+                return response()->json(['success' => true]);
+            }
+            return redirect()->back()->with('success', 'Document request rejected successfully.');
+        } else {
+            abort(404, 'Unknown request type');
+        }
     }
 
     public function show($type, $id)
     {
-        if ($type === 'child link') {
-            $request = ParentLinkRequest::with(['parent.user', 'students.student.user'])->findOrFail($id);
+        if ($type === 'child-link') {
+            $request = ParentLinkRequest::with(['parent.user', 'students.student.user'])
+                ->findOrFail($id);
+
+            $data = [
+                'type' => 'Child Link',
+                'status' => $request->status,
+                'requested_at' => Carbon::parse($request->requested_at)->format('F d, Y g:i A'),
+                'parent_name' => $request->parent->user->first_name . ' ' . $request->parent->user->last_name,
+                'email' => $request->parent->user->email,
+                'contact' => $request->parent->user->contact_num,
+                'students' => $request->students->map(
+                    fn($s) =>
+                    $s->student->user->first_name . ' ' . $s->student->user->last_name
+                )->toArray(),
+                'rejection_reason' => $request->rejection_reason,
+            ];
         } elseif ($type === 'document') {
-            $request = DocumentRequest::with(['parent.user', 'drs.student.user'])->findOrFail($id);
+            $request = DocumentRequest::with(['parent.user'])
+                ->findOrFail($id);
+
+            $data = [
+                'type' => 'Document Request',
+                'status' => $request->status,
+                'requested_at' => Carbon::parse($request->requested_at)->format('F d, Y g:i A'),
+                'parent_name' => $request->parent->user->first_name . ' ' . $request->parent->user->last_name,
+                'email' => $request->parent->user->email,
+                'contact' => $request->parent->user->contact_num,
+                'students' => [], // no students for document requests
+                'rejection_reason' => $request->rejection_reason,
+            ];
         } else {
-            abort(404);
+            abort(404, 'Unknown request type');
         }
-        return view('components.requestView', compact('request', 'type'));
+
+        return response()->json($data);
     }
 }

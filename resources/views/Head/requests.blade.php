@@ -11,17 +11,32 @@
                         <div class="table-filter">
                             <div class="filters">
                                 <li>
-                                    <a href="#" class="active" data-type="all">All</a>
-                                    <a href="#" data-type="link">Child Link</a>
-                                    <a href="#" data-type="document">Documents</a>
+                                    <a href="#" class="type-filter {{ $type == 'all' ? 'active' : '' }}"
+                                        data-type="all">All</a>
+                                    <a href="#" class="type-filter {{ $type == 'child-link' ? 'active' : '' }}"
+                                        data-type="child-link">Child Link</a>
+                                    <a href="#" class="type-filter {{ $type == 'document' ? 'active' : '' }}"
+                                        data-type="document">Documents</a>
                                 </li>
                             </div>
                         </div>
                     </div>
-                    <button class="toggle-btn" id="toggle-view-btn">
-                        <i class="fi fi-br-bars-filter" id="toggle-icon"></i>
-                        <span id="toggle-label"></span>
-                    </button>
+                    <div class="filter-wrapper">
+                        <!-- Dropdown Filter -->
+                        <div class="filter-dropdown">
+                            <button class="toggle-btn" id="toggle-view-btn">
+                                <i class="fi fi-br-bars-filter" id="toggle-icon"></i>
+                            </button>
+
+                            <ul class="dropdown-menu" id="status-dropdown">
+                                <li data-status="approved">Approved</li>
+                                <li data-status="pending">Pending</li>
+                                <li data-status="rejected">Rejected</li>
+                                <li data-status="all">All</li>
+                            </ul>
+                        </div>
+                    </div>
+
                 </div>
 
                 <div class="table-list">
@@ -37,21 +52,21 @@
                         @foreach ($allRequests as $req)
                             <div class="table-card">
 
-                                <div class="table-col type">{{ $req['type'] }}</div>
+                                <div class="table-col type">{{ $req['display_type'] }}</div>
                                 <div class="table-col requested-by">{{ $req['parent_name'] }}</div>
                                 <div class="table-col requested-at">{{ $req['requested_at'] }}</div>
                                 <div class="table-col status">
                                     @php
                                         $status = strtolower($req['status']);
                                         $dotClass = match ($status) {
-                                            'active' => 'status-dot status-approved',
-                                            'archived' => 'status-dot status-declined',
+                                            'approved' => 'status-dot status-approved',
+                                            'rejected' => 'status-dot status-declined',
                                             'pending' => 'status-dot status-pending',
                                             default => 'status-dot',
                                         };
                                         $labelClass = match ($status) {
-                                            'active' => 'status-label status-approved',
-                                            'archived' => 'status-label status-declined',
+                                            'approved' => 'status-label status-approved',
+                                            'rejected' => 'status-label status-declined',
                                             'pending' => 'status-label status-pending',
                                             default => 'status-label',
                                         };
@@ -63,11 +78,8 @@
                                 </div>
                                 <div class="table-col actions">
                                     @if ($req['status'] === 'Pending')
-                                        <a href="{{ route('Head.requests.show', ['type' => strtolower($req['type']), 'id' => $req['id']]) }}"
-                                            class="view-btn">Review</a>
-                                        <button class="btn btn-danger btn-sm reject-btn"
-                                            onclick="location.href='{{ route('Head.requests.show', ['type' => strtolower($req['type']), 'id' => $req['id']]) }}'"
-                                            data-id="{{ $req['id'] }}" data-type="{{ $req['type'] }}">Reject</button>
+                                        <a href="#" class="review-btn" data-id="{{ $req['id'] }}"
+                                            data-type="{{ strtolower($req['type']) }}">Review</a>
                                     @endif
                                 </div>
                             </div>
@@ -77,60 +89,9 @@
             </div>
         </div>
     </section>
-
-    @include('Head.Modal.caseModal')
-
+    @include('Head.Modal.requestModal')
     @push('scripts')
-        <script>
-            document.addEventListener('DOMContentLoaded', function() {
-                const filterLinks = document.querySelectorAll('.filters a');
-                const rows = document.querySelectorAll('.table-row');
-
-                filterLinks.forEach(link => {
-                    link.addEventListener('click', function(e) {
-                        e.preventDefault();
-                        const type = this.dataset.type;
-
-                        filterLinks.forEach(l => l.classList.remove('active'));
-                        this.classList.add('active');
-
-                        rows.forEach(row => {
-                            if (type === 'all') {
-                                row.style.display = '';
-                            } else {
-                                row.style.display = row.dataset.type === type ? '' : 'none';
-                            }
-                        });
-                    });
-                });
-
-                // Handle reject button click (open modal or prompt)
-                document.querySelectorAll('.reject-btn').forEach(btn => {
-                    btn.addEventListener('click', function() {
-                        const id = this.dataset.id;
-                        const type = this.dataset.type;
-                        const reason = prompt("Enter rejection reason:");
-
-                        if (reason) {
-                            const url = type === 'link' ?
-                                `/head/requests/reject/${id}` :
-                                `/head/requests/rejectDocument/${id}`;
-
-                            fetch(url, {
-                                method: 'POST',
-                                headers: {
-                                    'Content-Type': 'application/json',
-                                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                                },
-                                body: JSON.stringify({
-                                    reason
-                                })
-                            }).then(res => location.reload());
-                        }
-                    });
-                });
-            });
-        </script>
+        <script src="{{ asset('js/requests.js') }}"></script>
     @endpush
 
 @endsection

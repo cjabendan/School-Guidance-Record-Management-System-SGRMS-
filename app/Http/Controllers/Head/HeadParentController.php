@@ -17,22 +17,7 @@ class HeadParentController extends Controller
     // Display the list of parents //
     public function index()
     {
-        $parents = DB::table('parents')
-            ->leftJoin('users', 'parents.user_id', '=', 'users.id')
-            ->select(
-                'parents.*',
-                DB::raw("CONCAT_WS(' ', users.first_name, users.middle_name, users.last_name) AS full_name"),
-                'users.first_name',
-                'users.middle_name',
-                'users.last_name',
-                'users.contact_num',
-                'users.email',
-                'users.profile_image',
-                'users.status',
-                'users.sex'
-            )
-            ->orderBy('p_id', 'desc')
-            ->paginate(10);
+        $parents = ParentModel::with('user')->orderBy('p_id', 'desc')->paginate(10);
 
         return view('Head.profiling.parents', compact('parents'));
     }
@@ -42,30 +27,30 @@ class HeadParentController extends Controller
     {
         $request->validate([
             'first_name' => 'required|string|max:255',
-                'middle_name' => 'nullable|string|max:255',
+            'middle_name' => 'nullable|string|max:255',
             'last_name' => 'required|string|max:255',
             'contact_num' => 'nullable|string|max:20',
-                'sex' => 'required|in:Male,Female',
+            'sex' => 'required|in:Male,Female',
             'email' => 'required|email|unique:users,email',
             'password' => 'required|string|min:6',
             'confirm_password' => 'required|string|same:password',
-                
+
         ]);
 
         DB::beginTransaction();
         try {
             // Create user
-                $user = User::create([
-                    'first_name' => $request->first_name,
-                    'middle_name' => $request->middle_name,
-                    'last_name' => $request->last_name,
-                    'contact_num' => $request->contact_num,
-                    'sex' => $request->sex,
-                    'email' => $request->email,         
-                    'password' => bcrypt($request->password),
-                    'status' => 'active', // Set status to active
-                    'role' => 'parent', // Set role to parent
-                ]);
+            $user = User::create([
+                'first_name' => $request->first_name,
+                'middle_name' => $request->middle_name,
+                'last_name' => $request->last_name,
+                'contact_num' => $request->contact_num,
+                'sex' => $request->sex,
+                'email' => $request->email,
+                'password' => bcrypt($request->password),
+                'status' => 'active', // Set status to active
+                'role' => 'parent', // Set role to parent
+            ]);
 
             // Create parent
             $parent = ParentModel::create([

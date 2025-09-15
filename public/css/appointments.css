@@ -110,51 +110,6 @@
     margin-left: 8px;
 }
 
-.status-label {
-    display: inline-flex;
-    align-items: center;
-    padding: 4px 14px 4px 10px;
-    border-radius: 12px;
-    font-size: 1rem;
-    font-weight: 500;
-    gap: 6px;
-}
-
-.status-dot {
-    display: inline-block;
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    vertical-align: middle;
-}
-
-.status-approved {
-    background: #e8f5e9;
-    color: #388e3c;
-}
-
-.status-dot.status-approved {
-    background: #4caf50;
-}
-
-.status-declined {
-    background: #ffebee;
-    color: #d32f2f;
-}
-
-.status-dot.status-declined {
-    background: #f44336;
-}
-
-.status-pending {
-    background: #fff8e1;
-    color: #ff9800;
-}
-
-.status-dot.status-pending {
-    background: #ffc107;
-}
-
 .btn {
     padding: 5px 14px;
     border-radius: 6px;

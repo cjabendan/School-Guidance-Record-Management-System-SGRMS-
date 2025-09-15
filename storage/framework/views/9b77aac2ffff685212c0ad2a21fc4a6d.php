@@ -114,7 +114,6 @@
 
     <script src="<?php echo e(asset('js/head.js')); ?>"></script>
     <script src="<?php echo e(asset('js/Modal/studentModal.js')); ?>"></script>
-    <script src="<?php echo e(asset('js/Modal/studentModal.js')); ?>"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const searchInput = document.getElementById('student-search-input');

@@ -1,11 +1,12 @@
-<div class="request-detail-box">
-    <h2><?php echo e(ucfirst($type)); ?> Request</h2>
-    <div>
-        <strong>Requested By:</strong>
-        <?php echo e($request->parent->user->first_name ?? ''); ?> <?php echo e($request->parent->user->last_name ?? ''); ?>
+<div class="request-modal">
+    <div class="request-modal-content">
+        <h2><?php echo e(ucfirst($type)); ?> Request</h2>
+        <div>
+            <strong>Requested By:</strong>
+            <?php echo e($request->parent->user->first_name ?? ''); ?> <?php echo e($request->parent->user->last_name ?? ''); ?>
 
-    </div>
-    <div>
+        </div>
+        <div>
         <strong>Email:</strong>
         <?php echo e($request->parent->user->email ?? ($request->email ?? 'N/A')); ?>
 
@@ -60,4 +61,6 @@
         </div>
     <?php endif; ?>
     <a href="<?php echo e(route('Head.requests.index')); ?>" class="btn btn-secondary">Back to Requests</a>
+    </div>
+    
 </div><?php /**PATH C:\Users\Administrator\School-Guidance-Record-Management-System-SGRMS-\resources\views/components/requestView.blade.php ENDPATH**/ ?>

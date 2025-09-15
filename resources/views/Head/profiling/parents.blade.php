@@ -58,25 +58,40 @@
                                             : 'status-label status-declined');
                             @endphp
                             <div class="table-card">
-                                <div class="table-col title">{{ $parent->first_name }} {{ $parent->last_name }}</div>
-                                <div class="table-col">{{ $parent->contact_num ?? 'N/A'}}</div>
-                                <div class="table-col">{{ $parent->email }}</div>
+                                <div class="table-col title">
+                                    @if ($parent->user && $parent->user->profile_image)
+                                        <img src="{{ asset('images/user/' . $parent->user->profile_image) }}"
+                                            alt="Parent Image" class="parent-photo"
+                                            style="width:32px;height:32px;border-radius:50%;margin-right:12px;">
+                                    @else
+                                        <img src="{{ asset('images/user/default.jpg') }}" alt="Default Image"
+                                            class="parent-photo"
+                                            style="width:32px;height:32px;border-radius:50%;margin-right:8px;">
+                                    @endif
+                                    {{ $parent->user->first_name ?? $parent->first_name }}
+                                    {{ $parent->user->last_name ?? $parent->last_name }}
+                                </div>
+                                <div class="table-col">{{ $parent->user->contact_num ?? 'N/A' }}</div>
+                                <div class="table-col">{{ $parent->user->email ?? 'N/A' }}</div>
                                 <div class="table-col status">
-                                    @if (is_null($parent->status))
+                                    @if (is_null($parent->user->status))
                                         <span class="status-label status-declined"><span
                                                 class="status-dot status-declined"></span>Banned</span>
-                                    @elseif ($status === 'active')
+                                    @elseif ($parent->user->status === 'active')
                                         <span class="status-label status-approved"><span
                                                 class="status-dot status-approved"></span>Active</span>
                                     @else
                                         <span class="status-label status-pending"><span
-                                                class="status-dot status-pending"></span>Inactive</span>
+                                                class="status-dot status-pending"></span>Pending</span>
                                     @endif
                                 </div>
                                 <div class="table-col actions">
-                                    <button class="view-btn" data-id="{{ $parent->p_id }}">  <i class='bx bx-show'></i></button>
-                                    <button class="edit-btn" data-id="{{ $parent->p_id }}">  <i class='bx bx-edit'></i></button>
-                                    <button class="archive-btn" data-id="{{ $parent->p_id }}">  <i class='bx bx-archive'></i></button>
+                                    <button class="view-btn" data-id="{{ $parent->p_id }}"> <i
+                                            class='bx bx-show'></i></button>
+                                    <button class="edit-btn" data-id="{{ $parent->p_id }}"> <i
+                                            class='bx bx-edit'></i></button>
+                                    <button class="archive-btn" data-id="{{ $parent->p_id }}"> <i
+                                            class='bx bx-archive'></i></button>
                                 </div>
                             </div>
                         @empty
@@ -88,7 +103,7 @@
         </div>
     </section>
 
-        <!-- Add Parent Modal -->
+    <!-- Add Parent Modal -->
     @include('Head.modal.parentModal')
 
     <script src="{{ asset('js/Modal/parentModal.js') }}"></script>

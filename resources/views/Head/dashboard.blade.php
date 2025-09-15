@@ -5,7 +5,7 @@
     <!-- MAIN CONTENT -->
     <section id="content">
         @include('partials.navbar')
-        <div class="dashboard-content">
+        <div class="wrapper">
             <div class="box-page">
                 <section class="analytics">
                       @include('Head.dashboard-sections.stats')

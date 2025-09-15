@@ -1,0 +1,91 @@
+/* =========================
+   Child Card 
+========================= */
+.profiles-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 24px;
+    margin-top: 25px;
+    justify-content: flex-start;
+}
+
+.profile-box {
+    border: 1.5px solid #e5e7eb;
+    border-radius: 12px;
+    background: #fff;
+    box-shadow: 0 4px 16px rgba(37,99,235,0.07);
+    padding: 18px 16px 16px 16px;
+    text-align: center;
+    cursor: pointer;
+    width: 220px;
+    min-width: 220px;
+    max-width: 220px;
+    height: 260px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    transition: box-shadow 0.2s, border 0.2s;
+    position: relative;
+}
+.profile-box:hover {
+    box-shadow: 0 8px 32px rgba(37,99,235,0.13);
+    border-color: #2563eb;
+}
+.profile-box img {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 12px;
+    border: 3px solid #2563eb;
+    background: #f8fafc;
+    box-shadow: 0 2px 8px rgba(37,99,235,0.08);
+}
+.profile-box h2 {
+    font-size: 1.08rem;
+    color: #2563eb;
+    font-weight: 700;
+    margin: 0;
+    margin-bottom: 4px;
+    letter-spacing: 0.02em;
+    text-align: center;
+    word-break: break-word;
+}
+
+/* Add Child Card ( + ) */
+.add-box {
+    background-color: #f3f4f6;
+    border: 2px dashed #2563eb;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 220px;
+    min-width: 220px;
+    max-width: 220px;
+    height: 260px;
+    cursor: pointer;
+    transition: border 0.2s, background 0.2s;
+    position: relative;
+}
+.add-box:hover {
+    background-color: #e0e7ff;
+    border-color: #1d4ed8;
+}
+.add-box .add-profile-icon {
+    font-size: 2.8rem;
+    color: #2563eb;
+    margin-bottom: 10px;
+    font-weight: 700;
+}
+.add-box h2 {
+    font-size: 1.08rem;
+    color: #2563eb;
+    font-weight: 700;
+    margin: 0;
+    margin-bottom: 4px;
+    letter-spacing: 0.02em;
+    text-align: center;
+}

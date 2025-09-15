@@ -4,7 +4,7 @@
     <!-- MAIN CONTENT -->
     <section id="content">
         <?php echo $__env->make('partials.navbar', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
-        <div class="dashboard-content">
+        <div class="wrapper">
             <div class="box-page">
                 <section class="analytics">
                       <?php echo $__env->make('Head.dashboard-sections.stats', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>

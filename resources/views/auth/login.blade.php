@@ -19,7 +19,7 @@
             <form action="{{ url('login') }}" method="POST">
                 @csrf
                 <div class="input-box" style="position:relative;">
-                    <input type="text" name="login" class="input-box" placeholder="Email or Account ID"
+                    <input type="text" name="login" class="input-box" placeholder="Email or Student ID"
                         value="{{ old('login') }}">
                     <span class="input-icon">
                         <i class="fas fa-user"></i>

@@ -5,7 +5,7 @@
     <section id="content">
         <?php echo $__env->make('partials.navbar', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
         <div class="wrapper">
-            <div class="child-container">
+            <div class="profiles-container">
                 <!-- Add new profile box -->
                 <div class="profile-box add-box" onclick="openLinkChildModal()">
                     <i class='bx bx-plus add-profile-icon'></i>
@@ -13,8 +13,6 @@
                 </div>
 
                 <?php echo $__env->make('components.child-card', ['children' => $children], array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
-
-
 
                 <!-- Modal for sending request to link children -->
                 <div id="linkChildModal" class="modal" style="display:none;">
@@ -28,7 +26,6 @@
                                 <select name="student_ids[]" id="student_ids" class="form-control" multiple
                                     required></select>
                             </div>
-
 
                             <div class="form-group">
                                 <label for="parent_email">Your Email</label>
@@ -46,9 +43,6 @@
                         </form>
                     </div>
                 </div>
-
-
-
             </div>
         </div>
 
