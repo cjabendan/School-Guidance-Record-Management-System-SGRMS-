@@ -18,54 +18,77 @@ class HeadRequestController extends Controller
         $status = $request->query('status', 'pending');
         $type   = $request->query('type', 'all');
 
+        // Use pagination for both types, then merge and sort, then paginate manually
         $linkRequests = ParentLinkRequest::with(['parent.user', 'students.student.user'])
-            ->when($status !== 'all', fn($q) => $q->where('status', $status))
-            ->get()
-            ->map(function ($req) {
-                $sex = strtolower($req->parent->user->sex ?? '');
-                $prefix = $sex === 'male' ? 'Mr.' : ($sex === 'female' ? 'Ms.' : '');
-                $lastName = $req->parent->user->last_name ?? 'Unknown';
-
-                return [
-                    'id'           => $req->request_id,
-                    'type'         => 'child-link',
-                    'display_type' => 'Child Link',
-                    'status'       => ucfirst($req->status),
-                    'requested_at' => $req->requested_at
-                        ? Carbon::parse($req->requested_at)->format('M d, Y')
-                        : 'N/A',
-                    'parent_name'  => trim($prefix . ' ' . $lastName),
-                ];
-            });
-
+            ->when($status !== 'all', fn($q) => $q->where('status', $status));
         $documentRequests = DocumentRequest::with(['parent.user'])
-            ->when($status !== 'all', fn($q) => $q->where('status', $status))
-            ->get()
-            ->map(function ($req) {
-                return [
-                    'id'           => $req->id,
-                    'type'         => 'document',
-                    'display_type' => 'Document Request',
-                    'status'       => ucfirst($req->status),
-                    'requested_at' => $req->requested_at
-                        ? Carbon::parse($req->requested_at)->format('M d, Y')
-                        : 'N/A',
-                    'parent_name'  => trim($req->parent->user->first_name . ' ' . $req->parent->user->last_name),
-                ];
-            });
+            ->when($status !== 'all', fn($q) => $q->where('status', $status));
 
-        $allRequests = $linkRequests->concat($documentRequests);
+        // Fetch paginated results for each type
+        $linkRequestsPaginated = $linkRequests->get()->map(function ($req) {
+            $sex = strtolower($req->parent->user->sex ?? '');
+            $prefix = $sex === 'male' ? 'Mr.' : ($sex === 'female' ? 'Ms.' : '');
+            $lastName = $req->parent->user->last_name ?? 'Unknown';
+            return [
+                'id'           => $req->request_id,
+                'type'         => 'child-link',
+                'display_type' => 'Child Link',
+                'status'       => ucfirst($req->status),
+                'requested_at' => $req->requested_at
+                    ? Carbon::parse($req->requested_at)->format('M d, Y')
+                    : 'N/A',
+                'parent_name'  => trim($prefix . ' ' . $lastName),
+            ];
+        });
+        $documentRequestsPaginated = $documentRequests->get()->map(function ($req) {
+            return [
+                'id'           => $req->id,
+                'type'         => 'document',
+                'display_type' => 'Document Request',
+                'status'       => ucfirst($req->status),
+                'requested_at' => $req->requested_at
+                    ? Carbon::parse($req->requested_at)->format('M d, Y')
+                    : 'N/A',
+                'parent_name'  => trim($req->parent->user->first_name . ' ' . $req->parent->user->last_name),
+            ];
+        });
 
+        $allRequests = $linkRequestsPaginated->concat($documentRequestsPaginated);
         if ($type !== 'all') {
             $allRequests = $allRequests->where('type', $type);
         }
+        // Sort by requested_at desc (latest first)
+        $allRequests = $allRequests->sortByDesc(function($item) {
+            return strtotime($item['requested_at']);
+        })->values();
 
-        // AJAX → JSON response
+        // Paginate manually (since we merged two collections)
+        $perPage = 10;
+        $page = $request->query('page', 1);
+        $total = $allRequests->count();
+        $results = $allRequests->slice(($page - 1) * $perPage, $perPage)->values();
+
+        // AJAX → JSON response with pagination info
         if ($request->ajax()) {
-            return response()->json($allRequests->values());
+            return response()->json([
+                'data' => $results,
+                'current_page' => (int)$page,
+                'per_page' => $perPage,
+                'total' => $total,
+                'last_page' => (int)ceil($total / $perPage),
+            ]);
         }
 
-        return view('Head.requests', compact('allRequests', 'status', 'type'));
+        // For blade, pass paginated data (first page)
+        return view('Head.requests', [
+            'allRequests' => $results,
+            'status' => $status,
+            'type' => $type,
+            'current_page' => (int)$page,
+            'per_page' => $perPage,
+            'total' => $total,
+            'last_page' => (int)ceil($total / $perPage),
+        ]);
     }
 
    

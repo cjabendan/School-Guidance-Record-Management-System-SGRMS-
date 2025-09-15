@@ -174,7 +174,6 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 //_________________________________________________________________________________________
 
-
 // Add/Edit Modal logic
 window.openAddEditModal = function openAddEditModal(mode, studentData = null) {
     // If edit mode and only s_id is provided, fetch full data via AJAX
@@ -247,7 +246,17 @@ window.openAddEditModal = function openAddEditModal(mode, studentData = null) {
         document.getElementById('suffix').value = studentData.suffix || '';
         document.getElementById('email').value = studentData.email || '';
         document.getElementById('contact_num').value = studentData.mobile_num || '';
-        document.getElementById('sex').value = studentData.gender || studentData.sex || '';
+        // Set sex radio button for edit modal (name="sex")
+        if (studentData.gender === 'Male' || studentData.sex === 'Male') {
+            document.querySelector('input[name="sex"][value="Male"]').checked = true;
+            document.querySelector('input[name="sex"][value="Female"]').checked = false;
+        } else if (studentData.gender === 'Female' || studentData.sex === 'Female') {
+            document.querySelector('input[name="sex"][value="Male"]').checked = false;
+            document.querySelector('input[name="sex"][value="Female"]').checked = true;
+        } else {
+            document.querySelector('input[name="sex"][value="Male"]').checked = false;
+            document.querySelector('input[name="sex"][value="Female"]').checked = false;
+        }
         document.getElementById('bod').value = studentData.bod || '';
         document.getElementById('address').value = studentData.address || '';
         document.getElementById('religion').value = studentData.religion || '';
@@ -333,44 +342,66 @@ window.openViewStudentModal = function openViewStudentModal(s_id) {
                 return;
             }
             // Set all fields in the view modal
-            const viewFields = [
-                ['view_s_id_display', data.id_num || data.s_id],
-                ['view_first_name', data.fname],
-                ['view_middle_name', data.mname],
-                ['view_last_name', data.lname],
-                ['view_suffix', data.suffix],
-                ['view_email', data.email],
-                ['view_contact_num', data.mobile_num],
-                ['view_sex', data.gender || data.sex],
-                ['view_bod', data.bod],
-                ['view_address', data.address],
-                ['view_religion', data.religion],
-                ['view_civil_status', data.civil_status],
-                ['view_educ_level', data.educ_level],
-                ['view_program', data.program],
-                ['view_year_level', data.year_level],
-                ['view_section', data.section],
-                ['view_father_name', data.father_name],
-                ['view_mother_name', data.mother_name],
-                ['view_guardian_name', data.guardian_name],
-                ['view_relationship', data.relationship],
-                ['view_guardian_contact', data.guardian_contact],
-                ['view_guardian_email', data.guardian_email],
-            ];
-            for (const [id, value] of viewFields) {
-                const el = document.getElementById(id);
-                if (el) {
-                    let displayValue = value;
-                    if (displayValue === undefined || displayValue === null || displayValue === '' || displayValue === 'N/A') {
-                        if (id === 'view_relationship' || id === 'view_guardian_contact' || id === 'view_guardian_email') {
-                            displayValue = 'None';
-                        } else {
+                const viewFields = [
+                    ['view_s_id_display', data.id_num || data.s_id],
+                    ['view_first_name', data.fname],
+                    ['view_middle_name', data.mname],
+                    ['view_last_name', data.lname],
+                    ['view_suffix', data.suffix],
+                    ['view_email', data.email],
+                    ['view_contact_num', data.mobile_num],
+                    ['view_sex', data.gender || data.sex],
+                    ['view_bod', data.bod],
+                    ['view_address', data.address],
+                    ['view_religion', data.religion],
+                    ['view_civil_status', data.civil_status],
+                    ['view_educ_level', data.educ_level],
+                    ['view_program', data.program],
+                    ['view_year_level', data.year_level],
+                    ['view_section', data.section],
+                    ['view_father_name', data.father_name],
+                    ['view_mother_name', data.mother_name],
+                    ['view_guardian_name', data.guardian_name],
+                    ['view_relationship', data.relationship],
+                    ['view_guardian_contact', data.guardian_contact],
+                    ['view_guardian_email', data.guardian_email],
+                ];
+                for (const [id, value] of viewFields) {
+                    // Sex radio button for view modal (name="view_sex")
+                    if (id === 'view_sex') {
+                        let displayValue = value;
+                        if (displayValue === undefined || displayValue === null || displayValue === '' || displayValue === 'N/A') {
                             displayValue = 'N/A';
                         }
+                        if (displayValue === 'Male') {
+                            document.getElementById('view_sex_male').checked = true;
+                            document.getElementById('view_sex_female').checked = false;
+                        } else if (displayValue === 'Female') {
+                            document.getElementById('view_sex_male').checked = false;
+                            document.getElementById('view_sex_female').checked = true;
+                        } else {
+                            document.getElementById('view_sex_male').checked = false;
+                            document.getElementById('view_sex_female').checked = false;
+                        }
+                    } else {
+                        const el = document.getElementById(id);
+                        if (el) {
+                            let displayValue = value;
+                            if (displayValue === undefined || displayValue === null || displayValue === '' || displayValue === 'N/A') {
+                                if (id === 'view_relationship' || id === 'view_guardian_contact' || id === 'view_guardian_email') {
+                                    displayValue = 'None';
+                                } else {
+                                    displayValue = 'N/A';
+                                }
+                            }
+                            if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
+                                el.value = displayValue;
+                            } else {
+                                el.textContent = displayValue;
+                            }
+                        }
                     }
-                    el.textContent = displayValue;
                 }
-            }
             // Set image
             var img = document.getElementById('viewStudentImage');
             if (img && data.image_url) {
@@ -446,114 +477,99 @@ document.addEventListener('DOMContentLoaded', function() {
 // _________________________________________________________________________________________
 
 
+// Archive Modal logic
+window.currentArchiveSId = null;
 
-// Archive Modal logic 
-window.openArchiveModal = function openArchiveModal(s_id) {
+window.openArchiveStudentModal = function openArchiveStudentModal(s_id) {
     window.currentArchiveSId = s_id;
+    // Optionally fetch student data here if needed
+    var input = document.getElementById('archive_s_id');
+    if (input) input.value = s_id;
+    // Display the student ID in the modal title
+    var idDisplay = document.getElementById('archiveStudentIdDisplay');
+    if (idDisplay) idDisplay.textContent = `(${s_id})`;
     var modal = document.getElementById('archiveStudentModal');
-    if (modal) {
-        modal.style.display = 'block';
-    }
-}
-
-window.openArchiveDisableModal = function openArchiveDisableModal() {
-    var modal = document.getElementById('archiveDisableModal');
-    if (modal) {
-        modal.style.display = 'block';
-    }
-}
+    if (modal) modal.style.display = 'block';
+};
 
 window.closeArchiveModal = function closeArchiveModal() {
     var modal = document.getElementById('archiveStudentModal');
-    if (modal) {
-        modal.style.display = 'none';
-    }
-}
+    if (modal) modal.style.display = 'none';
+    window.currentArchiveSId = null;
+    var idDisplay = document.getElementById('archiveStudentIdDisplay');
+    if (idDisplay) idDisplay.textContent = '';
+};
 
-window.closeArchiveDisableModal = function closeArchiveDisableModal() {
-    var modal = document.getElementById('archiveDisableModal');
-    if (modal) {
-        modal.style.display = 'none';
-    }
-}
-
-// Archive Only AJAX
 window.archiveStudentOnly = function archiveStudentOnly() {
     if (!window.currentArchiveSId) return;
+    var status = document.getElementById('archive_status') ? document.getElementById('archive_status').value : '';
+    if (!status) {
+        alert('Please select a status.');
+        return;
+    }
     fetch('/Head/students/archive', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
         },
-        body: JSON.stringify({ s_id: window.currentArchiveSId })
+        body: JSON.stringify({ s_id: window.currentArchiveSId, status: status })
     })
-    .then(res => res.json())
+    .then(res => {
+        if (!res.ok) {
+            return res.text().then(text => { throw new Error('Server error: ' + text); });
+        }
+        return res.json();
+    })
     .then(data => {
         window.closeArchiveModal();
-        window.closeArchiveDisableModal();
         location.reload();
+    })
+    .catch(err => {
+        alert('Archive failed: ' + err.message);
     });
-}
+};
 
-// Archive and Disable AJAX
 window.archiveStudentAndDisable = function archiveStudentAndDisable() {
     if (!window.currentArchiveSId) return;
+    var status = document.getElementById('archive_status') ? document.getElementById('archive_status').value : '';
+    if (!status) {
+        alert('Please select a status.');
+        return;
+    }
     fetch('/Head/students/archive-disable', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
         },
-        body: JSON.stringify({ s_id: window.currentArchiveSId })
+        body: JSON.stringify({ s_id: window.currentArchiveSId, status: status })
     })
-    .then(res => res.json())
+    .then(res => {
+        if (!res.ok) {
+            return res.text().then(text => { throw new Error('Server error: ' + text); });
+        }
+        return res.json();
+    })
     .then(data => {
         window.closeArchiveModal();
-        window.closeArchiveDisableModal();
         location.reload();
+    })
+    .catch(err => {
+        alert('Archive & disable failed: ' + err.message);
     });
-}
+};
 
-
-
-document.addEventListener('click', function(e) {
-    // Archive Modal X button
-    if (e.target && e.target.id === 'closeArchiveModalBtn') {
-        e.stopPropagation();
-        window.closeArchiveModal();
-    }
-    // Archive Modal background
-    if (e.target && e.target.id === 'archiveStudentModal') {
-        window.closeArchiveModal();
-    }
-    // Archive Modal content 
-    if (e.target && e.target.closest && e.target.closest('#archiveStudentModal .modal-content')) {
-        e.stopPropagation();
-    }
-
-    // Archive Disable Modal X button
-    if (e.target && e.target.id === 'closeArchiveDisableModalBtn') {
-        e.stopPropagation();
-        window.closeArchiveDisableModal();
-    }
-    // Archive Disable Modal background
-    if (e.target && e.target.id === 'archiveDisableModal') {
-        window.closeArchiveDisableModal();
-    }
-    // Archive Disable Modal content 
-    if (e.target && e.target.closest && e.target.closest('#archiveDisableModal .modal-content')) {
-        e.stopPropagation();
-    }
-});
-
-// Confirm button logic 
+// Attach click event to all archive buttons
 document.addEventListener('DOMContentLoaded', function() {
-    var confirmBtn = document.getElementById('confirmArchiveBtn');
-    if (confirmBtn) {
-        confirmBtn.onclick = function() {
+    // No need to attach click handler here if using inline onclick in Blade
+
+    // Archive modal close button
+    var closeArchiveBtn = document.getElementById('closeArchiveModalBtn');
+    if (closeArchiveBtn) {
+        closeArchiveBtn.onclick = function(e) {
+            e.stopPropagation();
             window.closeArchiveModal();
-            window.openArchiveDisableModal();
         };
     }
 });
@@ -561,41 +577,20 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // _________________________________________________________________________________________
 
-// Import Modal logic
-window.openImportModal = function openImportModal() {
-    var modal = document.getElementById('importModal');
-    if (modal) {
-        modal.style.display = 'block';
-    }
-}
-
-window.closeImportModal = function closeImportModal() {
-    var modal = document.getElementById('importModal');
-    if (modal) {
-        modal.style.display = 'none';
-    }
-}
-
-// Close import modal on outside click
+// Import button logic for students.blade.php
 document.addEventListener('DOMContentLoaded', function() {
-    var importModal = document.getElementById('importModal');
-    var closeBtn = document.getElementById('closeImportModalBtn');
-    if (closeBtn && importModal) {
-        closeBtn.onclick = function(e) {
-            e.stopPropagation();
-            importModal.style.display = 'none';
-        };
-        importModal.onclick = function(event) {
-            if (event.target === importModal) {
-                importModal.style.display = 'none';
+    const importBtn = document.getElementById('importBtn');
+    const importFileInput = document.getElementById('importFileInput');
+    const importForm = document.getElementById('importForm');
+    if (importBtn && importFileInput && importForm) {
+        importBtn.addEventListener('click', function() {
+            importFileInput.click();
+        });
+        importFileInput.addEventListener('change', function() {
+            if (importFileInput.files.length > 0) {
+                importForm.submit();
             }
-        };
-        var modalContent = importModal.querySelector('.modal-content');
-        if (modalContent) {
-            modalContent.onclick = function(e) {
-                e.stopPropagation();
-            };
-        }
+        });
     }
 });
 

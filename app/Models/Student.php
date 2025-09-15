@@ -13,9 +13,8 @@ class Student extends Model
     public $timestamps = false;
 
     protected $fillable = [
-        's_id', // VARCHAR(50)
+        's_id', 
         'user_id',
-        'y_id',
         'section',
         'father_name',
         'mother_name',
@@ -24,7 +23,6 @@ class Student extends Model
         'guardian_contact',
         'guardian_email',
         'program',
-        'status',
         'religion',
         'civil_status',
     ];
@@ -35,10 +33,7 @@ class Student extends Model
         return $this->belongsTo(User::class, 'user_id');
     }
 
-    public function yearLevel()
-    {
-        return $this->belongsTo(YearLevel::class, 'y_id', 'y_id');
-    }
+    // yearLevel relationship removed (y_id no longer exists)
 
     // ✅ Many-to-Many with parents (pivot has relation)
     public function parents()

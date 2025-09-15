@@ -95,7 +95,7 @@ Route::prefix('Head')->name('Head.')->group(function () {
     Route::post('/students/import', [HeadStudentController::class, 'import'])->name('students.import');
     Route::get('/students/{id_num}/json', [HeadStudentController::class, 'showAjax'])->name('students.show-json');
     Route::put('/students/{id_num}', [HeadStudentController::class, 'editStudent'])->name('students.update');
-    Route::post('/students/archive', [HeadStudentController::class, 'archiveStudent'])->name('students.archive');
+    Route::post('/students/archive', [HeadStudentController::class, 'archive'])->name('students.archive');
     Route::post('/students/archive-disable', [HeadStudentController::class, 'archiveAndDisableStudent'])->name('students.archive-disable');
     Route::get('/students/{s_id}/cases', [HeadStudentController::class, 'getStudentCases']);
 
@@ -112,6 +112,10 @@ Route::prefix('Head')->name('Head.')->group(function () {
     Route::put('/cases/{case}', [HeadCaseController::class, 'update'])->name('cases.update');
     Route::put('/cases/{case}/archive', [HeadCaseController::class, 'archive'])->name('cases.archive');
     Route::get('/students/search', [HeadCaseController::class, 'searchStudent'])->name('students.search');
+
+    // Cases Import/Export
+    Route::post('/cases/import', [HeadCaseController::class, 'import'])->name('cases.import');
+    Route::get('/cases/export', [HeadCaseController::class, 'export'])->name('cases.export');
 
     // Counseling
     Route::get('/counseling', [HeadCounselingController::class, 'index'])->name('counseling.index');

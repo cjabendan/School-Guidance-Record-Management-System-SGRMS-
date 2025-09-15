@@ -11,7 +11,7 @@
                     <div class="image-col">
                         <div style="position: relative; display: inline-block;">
                             <img id="studentImage" src="{{ asset('images/user/default.jpg') }}" data-default="{{ asset('images/user/default.jpg') }}" alt="Student Image" class="student-image-box pro-add-image">
-                            <button type="button" id="deleteProfileImageBtn" title="Delete Profile Image" style="position: absolute; top: 8px; right: 8px; background: #fff; border: none; border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; box-shadow: 0 1px 4px rgba(0,0,0,0.12); cursor: pointer;">
+                            <button type="button" id="deleteProfileImageBtn" class="delete-profile-image-btn" title="Delete Profile Image">
                                 <i class="fi fi-rr-trash" style="color: #e53e3e; font-size: 1.2rem;"></i>
                             </button>
                         </div>
@@ -52,12 +52,17 @@
                                 <input type="text" id="contact_num" name="contact_num" class="add-input">
                             </div>
                             <div class="add-field-col">
-                                <label for="sex" class="add-label">Sex:</label>
-                                <select id="sex" name="sex" class="add-input" required>
-                                    <option value="">Select Sex</option>
-                                    <option value="Male">Male</option>
-                                    <option value="Female">Female</option>
-                                </select>
+                                <label class="add-label">Sex:</label>
+                                <div style="display: flex; gap: 16px; align-items: center;">
+                                    <label style="margin-bottom:0;">
+                                        <input type="radio" id="sex_male" name="sex" value="Male" required>
+                                        Male
+                                    </label>
+                                    <label style="margin-bottom:0;">
+                                        <input type="radio" id="sex_female" name="sex" value="Female" required>
+                                        Female
+                                    </label>
+                                </div>
                             </div>
                         </div>
                         <div class="form-row">
@@ -108,6 +113,15 @@
                         <input type="text" id="section" name="section" class="add-input">
                     </div>
                 </div>
+
+                <div class="form-row">
+                    <div class="add-field-col" style="width:100%; text-align:left;">
+                        <p style="color:#2563eb; font-size:0.95rem; font-weight:500; margin:6px 0; background:#f0f7ff; padding:6px 10px; border-radius:6px;">
+                            Note: Student will be automatically assigned to the current school year (e.g., {{ date('Y') }}–{{ date('Y', strtotime('+1 year')) }}).
+                        </p>
+                    </div>
+                </div>
+
 
                 <div style="width: 100%; text-align: center; margin: 28px 0 18px 0; position: relative;">
                     <span style="background: #fff; position: relative; z-index: 1; padding: 0 18px; font-size: 1.08rem; font-weight: 600; color: #2563eb; letter-spacing: 0.04em;">Parent & Guardian Information</span>
@@ -163,121 +177,132 @@
         <div class="modal-content add-modal-content pro-add-modal">
             <span class="close add-modal-close pro-add-close" id="closeViewModalBtn">&times;</span>
             <h2 class="add-modal-title pro-add-title">Student Information</h2>
-            <div class="form-row image-name-row">
-                <div class="image-col">
-                    <img id="viewStudentImage" src="{{ asset('images/user/default.jpg') }}" data-default="{{ asset('images/user/default.jpg') }}" alt="Student Image" class="student-image-box pro-add-image">
-                    <div class="student-id-row pro-add-id-row">
-                        <label class="add-label" style="margin-bottom:0;">Student ID:</label>
-                        <span id="view_s_id_display" class="pro-add-id-value">Loading...</span>
-                    </div>
-                </div>
-                <div class="name-fields-col">
-                    <div class="form-row" style="margin-bottom: 0; gap: 12px;">
-                        <div class="add-field-col">
-                            <label class="add-label">First Name:</label>
-                            <span id="view_first_name" class="view-field"></span>
-                        </div>
-                        <div class="add-field-col">
-                            <label class="add-label">Middle Name:</label>
-                            <span id="view_middle_name" class="view-field"></span>
-                        </div>
-                        <div class="add-field-col">
-                            <label class="add-label">Last Name:</label>
-                            <span id="view_last_name" class="view-field"></span>
-                        </div>
-                        <div class="add-field-col">
-                            <label class="add-label">Suffix:</label>
-                            <span id="view_suffix" class="view-field"></span>
+            <form id="editStudentForm" method="POST" action="#" enctype="multipart/form-data">
+                @csrf
+                <div class="form-row image-name-row">
+                    <div class="image-col">
+                        <img id="viewStudentImage" src="{{ asset('images/user/default.jpg') }}" data-default="{{ asset('images/user/default.jpg') }}" alt="Student Image" class="student-image-box pro-add-image">
+                        <div class="student-id-row pro-add-id-row">
+                            <label class="add-label" style="margin-bottom:0;">Student ID:</label>
+                            <input type="text" id="view_s_id_display" name="s_id" class="add-input" readonly disabled>
                         </div>
                     </div>
-                    <div class="form-row">
-                        <div class="add-field-col">
-                            <label class="add-label">Email:</label>
-                            <span id="view_email" class="view-field"></span>
+                    <div class="name-fields-col">
+                        <div class="form-row" style="margin-bottom: 0; gap: 12px;">
+                            <div class="add-field-col">
+                                <label class="add-label">First Name:</label>
+                                <input type="text" id="view_first_name" name="first_name" class="add-input" required readonly disabled>
+                            </div>
+                            <div class="add-field-col">
+                                <label class="add-label">Middle Name:</label>
+                                <input type="text" id="view_middle_name" name="middle_name" class="add-input" readonly disabled>
+                            </div>
+                            <div class="add-field-col">
+                                <label class="add-label">Last Name:</label>
+                                <input type="text" id="view_last_name" name="last_name" class="add-input" required readonly disabled>
+                            </div>
+                            <div class="add-field-col">
+                                <label class="add-label">Suffix:</label>
+                                <input type="text" id="view_suffix" name="suffix" class="add-input" readonly disabled>
+                            </div>
                         </div>
-                        <div class="add-field-col">
-                            <label class="add-label">Contact Number:</label>
-                            <span id="view_contact_num" class="view-field"></span>
+                        <div class="form-row">
+                            <div class="add-field-col">
+                                <label class="add-label">Email:</label>
+                                <input type="email" id="view_email" name="email" class="add-input" required readonly disabled>
+                            </div>
+                            <div class="add-field-col">
+                                <label class="add-label">Contact Number:</label>
+                                <input type="text" id="view_contact_num" name="contact_num" class="add-input" readonly disabled>
+                            </div>
+                            <div class="add-field-col">
+                                <label class="add-label">Sex:</label>
+                                <div style="display: flex; gap: 16px; align-items: center;">
+                                    <label style="margin-bottom:0;">
+                                        <input type="radio" id="view_sex_male" name="view_sex" value="Male" disabled readonly>
+                                        Male
+                                    </label>
+                                    <label style="margin-bottom:0;">
+                                        <input type="radio" id="view_sex_female" name="view_sex" value="Female" disabled readonly>
+                                        Female
+                                    </label>
+                                </div>
+                            </div>
                         </div>
-                        <div class="add-field-col">
-                            <label class="add-label">Sex:</label>
-                            <span id="view_sex" class="view-field"></span>
+                        <div class="form-row">
+                            <div class="add-field-col">
+                                <label class="add-label">Birthdate:</label>
+                                <input type="date" id="view_bod" name="bod" class="add-input" readonly disabled>
+                            </div>
+                            <div class="add-field-col">
+                                <label class="add-label">Address:</label>
+                                <input type="text" id="view_address" name="address" class="add-input" readonly disabled>
+                            </div>
+                            <div class="add-field-col">
+                                <label class="add-label">Religion:</label>
+                                <input type="text" id="view_religion" name="religion" class="add-input" readonly disabled>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="add-field-col">
+                                <label class="add-label">Civil Status:</label>
+                                <input type="text" id="view_civil_status" name="civil_status" class="add-input" readonly disabled>
+                            </div>
+                            <div class="add-field-col">
+                                <label class="add-label">Educational Level:</label>
+                                <input type="text" id="view_educ_level" name="educ_level" class="add-input" readonly disabled>
+                            </div>
                         </div>
                     </div>
-                    <div class="form-row">
-                        <div class="add-field-col">
-                            <label class="add-label">Birthdate:</label>
-                            <span id="view_bod" class="view-field"></span>
-                        </div>
-                        <div class="add-field-col">
-                            <label class="add-label">Address:</label>
-                            <span id="view_address" class="view-field"></span>
-                        </div>
-                        <div class="add-field-col">
-                            <label class="add-label">Religion:</label>
-                            <span id="view_religion" class="view-field"></span>
-                        </div>
+                </div>
+                <div class="form-row">
+                    <div class="add-field-col">
+                        <label class="add-label">Program:</label>
+                        <input type="text" id="view_program" name="program" class="add-input" readonly disabled>
                     </div>
-                    <div class="form-row">
-                        <div class="add-field-col">
-                            <label class="add-label">Civil Status:</label>
-                            <span id="view_civil_status" class="view-field"></span>
-                        </div>
-                        <div class="add-field-col">
-                            <label class="add-label">Educational Level:</label>
-                            <span id="view_educ_level" class="view-field"></span>
-                        </div>
+                    <div class="add-field-col">
+                        <label class="add-label">Year Level:</label>
+                        <input type="text" id="view_year_level" name="year_level" class="add-input" readonly disabled>
+                    </div>
+                    <div class="add-field-col">
+                        <label class="add-label">Section:</label>
+                        <input type="text" id="view_section" name="section" class="add-input" readonly disabled>
                     </div>
                 </div>
-            </div>
-            <div class="form-row">
-                <div class="add-field-col">
-                    <label class="add-label">Program:</label>
-                    <span id="view_program" class="view-field"></span>
+                <div style="width: 100%; text-align: center; margin: 28px 0 18px 0; position: relative;">
+                    <span style="background: #fff; position: relative; z-index: 1; padding: 0 18px; font-size: 1.08rem; font-weight: 600; color: #2563eb; letter-spacing: 0.04em;">Parent & Guardian Information</span>
+                    <hr style="position: absolute; top: 50%; left: 0; width: 100%; border: none; border-top: 2px solid #2563eb; z-index: 0; margin: 0;">
                 </div>
-                <div class="add-field-col">
-                    <label class="add-label">Year Level:</label>
-                    <span id="view_year_level" class="view-field"></span>
+                <div class="form-row">
+                    <div class="add-field-col">
+                        <label class="add-label">Father Name</label>
+                        <input type="text" id="view_father_name" name="father_name" class="add-input" maxlength="255" readonly disabled>
+                    </div>
+                    <div class="add-field-col">
+                        <label class="add-label">Mother Name</label>
+                        <input type="text" id="view_mother_name" name="mother_name" class="add-input" maxlength="255" readonly disabled>
+                    </div>
                 </div>
-                <div class="add-field-col">
-                    <label class="add-label">Section:</label>
-                    <span id="view_section" class="view-field"></span>
+                <div class="form-row">
+                    <div class="add-field-col">
+                        <label class="add-label">Guardian Name</label>
+                        <input type="text" id="view_guardian_name" name="guardian_name" class="add-input" maxlength="255" readonly disabled>
+                    </div>
+                    <div class="add-field-col">
+                        <label class="add-label">Relationship</label>
+                        <input type="text" id="view_relationship" name="relationship" class="add-input" maxlength="255" readonly disabled>
+                    </div>
                 </div>
-            </div>
-            <div style="width: 100%; text-align: center; margin: 28px 0 18px 0; position: relative;">
-                <span style="background: #fff; position: relative; z-index: 1; padding: 0 18px; font-size: 1.08rem; font-weight: 600; color: #2563eb; letter-spacing: 0.04em;">Parent & Guardian Information</span>
-                <hr style="position: absolute; top: 50%; left: 0; width: 100%; border: none; border-top: 2px solid #2563eb; z-index: 0; margin: 0;">
-            </div>
-            <div class="form-row">
-                <div class="add-field-col">
-                    <label class="add-label">Father Name</label>
-                    <span id="view_father_name" class="view-field"></span>
+                <div class="form-row">
+                    <div class="add-field-col">
+                        <label class="add-label">Guardian Contact</label>
+                        <input type="text" id="view_guardian_contact" name="guardian_contact" class="add-input" maxlength="255" readonly disabled>
+                    </div>
+                    <div class="add-field-col">
+                        <label class="add-label">Guardian Email</label>
+                        <input type="email" id="view_guardian_email" name="guardian_email" class="add-input" maxlength="255" readonly disabled>
+                    </div>
                 </div>
-                <div class="add-field-col">
-                    <label class="add-label">Mother Name</label>
-                    <span id="view_mother_name" class="view-field"></span>
-                </div>
-            </div>
-            <div class="form-row">
-                <div class="add-field-col">
-                    <label class="add-label">Guardian Name</label>
-                    <span id="view_guardian_name" class="view-field"></span>
-                </div>
-                <div class="add-field-col">
-                    <label class="add-label">Relationship</label>
-                    <span id="view_relationship" class="view-field"></span>
-                </div>
-            </div>
-            <div class="form-row">
-                <div class="add-field-col">
-                    <label class="add-label">Guardian Contact</label>
-                    <span id="view_guardian_contact" class="view-field"></span>
-                </div>
-                <div class="add-field-col">
-                    <label class="add-label">Guardian Email</label>
-                    <span id="view_guardian_email" class="view-field"></span>
-                </div>
-            </div>
 
             <h3 style="color:#e11d48; margin-bottom:12px;"><i class="fi fi-rr-folder"></i> Case Records</h3>
             <div id="view_case_records"></div>
@@ -317,54 +342,46 @@
 
 <!-- Archive Modal -->
 <div id="archiveStudentModal" class="modal" style="display:none;">
-    <div class="modal-content add-modal-content pro-add-modal" style="max-width:400px;">
+    <div class="modal-content" style="max-width:480px;">
         <span class="close add-modal-close pro-add-close" id="closeArchiveModalBtn">&times;</span>
-        <h2 class="add-modal-title pro-add-title">Archive Student</h2>
-        <p style="font-size:1.08rem; margin-bottom:24px;">Are you sure you want to archive this student?</p>
-        <div class="pro-add-buttons" style="justify-content:center;">
-            <button type="button" class="pro-add-save" id="confirmArchiveBtn">Confirm</button>
-            <button type="button" class="pro-add-save" style="background:#e11d48;" onclick="closeArchiveModal()">Cancel</button>
-        </div>
+    <h2 class="add-modal-title pro-add-title">Archive Student <span id="archiveStudentIdDisplay" style="color:#2563eb;font-size:1.1rem;font-weight:600;"></span></h2>
+
+        <form id="archiveStudentForm" method="POST" action="{{ url('/students/archive') }}">
+            @csrf
+            <input type="hidden" name="s_id" id="archive_s_id">
+            <p style="font-size:1.05rem; margin-bottom:18px;">
+                Select the archive status for this student. You may also disable their login if needed.
+            </p>
+
+            <!-- Archive Status -->
+            <div class="form-row" style="margin-bottom:18px;">
+                <div class="add-field-col" style="width:100%;">
+                    <label for="archive_status" class="add-label">Archive Status:</label>
+                    <select id="archive_status" name="status" class="add-input" required>
+                        <option value="">Select Status</option>
+                        <option value="Inactive">Inactive</option>
+                        <option value="Pending">Pending</option>
+                        <option value="Graduated">Graduated</option>
+                        <option value="Transferred">Transferred</option>
+                        <option value="Dropped">Dropped</option>
+                        <option value="Suspended">Suspended</option>
+                        <option value="Expelled">Expelled</option>
+                    </select>
+                    <small id="statusMeaning" style="display:block; margin-top:4px; color:#64748b; font-size:0.9rem;">
+                        Select a status to see its meaning.
+                    </small>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="pro-add-buttons" style="justify-content:center; gap: 16px;">
+                <button type="button" class="pro-add-save" onclick="archiveStudentOnly()">Archive Only</button>
+                <button type="button" class="pro-add-save" style="background:#e11d48;" onclick="archiveStudentAndDisable()">Archive & Disable Account</button>
+            </div>
+        </form>
     </div>
 </div>
 
-<!-- Archive Disable Modal -->
-<div id="archiveDisableModal" class="modal" style="display:none;">
-    <div class="modal-content add-modal-content pro-add-modal" style="max-width:420px;">
-        <span class="close add-modal-close pro-add-close" id="closeArchiveDisableModalBtn">&times;</span>
-        <h2 class="add-modal-title pro-add-title">Archive Student</h2>
-        <p style="font-size:1.08rem; margin-bottom:24px;">Do you also want to disable this student’s login account?</p>
-        <div class="pro-add-buttons" style="justify-content:center;">
-            <button type="button" class="pro-add-save" id="archiveOnlyBtn" onclick="archiveStudentOnly()">Archive Only</button>
-            <button type="button" class="pro-add-save" style="background:#e11d48;" id="archiveAndDisableBtn" onclick="archiveStudentAndDisable()">Archive and Disable</button>
-            <button type="button" class="pro-add-save" style="background:#64748b;" onclick="closeArchiveDisableModal()">Cancel</button>
-        </div>
-    </div>
-</div>
 
 
 <!---------------------------------------------------------------------------------------->
-
-<!-- Import Modal -->
-<div id="importModal" class="modal" style="display:none;">
-    <div class="modal-content add-modal-content pro-add-modal">
-        <span class="close add-modal-close pro-add-close" id="closeImportModalBtn">&times;</span>
-        <h2 class="add-modal-title pro-add-title">Import Students</h2>
-            <form action="{{ route('Head.students.import') }}" method="POST" enctype="multipart/form-data">
-                @csrf
-                <div class="form-row">
-                    <div class="add-field-col" style="flex:2;">
-                        <label for="students_file" class="add-label">Select File:</label>
-                        <input type="file" name="students_file" id="students_file" accept=".csv,.xlsx,.xls" required style="margin-top:8px;">
-                    </div>
-                </div>
-                <div class="pro-add-buttons">
-                    <button type="submit" class="pro-add-save">Import</button>
-                </div>
-            </form>
-    </div>
-</div>
-
-
-<!---------------------------------------------------------------------------------------->
-

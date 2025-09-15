@@ -4,6 +4,13 @@
 
     <!-- MAIN CONTENT -->
     <section id="content">
+        <?php if(session('error')): ?>
+            <div class="alert alert-danger" style="margin: 16px 0; padding: 12px; background: #fee2e2; color: #b91c1c; border-radius: 6px; border: 1px solid #fca5a5;"><?php echo e(session('error')); ?></div>
+        <?php endif; ?>
+        <?php if(session('success')): ?>
+            <div class="alert alert-success" style="margin: 16px 0; padding: 12px; background: #dcfce7; color: #166534; border-radius: 6px; border: 1px solid #86efac;"><?php echo e(session('success')); ?></div>
+        <?php endif; ?>
+        
         <?php echo $__env->make('partials.navbar', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
         <div class="wrapper">
             <div class="table-container">
@@ -30,7 +37,11 @@
                             <button type="submit" style="display:none"></button>
                         </form>
                     </div>
-                    <button class="toggle-btn" onclick="openImportModal()"><i class="fi fi-rr-document-circle-arrow-up"></i></i></button>
+                        <form id="importForm" action="<?php echo e(route('Head.students.import')); ?>" method="POST" enctype="multipart/form-data" style="display:inline;">
+                            <?php echo csrf_field(); ?>
+                            <input type="file" id="importFileInput" name="students_file" accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" style="display:none" required>
+                            <button type="button" class="toggle-btn" id="importBtn"><i class="fi fi-rr-document-circle-arrow-up"></i></button>
+                        </form>
                     <div class="dropdown" style="display:inline-block;position:relative;">
                         <button class="toggle-btn" id="exportDropdownBtn" style="padding:8px 12px;border-radius:6px;background:#2563eb;color:#fff;border:none;box-shadow:0 1px 4px rgba(0,0,0,0.05);"><i class="fi fi-rr-file-download"></i></button>
                         <div id="exportDropdownMenu" class="dropdown-menu" style="display:none;position:absolute;right:0;top:110%;z-index:1000;background:#fff;border-radius:8px;border:1px solid #e5e7eb;padding:4px 0;min-width:180px;box-shadow:0 4px 16px rgba(0,0,0,0.08);">
@@ -47,8 +58,10 @@
                 <div class="table-col">Name</div>
                 <div class="table-col">Sex</div>
                 <div class="table-col">Educational Level</div>
+                <div class="table-col">Program</div>
                 <div class="table-col">Year Level</div>
                 <div class="table-col">Section</div>
+                <div class="table-col">Status</div>
                 <div class="table-col actions">Actions</div>
             </div>
             <div id="student-list">
@@ -74,6 +87,19 @@
                             $mname = $mname !== '' ? strtoupper(substr($mname, 0, 1)) . '.' : '';
                             $name = trim($row->lname . ', ' . $row->fname . ' ' . $mname . ' ' . $suffix);
                             $profileImage = $row->profile_image ?? 'default.png';
+                            $program = ($row->educ_level === 'Senior High School' && !empty($row->program)) ? $row->program : 'N/A';
+                            $status = $row->enrollment_status ?? 'N/A';
+                            $statusColor = [
+                                'Enrolled'     => '#16a34a', // green 
+                                'Pending'      => '#f97316', // orange 
+                                'Probation'    => '#eab308', // yellow 
+                                'Suspended'    => '#dc2626', // red 
+                                'Dropped'      => '#475569', // dark gray 
+                                'Transferred'  => '#3b82f6', // blue 
+                                'Graduated'    => '#8b5cf6', // purple 
+                                'Inactive'     => '#94a3b8', // light gray 
+                                'Expelled'     => '#b91c1c', // dark red 
+                            ][$status] ?? '#64748b';
                         ?>
                         <div class="table-card">
                             <div class="table-col title">
@@ -84,8 +110,15 @@
                             <div class="table-col"><?php echo e($name); ?></div>
                             <div class="table-col"><?php echo e($row->sex); ?></div>
                             <div class="table-col"><?php echo e($row->educ_level); ?></div>
+                            <div class="table-col"><?php echo e($program); ?></div>
                             <div class="table-col"><?php echo e($row->year_level); ?></div>
                             <div class="table-col"><?php echo e($row->section); ?></div>
+                            <div class="table-col">
+                                <span style="display:inline-block;padding:4px 14px;border-radius:16px;font-weight:600;background:<?php echo e($statusColor); ?>20;color:<?php echo e($statusColor); ?>;border:1px solid <?php echo e($statusColor); ?>;min-width:90px;text-align:center;">
+                                    <?php echo e($status); ?>
+
+                                </span>
+                            </div>
                             <div class="table-col actions">
                                 <a href="javascript:void(0);" class="view-btn" title="View" onclick="openViewStudentModal('<?php echo e($row->s_id); ?>')">
                                     <i class='bx bx-show'></i>
@@ -93,7 +126,7 @@
                                 <a href="javascript:void(0);" class="edit-btn" title="Edit" onclick="openAddEditModal('edit', { s_id: '<?php echo e($row->s_id); ?>' })">
                                     <i class='bx bx-edit'></i>
                                 </a>
-                                <button type="button" class="archive-btn" title="Archive" onclick="openArchiveModal('<?php echo e($row->s_id); ?>')">
+                                <button type="button" class="archive-btn" title="Archive" onclick="openArchiveStudentModal('<?php echo e($row->s_id); ?>')">
                                     <i class='bx bx-archive'></i>
                                 </button>
                             </div>
@@ -139,6 +172,7 @@
                     });
                 }, 300);
             });
+
         });
     </script>
 <?php $__env->stopSection(); ?>

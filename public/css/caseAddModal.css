@@ -12,15 +12,18 @@
     background: #0d6efd;
     color: #fff;
     border-bottom: none;
-    border-radius: 14px 14px 0 0;
+    border-radius: 14px 14px 0 0; 
     padding: 1.25rem 1.5rem;
+    font-size: 50px;
 }
 
 /* Modal Title */
 .modal-title {
     font-weight: 600;
-    font-size: 1.3rem;
+    font-size: 500rem;
+    background: #0d6efd;
 }
+
 
 /* Close Button */
 .btn-close {
@@ -62,4 +65,138 @@
     padding: 0.5rem 1.5rem;
     font-weight: 500;
     font-size: 1rem;
+}
+
+/* Add Modal Content Styling */
+.add-modal-content {
+    background: #f8fafc;
+    border-radius: 18px;
+    box-shadow: 0 8px 32px rgba(37, 99, 235, 0.13);
+    font-family: "Segoe UI", "Roboto", Arial, sans-serif;
+    padding: 28px 32px 24px 32px;
+    margin: 2.5rem auto;
+}
+
+
+/* Pro Add Close */
+.pro-add-close, .close {
+    font-size: 2.1rem;
+    color: #2563eb;
+    font-weight: 700;
+    position: absolute;
+    top: 18px;
+    right: 24px;
+    cursor: pointer;
+}
+
+/* Pro Add Buttons */
+.pro-add-buttons {
+    width: 100%;
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 18px;
+}
+
+/* Pro Add Save Button */
+.pro-add-save {
+    background: #2563eb;
+    color: #fff;
+    font-weight: 700;
+    border-radius: 6px;
+    padding: 10px 32px;
+    font-size: 1.08rem;
+    border: none;
+    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.08);
+    transition: background 0.2s;
+    cursor: pointer;
+}
+
+.pro-add-save:hover {
+    background: #1e40af;
+}
+
+/* Import & Export Buttons */
+.pro-add-import, .pro-add-export {
+    background: #38bdf8; /* Light blue for import */
+    color: #fff;
+    font-weight: 700;
+    border-radius: 6px;
+    padding: 10px 32px;
+    font-size: 1.08rem;
+    border: none;
+    box-shadow: 0 2px 8px rgba(56, 189, 248, 0.08);
+    transition: background 0.2s;
+    cursor: pointer;
+    margin-left: 10px;
+}
+
+.pro-add-export {
+    background: #22c55e; /* Green for export */
+    box-shadow: 0 2px 8px rgba(34, 197, 94, 0.08);
+}
+
+.pro-add-import:hover {
+    background: #0ea5e9;
+}
+
+.pro-add-export:hover {
+    background: #16a34a;
+}
+
+/* Form Row */
+.form-row {
+    display: flex;
+    gap: 26px;
+    margin-bottom: 22px;
+    flex-wrap: wrap;
+    padding-left: 2px;
+    padding-right: 2px;
+}
+
+/* Add Field Column */
+.add-field-col {
+    min-width: 140px;
+    margin-bottom: 10px;
+    display: flex;
+    flex-direction: column;
+   
+}
+
+/* Add Label */
+.add-label {
+    font-weight: 700;
+    color: #1e293b;
+    font-size: 1.08rem;
+    margin-bottom: 2px;
+    letter-spacing: 0.01em;
+}
+.label{
+    justify-content: center;
+    align-items: center;
+    display: flex;
+}
+
+/* Add Input */
+.add-input {
+    font-size: 1.13rem;
+    color: #475569;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    padding: 8px 10px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    background: #f9fafb;
+    transition: border 0.2s;
+}
+
+.add-input:focus {
+    border: 1.5px solid #2563eb;
+    outline: none;
+    background: #fff;
+}
+
+/* Limit modal width */
+.modal-dialog, .modal-lg {
+    max-width: 300px !important; /* Your desired width */
+    margin: 2.5rem auto;
 }

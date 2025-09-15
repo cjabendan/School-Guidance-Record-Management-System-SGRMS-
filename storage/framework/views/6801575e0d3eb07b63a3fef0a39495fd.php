@@ -48,45 +48,10 @@
                         <div class="table-col actions">Actions</div>
                     </div>
 
-                    <div class="table">
-                        <?php $__currentLoopData = $allRequests; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $req): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                            <div class="table-card">
-
-                                <div class="table-col type"><?php echo e($req['display_type']); ?></div>
-                                <div class="table-col requested-by"><?php echo e($req['parent_name']); ?></div>
-                                <div class="table-col requested-at"><?php echo e($req['requested_at']); ?></div>
-                                <div class="table-col status">
-                                    <?php
-                                        $status = strtolower($req['status']);
-                                        $dotClass = match ($status) {
-                                            'approved' => 'status-dot status-approved',
-                                            'rejected' => 'status-dot status-declined',
-                                            'pending' => 'status-dot status-pending',
-                                            default => 'status-dot',
-                                        };
-                                        $labelClass = match ($status) {
-                                            'approved' => 'status-label status-approved',
-                                            'rejected' => 'status-label status-declined',
-                                            'pending' => 'status-label status-pending',
-                                            default => 'status-label',
-                                        };
-                                    ?>
-                                    <span class="<?php echo e($labelClass); ?>">
-                                        <span class="<?php echo e($dotClass); ?>"></span>
-                                        <?php echo e(ucfirst($req['status'])); ?>
-
-                                    </span>
-                                </div>
-                                <div class="table-col actions">
-                                    <?php if($req['status'] === 'Pending'): ?>
-                                        <a href="#" class="review-btn" data-id="<?php echo e($req['id']); ?>"
-                                            data-type="<?php echo e(strtolower($req['type'])); ?>">Review</a>
-                                    <?php endif; ?>
-                                </div>
-                            </div>
-                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-                    </div>
+                    <div class="table" id="requests-table"></div>
+                 
                 </div>
+                   <div id="requests-pagination" class="pagination"></div>
             </div>
         </div>
     </section>

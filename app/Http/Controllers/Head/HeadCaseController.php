@@ -8,6 +8,9 @@ use Illuminate\Http\Request;
 use App\Models\CaseModel;
 use Illuminate\Support\Facades\DB;
 use App\Models\Student;
+use App\Models\CaseType;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Response;
 
 class HeadCaseController extends Controller
 {
@@ -34,7 +37,7 @@ class HeadCaseController extends Controller
 
     public function index(Request $request)
     {
-        $query = CaseModel::with('caseType')->orderBy('case_id', 'desc');
+    $query = CaseModel::with(['caseType', 'students'])->orderBy('case_id', 'desc');
 
         // Filter by archived status
         if ($request->filled('archived') && $request->archived == '1') {
@@ -63,9 +66,9 @@ class HeadCaseController extends Controller
             $search = $request->input('search');
             $query->where(function($q) use ($search) {
                 $q->where('case_id', 'LIKE', "%$search%")
-                ->orWhereHas('caseType', function($q2) use ($search) {
-                    $q2->where('type_name', 'LIKE', "%$search%");
-                });
+                  ->orWhereHas('caseType', function($q2) use ($search) {
+                      $q2->where('type_name', 'LIKE', "%$search%");
+                  });
             });
         }
 
@@ -90,7 +93,7 @@ class HeadCaseController extends Controller
 
         // Handle "Other" case type
         if ($request->case_type_id === 'other') {
-            $newType = \App\Models\CaseType::create([
+            $newType = CaseType::create([
                 'type_name' => $request->other_case_type,
                 'description' => '',
             ]);
@@ -141,11 +144,12 @@ class HeadCaseController extends Controller
             'filed_date' => 'required|date',
             'filed_time' => 'required',
             'status' => 'required|string',
+            'involved_students' => 'required|string', 
         ]);
 
         // Handle "Other" case type
         if ($request->case_type_id === 'other') {
-            $newType = \App\Models\CaseType::create([
+            $newType = CaseType::create([
                 'type_name' => $request->other_case_type,
                 'description' => '',
             ]);
@@ -173,6 +177,20 @@ class HeadCaseController extends Controller
             'follow_up_date' => $request->follow_up_date,
         ]);
 
+        // Update involved students
+        $studentIds = array_map('trim', explode(',', $request->involved_students));
+        // Remove all current links
+        DB::table('case_students')->where('case_id', $case->case_id)->delete();
+        // Add new links
+        foreach ($studentIds as $studentId) {
+            if ($studentId) {
+                DB::table('case_students')->insert([
+                    'case_id' => $case->case_id,
+                    'student_id' => $studentId,
+                ]);
+            }
+        }
+
         return redirect()->route('Head.cases.index')->with('success', 'Case updated successfully!');
     }
 
@@ -189,7 +207,7 @@ class HeadCaseController extends Controller
     {
         $query = $request->input('q');
 
-        $students = \App\Models\Student::with('user')
+        $students = Student::with('user')
             ->where('s_id', 'like', "%{$query}%")
             ->orWhereHas('user', function ($q) use ($query) {
                 $q->where('first_name', 'like', "%{$query}%")
@@ -207,5 +225,81 @@ class HeadCaseController extends Controller
         });
 
         return response()->json($results);
+    }
+
+    public function export()
+    {
+        $cases = CaseModel::with('caseType')->get();
+        $filename = 'cases_export_' . date('Ymd_His') . '.csv';
+
+        $headers = [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => "attachment; filename=\"$filename\"",
+        ];
+
+        $columns = [
+            'case_id', 'case_type', 'presenting_problem', 'description', 'severity', 'filed_date', 'filed_time', 'status'
+        ];
+
+        $callback = function() use ($cases, $columns) {
+            $file = fopen('php://output', 'w');
+            fputcsv($file, $columns);
+
+            foreach ($cases as $case) {
+                fputcsv($file, [
+                    $case->case_id,
+                    $case->caseType->type_name ?? '',
+                    $case->presenting_problem,
+                    $case->description,
+                    $case->severity,
+                    $case->filed_date,
+                    $case->filed_time,
+                    $case->status,
+                ]);
+            }
+            fclose($file);
+        };
+
+        return Response::stream($callback, 200, $headers);
+    }
+
+    public function import(Request $request)
+    {
+        $request->validate([
+            'import_file' => 'required|file|mimes:csv,txt',
+        ]);
+
+        $file = $request->file('import_file');
+        $handle = fopen($file->getRealPath(), 'r');
+        $header = fgetcsv($handle);
+
+        while (($row = fgetcsv($handle)) !== false) {
+            $data = array_combine($header, $row);
+
+            // Find or create case type
+            $caseType = \App\Models\CaseType::firstOrCreate([
+                'type_name' => $data['case_type'] ?? 'N/A'
+            ], [
+                'description' => ''
+            ]);
+
+            // Create case
+            CaseModel::updateOrCreate(
+                ['case_id' => $data['case_id']],
+                [
+                    'case_type_id' => $caseType->type_id,
+                    'presenting_problem' => $data['presenting_problem'] ?? '',
+                    'description' => $data['description'] ?? '',
+                    'severity' => $data['severity'] ?? '',
+                    'filed_date' => $data['filed_date'] ?? null,
+                    'filed_time' => $data['filed_time'] ?? null,
+                    'status' => $data['status'] ?? '',
+                    'archived' => false,
+                ]
+            );
+        }
+        fclose($handle);
+
+        return redirect()->route('Head.cases.index')->with('success', 'Cases imported successfully!');
     }
 }

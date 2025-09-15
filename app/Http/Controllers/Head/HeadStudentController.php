@@ -1,12 +1,12 @@
 <?php
-
 namespace App\Http\Controllers\Head;
-
 use Illuminate\Support\Facades\Log;
 
 use Barryvdh\DomPDF\Facade\Pdf;
 
 use App\Models\Student;
+use App\Models\StudentSchoolYear;
+use App\Models\SchoolYear;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\DB;
@@ -27,9 +27,17 @@ class HeadStudentController extends Controller
             'kindergarten' => 'Kindergarten',
         ];
 
+
+        $activeSchoolYearId = SchoolYear::where('is_active', 1)->value('id');
         $query = DB::table('students')
             ->leftJoin('users', 'students.user_id', '=', 'users.id')
-            ->leftJoin('year_levels', 'students.y_id', '=', 'year_levels.y_id')
+            ->leftJoin('student_schoolyear', function($join) use ($activeSchoolYearId) {
+                $join->on('students.s_id', '=', 'student_schoolyear.student_id')
+                    ->where('student_schoolyear.school_year_id', '=', $activeSchoolYearId);
+            })
+            ->leftJoin('year_levels', function($join) {
+                $join->on('student_schoolyear.year_level', '=', 'year_levels.year_level');
+            })
             ->leftJoin('educ_levels', 'year_levels.e_id', '=', 'educ_levels.e_id')
             // Join case_students and cases to get severity
             ->leftJoin('case_students', 'students.s_id', '=', 'case_students.student_id')
@@ -49,23 +57,20 @@ class HeadStudentController extends Controller
                 'users.bod',
                 'users.address',
                 'educ_levels.educ_level',
-                'year_levels.year_level',
+                'student_schoolyear.year_level',
                 'students.section',
                 'students.program',
-                'students.status',
+                'student_schoolyear.status as enrollment_status',
                 'users.profile_image',
                 'students.father_name',
                 'students.mother_name',
                 'students.guardian_name',
                 'students.relationship',
-                'students.guardian_contact',
                 'students.guardian_email',
-                
                 DB::raw('MAX(CASE WHEN cases.severity = "Severe" THEN 3 WHEN cases.severity = "Intermediate" THEN 2 WHEN cases.severity = "Low" THEN 1 ELSE 0 END) as severity_rank'),
-                DB::raw('MAX(cases.severity) as case_severity'),
                 DB::raw('COUNT(cases.case_id) as case_count')
             );
-        $query->groupBy(
+    $query->groupBy(
             'students.s_id',
             'users.first_name',
             'users.middle_name',
@@ -77,28 +82,24 @@ class HeadStudentController extends Controller
             'users.bod',
             'users.address',
             'educ_levels.educ_level',
-            'year_levels.year_level',
+            'student_schoolyear.year_level',
             'students.section',
             'students.program',
-            'students.status',
+            'student_schoolyear.status',
             'users.profile_image',
             'students.father_name',
             'students.mother_name',
             'students.guardian_name',
             'students.relationship',
-            'students.guardian_contact',
             'students.guardian_email'
         );
 
-        // Apply filters
+        // Apply filters using student_schoolyear.status
         if (array_key_exists($filter, $educLevelMap)) {
             $query->where('educ_levels.educ_level', $educLevelMap[$filter])
-                ->where('students.status', 'active');
-        } elseif ($filter === 'inactive') {
-            $query->where('students.status', 'inactive');
-        } else {
-            $query->where('students.status', 'active');
+                ->where('student_schoolyear.status', 'Enrolled');
         }
+    // End of index()
 
         // Add search filter
         if ($search) {
@@ -106,9 +107,9 @@ class HeadStudentController extends Controller
                 $q->where('students.s_id', 'like', "%$search%")
                   ->orWhere('users.first_name', 'like', "%$search%")
                   ->orWhere('users.last_name', 'like', "%$search%")
-                  ->orWhere('users.middle_name', 'like', "%$search%")
                   ->orWhere('students.section', 'like', "%$search%")
                   ->orWhere('students.program', 'like', "%$search%")
+                  ->orWhere('student_schoolyear.status', 'like', "%$search%")
                   ;
             });
         }
@@ -119,10 +120,10 @@ class HeadStudentController extends Controller
             return view('Head.profiling.students', compact('students', 'filter'))->render();
         }
         return view('Head.profiling.students', compact('students', 'filter'));
+
+
+
     }
-
-
-
     public function getNextStudentId()
     {
         $currentYear = date('y');
@@ -157,6 +158,8 @@ class HeadStudentController extends Controller
 
 //_________________________________________________________________________________
 
+
+    
     //Add Student
     public function addStudent(Request $request)
     {
@@ -188,11 +191,15 @@ class HeadStudentController extends Controller
 
         // Insert or get educ_level
         $educLevel = DB::table('educ_levels')->where('educ_level', $validated['educ_level'])->first();
-        $e_id = $educLevel ? $educLevel->e_id : DB::table('educ_levels')->insertGetId([
-            'educ_level' => $validated['educ_level'],
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
+        if ($educLevel && isset($educLevel->e_id)) {
+            $e_id = $educLevel->e_id;
+        } else {
+            $e_id = DB::table('educ_levels')->insertGetId([
+                'educ_level' => $validated['educ_level'],
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
 
         // Insert or get year_level
         $yearLevel = DB::table('year_levels')->where('year_level', $validated['year_level'])->where('e_id', $e_id)->first();
@@ -234,7 +241,6 @@ class HeadStudentController extends Controller
         Student::create([
             's_id' => $validated['s_id'],
             'user_id' => $user->id,
-            'y_id' => $y_id,
             'section' => $validated['section'] ?? null,
             'father_name' => $validated['father_name'] ?? null,
             'mother_name' => $validated['mother_name'] ?? null,
@@ -243,25 +249,47 @@ class HeadStudentController extends Controller
             'guardian_contact' => $validated['guardian_contact'] ?? null,
             'guardian_email' => $validated['guardian_email'] ?? null,
             'program' => $validated['program'] ?? null,
-            'status' => $validated['status'] ?? 'active',
             'religion' => $validated['religion'] ?? null,
             'civil_status' => $validated['civil_status'] ?? null,
         ]);
 
+            // Ensure there is an active school year, or create one for the current year
+            $currentYear = date('Y');
+            $nextYear = $currentYear + 1;
+            $yearLabel = $currentYear . '-' . $nextYear;
+            $activeSchoolYear = SchoolYear::where('is_active', 1)->first();
+            if (!$activeSchoolYear) {
+                $activeSchoolYear = SchoolYear::create([
+                    'year_label' => $yearLabel,
+                    'is_active' => 1,
+                    'start_date' => $currentYear . '-06-01',
+                    'end_date' => $nextYear . '-03-31',
+                ]);
+            }
+            StudentSchoolYear::create([
+                'student_id' => $validated['s_id'],
+                'school_year_id' => $activeSchoolYear->id,
+                'year_level' => $validated['year_level'],
+                'section' => $validated['section'] ?? null,
+                'status' => 'Enrolled',
+                'remarks' => null,
+            ]);
             if ($request->ajax()) {
                 return response()->json(['success' => true, 'message' => 'Student added successfully!']);
             }
             return redirect()->back()->with('success', 'Student added successfully!');
-    }
+        }
+
 
     //_________________________________________________________________________________
-
 
     public function showAjax($s_id)
     {
         $student = DB::table('students')
             ->leftJoin('users', 'students.user_id', '=', 'users.id')
-            ->leftJoin('year_levels', 'students.y_id', '=', 'year_levels.y_id')
+            ->leftJoin('student_schoolyear', 'students.s_id', '=', 'student_schoolyear.student_id')
+            ->leftJoin('school_year', 'student_schoolyear.school_year_id', '=', 'school_year.id')
+            ->leftJoin('year_levels', 'student_schoolyear.year_level', '=', 'year_levels.year_level')
             ->leftJoin('educ_levels', 'year_levels.e_id', '=', 'educ_levels.e_id')
             ->select(
                 'students.s_id as id_num',
@@ -274,11 +302,9 @@ class HeadStudentController extends Controller
                 'users.sex as gender',
                 'users.bod',
                 'users.address',
-                'educ_levels.educ_level',
-                'year_levels.year_level',
-                'students.section',
-                'students.program',
-                'students.status',
+                'student_schoolyear.year_level',
+                'student_schoolyear.section',
+                'student_schoolyear.status as enrollment_status',
                 'users.profile_image',
                 'students.father_name',
                 'students.mother_name',
@@ -287,9 +313,13 @@ class HeadStudentController extends Controller
                 'students.guardian_contact',
                 'students.guardian_email',
                 'students.religion',
-                'students.civil_status'
+                'students.civil_status',
+                'school_year.year_label as school_year_label',
+                'educ_levels.educ_level as educ_level',
+                'students.program'
             )
             ->where('students.s_id', $s_id)
+            ->where('student_schoolyear.school_year_id', SchoolYear::where('is_active', 1)->value('id'))
             ->first();
 
         if (!$student) {
@@ -345,11 +375,15 @@ class HeadStudentController extends Controller
 
         // Update or get educ_level
         $educLevel = DB::table('educ_levels')->where('educ_level', $validated['educ_level'])->first();
-        $e_id = $educLevel ? $educLevel->e_id : DB::table('educ_levels')->insertGetId([
-            'educ_level' => $validated['educ_level'],
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
+        if ($educLevel && isset($educLevel->e_id)) {
+            $e_id = $educLevel->e_id;
+        } else {
+            $e_id = DB::table('educ_levels')->insertGetId([
+                'educ_level' => $validated['educ_level'],
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
         // Update or get year_level
         $yearLevel = DB::table('year_levels')->where('year_level', $validated['year_level'])->where('e_id', $e_id)->first();
         $y_id = $yearLevel ? $yearLevel->y_id : DB::table('year_levels')->insertGetId([
@@ -379,8 +413,7 @@ class HeadStudentController extends Controller
         $user->status = $validated['status'] ?? 'active';
         $user->save();
 
-        // Update student
-        $student->y_id = $y_id;
+        // Update student (all guardian and parent info, program, etc.)
         $student->section = $validated['section'] ?? null;
         $student->father_name = $validated['father_name'] ?? null;
         $student->mother_name = $validated['mother_name'] ?? null;
@@ -389,10 +422,25 @@ class HeadStudentController extends Controller
         $student->guardian_contact = $validated['guardian_contact'] ?? null;
         $student->guardian_email = $validated['guardian_email'] ?? null;
         $student->program = $validated['program'] ?? null;
-        $student->status = $validated['status'] ?? 'active';
         $student->religion = $validated['religion'] ?? null;
         $student->civil_status = $validated['civil_status'] ?? null;
         $student->save();
+
+        // Update student_schoolyear for current school year
+        $activeSchoolYearId = \App\Models\SchoolYear::where('is_active', 1)->value('id');
+        if ($activeSchoolYearId) {
+            $updateData = [
+                'year_level' => $validated['year_level'],
+                'section' => $validated['section'] ?? null,
+                'status' => $validated['status'] ?? 'Enrolled',
+            ];
+            if ($request->has('remarks')) {
+                $updateData['remarks'] = $request->input('remarks');
+            }
+            \App\Models\StudentSchoolYear::where('student_id', $student->s_id)
+                ->where('school_year_id', $activeSchoolYearId)
+                ->update($updateData);
+        }
 
         if ($request->ajax()) {
             return response()->json(['success' => true, 'message' => 'Student updated successfully!']);
@@ -403,38 +451,90 @@ class HeadStudentController extends Controller
 
 //_____________________________________________________________________________
 
-    // Archive student 
-    public function archiveStudent(Request $request)
+//Archive Student
+    public function archive(Request $request)
     {
-        $s_id = $request->input('s_id');
-        $student = Student::where('s_id', $s_id)->first();
-        if (!$student) {
-            return response()->json(['error' => 'Student not found'], 404);
-        }
-        $student->status = 'inactive';
-        $student->save();
-        return response()->json(['success' => true, 'message' => 'Student archived (inactive)']);
-    }
-
-    // Archive and disable student 
-    public function archiveAndDisableStudent(Request $request)
-    {
-        $s_id = $request->input('s_id');
-        $student = Student::where('s_id', $s_id)->first();
-        if (!$student) {
-            return response()->json(['error' => 'Student not found'], 404);
-        }
-        $student->status = 'inactive';
-        $student->save();
-        if ($student->user_id) {
-            $user = \App\Models\User::find($student->user_id);
-            if ($user) {
-                $user->status = 'inactive';
-                $user->save();
+    Log::info('Archive request received', ['body' => $request->all()]);
+        $validated = $request->validate([
+            's_id' => 'required|string',
+            'status' => 'required|string',
+        ]);
+    $s_id = $validated['s_id'];
+    $status = $validated['status'];
+    Log::info('Archive validated', ['s_id' => $s_id, 'status' => $status]);
+        // Archive student only (do not disable user)
+    $activeSchoolYearId = \App\Models\SchoolYear::where('is_active', 1)->value('id');
+    Log::info('Active school year ID', ['activeSchoolYearId' => $activeSchoolYearId]);
+        if (!$activeSchoolYearId) {
+            if ($request->ajax()) {
+                return response()->json(['error' => 'No active school year.'], 400);
+            } else {
+                return redirect()->back()->with('error', 'No active school year.');
             }
         }
-        return response()->json(['success' => true, 'message' => 'Student and user account archived (inactive)']);
+        $ssy = \App\Models\StudentSchoolYear::where('student_id', $s_id)
+            ->where('school_year_id', $activeSchoolYearId)
+            ->first();
+        Log::info('StudentSchoolYear found', ['ssy' => $ssy]);
+        if ($ssy) {
+            $ssy->status = $status;
+            $ssy->save();
+        }
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json(['success' => true, 'message' => 'Student status updated to ' . $status . '.']);
+        } else {
+            // If called via fetch (not AJAX), still return JSON
+            if ($request->isMethod('post') && $request->header('Content-Type') === 'application/json') {
+                return response()->json(['success' => true, 'message' => 'Student status updated to ' . $status . '.']);
+            }
+            return redirect()->back()->with('success', 'Student status updated to ' . $status . '.');
+        }
     }
+
+    public function archiveAndDisableStudent(Request $request)
+    {
+    Log::info('Archive & Disable request received', ['body' => $request->all()]);
+        $validated = $request->validate([
+            's_id' => 'required|string',
+            'status' => 'required|string',
+        ]);
+    $s_id = $validated['s_id'];
+    $status = $validated['status'];
+    Log::info('Archive & Disable validated', ['s_id' => $s_id, 'status' => $status]);
+    $activeSchoolYearId = \App\Models\SchoolYear::where('is_active', 1)->value('id');
+    Log::info('Active school year ID', ['activeSchoolYearId' => $activeSchoolYearId]);
+        if (!$activeSchoolYearId) {
+            if ($request->ajax()) {
+                return response()->json(['error' => 'No active school year.'], 400);
+            } else {
+                return redirect()->back()->with('error', 'No active school year.');
+            }
+        }
+        $ssy = \App\Models\StudentSchoolYear::where('student_id', $s_id)
+            ->where('school_year_id', $activeSchoolYearId)
+            ->first();
+        Log::info('StudentSchoolYear found', ['ssy' => $ssy]);
+        if ($ssy) {
+            $ssy->status = $status;
+            $ssy->save();
+        }
+        // Also disable the user account
+        $student = \App\Models\Student::where('s_id', $s_id)->first();
+        if ($student && $student->user) {
+            $student->user->status = 'inactive';
+            $student->user->save();
+        }
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json(['success' => true, 'message' => 'Student status updated to ' . $status . ' and account disabled.']);
+        } else {
+            // If called via fetch (not AJAX), still return JSON
+            if ($request->isMethod('post') && $request->header('Content-Type') === 'application/json') {
+                return response()->json(['success' => true, 'message' => 'Student status updated to ' . $status . ' and account disabled.']);
+            }
+            return redirect()->back()->with('success', 'Student status updated to ' . $status . ' and account disabled.');
+        }
+    }
+
 
 
 //_____________________________________________________________________________
@@ -452,7 +552,15 @@ class HeadStudentController extends Controller
         }
 
         try {
-            Excel::import(new \App\Imports\StudentsImport, $file);
+            $importer = new \App\Imports\StudentsImport;
+            Excel::import($importer, $file);
+            if (!empty($importer->errors)) {
+                $errorMessages = collect($importer->errors)->map(function($err) {
+                    $rowInfo = isset($err['row']['s_id']) ? $err['row']['s_id'] : json_encode($err['row']);
+                    return 'Student ID: ' . $rowInfo . ' - Error: ' . $err['error'];
+                })->implode(' | ');
+                return redirect()->back()->with('error', 'Import completed with errors: ' . $errorMessages);
+            }
             return redirect()->back()->with('success', 'Students imported successfully!');
         } catch (\Maatwebsite\Excel\Validators\ValidationException $e) {
             $failures = $e->failures();
@@ -479,9 +587,16 @@ class HeadStudentController extends Controller
             'elementary' => 'Elementary',
             'kindergarten' => 'Kindergarten',
         ];
+        $activeSchoolYearId = SchoolYear::where('is_active', 1)->value('id');
         $query = DB::table('students')
             ->leftJoin('users', 'students.user_id', '=', 'users.id')
-            ->leftJoin('year_levels', 'students.y_id', '=', 'year_levels.y_id')
+            ->leftJoin('student_schoolyear', function($join) use ($activeSchoolYearId) {
+                $join->on('students.s_id', '=', 'student_schoolyear.student_id')
+                    ->where('student_schoolyear.school_year_id', '=', $activeSchoolYearId);
+            })
+            ->leftJoin('year_levels', function($join) {
+                $join->on('student_schoolyear.year_level', '=', 'year_levels.year_level');
+            })
             ->leftJoin('educ_levels', 'year_levels.e_id', '=', 'educ_levels.e_id')
             ->select(
                 'students.s_id',
@@ -495,10 +610,10 @@ class HeadStudentController extends Controller
                 'users.bod',
                 'users.address',
                 'educ_levels.educ_level',
-                'year_levels.year_level',
+                'student_schoolyear.year_level',
                 'students.section',
                 'students.program',
-                'students.status',
+                'student_schoolyear.status as enrollment_status',
                 'users.profile_image',
                 'students.father_name',
                 'students.mother_name',
@@ -509,18 +624,18 @@ class HeadStudentController extends Controller
             );
         if (array_key_exists($filter, $educLevelMap)) {
             $query->where('educ_levels.educ_level', $educLevelMap[$filter])
-                ->where('students.status', 'active');
+                ->where('student_schoolyear.status', 'Enrolled');
         } elseif ($filter === 'inactive') {
-            $query->where('students.status', 'inactive');
+            $query->where('student_schoolyear.status', '!=', 'Enrolled');
         } else {
-            $query->where('students.status', 'active');
+            $query->where('student_schoolyear.status', 'Enrolled');
         }
         $students = $query->orderBy('users.last_name')->get();
 
         $format = $request->query('format', 'csv');
         $columns = [
             's_id', 'fname', 'mname', 'lname', 'suffix', 'email', 'contact_num', 'sex', 'bod', 'address',
-            'educ_level', 'year_level', 'section', 'program', 'status', 'profile_image',
+            'educ_level', 'year_level', 'section', 'program', 'enrollment_status', 'profile_image',
             'father_name', 'mother_name', 'guardian_name', 'relationship', 'guardian_contact', 'guardian_email'
         ];
 
