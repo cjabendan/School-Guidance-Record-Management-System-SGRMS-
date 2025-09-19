@@ -16,14 +16,12 @@
                         <?php echo $__env->make('Head.dashboard-sections.events', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
                         <?php echo $__env->make('Head.dashboard-sections.messages', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
                     </div>
-
                 </section>
 
                 <!-- APPOINTMENTS -->
                 <section class="bottom-container">
                     <div class="flex-bottom">
                         <?php echo $__env->make('Head.dashboard-sections.appointments', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
-                        <?php echo $__env->make('Head.dashboard-sections.requests', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
                     </div>
                 </section>
             </div>

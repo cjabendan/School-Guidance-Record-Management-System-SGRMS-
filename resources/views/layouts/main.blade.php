@@ -35,7 +35,10 @@
     <link rel="stylesheet" href="{{ asset('css/case.css') }}">
     <link rel="stylesheet" href="{{ asset('css/student.css') }}">
     <link rel="stylesheet" href="{{ asset('css/requests.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/messages.css') }}">
     @yield('head')
+
+
 </head>
 <body>
 

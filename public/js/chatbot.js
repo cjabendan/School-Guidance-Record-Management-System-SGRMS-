@@ -1,4 +1,4 @@
-const chatBody = document.querySelector(".chat-body");
+const chatBody = document.querySelector(".chatbot-body");
 const messageInput = document.querySelector(".message-input");
 const sendMessageButton = document.querySelector("#send-message");
 

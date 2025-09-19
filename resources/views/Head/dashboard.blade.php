@@ -17,14 +17,12 @@
                         @include('Head.dashboard-sections.events')
                         @include('Head.dashboard-sections.messages')
                     </div>
-
                 </section>
 
                 <!-- APPOINTMENTS -->
                 <section class="bottom-container">
                     <div class="flex-bottom">
                         @include('Head.dashboard-sections.appointments')
-                        @include('Head.dashboard-sections.requests')
                     </div>
                 </section>
             </div>

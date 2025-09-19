@@ -12,10 +12,10 @@
                         <div class="table-filter">
                             <div class="filters">
                                 <li>
-                                    <div class="type-filter active">All</div>
-                                    <div class="type-filter">Minor</div>
-                                    <div class="type-filter">Major</div>
-                                    <div class="type-filter">Grave</div>
+                                    <div class="a-nav active">All</div>
+                                    <div class="a-nav">Minor</div>
+                                    <div class="a-nav">Major</div>
+                                    <div class="a-nav">Grave</div>
                                 </li>
                             </div>
                             <button class="add-btn" data-bs-toggle="modal" data-bs-target="#addCaseModal"
@@ -101,7 +101,7 @@
                                 </div>
                             </div>
                         @empty
-                            <div class="no-announcement-cell">No cases found.</div>
+                            <div class="no-table-cell">No cases found.</div>
                         @endforelse
                     </div>
                 </div>

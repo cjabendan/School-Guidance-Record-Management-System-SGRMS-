@@ -3,7 +3,7 @@
     left: 260px;
     transition: 0.3s ease;
     width: calc(100% - 260px);
-    height: 100vh;
+    height: 100%;
     display: flex;
     flex-direction: column;
     overflow: hidden; /* Prevent overflow */
@@ -14,13 +14,6 @@
     width: calc(100% - 60px);
 }
 
-.dashboard-content {
-    background-color: #ffffff;
-    height: 100%;
-    padding: 0 20px;
-    overflow: hidden; /* Prevent overflow */
-}
-
 .box-page {
     display: grid;
     grid-template-columns: 2fr 1fr;
@@ -28,8 +21,6 @@
     gap: 8px;
     height: 100%;
     padding: 1px 1px;
-    min-height: 0; /* Allow children to shrink */
-    overflow: hidden; /* Prevent overflow */
 }
 
 .analytics {
@@ -143,7 +134,7 @@
     min-height: 0;
     border-radius: 10px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    height: 98%;
+    height: 100%;
     width: 100%;
     overflow: auto;
 }
@@ -280,7 +271,7 @@
 .bottom-container {
     grid-column: 1;
     grid-row: 2;
-    height: 97%;
+    height: 100%;
     min-height: 0;
 }
 
@@ -294,7 +285,7 @@
 .appointments-box {
     display: flex;
     flex-direction: column;
-    width: 850px;
+    width: 100%;
     border-radius: 10px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }

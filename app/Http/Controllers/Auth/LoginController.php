@@ -4,6 +4,10 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Models\Admins;
+use App\Models\Student;
+use App\Models\ParentModel;
+use App\Models\Counselor;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -27,14 +31,14 @@ class LoginController extends Controller
         } else {
             // Try to find user by role-specific ID
             // Admin
-            $admin = \App\Models\Admins::where('a_id', $loginInput)->first();
+            $admin = Admins::where('a_id', $loginInput)->first();
             if ($admin && $admin->user) {
                 $user = $admin->user;
                 $role_id = $admin->a_id;
             }
             // Student
             if (!$user) {
-                $student = \App\Models\Student::where('s_id', $loginInput)->first();
+                $student = Student::where('s_id', $loginInput)->first();
                 if ($student && $student->user) {
                     $user = $student->user;
                     $role_id = $student->s_id;
@@ -42,7 +46,7 @@ class LoginController extends Controller
             }
             // Parent
             if (!$user) {
-                $parent = \App\Models\ParentModel::where('p_id', $loginInput)->first();
+                $parent = ParentModel::where('p_id', $loginInput)->first();
                 if ($parent && $parent->user) {
                     $user = $parent->user;
                     $role_id = $parent->p_id;
@@ -50,7 +54,7 @@ class LoginController extends Controller
             }
             // Counselor
             if (!$user) {
-                $counselor = \App\Models\Counselor::where('c_id', $loginInput)->first();
+                $counselor = Counselor::where('c_id', $loginInput)->first();
                 if ($counselor && $counselor->user) {
                     $user = $counselor->user;
                     $role_id = $counselor->c_id;

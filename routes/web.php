@@ -1,6 +1,8 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
+use App\Models\Conversation;
 
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\LogoutController;
@@ -8,6 +10,7 @@ use App\Http\Controllers\Auth\LoginController;
 
 use App\Http\Controllers\StaffController;
 use App\Http\Controllers\AnnouncementsController;
+use App\Http\Controllers\ChatController;
 
 use App\Http\Controllers\Head\HeadDashboardController;
 use App\Http\Controllers\Head\HeadCounselorController;
@@ -22,19 +25,20 @@ use App\Http\Controllers\Head\HeadAnnouncementController;
 use App\Http\Controllers\Head\HeadSettingsController;
 
 use App\Http\Controllers\Counselor\CounselorDashboardController;
+use App\Http\Controllers\Counselor\CounselorMessageController;
 
 use App\Http\Controllers\Parents\ParentDashboardController;
 use App\Http\Controllers\Parents\ParentChildController;
 use App\Http\Controllers\Parents\ParentRequestController;
+use App\Http\Controllers\Parents\ParentMessageController;
 use Illuminate\Routing\Events\RouteMatched;
 
 use App\Http\Controllers\Head\StudentController;
+use App\Models\Counselor;
+use Dompdf\FrameDecorator\Page;
 
 // ========================= Landing Page - Staffs ============================= //
 Route::get('/', [StaffController::class, 'index']);
-
-
-
 
 // ========================= Landing Page - Announcements ============================= //
 Route::get('/announcements', [AnnouncementsController::class, 'index'])
@@ -75,7 +79,7 @@ Route::middleware('auth')->group(function () {
 
 
 // ========================== Administrator (Head) Routes ================================ //
-Route::prefix('Head')->name('Head.')->group(function () {
+Route::prefix('Head')->name('Head.')->middleware('auth')->group(function () {
 
     // Counselors
     Route::get('/counselors', [HeadCounselorController::class, 'index'])->name('counselors.index');
@@ -123,6 +127,13 @@ Route::prefix('Head')->name('Head.')->group(function () {
 
     // Messages
     Route::get('/messages', [HeadMessageController::class, 'index'])->name('messages.index');
+    Route::get('/messages/search-users', [HeadMessageController::class, 'searchUsers'])->name('messages.search-users');
+    Route::post('/messages/conversations/{receiverId}', [HeadMessageController::class, 'startConversation'])->name('messages.start-conversation');
+    Route::get('/messages/fetch/{conversationId}', [HeadMessageController::class, 'fetchConversation'])->name('messages.fetch-conversation');
+    Route::post('/messages/send/{conversationId}', [HeadMessageController::class, 'sendMessage'])->name('messages.send-message');
+    Route::post('/messages/mark-as-read/{conversationId}', [HeadMessageController::class, 'markAsRead']);
+
+
 
     // Requests
     Route::get('/requests', [HeadRequestController::class, 'index'])->name('requests.index');
@@ -143,7 +154,19 @@ Route::prefix('Head')->name('Head.')->group(function () {
 });
 
 // ============================== Counselor Routes ==================================== //
-Route::prefix('Counselor')->name('Counselor.')->group(function () {});
+Route::prefix('Counselor')->name('Counselor.')->middleware('auth')->group(function () {
+
+    // Blade view
+    Route::get('/messages', [CounselorMessageController::class, 'index'])->name('messages.index');
+    Route::get('/messages/search-users', [CounselorMessageController::class, 'searchUsers'])->name('messages.search-users');
+    Route::post('/messages/conversations/{receiverId}', [CounselorMessageController::class, 'startConversation'])->name('messages.start-conversation');
+    Route::get('/messages/fetch/{conversationId}', [CounselorMessageController::class, 'fetchConversation'])->name('messages.fetch-conversation');
+    Route::post('/messages/send/{conversationId}', [CounselorMessageController::class, 'sendMessage'])->name('messages.send-message');
+    Route::post('/messages/mark-as-read/{conversationId}', [CounselorMessageController::class, 'markAsRead']);
+
+
+});
+
 
 
 
@@ -154,6 +177,17 @@ Route::prefix('Parent')->name('Parent.')->middleware('auth')->group(function () 
     Route::post('/children/link-request', [ParentChildController::class, 'sendLinkRequest'])->name('link.request');
     Route::get('/children/search-students', [ParentChildController::class, 'searchStudents'])->name('search.students');
 
+    //Messages
+    Route::get('/messages', [ParentMessageController::class, 'index'])->name('messages.index');
+    Route::get('/messages/search-users', [ParentMessageController::class, 'searchUsers'])->name('messages.search-users');
+    Route::post('/messages/conversations/{receiverId}', [ParentMessageController::class, 'startConversation'])->name('messages.start-conversation');
+    Route::get('/messages/fetch/{conversationId}', [ParentMessageController::class, 'fetchConversation'])->name('messages.fetch-conversation');
+    Route::post('/messages/send/{conversationId}', [ParentMessageController::class, 'sendMessage'])->name('messages.send-message');
+    Route::post('/messages/mark-as-read/{conversationId}', [ParentMessageController::class, 'markAsRead']);
+
     // Requests
     Route::get('/requests', [ParentRequestController::class, 'index'])->name('requests.index');
 });
+
+
+// ============================== Student Routes ==================================== //

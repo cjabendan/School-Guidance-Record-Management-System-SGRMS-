@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Head;
+namespace App\Http\Controllers\Parents;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
@@ -9,7 +9,7 @@ use App\Models\Message;
 use App\Models\Conversation;
 use Illuminate\Support\Facades\Auth;
 
-class HeadMessageController extends Controller
+class ParentMessageController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -27,7 +27,7 @@ class HeadMessageController extends Controller
             })
             ->values(); // Re-index the collection
 
-        return view('Head.messages', compact('conversations', 'user'));
+        return view('Parent.messages', compact('conversations', 'user'));
     }
     /**
      * Search users for new conversation

@@ -68,9 +68,11 @@ class User extends Authenticatable
     }
 
     // If this user is an admin
-   
-     public function admin()
+
+    public function admin()
     {
         return $this->hasOne(Admins::class, 'user_id');
-     }
+    }
+
+  
 }

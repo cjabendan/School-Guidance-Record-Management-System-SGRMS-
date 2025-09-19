@@ -24,35 +24,6 @@ class HeadDashboardController extends Controller
         $totalCounselors = User::where('role', 'counselor')->count();
         $totalCases = CaseModel::count();
 
-        // Merge pending requests
-        $linkRequests = ParentLinkRequest::with(['parent.user', 'students.student.user'])
-            ->where('status', 'pending')
-            ->get()
-            ->map(function ($req) {
-                return [
-                    'id' => $req->request_id,
-                    'type' => 'child-link',
-                    'parent' => $req->parent,
-                    'students' => $req->students,
-                    'requested_at' => $req->requested_at,
-                ];
-            });
-
-        $documentRequests = DocumentRequest::with(['parent.user', 'drs.student.user'])
-            ->where('status', 'pending')
-            ->get()
-            ->map(function ($req) {
-                return [
-                    'id' => $req->request_id,
-                    'type' => 'document',
-                    'parent' => $req->parent,
-                    'students' => $req->drs,
-                    'requested_at' => $req->requested_at,
-                ];
-            });
-
-        $pendingRequests = $linkRequests->merge($documentRequests);
-
         // Appointments (unchanged)
         $userId = Auth::id();
         $filter = $request->input('filter', 'today');
@@ -76,8 +47,7 @@ class HeadDashboardController extends Controller
             'totalParents',
             'totalCounselors',
             'totalCases',
-            'upcomingAppointments',
-            'pendingRequests'
+            'upcomingAppointments'
         ));
     }
 }

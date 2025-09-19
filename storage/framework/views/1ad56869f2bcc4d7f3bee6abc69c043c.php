@@ -1,21 +1,21 @@
-@extends('layouts.main')
-@section('title', 'SGRMS - Chat')
-@section('content')
+
+<?php $__env->startSection('title', 'SGRMS - Chat'); ?>
+<?php $__env->startSection('content'); ?>
 
     <script>
         window.routes = {
-            sendMessage: "/Head/messages/send/:id", // existing conversation
-            fetchConversation: "/Head/messages/fetch/:id", // fetch messages dynamically
-            startConversation: "/Head/messages/conversations/:id" // new conversation
+            sendMessage: "/Parent/messages/send/:id", // existing conversation
+            fetchConversation: "/Parent/messages/fetch/:id", // fetch messages dynamically
+            startConversation: "/Parent/messages/conversations/:id" // new conversation
         };
     </script>
 
     <section id="content">
-        @include('partials.navbar')
+        <?php echo $__env->make('partials.navbar', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
 
 
         <div class="chat-app">
-            {{-- Sidebar --}}
+            
             <div class="message-sidebar">
                 <div class="message-sidebar-header">
                     <div class="message-sidebar-header-title">
@@ -33,16 +33,16 @@
                         <ul>
                             <li>
                                 <a href="#"
-                                    class="chat-nav {{ request('category') == 'recent' || !request()->has('category') ? 'active' : '' }}"
+                                    class="chat-nav <?php echo e(request('category') == 'recent' || !request()->has('category') ? 'active' : ''); ?>"
                                     data-filter="recent">All</a>
                             </li>
                             <li>
                                 <a href="#"
-                                    class="chat-nav {{ request('category') == 'announcement' ? 'active' : '' }}"
+                                    class="chat-nav <?php echo e(request('category') == 'announcement' ? 'active' : ''); ?>"
                                     data-filter="announcement">Unread</a>
                             </li>
                             <li>
-                                <a href="#" class="chat-nav {{ request('category') == 'event' ? 'active' : '' }}"
+                                <a href="#" class="chat-nav <?php echo e(request('category') == 'event' ? 'active' : ''); ?>"
                                     data-filter="event">Counselors</a>
                             </li>
                         </ul>
@@ -50,53 +50,55 @@
 
                 </div>
                 <div id="chatList" class="chat-list">
-                    @php $firstConversation = $conversations->first(); @endphp
-                    @foreach ($conversations as $conv)
-                        @php
+                    <?php $firstConversation = $conversations->first(); ?>
+                    <?php $__currentLoopData = $conversations; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $conv): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                        <?php
                             $other = $conv->getOtherParticipant($user->id);
                             $lastMsg = $conv->messages->last();
-                        @endphp
-                        <div class="chat-item {{ $loop->first ? 'active' : '' }}" data-conversation="{{ $conv->id }}"
-                            data-other-user-id="{{ $other->id }}">
+                        ?>
+                        <div class="chat-item <?php echo e($loop->first ? 'active' : ''); ?>" data-conversation="<?php echo e($conv->id); ?>"
+                            data-other-user-id="<?php echo e($other->id); ?>">
 
-                            <img src="{{ asset('images/user/' . $other->profile_image) }}" class="user-img" alt="User">
+                            <img src="<?php echo e(asset('images/user/' . $other->profile_image)); ?>" class="user-img" alt="User">
                             <div class="chat-item-info">
-                                <h3 class="chat-item-username">{{ $other->first_name }} {{ $other->last_name }}</h3>
+                                <h3 class="chat-item-username"><?php echo e($other->first_name); ?> <?php echo e($other->last_name); ?></h3>
                                 <div class="chat-item-preview">
                                     <p class="chat-item-lastmessage
-    @if ($lastMsg && $lastMsg->status === 'sent' && $lastMsg->receiver_id === $user->id) unread @endif
+    <?php if($lastMsg && $lastMsg->status === 'sent' && $lastMsg->receiver_id === $user->id): ?> unread <?php endif; ?>
 ">
-                                        @if ($lastMsg)
-                                            {{ $lastMsg->sender_id === $user->id ? 'You: ' : '' }}
-                                            {{ \Illuminate\Support\Str::limit($lastMsg->msg, 30) }}
-                                        @else
+                                        <?php if($lastMsg): ?>
+                                            <?php echo e($lastMsg->sender_id === $user->id ? 'You: ' : ''); ?>
+
+                                            <?php echo e(\Illuminate\Support\Str::limit($lastMsg->msg, 30)); ?>
+
+                                        <?php else: ?>
                                             No messages yet
-                                        @endif
+                                        <?php endif; ?>
                                     </p>
-                                    <span class="chat-item-time" data-time="{{ $lastMsg->created_at }}"></span>
+                                    <span class="chat-item-time" data-time="<?php echo e($lastMsg->created_at); ?>"></span>
                                 </div>
                             </div>
                         </div>
-                    @endforeach
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                 </div>
             </div>
 
-            {{-- Main chat area --}}
+            
             <div class="main-chat" id="mainChat">
                 <div class="chat-container">
-                    @if ($firstConversation)
-                        @php
+                    <?php if($firstConversation): ?>
+                        <?php
                             $conv = $firstConversation;
                             $other = $conv->getOtherParticipant($user->id);
-                        @endphp
+                        ?>
                         <div class="chat-header">
                             <div class="chat-header-left">
                                 <div>
-                                    <img src="{{ asset('images/user/' . $other->profile_image) }}" alt="User">
+                                    <img src="<?php echo e(asset('images/user/' . $other->profile_image)); ?>" alt="User">
                                 </div>
                                 <div class="chat-header-info">
-                                    <h2>{{ $other->first_name }} {{ $other->last_name }}</h2>
-                                    <p>{{ $other->status ?? 'Online' }}</p>
+                                    <h2><?php echo e($other->first_name); ?> <?php echo e($other->last_name); ?></h2>
+                                    <p><?php echo e($other->status ?? 'Online'); ?></p>
                                 </div>
                             </div>
                             <div class="chat-header-right">
@@ -104,47 +106,47 @@
                             </div>
                         </div>
                         <div class="messages-container" id="messagesContainer">
-                            @foreach ($conv->messages as $msg)
-                                @if ($msg->sender_id === $user->id)
-                                    {{-- Sent message (right) --}}
+                            <?php $__currentLoopData = $conv->messages; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $msg): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <?php if($msg->sender_id === $user->id): ?>
+                                    
                                     <div class="message-row sent">
                                         <div class="message-data sent">
-                                            <p>{{ $msg->msg }}</p>
+                                            <p><?php echo e($msg->msg); ?></p>
                                         </div>
-                                        <span class="message-time">{{ $msg->created_at->format('H:i') }}</span>
+                                        <span class="message-time"><?php echo e($msg->created_at->format('H:i')); ?></span>
                                     </div>
-                                @else
-                                    {{-- Received message (left) --}}
+                                <?php else: ?>
+                                    
                                     <div class="message-row received">
                                         <div class="sender-info">
-                                            <img src="{{ asset('images/user/' . $msg->sender->profile_image) }}"
+                                            <img src="<?php echo e(asset('images/user/' . $msg->sender->profile_image)); ?>"
                                                 class="sender-img" alt="User">
                                         </div>
                                         <div class="sender-data">
                                             <div class="message-data received">
-                                                <p>{{ $msg->msg }}</p>
+                                                <p><?php echo e($msg->msg); ?></p>
                                             </div>
-                                            <span class="message-time">{{ $msg->created_at->format('H:i') }}</span>
+                                            <span class="message-time"><?php echo e($msg->created_at->format('H:i')); ?></span>
                                         </div>
 
                                     </div>
-                                @endif
-                            @endforeach
+                                <?php endif; ?>
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                         </div>
                         <div class="chat-footer">
-                            <form id="messageForm" data-conversation="{{ $conv->id }}">
+                            <form id="messageForm" data-conversation="<?php echo e($conv->id); ?>">
                                 <input type="text" id="messageInput" placeholder="Type a message..." required>
                                 <button type="submit"><i class="fi fi-sr-paper-plane-top"></i></button>
                             </form>
                         </div>
-                    @else
-                        {{-- No conversations placeholder --}}
+                    <?php else: ?>
+                        
                         <div class="no-conversation-holder">
-                            <img src="{{ asset('images/img/no-convo.png') }}" alt="No convo" class="no-conversation-image">
+                            <img src="<?php echo e(asset('images/img/no-convo.png')); ?>" alt="No convo" class="no-conversation-image">
                             <p class="no-conversation-placeholder">Looks like you don't have any conversations
                                 yet.<br>Start a new conversation!</p>
                         </div>
-                    @endif
+                    <?php endif; ?>
                 </div>
 
             </div>
@@ -239,7 +241,7 @@
                     newChatItem.classList.add('chat-item');
                     newChatItem.dataset.conversation = convId;
                     newChatItem.innerHTML = `
-                <img src="{{ asset('images/user') }}/${data.otherUser.profile_image}" class="user-img" alt="User">
+                <img src="<?php echo e(asset('images/user')); ?>/${data.otherUser.profile_image}" class="user-img" alt="User">
                 <div class="chat-item-info">
                     <h3 class="chat-item-username">${data.otherUser.first_name} ${data.otherUser.last_name}</h3>
                     <div class="chat-item-preview">
@@ -264,7 +266,7 @@
                 profile.innerHTML = `
         <div class="user-chat-profile-container">
             <div>
-                <img src="{{ asset('images/user') }}/${user.profile_image}" alt="User">
+                <img src="<?php echo e(asset('images/user')); ?>/${user.profile_image}" alt="User">
             </div>
             <div class="chat-header-info">
                 <h2>${user.first_name} ${user.last_name}</h2>
@@ -316,7 +318,7 @@
                                                                                                    </div>`
         : `<div class="message-row received">
                                                                                                     <div class="sender-info">
-                                                                                                        <img src="{{ asset('images/user') }}/${data.otherUser.profile_image}" class="user-img" alt="User">
+                                                                                                        <img src="<?php echo e(asset('images/user')); ?>/${data.otherUser.profile_image}" class="user-img" alt="User">
                                                                                                     </div>
                                                                                                     <div class="sender-data">
                                                                                                         <div class="message-data received"><p>${msg.msg}</p></div>
@@ -360,7 +362,7 @@
                     <div class="chat-header">
                             <div class="chat-header-left">
                                 <div>
-                                  <img src="{{ asset('images/user') }}/${data.otherUser.profile_image}" class="user-img" alt="User">
+                                  <img src="<?php echo e(asset('images/user')); ?>/${data.otherUser.profile_image}" class="user-img" alt="User">
                                 </div>
                                 <div class="chat-header-info">
                                  <h2>${data.otherUser.first_name} ${data.otherUser.last_name}</h2>
@@ -392,7 +394,7 @@
                                                                                                </div>`
         : `<div class="message-row received">
                                                                                                     <div class="sender-info">
-                                                                                                        <img src="{{ asset('images/user') }}/${data.otherUser.profile_image}" class="user-img" alt="User">
+                                                                                                        <img src="<?php echo e(asset('images/user')); ?>/${data.otherUser.profile_image}" class="user-img" alt="User">
                                                                                                     </div>
                                                                                                     <div class="sender-data">
                                                                                                        
@@ -447,7 +449,7 @@
                     if (!q) return;
 
                     const res = await fetch(
-                        `{{ route('Head.messages.search-users') }}?query=${encodeURIComponent(q)}`, {
+                        `<?php echo e(route('Parent.messages.search-users')); ?>?query=${encodeURIComponent(q)}`, {
                             headers: {
                                 'Accept': 'application/json'
                             }
@@ -457,7 +459,7 @@
                     users.forEach(u => {
                         const li = document.createElement('li');
                         li.innerHTML =
-                            `<img src="{{ asset('images/user') }}/${u.profile_image}" class="search-user-img"><span>${u.first_name} ${u.last_name}</span>`;
+                            `<img src="<?php echo e(asset('images/user')); ?>/${u.profile_image}" class="search-user-img"><span>${u.first_name} ${u.last_name}</span>`;
                         li.style.display = 'flex';
                         li.style.alignItems = 'center';
                         li.style.gap = '8px';
@@ -487,7 +489,7 @@
             <div class="chat-header">
                 <div class="chat-header-left">
                     <div>
-                        <img src="{{ asset('images/user') }}/${u.profile_image}" class="user-img" alt="User">
+                        <img src="<?php echo e(asset('images/user')); ?>/${u.profile_image}" class="user-img" alt="User">
                     </div>
                     <div class="chat-header-info">
                         <h2>${u.first_name} ${u.last_name}</h2>
@@ -517,9 +519,9 @@
             setInterval(refreshChatTimes, 20000);
 
             // Render profile info for the first conversation if it exists
-            @if ($firstConversation)
-                renderUserProfileInfo(@json($firstConversation->getOtherParticipant($user->id)));
-            @endif
+            <?php if($firstConversation): ?>
+                renderUserProfileInfo(<?php echo json_encode($firstConversation->getOtherParticipant($user->id), 15, 512) ?>);
+            <?php endif; ?>
         });
 
 
@@ -542,4 +544,6 @@
 
 
 
-@endsection
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make('layouts.parent', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\Administrator\School-Guidance-Record-Management-System-SGRMS-\resources\views/Parent/messages.blade.php ENDPATH**/ ?>

@@ -35,7 +35,10 @@
     <link rel="stylesheet" href="<?php echo e(asset('css/case.css')); ?>">
     <link rel="stylesheet" href="<?php echo e(asset('css/student.css')); ?>">
     <link rel="stylesheet" href="<?php echo e(asset('css/requests.css')); ?>">
+    <link rel="stylesheet" href="<?php echo e(asset('css/messages.css')); ?>">
     <?php echo $__env->yieldContent('head'); ?>
+
+
 </head>
 <body>
 

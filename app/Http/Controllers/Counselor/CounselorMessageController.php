@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Head;
+namespace App\Http\Controllers\Counselor;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
@@ -9,9 +9,9 @@ use App\Models\Message;
 use App\Models\Conversation;
 use Illuminate\Support\Facades\Auth;
 
-class HeadMessageController extends Controller
+class CounselorMessageController extends Controller
 {
-    /**
+      /**
      * Display a listing of the resource.
      */
     public function index()
@@ -27,7 +27,7 @@ class HeadMessageController extends Controller
             })
             ->values(); // Re-index the collection
 
-        return view('Head.messages', compact('conversations', 'user'));
+        return view('Counselor.messages', compact('conversations', 'user'));
     }
     /**
      * Search users for new conversation
@@ -195,4 +195,5 @@ class HeadMessageController extends Controller
 
         return response()->json(['success' => true]);
     }
+    
 }

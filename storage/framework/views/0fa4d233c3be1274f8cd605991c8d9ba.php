@@ -11,7 +11,7 @@
                     <div class="image-col">
                         <div style="position: relative; display: inline-block;">
                             <img id="studentImage" src="<?php echo e(asset('images/user/default.jpg')); ?>" data-default="<?php echo e(asset('images/user/default.jpg')); ?>" alt="Student Image" class="student-image-box pro-add-image">
-                            <button type="button" id="deleteProfileImageBtn" title="Delete Profile Image" style="position: absolute; top: 8px; right: 8px; background: #fff; border: none; border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; box-shadow: 0 1px 4px rgba(0,0,0,0.12); cursor: pointer;">
+                            <button type="button" id="deleteProfileImageBtn" class="delete-profile-image-btn" title="Delete Profile Image">
                                 <i class="fi fi-rr-trash" style="color: #e53e3e; font-size: 1.2rem;"></i>
                             </button>
                         </div>

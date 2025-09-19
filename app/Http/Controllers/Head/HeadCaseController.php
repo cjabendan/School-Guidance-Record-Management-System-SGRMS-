@@ -277,7 +277,7 @@ class HeadCaseController extends Controller
             $data = array_combine($header, $row);
 
             // Find or create case type
-            $caseType = \App\Models\CaseType::firstOrCreate([
+            $caseType = CaseType::firstOrCreate([
                 'type_name' => $data['case_type'] ?? 'N/A'
             ], [
                 'description' => ''

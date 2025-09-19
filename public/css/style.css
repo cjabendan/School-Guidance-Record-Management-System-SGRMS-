@@ -22,6 +22,7 @@
 
 body {
     background-color: #ffffff;
+    height: 100vh;
     overflow-x: hidden;
     font-family: "Poppins", sans-serif;
 }
@@ -39,7 +40,7 @@ html {
 }
 
 .wrapper {
-    padding: 20px 20px 0 20px;
+    padding: 20px;
     height: 100%;
 }
 
@@ -463,6 +464,54 @@ select:focus {
     font-size: 1.1em;
 }
 
+/* Pagination styles */
+.pagination {
+    display: flex;
+    flex-direction: row;
+    justify-content: right;
+    align-items: center;
+    padding-top: 1.3rem;
+    gap: 0.5rem;
+}
+
+.pagination-links,
+.pagination .page-item > a,
+.pagination .page-item > span {
+    background: #fff;
+    color: #1ea7ff;
+    border-radius: 6px;
+    padding: 8px 18px;
+    font-size: 16px;
+    border: 1px solid #bcd6f7;
+    font-weight: 500;
+    text-decoration: none;
+    transition: background 0.2s, color 0.2s, border 0.2s;
+    margin: 0 2px;
+    display: flex;
+    align-items: center;
+}
+
+.pagination .page-item.active .pagination-links,
+.pagination .page-item.active > span {
+    background: #1ea7ff;
+    color: #fff;
+    border-color: #1ea7ff;
+}
+
+.pagination .pagination-links:hover,
+.pagination .page-item > a:hover {
+    background: #0080ff;
+    color: #fff;
+    border-color: #0080ff;
+}
+
+.pagination .page-item.disabled .pagination-links,
+.pagination .page-item.disabled > span {
+    color: #bcd6f7;
+    background: #f5faff;
+    border-color: #bcd6f7;
+    cursor: not-allowed;
+}
 
 
 

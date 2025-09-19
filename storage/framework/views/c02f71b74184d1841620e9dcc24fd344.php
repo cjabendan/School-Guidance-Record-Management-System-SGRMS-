@@ -23,6 +23,7 @@
     <link rel="stylesheet" href="<?php echo e(asset('css/table.css')); ?>">
     <link rel="stylesheet" href="<?php echo e(asset('css/chatbot.css')); ?>">
     <link rel="stylesheet" href="<?php echo e(asset('css/child.css')); ?>">
+    <link rel="stylesheet" href="<?php echo e(asset('css/messages.css')); ?>">
     <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet" />
     <?php echo $__env->yieldContent('head'); ?>
 </head>
