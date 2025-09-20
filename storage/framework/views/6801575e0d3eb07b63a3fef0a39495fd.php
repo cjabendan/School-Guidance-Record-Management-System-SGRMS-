@@ -1,4 +1,3 @@
-
 <?php $__env->startSection('title', 'SGRMS - School Guidance Records Management System'); ?>
 <?php $__env->startSection('content'); ?>
 

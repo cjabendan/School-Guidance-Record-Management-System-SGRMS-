@@ -37,7 +37,7 @@ class ParentMessageController extends Controller
         $query = $request->input('query');
         $user = Auth::user();
 
-        $users = User::whereIn('role', ['counselor', 'parent'])
+        $users = User::whereIn('role', ['counselor', 'admin'])
             ->where('status', 'active')
             ->where(function ($q) use ($query) {
                 $q->where('first_name', 'like', "%$query%")

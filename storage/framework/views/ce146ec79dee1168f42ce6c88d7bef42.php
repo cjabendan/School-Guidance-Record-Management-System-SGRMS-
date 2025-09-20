@@ -10,7 +10,7 @@
         <h2><?php echo e($fullName); ?></h2>
         <p>Student ID: <?php echo e($child['id']); ?></p>
         <p>Email: <?php echo e($child['email']); ?></p>
-        <p>Grade Level: <?php echo e($child['grade_level']); ?></p>
+       
     </div>
 <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
     <p>No children found.</p>

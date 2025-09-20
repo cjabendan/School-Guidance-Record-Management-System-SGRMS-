@@ -22,7 +22,7 @@
 
 body {
     background-color: #ffffff;
-    height: 100vh;
+    height: 100%;
     overflow-x: hidden;
     font-family: "Poppins", sans-serif;
 }

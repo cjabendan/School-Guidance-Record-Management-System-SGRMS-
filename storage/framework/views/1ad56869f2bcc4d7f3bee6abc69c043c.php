@@ -1,4 +1,3 @@
-
 <?php $__env->startSection('title', 'SGRMS - Chat'); ?>
 <?php $__env->startSection('content'); ?>
 
@@ -160,24 +159,9 @@
         document.addEventListener('DOMContentLoaded', () => {
             const chatList = document.getElementById('chatList');
             const mainChat = document.getElementById('mainChat');
+            const profilePanel = document.getElementById('userChatProfileInfo');
 
-            //-- Mark As Read function
-            function markConversationAsRead(conversationId) {
-                fetch(`/Head/messages/mark-as-read/${conversationId}`, {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                        'Accept': 'application/json'
-                    }
-                }).then(() => {
-                    // Optionally, update the sidebar UI to remove bold
-                    const chatItem = document.querySelector(
-                        `.chat-item[data-conversation="${conversationId}"] .chat-item-lastmessage`);
-                    if (chatItem) chatItem.classList.remove('unread');
-                });
-            }
-
-            // --- Format time like Laravel's diffForHumans ---
+            // --- Helper: Format time like Laravel's diffForHumans ---
             function timeAgo(dateString) {
                 const seconds = Math.floor((new Date() - new Date(dateString)) / 1000);
                 if (seconds < 60) return "1m";
@@ -217,11 +201,27 @@
                 });
             }
 
-            // --- Update sidebar with a conversation (only if there’s at least one message) ---
+            // --- Mark conversation as read ---
+            function markConversationAsRead(conversationId) {
+                fetch(`/Parent/messages/mark-as-read/${conversationId}`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Accept': 'application/json'
+                    }
+                }).then(() => {
+                    const chatItem = document.querySelector(
+                        `.chat-item[data-conversation="${conversationId}"] .chat-item-lastmessage`
+                    );
+                    if (chatItem) chatItem.classList.remove('unread');
+                });
+            }
+
+            // --- Update sidebar conversation ---
             function updateSidebarConversation(data) {
                 const convId = data.conversation.id;
                 const messages = data.messages;
-                if (!messages.length) return; // Don't add empty conversation
+                if (!messages.length) return;
 
                 const lastMsg = messages[messages.length - 1];
                 let chatItem = chatList.querySelector(`.chat-item[data-conversation="${convId}"]`);
@@ -240,6 +240,7 @@
                     const newChatItem = document.createElement('div');
                     newChatItem.classList.add('chat-item');
                     newChatItem.dataset.conversation = convId;
+                    newChatItem.dataset.otherUserId = data.otherUser.id;
                     newChatItem.innerHTML = `
                 <img src="<?php echo e(asset('images/user')); ?>/${data.otherUser.profile_image}" class="user-img" alt="User">
                 <div class="chat-item-info">
@@ -255,27 +256,35 @@
                 }
             }
 
-            // --- Render user profile info in the side panel ---
+            // --- Render user profile info ---
             function renderUserProfileInfo(user) {
-                const profile = document.getElementById('userChatProfileInfo');
                 if (!user) {
-                    profile.innerHTML = '';
-                    profile.classList.remove('active');
+                    profilePanel.innerHTML = '';
+                    profilePanel.classList.remove('active'); // hide panel if no user
+                    profilePanel.removeAttribute('data-user-id');
                     return;
                 }
-                profile.innerHTML = `
-        <div class="user-chat-profile-container">
-            <div>
-                <img src="<?php echo e(asset('images/user')); ?>/${user.profile_image}" alt="User">
+
+                profilePanel.innerHTML = `
+            <div class="user-chat-profile-container">
+                <div>
+                    <img src="<?php echo e(asset('images/user')); ?>/${user.profile_image}" class="user-profile-img" alt="User">
+                </div>
+                <div class="chat-header-info">
+                    <h2 class="user-profile-name">${user.first_name} ${user.last_name}</h2>
+                    <p class="user-profile-role">${user.role ?? 'Online'}</p>
+                </div>
             </div>
-            <div class="chat-header-info">
-                <h2>${user.first_name} ${user.last_name}</h2>
-                <p>${user.role ?? 'Online'}</p>
-            </div>
-        </div>
-    `;
-                // Optionally keep it hidden until info icon is clicked
-                profile.classList.remove('active');
+        `;
+                profilePanel.dataset.userId = user.id;
+
+                // Only activate panel if toggle is active AND user exists
+                const toggleActive = localStorage.getItem('userInfoActive') === 'true';
+                if (toggleActive && user) {
+                    profilePanel.classList.add('active');
+                } else {
+                    profilePanel.classList.remove('active');
+                }
             }
 
             // --- Bind message form ---
@@ -288,7 +297,8 @@
                     const receiverId = form.dataset.receiver;
                     if (!input.value.trim()) return;
 
-                    const url = receiverId ? window.routes.startConversation.replace(':id', receiverId) :
+                    const url = receiverId ?
+                        window.routes.startConversation.replace(':id', receiverId) :
                         window.routes.sendMessage.replace(':id', conversationId);
 
                     fetch(url, {
@@ -306,45 +316,22 @@
                         .then(data => {
                             input.value = '';
                             const container = document.getElementById('messagesContainer');
-
-                            // Render messages
                             container.innerHTML = '';
                             data.messages.forEach(msg => {
-                                container.innerHTML += `
-    ${msg.sender_id === data.currentUserId
-        ? `<div class="message-row sent">
-                                                                                                        <div class="message-data sent"><p>${msg.msg}</p></div>
-                                                                                                        <span class="message-time">${timeAgo(msg.created_at)}</span>
-                                                                                                   </div>`
-        : `<div class="message-row received">
-                                                                                                    <div class="sender-info">
-                                                                                                        <img src="<?php echo e(asset('images/user')); ?>/${data.otherUser.profile_image}" class="user-img" alt="User">
-                                                                                                    </div>
-                                                                                                    <div class="sender-data">
-                                                                                                        <div class="message-data received"><p>${msg.msg}</p></div>
-                                                                                                    </div>
-                                                                                                  
-                                                                                                    <span class="message-time">${timeAgo(msg.created_at)}</span>
-                                                                                               </div>`
-    }
-`;
+                                container.innerHTML += msg.sender_id === data.currentUserId ?
+                                    `<div class="message-row sent"><div class="message-data sent"><p>${msg.msg}</p></div><span class="message-time">${timeAgo(msg.created_at)}</span></div>` :
+                                    `<div class="message-row received"><div class="sender-info"><img src="<?php echo e(asset('images/user')); ?>/${data.otherUser.profile_image}" class="user-img" alt="User"></div><div class="sender-data"><div class="message-data received"><p>${msg.msg}</p></div></div><span class="message-time">${timeAgo(msg.created_at)}</span></div>`;
                             });
                             container.scrollTop = container.scrollHeight;
-
-                            // Update sidebar
                             updateSidebarConversation(data);
-
-                            // Mark as read after sending a message (Messenger-like)
-                            if (form.dataset.conversation) {
-                                markConversationAsRead(form.dataset.conversation);
-                            }
-                            
+                            if (form.dataset.conversation) markConversationAsRead(form.dataset
+                                .conversation);
                         })
                         .catch(console.error);
                 });
             }
 
-            // --- Load an existing conversation ---
+            // --- Load a conversation ---
             function loadConversation(convId) {
                 fetch(window.routes.fetchConversation.replace(':id', convId), {
                         headers: {
@@ -353,58 +340,36 @@
                     })
                     .then(res => res.json())
                     .then(data => {
+                        // Save active conversation
+                        localStorage.setItem('activeConversationId', convId);
 
                         renderUserProfileInfo(data.otherUser);
-
-                        // Render main chat area
                         mainChat.innerHTML = `
-            
                     <div class="chat-header">
-                            <div class="chat-header-left">
-                                <div>
-                                  <img src="<?php echo e(asset('images/user')); ?>/${data.otherUser.profile_image}" class="user-img" alt="User">
-                                </div>
-                                <div class="chat-header-info">
-                                 <h2>${data.otherUser.first_name} ${data.otherUser.last_name}</h2>
-                        <p>${data.otherUser.status ?? 'Online'}</p>
-                                </div>
-                            </div>
-                            <div class="chat-header-right">
-                                <i class="fi fi-sr-info"></i>
+                        <div class="chat-header-left">
+                            <div><img src="<?php echo e(asset('images/user')); ?>/${data.otherUser.profile_image}" class="user-img" alt="User"></div>
+                            <div class="chat-header-info">
+                                <h2>${data.otherUser.first_name} ${data.otherUser.last_name}</h2>
+                                <p>${data.otherUser.status ?? 'Online'}</p>
                             </div>
                         </div>
-
-                
-                <div class="messages-container" id="messagesContainer"></div>
-                <div class="chat-footer">
-                    <form id="messageForm" data-conversation="${data.conversation.id}">
-                        <input type="text" id="messageInput" placeholder="Type a message..." required>
-                        <button type="submit"><i class="fi fi-sr-paper-plane-top"></i></button>
-                    </form>
-                </div>
-            `;
-
+                        <div class="chat-header-right">
+                            <i class="fi fi-sr-info"></i>
+                        </div>
+                    </div>
+                    <div class="messages-container" id="messagesContainer"></div>
+                    <div class="chat-footer">
+                        <form id="messageForm" data-conversation="${data.conversation.id}">
+                            <input type="text" id="messageInput" placeholder="Type a message..." required>
+                            <button type="submit"><i class="fi fi-sr-paper-plane-top"></i></button>
+                        </form>
+                    </div>
+                `;
                         const container = document.getElementById('messagesContainer');
                         data.messages.forEach(msg => {
-                            container.innerHTML += `
-    ${msg.sender_id === data.currentUserId
-        ? `<div class="message-row sent">
-                    <div class="message-data sent"><p>${msg.msg}</p></div>
-                                <span class="message-time">${timeAgo(msg.created_at)}</span>
-                                                                                               </div>`
-        : `<div class="message-row received">
-                                                                                                    <div class="sender-info">
-                                                                                                        <img src="<?php echo e(asset('images/user')); ?>/${data.otherUser.profile_image}" class="user-img" alt="User">
-                                                                                                    </div>
-                                                                                                    <div class="sender-data">
-                                                                                                       
-                                                                                                        <div class="message-data received"><p>${msg.msg}</p></div>
-                                                                                                    </div>
-                                                                                                  
-                                                                                                    <span class="message-time">${timeAgo(msg.created_at)}</span>
-                                                                                               </div>`
-    }
-`;
+                            container.innerHTML += msg.sender_id === data.currentUserId ?
+                                `<div class="message-row sent"><div class="message-data sent"><p>${msg.msg}</p></div><span class="message-time">${timeAgo(msg.created_at)}</span></div>` :
+                                `<div class="message-row received"><div class="sender-info"><img src="<?php echo e(asset('images/user')); ?>/${data.otherUser.profile_image}" class="user-img" alt="User"></div><div class="sender-data"><div class="message-data received"><p>${msg.msg}</p></div></div><span class="message-time">${timeAgo(msg.created_at)}</span></div>`;
                         });
                         container.scrollTop = container.scrollHeight;
                         markConversationAsRead(convId);
@@ -419,10 +384,9 @@
                 if (!item) return;
                 chatList.querySelectorAll('.chat-item').forEach(c => c.classList.remove('active'));
                 item.classList.add('active');
+                localStorage.setItem('activeConversationId', item.dataset.conversation);
                 loadConversation(item.dataset.conversation);
             });
-
-
 
             // --- New chat ---
             document.getElementById('newChatBtn').addEventListener('click', e => {
@@ -440,6 +404,11 @@
             <div class="messages-container" id="messagesContainer"></div>
         `;
 
+                // Hide profile panel when starting new chat
+                profilePanel.classList.remove('active');
+                profilePanel.innerHTML = '';
+                profilePanel.removeAttribute('data-user-id');
+
                 const searchBox = document.getElementById('userSearch');
                 const resultsBox = document.getElementById('userResults');
 
@@ -453,9 +422,9 @@
                             headers: {
                                 'Accept': 'application/json'
                             }
-                        });
+                        }
+                    );
                     const users = await res.json();
-
                     users.forEach(u => {
                         const li = document.createElement('li');
                         li.innerHTML =
@@ -463,87 +432,88 @@
                         li.style.display = 'flex';
                         li.style.alignItems = 'center';
                         li.style.gap = '8px';
+
                         li.addEventListener('click', () => selectNewChatUser(u));
                         resultsBox.appendChild(li);
                     });
                 });
             }
 
-            // --- Select a user for new conversation ---
             function selectNewChatUser(u) {
-                // Check if a conversation with this user already exists in the sidebar
-                const existingChat = [...chatList.querySelectorAll('.chat-item')].find(item => {
-                    return item.dataset.otherUserId == u.id; // <-- we need to store otherUserId in sidebar
-                });
+                const existingChat = [...chatList.querySelectorAll('.chat-item')]
+                    .find(item => item.dataset.otherUserId == u.id);
 
                 if (existingChat) {
-                    // If exists, load existing conversation
                     chatList.querySelectorAll('.chat-item').forEach(c => c.classList.remove('active'));
                     existingChat.classList.add('active');
+                    localStorage.setItem('activeConversationId', existingChat.dataset.conversation);
                     loadConversation(existingChat.dataset.conversation);
-
                 } else {
-                    renderUserProfileInfo(u);
-                    // Otherwise, show new chat
-                    mainChat.innerHTML = `
-            <div class="chat-header">
-                <div class="chat-header-left">
-                    <div>
-                        <img src="<?php echo e(asset('images/user')); ?>/${u.profile_image}" class="user-img" alt="User">
-                    </div>
-                    <div class="chat-header-info">
-                        <h2>${u.first_name} ${u.last_name}</h2>
-                        <p>${u.status ?? 'Online'}</p>
-                    </div>
-                </div>
-                <div class="chat-header-right">
-                    <i class="fi fi-sr-info"></i>
-                </div>
-            </div>
+                    // Only render profile info if toggle is active AND user is selected
+                    const toggleActive = localStorage.getItem('userInfoActive') === 'true';
+                    if (toggleActive) renderUserProfileInfo(u);
 
-            <div class="messages-container" id="messagesContainer"></div>
-            <div class="chat-footer">
-                <form id="messageForm" data-receiver="${u.id}">
-                    <input type="text" id="messageInput" placeholder="Type a message..." required>
-                    <button type="submit"><i class="fi fi-sr-paper-plane-top"></i></button>
-                </form>
-            </div>
-        `;
+                    mainChat.innerHTML = `
+                <div class="chat-header">
+                    <div class="chat-header-left">
+                        <div><img src="<?php echo e(asset('images/user')); ?>/${u.profile_image}" class="user-img" alt="User"></div>
+                        <div class="chat-header-info">
+                            <h2>${u.first_name} ${u.last_name}</h2>
+                            <p>${u.status ?? 'Online'}</p>
+                        </div>
+                    </div>
+                    <div class="chat-header-right">
+                        <i class="fi fi-sr-info"></i>
+                    </div>
+                </div>
+                <div class="messages-container" id="messagesContainer"></div>
+                <div class="chat-footer">
+                    <form id="messageForm" data-receiver="${u.id}">
+                        <input type="text" id="messageInput" placeholder="Type a message..." required>
+                        <button type="submit"><i class="fi fi-sr-paper-plane-top"></i></button>
+                    </form>
+                </div>
+            `;
                     bindMessageForm(document.getElementById('messageForm'));
                 }
             }
 
-            // --- Init ---
+            // --- Toggle user info panel ---
+            document.addEventListener('click', e => {
+                if (e.target.closest('.fi-sr-info')) {
+                    if (!profilePanel) return;
+                    profilePanel.classList.toggle('active');
+                    localStorage.setItem('userInfoActive', profilePanel.classList.contains('active'));
+                    localStorage.setItem('userInfoUserId', profilePanel.dataset.userId || null);
+                }
+            });
+
+            // --- Initialize ---
             bindMessageForm(document.getElementById('messageForm'));
             refreshChatTimes();
             setInterval(refreshChatTimes, 20000);
 
-            // Render profile info for the first conversation if it exists
-            <?php if($firstConversation): ?>
-                renderUserProfileInfo(<?php echo json_encode($firstConversation->getOtherParticipant($user->id), 15, 512) ?>);
-            <?php endif; ?>
-        });
-
-
-        document.addEventListener('DOMContentLoaded', () => {
-
-
-            // Toggle user profile info
-            document.addEventListener('click', function(e) {
-                if (e.target.closest('.fi-sr-info')) {
-                    const profile = document.querySelector('.user-chat-profile-info');
-                    if (profile) {
-                        profile.classList.toggle('active');
-                    }
+            // --- Load saved active conversation if any ---
+            const savedConversationId = localStorage.getItem('activeConversationId');
+            if (savedConversationId) {
+                const savedChatItem = chatList.querySelector(
+                    `.chat-item[data-conversation="${savedConversationId}"]`);
+                if (savedChatItem) {
+                    chatList.querySelectorAll('.chat-item').forEach(c => c.classList.remove('active'));
+                    savedChatItem.classList.add('active');
+                    loadConversation(savedConversationId);
                 }
-            });
-
-
+            } else {
+                <?php if($firstConversation): ?>
+                    renderUserProfileInfo(<?php echo json_encode($firstConversation->getOtherParticipant($user->id), 15, 512) ?>);
+                <?php endif; ?>
+            }
         });
     </script>
 
 
 
+
 <?php $__env->stopSection(); ?>
 
-<?php echo $__env->make('layouts.parent', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\Administrator\School-Guidance-Record-Management-System-SGRMS-\resources\views/Parent/messages.blade.php ENDPATH**/ ?>
+<?php echo $__env->make('layouts.main', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\Administrator\School-Guidance-Record-Management-System-SGRMS-\resources\views/Parent/messages.blade.php ENDPATH**/ ?>

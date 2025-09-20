@@ -2,6 +2,7 @@
 .chat-app {
     display: flex;
     height: 100%;
+      min-height: 0;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
     border-radius: 8px;
     padding: 1px;
@@ -9,7 +10,7 @@
 
 /* Sidebar */
 .message-sidebar {
-    width: 420px;
+    width: 400px;
     background: #ffffff;
     padding: 0 8px 0px 5px;
     border-right: 1px solid #e5e7eb;
@@ -34,10 +35,10 @@
 }
 
 .message-sidebar-header h2 {
-    font-size: 1.25rem;
-    font-weight: 500;
-    letter-spacing: 0.5px;
-    color: #696969;
+    font-size: 1.5rem;
+    font-weight: 520;
+    letter-spacing: 0.8px;
+    color: #0f0f0f;
 }
 
 .search-wrapper {
@@ -140,7 +141,8 @@
 }
 
 .chat-item-username {
-    font-weight: 500;
+    font-weight: 510;
+    font-size: 1.1rem;
     color: #1f2937;
 }
 
@@ -156,16 +158,19 @@
 .main-chat {
     flex: 1;
     display: flex;
+    flex-direction: column;
     background-color: #f0f0f0;
     padding: 15px;
-    flex-direction: column;
+    min-height: 0; /* important */
+        height: 100%;
 }
 
 .chat-container{
     display: flex;
     flex-direction: column;
     flex: 1;
-    height: 100%;
+    min-height: 0; /* allow flex children to shrink for scrolling */
+     height: 100%;
     background: #ffffff;
     border-radius: 8px;
     overflow: hidden;
@@ -198,8 +203,6 @@
     border: 1px solid #d1d5db;
     outline: none;
 }
-
-
 
 .new-chat-btn .user-search-input {
     flex: 1;
@@ -245,6 +248,7 @@
 
 .chat-header h2 {
     font-weight: 600;
+    font-size: 1.5rem;
     color: #1f2937;
 }
 
@@ -253,18 +257,20 @@
     color: #6b7280;
 }
 
+/* Messages Area */
+
 .messages-container {
-    flex: 1;
-    overflow-y: auto;
-    padding: 16px;
+    flex: 1; 
+      min-height: 0; 
+    max-height: 100%;
+    overflow-y: auto; 
     background-color: #ffffff;
+    padding: 16px;
     display: flex;
     flex-direction: column;
     gap: 16px;
-    box-sizing: border-box;
-    scroll-behavior: smooth; /
+    scroll-behavior: smooth;
 }
-
 
 .message-data {
     display: inline-block; 
@@ -514,12 +520,30 @@
 }
 
 .user-chat-profile-info .user-chat-profile-container {
-    display: flex;
+    display: flex;    
     flex-direction: column;
+    align-items: center;
+    
     flex: 1;
+    padding: 25px 20px;
     height: 100%;
     background: #ffffff;
     border-radius: 8px;
     overflow: hidden;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.user-profile-img {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    margin-bottom: 12px;
+    object-fit: cover;
+}
+
+.user-profile-name {
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: #1f2937;
+    margin-bottom: 4px;
 }

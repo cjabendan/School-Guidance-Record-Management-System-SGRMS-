@@ -132,7 +132,7 @@ Route::prefix('Head')->name('Head.')->middleware('auth')->group(function () {
     Route::get('/messages/fetch/{conversationId}', [HeadMessageController::class, 'fetchConversation'])->name('messages.fetch-conversation');
     Route::post('/messages/send/{conversationId}', [HeadMessageController::class, 'sendMessage'])->name('messages.send-message');
     Route::post('/messages/mark-as-read/{conversationId}', [HeadMessageController::class, 'markAsRead']);
-
+    Route::get('/Head/messages/sidebar-list', [HeadMessageController::class, 'sidebarList'])->name('Head.messages.sidebar-list');
 
 
     // Requests
@@ -163,8 +163,6 @@ Route::prefix('Counselor')->name('Counselor.')->middleware('auth')->group(functi
     Route::get('/messages/fetch/{conversationId}', [CounselorMessageController::class, 'fetchConversation'])->name('messages.fetch-conversation');
     Route::post('/messages/send/{conversationId}', [CounselorMessageController::class, 'sendMessage'])->name('messages.send-message');
     Route::post('/messages/mark-as-read/{conversationId}', [CounselorMessageController::class, 'markAsRead']);
-
-
 });
 
 

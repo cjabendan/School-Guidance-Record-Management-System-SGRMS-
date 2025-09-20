@@ -25,14 +25,13 @@ class ParentChildController extends Controller
         // Get students linked to this parent via pivot table
         $students = Student::whereHas('parents', function ($q) use ($parent) {
             $q->where('parent_student.p_id', $parent->p_id);
-        })->with('user', 'yearLevel')->get();
+        })->with('user')->get();
 
         $children = $students->map(function ($student) {
             return [
                 'id' => $student->s_id,
                 'name' => $student->user ? $student->user->first_name . ' ' . $student->user->last_name : 'N/A',
                 'email' => $student->user ? $student->user->email : 'N/A',
-                'grade_level' => $student->yearLevel ? $student->yearLevel->year_level : 'N/A',
             ];
         });
 

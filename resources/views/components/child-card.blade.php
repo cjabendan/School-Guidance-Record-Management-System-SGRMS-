@@ -10,7 +10,7 @@
         <h2>{{ $fullName }}</h2>
         <p>Student ID: {{ $child['id'] }}</p>
         <p>Email: {{ $child['email'] }}</p>
-        <p>Grade Level: {{ $child['grade_level'] }}</p>
+       
     </div>
 @empty
     <p>No children found.</p>

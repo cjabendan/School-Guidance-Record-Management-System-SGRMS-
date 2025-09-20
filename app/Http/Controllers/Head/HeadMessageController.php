@@ -29,6 +29,8 @@ class HeadMessageController extends Controller
 
         return view('Head.messages', compact('conversations', 'user'));
     }
+
+
     /**
      * Search users for new conversation
      */
@@ -48,6 +50,7 @@ class HeadMessageController extends Controller
 
         return response()->json($users);
     }
+
 
     /**
      * Start or get existing conversation
@@ -139,6 +142,70 @@ class HeadMessageController extends Controller
         ]);
     }
 
+
+    /**
+     * Fetch sidebar conversation list (for JS)
+     */
+    public function sidebarList()
+{
+    $user = Auth::user();
+    $conversations = Conversation::where('user_one', $user->id)
+        ->orWhere('user_two', $user->id)
+        ->with(['messages' => function ($q) {
+            $q->orderBy('created_at', 'asc');
+        }])
+        ->get()
+        ->sortByDesc(function ($conv) {
+            // Still fallback: latest msg (sent or received)
+            return optional($conv->messages->last())->created_at ?? now()->subYears(100);
+        })
+        ->values();
+
+    $result = $conversations->map(function ($conv) use ($user) {
+        $other = $conv->user_one == $user->id ? $conv->user_two : $conv->user_one;
+        $otherUser = User::find($other);
+
+        $lastMsg = $conv->messages->last();
+
+        // 🛠 Find the last message *received* by this user
+        $lastReceived = $conv->messages
+            ->where('receiver_id', $user->id)
+            ->last();
+
+        return [
+            'id' => $conv->id,
+            'otherUser' => [
+                'id' => $otherUser->id,
+                'first_name' => $otherUser->first_name,
+                'last_name' => $otherUser->last_name,
+                'profile_image' => $otherUser->profile_image,
+            ],
+            'lastMessage' => $lastMsg ? [
+                'id' => $lastMsg->id,
+                'msg' => $lastMsg->msg,
+                'sender_id' => $lastMsg->sender_id,
+                'receiver_id' => $lastMsg->receiver_id,
+                'status' => $lastMsg->status,
+                'created_at' => $lastMsg->created_at->toIso8601String(),
+            ] : null,
+            'lastReceived' => $lastReceived ? [
+                'id' => $lastReceived->id,
+                'msg' => $lastReceived->msg,
+                'sender_id' => $lastReceived->sender_id,
+                'receiver_id' => $lastReceived->receiver_id,
+                'status' => $lastReceived->status,
+                'created_at' => $lastReceived->created_at->toIso8601String(),
+            ] : null,
+        ];
+    });
+
+    return response()->json([
+        'conversations' => $result,
+        'currentUserId' => $user->id,
+    ]);
+}
+
+   
     /**
      * Send a message in an existing conversation
      */
