@@ -7,6 +7,8 @@ use App\Models\Counselor;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
+
 
 class HeadCounselorController extends Controller
 {
@@ -80,14 +82,23 @@ class HeadCounselorController extends Controller
             'profile_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
-        // Handle profile image upload (save with original filename)
+        // Handle profile image (cropped or original upload)
         $profileImageName = 'default.jpg';
-        if ($request->hasFile('profile_image')) {
+        if ($request->filled('cropped_image_data')) {
+            $imageData = $request->input('cropped_image_data');
+            $image = str_replace('data:image/png;base64,', '', $imageData);
+            $image = str_replace(' ', '+', $image);
+            $imageName = uniqid().'_counselor.png';
+            Storage::disk('public')->put('images/user/' . $imageName, base64_decode($image));
+            $profileImageName = $imageName;
+        } elseif ($request->hasFile('profile_image')) {
             $file = $request->file('profile_image');
             $originalName = $file->getClientOriginalName();
-            $file->move(public_path('images/user'), $originalName);
-            $profileImageName = $originalName;
+            $safeName = preg_replace('/[\#\s]+/', '_', $originalName);
+            $file->move(public_path('images/user'), $safeName);
+            $profileImageName = $safeName;
         }
+
 
         // Use a transaction to ensure both user and counselor are created
         DB::beginTransaction();
@@ -149,13 +160,21 @@ class HeadCounselorController extends Controller
         $user->contact_num = $request->input('contact_num');
         $user->email = $request->input('email');
 
-        // Handle profile image upload (save with original filename)
-        if ($request->hasFile('profile_image')) {
+        // Handle profile image update
+        if ($request->filled('cropped_image_data')) {
+            $imageData = $request->input('cropped_image_data');
+            $image = str_replace('data:image/png;base64,', '', $imageData);
+            $image = str_replace(' ', '+', $image);
+            $imageName = uniqid().'_counselor.png';
+            Storage::disk('public')->put('images/user/' . $imageName, base64_decode($image));
+            $user->profile_image = $imageName;
+        } elseif ($request->hasFile('profile_image')) {
             $file = $request->file('profile_image');
             $originalName = $file->getClientOriginalName();
             $file->move(public_path('images/user'), $originalName);
             $user->profile_image = $originalName;
         }
+
 
         $user->save();
 

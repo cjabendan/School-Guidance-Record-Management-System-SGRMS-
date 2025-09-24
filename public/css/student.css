@@ -1,13 +1,66 @@
-/* Delete Profile Image Button Styles */
+/* Force export dropdown menu to show above all and not be clipped */
+#exportDropdownMenu {
+    z-index: 99999 !important;
+    position: absolute !important;
+    right: 0 !important;
+    left: auto !important;
+    top: 110% !important;
+    min-width: 180px;
+    background: #fff;
+    border-radius: 8px;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+    display: none;
+    max-width: 90vw;
+    overflow-x: auto;
+}
+
+@media (max-width: 600px) {
+    #exportDropdownMenu {
+        left: 0 !important;
+        right: auto !important;
+        min-width: 160px;
+        max-width: 98vw;
+    }
+}
+
+#exportDropdownMenu.show {
+    display: block !important;
+}
+
+/* Remove overflow hidden from parent wrappers if present */
+.wrapper, .table-container, .table-management, .search-bar, .table-nav, .table-filter {
+    overflow: visible !important;
+}
+
+.student-image-wrapper {
+    position: relative;
+    display: inline-block;
+    width: 250px;
+    height: 225px;
+    margin-bottom: 12px; 
+}
+
+.student-image-wrapper img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 5px;
+    border: 2px solid #2563eb;
+    background: #f4f6fa;
+    box-shadow: 0 2px 10px rgba(44, 62, 80, 0.1);
+}
+
 .delete-profile-image-btn {
     position: absolute;
     top: 8px;
     right: 8px;
-    background: rgba(229, 62, 62, 0.1); /* subtle red background */
+    background: rgba(229, 62, 62, 0.1);
     border: none;
     border-radius: 50%;
     width: 36px;
     height: 36px;
+    display: none; 
     display: flex;
     align-items: center;
     justify-content: center;
@@ -20,9 +73,16 @@
 
 .delete-profile-image-btn i {
     color: #e53e3e;
-    font-size: 1.2rem;
-    transition: transform 0.2s ease-in-out, color 0.2s ease-in-out;
+    font-size: 16px;
+    line-height: 1;
+    display: flex;        
+    align-items: center;
+    justify-content: center;
+    vertical-align: middle;      
+    position: relative;
+    top: 0;                      
 }
+
 
 /* Hover effect */
 .delete-profile-image-btn:hover {
@@ -31,7 +91,7 @@
 }
 
 .delete-profile-image-btn:hover i {
-    color: #c53030; /* darker red */
+    color: #c53030;
     transform: rotate(-15deg);
 }
 
@@ -457,8 +517,26 @@
     border: 2px solid #2563eb;
     background: #f4f6fa;
     box-shadow: 0 2px 10px rgba(44, 62, 80, 0.1);
-    margin-top: 12px;
 }
+
+/* Match Choose Image button width with student image */
+.custom-upload-btn {
+    display: inline-block;
+    width: 250px;             
+    text-align: center;
+    padding: 10px 0;
+    background: #2563eb;
+    color: #fff;
+    font-weight: 600;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.custom-upload-btn:hover {
+    background: #1e40af;
+}
+
 
 #programField,
 #edit_programField,
@@ -471,22 +549,13 @@
 #editStudentForm button {
     align-self: flex-end;
     padding: 11px 28px;
-    background-color: #2ecc71;
     border: none;
     border-radius: 7px;
     color: white;
     font-weight: 600;
     font-size: 16px;
     cursor: pointer;
-    transition: background 0.2s, box-shadow 0.2s;
-    box-shadow: 0 2px 8px rgba(46, 204, 113, 0.08);
     margin-top: 10px;
-}
-
-#addStudentForm button:hover,
-#editStudentForm button:hover {
-    background-color: #27ae60;
-    box-shadow: 0 4px 16px rgba(46, 204, 113, 0.12);
 }
 
 #id_num_display,
@@ -833,54 +902,6 @@
 
 #archiveStudentModal .close:hover {
     color: #dc2626;
-}
-
-/* Custom Checkbox for Archive Modal */
-.custom-checkbox-label {
-    position: relative;
-    cursor: pointer;
-    user-select: none;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-.custom-checkbox {
-    position: absolute;
-    opacity: 0;
-    width: 0;
-    height: 0;
-}
-.custom-checkbox-box {
-    width: 22px;
-    height: 22px;
-    border-radius: 6px;
-    border: 2px solid #2563eb;
-    background: #fff;
-    display: inline-block;
-    transition: border-color 0.2s, background 0.2s;
-    box-shadow: 0 2px 8px rgba(37,99,235,0.08);
-    position: relative;
-}
-.custom-checkbox:checked + .custom-checkbox-box {
-    background: #2563eb;
-    border-color: #2563eb;
-}
-.custom-checkbox-box:after {
-    content: '';
-    position: absolute;
-    left: 6px;
-    top: 2px;
-    width: 7px;
-    height: 13px;
-    border: solid #fff;
-    border-width: 0 3px 3px 0;
-    opacity: 0;
-    transform: scale(0.7) rotate(45deg);
-    transition: opacity 0.2s, transform 0.2s;
-}
-.custom-checkbox:checked + .custom-checkbox-box:after {
-    opacity: 1;
-    transform: scale(1) rotate(45deg);
 }
 
 /* ______________________________________________________________________________ */

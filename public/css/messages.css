@@ -347,10 +347,62 @@
     margin-left: 4px;
 }
 
+
+.chat-item-lastmessage {
+    font-size: 0.9rem;
+    color: #6b7280;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 220px;
+}
 /* Bold for unread last message in chat list */
 .chat-item-lastmessage.unread {
     font-weight: bold;
     color: #1f2937;
+}
+
+/* Typing Indicator */
+.typing-indicator {
+    display: flex;
+    gap: 4px;
+    padding-block: 5px;
+}
+
+.typing-indicator .dot {
+    height: 7px;
+    width: 7px;
+    border-radius: 50%;
+    opacity: 0.7;
+    background: #427ffa;
+    animation: dotPulse 1.8s ease-in-out infinite;
+}
+
+.typing-indicator .dot:nth-child(1) {
+    animation-delay: 0.2s;
+}
+
+.typing-indicator .dot:nth-child(2) {
+    animation-delay: 0.3s;
+}
+
+.chatbot-body .bot-message .thinking-indicator .dot:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+@keyframes dotPulse {
+    0%, 44% {
+        transform: translateY(0);
+    }
+
+    28% {
+        opacity: 0.4;
+        transform: translateY(-4px);
+    }
+
+    44% {
+        opacity: 0.2;
+    }
 }
 
 .chat-footer {
@@ -459,17 +511,6 @@
     letter-spacing: 0.5px;
 }
 
-.to-user {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-.to-user input {
-    flex: 1;
-    padding: 0.3rem 0.5rem;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-}
 
 .search-user-img {
     width: 30px;

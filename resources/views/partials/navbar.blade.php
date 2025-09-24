@@ -3,10 +3,12 @@
         <i class='bx bx-menu'></i>
         <a href="#" class="nav-link">
             @php
-                $routeName = Route::currentRouteName();
+                $pages = [
 
-                // Head sidebar mapping
-                $headPages = [
+                    // Notifications
+                    'Head.notify.notification' => 'Notifications',
+
+                    // Head
                     'Head.dashboard' => 'Dashboard',
                     'Head.counselors.index' => 'Counselors',
                     'Head.counselors.show' => 'Counselor Details',
@@ -19,17 +21,15 @@
                     'Head.appointments.index' => 'Appointments',
                     'Head.announcements.index' => 'Announcements',
                     'Head.settings.index' => 'Settings',
-                ];
 
-                // Counselor sidebar mapping
-                $counselorPages = [
+                    // Counselor
                     'Counselor.dashboard' => 'Dashboard',
-                    'Counselor.appointments.index' => 'Appointments',
+                    'Counselor.counseling.index' => 'Counseling',
+                    'Counselor.message.index' => 'Messages',
+                    'Counselor.appointment.index' => 'Appointments',
                     'Counselor.settings.index' => 'Settings',
-                ];
 
-                // Parent sidebar mapping
-                $parentPages = [
+                    // Parent
                     'Parent.dashboard' => 'Dashboard',
                     'Parent.child.index' => 'My Children',
                     'Parent.messages.index' => 'Messages',
@@ -38,22 +38,77 @@
                     'Parent.settings.index' => 'Settings',
                 ];
 
-                $allPages = array_merge($headPages, $counselorPages, $parentPages);
-
-                $page = $allPages[$routeName] ?? 'Welcome';
+                $page = $pages[Route::currentRouteName()] ?? 'Welcome';
             @endphp
             {{ $page }}
         </a>
     </div>
+
     <div class="nav-right">
-        <a href="#" id="notificationBell" class="notification">
-            <i class='bx bxs-bell'></i>
-            @if (isset($notifCount) && $notifCount > 0)
-                <span class="num">{{ $notifCount }}</span>
-            @endif
+        @php
+            use App\Models\Notification;
+            $notifCount = Notification::where('user_id', Auth::id())
+                ->where('is_read', 0)
+                ->count();
+        @endphp
+
+    <!-- Notifications -->
+    <div class="nav-right" style="display:flex;align-items:center;gap:16px;">
+        <div class="notification-wrapper">
+            <a href="#" id="notificationBell" class="notification-bell">
+                <i class='bx bxs-bell'></i>
+                @if ($notifCount > 0)
+                    <span class="badge">{{ $notifCount }}</span>
+                @endif
+            </a>
+            <div id="notificationDropdown" class="notification-dropdown" style="display:none;">
+                <div id="notificationDropdownContent"><!-- loaded by AJAX --></div>
+            </div>
+        </div>    
+        <a href="#" class="user-profile" style="vertical-align:middle;"> 
+            <img src="{{ asset('images/user/' . Auth::user()->profile_image) }}" alt=""> 
         </a>
-        <a href="#" class="user-profile">
-            <img src="{{ asset('images/user/' . Auth::user()->profile_image) }}" alt="">
-        </a>
-    </div>
+    </div>    
 </nav>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const bell = document.getElementById('notificationBell');
+    const dropdown = document.getElementById('notificationDropdown');
+    const dropdownContent = document.getElementById('notificationDropdownContent');
+
+    if (bell && dropdown && dropdownContent) {
+        bell.addEventListener('click', e => {
+            e.preventDefault();
+            dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+
+            if (dropdown.style.display === 'block') {
+                fetch('/notify/fetch', { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+                    .then(res => res.json())
+                    .then(data => {
+                        dropdownContent.innerHTML = data.html || `
+                            <div class="notify-empty">
+                                <span class="notify-icon">🔔</span>
+                                <p class="notify-text">You're all caught up!</p>
+                                <small class="notify-time">No new notifications at this time.</small>
+                            </div>`;
+                    })
+                    .catch(() => {
+                        dropdownContent.innerHTML = `
+                            <div class="notify-empty error">
+                                <span class="notify-icon">❌</span>
+                                <p class="notify-text">Could not load notifications.</p>
+                            </div>`;
+                    });
+            }
+        });
+
+        // Close when clicking outside
+        document.addEventListener('mousedown', e => {
+            if (!dropdown.contains(e.target) && !bell.contains(e.target)) {
+                dropdown.style.display = 'none';
+            }
+        });
+    }
+});
+</script>

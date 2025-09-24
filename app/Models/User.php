@@ -74,5 +74,12 @@ class User extends Authenticatable
         return $this->hasOne(Admins::class, 'user_id');
     }
 
+    public function lastMessage()
+{
+    return $this->hasOne(ChatMessage::class, 'sender_id')
+        ->orWhere('receiver_id', $this->id)
+        ->latest();
+}
+
   
 }

@@ -15,14 +15,12 @@ class Student extends Model
     protected $fillable = [
         's_id', 
         'user_id',
-        'section',
         'father_name',
         'mother_name',
         'guardian_name',
         'relationship',
         'guardian_contact',
         'guardian_email',
-        'program',
         'religion',
         'civil_status',
     ];

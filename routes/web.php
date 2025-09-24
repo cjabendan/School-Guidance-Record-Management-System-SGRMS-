@@ -33,6 +33,8 @@ use App\Http\Controllers\Parents\ParentRequestController;
 use App\Http\Controllers\Parents\ParentMessageController;
 use Illuminate\Routing\Events\RouteMatched;
 
+use App\Http\Controllers\NotifyController;
+
 use App\Http\Controllers\Head\StudentController;
 use App\Models\Counselor;
 use Dompdf\FrameDecorator\Page;
@@ -76,7 +78,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/Parent/dashboard', [ParentDashboardController::class, 'dashboard'])->name('Parent.dashboard');
 });
 
-
+Route::get('/notify/fetch', [NotifyController::class, 'fetchNotifications'])->name('notify.fetch');
+Route::get('/Head/notify/notification', [NotifyController::class, 'index'])
+    ->name('Head.notify.notification');
 
 // ========================== Administrator (Head) Routes ================================ //
 Route::prefix('Head')->name('Head.')->middleware('auth')->group(function () {

@@ -21,7 +21,12 @@
                         <span class="text">Dashboard</span>
                     </a>
                 </li>
-
+                <li class="{{ Request::is('Counselor/messages*') ? 'active' : '' }}">
+                    <a href="{{ url('Counselor/messages') }}">
+                        <i class="fi fi-sr-comment"></i>
+                        <span class="text">Messages</span>
+                    </a>
+                </li>
                 <li class="{{ Request::is('Counselor/appointments*') ? 'active' : '' }}">
                     <a href="{{ url('Counselor/appointments') }}">
                         <i class='bx bxs-calendar'></i>

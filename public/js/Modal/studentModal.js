@@ -1,18 +1,5 @@
-// Delete profile image logic for edit modal
-document.addEventListener('DOMContentLoaded', function() {
-    var deleteBtn = document.getElementById('deleteProfileImageBtn');
-    var studentImage = document.getElementById('studentImage');
-    var deleteField = document.getElementById('delete_profile_image');
-    if (deleteBtn && studentImage && deleteField) {
-        deleteBtn.addEventListener('click', function() {
-            var defaultSrc = studentImage.getAttribute('data-default');
-            if (studentImage.src !== defaultSrc) {
-                studentImage.src = defaultSrc;
-                deleteField.value = '1';
-            }
-        });
-    }
-});
+
+// Utility: Get year suffix (for college levels)
 function getYearSuffix(i) {
     if (i === 1) return "st";
     if (i === 2) return "nd";
@@ -20,10 +7,12 @@ function getYearSuffix(i) {
     return "th";
 }
 
-// Year level for Add
+// Populate year levels for Add Student modal
 function updateYearLevel() {
     const educLevel = document.getElementById("educ_level").value;
     const yearLevelSelect = document.getElementById("year_level");
+    if (!yearLevelSelect) return;
+
     yearLevelSelect.innerHTML = "";
 
     // Add default option
@@ -33,47 +22,33 @@ function updateYearLevel() {
     yearLevelSelect.add(defaultOption);
 
     if (educLevel === "Kindergarten") {
-        const option = document.createElement("option");
-        option.value = "Kindergarten";
-        option.text = "Kindergarten";
-        yearLevelSelect.add(option);
+        yearLevelSelect.add(new Option("Kindergarten", "Kindergarten"));
     } else if (educLevel === "Elementary") {
         for (let i = 1; i <= 6; i++) {
-            const option = document.createElement("option");
-            option.value = `Grade ${i}`;
-            option.text = `Grade ${i}`;
-            yearLevelSelect.add(option);
+            yearLevelSelect.add(new Option(`Grade ${i}`, `Grade ${i}`));
         }
     } else if (educLevel === "Junior High School") {
         for (let i = 7; i <= 10; i++) {
-            const option = document.createElement("option");
-            option.value = `Grade ${i}`;
-            option.text = `Grade ${i}`;
-            yearLevelSelect.add(option);
+            yearLevelSelect.add(new Option(`Grade ${i}`, `Grade ${i}`));
         }
     } else if (educLevel === "Senior High School") {
         for (let i = 11; i <= 12; i++) {
-            const option = document.createElement("option");
-            option.value = `Grade ${i}`;
-            option.text = `Grade ${i}`;
-            yearLevelSelect.add(option);
+            yearLevelSelect.add(new Option(`Grade ${i}`, `Grade ${i}`));
         }
     } else if (educLevel === "College") {
         for (let i = 1; i <= 4; i++) {
             const suffix = getYearSuffix(i);
-            const option = document.createElement("option");
-            option.value = `${i}${suffix} Year`;
-            option.text = `${i}${suffix} Year`;
-            yearLevelSelect.add(option);
+            yearLevelSelect.add(new Option(`${i}${suffix} Year`, `${i}${suffix} Year`));
         }
     }
 }
 
-
-
+// Populate year levels for Edit Student modal
 function updateEditYearLevel(selectedValue) {
-    const educLevel = document.getElementById("edit_educ_level").value;
+    const educLevel = document.getElementById("edit_educ_level")?.value;
     const yearLevelSelect = document.getElementById("edit_year_level");
+    if (!yearLevelSelect) return;
+
     yearLevelSelect.innerHTML = "";
 
     const defaultOption = document.createElement("option");
@@ -82,101 +57,78 @@ function updateEditYearLevel(selectedValue) {
     yearLevelSelect.add(defaultOption);
 
     if (educLevel === "Kindergarten") {
-        const option = document.createElement("option");
-        option.value = "Kindergarten";
-        option.text = "Kindergarten";
-        yearLevelSelect.add(option);
+        yearLevelSelect.add(new Option("Kindergarten", "Kindergarten"));
     } else if (educLevel === "Elementary") {
         for (let i = 1; i <= 6; i++) {
-            const option = document.createElement("option");
-            option.value = `Grade ${i}`;
-            option.text = `Grade ${i}`;
-            yearLevelSelect.add(option);
+            yearLevelSelect.add(new Option(`Grade ${i}`, `Grade ${i}`));
         }
     } else if (educLevel === "Junior High School") {
         for (let i = 7; i <= 10; i++) {
-            const option = document.createElement("option");
-            option.value = `Grade ${i}`;
-            option.text = `Grade ${i}`;
-            yearLevelSelect.add(option);
+            yearLevelSelect.add(new Option(`Grade ${i}`, `Grade ${i}`));
         }
     } else if (educLevel === "Senior High School") {
         for (let i = 11; i <= 12; i++) {
-            const option = document.createElement("option");
-            option.value = `Grade ${i}`;
-            option.text = `Grade ${i}`;
-            yearLevelSelect.add(option);
+            yearLevelSelect.add(new Option(`Grade ${i}`, `Grade ${i}`));
         }
     } else if (educLevel === "College") {
         for (let i = 1; i <= 4; i++) {
             const suffix = getYearSuffix(i);
-            const option = document.createElement("option");
-            option.value = `${i}${suffix} Year`;
-            option.text = `${i}${suffix} Year`;
-            yearLevelSelect.add(option);
+            yearLevelSelect.add(new Option(`${i}${suffix} Year`, `${i}${suffix} Year`));
         }
     }
+
     if (selectedValue) {
         yearLevelSelect.value = selectedValue;
     }
 }
 
-// Toggle program field enable/disable
-function toggleProgramField() {
-    const educLevel = document.getElementById('educ_level').value;
-    const programInput = document.getElementById('program');
-    if (educLevel === 'Senior High School') {
-        programInput.disabled = false;
-        programInput.placeholder = "Enter program name";
-    } else {
-        programInput.disabled = true;
-        programInput.value = "";
-        programInput.placeholder = "Program only for Senior High School";
-    }
-}
-
+// Attach listeners once DOM is ready
 document.addEventListener('DOMContentLoaded', function() {
-    var educLevelInput = document.getElementById('educ_level');
+    const educLevelInput = document.getElementById('educ_level');
     if (educLevelInput) {
-        educLevelInput.addEventListener('change', function() {
-            updateYearLevel();
-            toggleProgramField();
+        educLevelInput.addEventListener('change', updateYearLevel);
+    }
+
+    const editEducLevelInput = document.getElementById('edit_educ_level');
+    if (editEducLevelInput) {
+        editEducLevelInput.addEventListener('change', function() {
+            updateEditYearLevel();
         });
     }
+});
 
-    // Modal close logic with debug logs
-    const closeBtn = document.getElementById('closeAddModalBtn');
-    if (closeBtn) {
-        closeBtn.onclick = function(e) {
-            console.log('X button clicked');
-            e.stopPropagation();
-            window.closeAddModal();
-        };
-    }
-    const modal = document.getElementById('addStudentModal');
-    if (modal) {    
-        modal.onclick = function(event) {
-            if (event.target === modal) {
-                console.log('Modal background clicked');
-                window.closeAddModal();
-            } else {
-                console.log('Modal inner element clicked:', event.target);
-            }
-        };
-    }
-    const modalContent = document.querySelector('#addStudentModal .modal-content');
-    if (modalContent) {
-        modalContent.onclick = function(e) {
-            console.log('Modal content clicked');
-            e.stopPropagation();
-        };
+
+//__________________________________________________________________________________________
+
+
+// Delete profile image logic for Add/Edit Student modal
+document.addEventListener('DOMContentLoaded', function() {
+    const removeBtn = document.getElementById('remove-image-btn');
+    const studentImage = document.getElementById('studentImage');
+    const imageInput = document.getElementById('profile_image');
+    const fileChosen = document.getElementById('file-chosen');
+    const deleteField = document.getElementById('delete_profile_image'); 
+
+    if (removeBtn && studentImage && imageInput) {
+        removeBtn.addEventListener('click', function () {
+            // Reset to default image
+            studentImage.src = '/images/user/default.png'; 
+            imageInput.value = '';
+            if (fileChosen) fileChosen.textContent = 'No file chosen';
+
+            // Show backend this image was deleted (only for edit mode)
+            if (deleteField) deleteField.value = '1';
+
+            // Hide button again after deleting
+            removeBtn.style.display = 'none';
+        });
     }
 });
-//_________________________________________________________________________________________
+
 
 // Add/Edit Modal logic
 window.openAddEditModal = function openAddEditModal(mode, studentData = null) {
-    // If edit mode and only s_id is provided, fetch full data via AJAX
+    // ✅ If edit mode and only s_id is provided, fetch full data via AJAX
     if (mode === 'edit' && studentData && studentData.s_id && Object.keys(studentData).length === 1) {
         fetch(`/Head/students/${studentData.s_id}/json`)
             .then(response => response.json())
@@ -185,41 +137,102 @@ window.openAddEditModal = function openAddEditModal(mode, studentData = null) {
                     alert('Student not found!');
                     return;
                 }
+                // Call again with full student data
                 window.openAddEditModal('edit', data);
+            })
+            .catch(err => {
+                console.error("Failed to fetch student:", err);
+                alert("Error fetching student details.");
             });
         return;
     }
+
     const modal = document.getElementById('addStudentModal');
     const form = document.getElementById('addStudentForm');
     const title = document.getElementById('addModalTitle');
     const saveBtn = document.getElementById('addEditSaveBtn');
-    const imgPreview = document.getElementById('studentImage');
+    const imgPreview = document.getElementById('studentImage'); 
     const imageInput = document.getElementById('profile_image');
+    const removeBtn = document.getElementById('remove-image-btn');
+    const fileChosen = document.getElementById('file-chosen');
+
     // Reset form
     form.reset();
-    // Reset image
-    imgPreview.src = imgPreview.getAttribute('data-default');
-    // Remove previous image preview
+    if (fileChosen) fileChosen.textContent = 'No file chosen';
     if (imageInput) imageInput.value = "";
-    // Attach image preview event every time modal opens
+
+    // Reset image
+    if (mode === 'add') {
+        imgPreview.src = '/images/user/default.png'; 
+        if (removeBtn) removeBtn.style.display = 'none'; // hidden by default
+    } else {
+        imgPreview.src = '';
+        if (removeBtn) removeBtn.style.display = 'none';
+    }
+
+    // Image upload + crop logic (same as before)...
     if (imageInput) {
         imageInput.onchange = function(event) {
             const [file] = event.target.files;
             if (file) {
-                imgPreview.src = URL.createObjectURL(file);
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const cropperModal = document.getElementById('cropImageModal');
+                    const cropperImage = document.getElementById('cropperImage');
+                    cropperImage.src = e.target.result;
+                    cropperModal.style.display = 'block';
+
+                    if (window.cropper) {
+                        window.cropper.destroy();
+                    }
+                    window.cropper = new Cropper(cropperImage, {
+                        aspectRatio: 1, 
+                        viewMode: 1,
+                    });
+
+                    document.getElementById('cropApplyBtn').onclick = function() {
+                        const canvas = window.cropper.getCroppedCanvas({
+                            width: 250,
+                            height: 225
+                        });
+                        imgPreview.src = canvas.toDataURL("image/png");
+                        document.getElementById('cropped_image_data').value = canvas.toDataURL("image/png");
+                        cropperModal.style.display = 'none';
+                        window.cropper.destroy();
+                        if (removeBtn) removeBtn.style.display = "block";
+                    };
+
+                    document.getElementById('closeCropModalBtn').onclick = function() {
+                        cropperModal.style.display = 'none';
+                        if (window.cropper) {
+                            window.cropper.destroy();
+                            window.cropper = null;
+                        }
+                        if (imageInput) imageInput.value = "";
+                        if (fileChosen) fileChosen.textContent = "No file chosen";
+                        if (form && form.getAttribute("data-mode") === "add") {
+                            imgPreview.src = "/images/user/default.png";
+                        }
+                        if (removeBtn) removeBtn.style.display = "none";
+                    };
+                };
+                reader.readAsDataURL(file);
+                if (fileChosen) fileChosen.textContent = file.name;
             } else {
-                imgPreview.src = imgPreview.getAttribute('data-default');
+                imgPreview.src = '';
+                if (fileChosen) fileChosen.textContent = 'No file chosen';
+                if (removeBtn) removeBtn.style.display = "none";
             }
             imgPreview.style.display = 'block';
         };
     }
-    // Set mode
+
+    // Set mode details
     if (mode === 'add') {
         title.textContent = 'Add Student';
         saveBtn.textContent = 'Save';
         var methodInput = document.getElementById('_method_input');
         if (methodInput) methodInput.remove();
-        // Fetch new student ID
         fetch('/Head/students/next-id')
             .then(response => response.json())
             .then(data => {
@@ -229,7 +242,7 @@ window.openAddEditModal = function openAddEditModal(mode, studentData = null) {
     } else if (mode === 'edit' && studentData) {
         title.textContent = 'Edit Student';
         saveBtn.textContent = 'Update';
-        // DO NOT set form.action here
+
         if (!document.getElementById('_method_input')) {
             const methodInput = document.createElement('input');
             methodInput.type = 'hidden';
@@ -238,6 +251,8 @@ window.openAddEditModal = function openAddEditModal(mode, studentData = null) {
             methodInput.id = '_method_input';
             form.appendChild(methodInput);
         }
+
+        // Fill in fields from studentData
         document.getElementById('s_id_display').textContent = studentData.id_num || '';
         document.getElementById('s_id').value = studentData.id_num || '';
         document.getElementById('first_name').value = studentData.fname || '';
@@ -246,44 +261,68 @@ window.openAddEditModal = function openAddEditModal(mode, studentData = null) {
         document.getElementById('suffix').value = studentData.suffix || '';
         document.getElementById('email').value = studentData.email || '';
         document.getElementById('contact_num').value = studentData.mobile_num || '';
-        // Set sex radio button for edit modal (name="sex")
+
         if (studentData.gender === 'Male' || studentData.sex === 'Male') {
-            document.querySelector('input[name="sex"][value="Male"]').checked = true;
-            document.querySelector('input[name="sex"][value="Female"]').checked = false;
+            document.getElementById('sex_male').checked = true;
         } else if (studentData.gender === 'Female' || studentData.sex === 'Female') {
-            document.querySelector('input[name="sex"][value="Male"]').checked = false;
-            document.querySelector('input[name="sex"][value="Female"]').checked = true;
-        } else {
-            document.querySelector('input[name="sex"][value="Male"]').checked = false;
-            document.querySelector('input[name="sex"][value="Female"]').checked = false;
+            document.getElementById('sex_female').checked = true;
         }
+
         document.getElementById('bod').value = studentData.bod || '';
         document.getElementById('address').value = studentData.address || '';
         document.getElementById('religion').value = studentData.religion || '';
         document.getElementById('civil_status').value = studentData.civil_status || '';
-        document.getElementById('educ_level').value = studentData.educ_level || '';
-        toggleProgramField();
-        if (typeof updateYearLevel === 'function') {
+
+        const educLevelEl = document.getElementById('educ_level');
+        const yearLevelEl = document.getElementById('year_level');
+        if (educLevelEl) {
+            educLevelEl.value = studentData.educ_level || '';
             updateYearLevel();
         }
-        document.getElementById('program').value = studentData.program || '';
-        document.getElementById('year_level').value = studentData.year_level || '';
-        document.getElementById('section').value = studentData.section || '';
+        if (yearLevelEl) {
+            yearLevelEl.value = studentData.year_level || '';
+        }
+
         document.getElementById('father_name').value = studentData.father_name || '';
         document.getElementById('mother_name').value = studentData.mother_name || '';
         document.getElementById('guardian_name').value = studentData.guardian_name || '';
         document.getElementById('relationship').value = studentData.relationship || '';
         document.getElementById('guardian_contact').value = studentData.guardian_contact || '';
         document.getElementById('guardian_email').value = studentData.guardian_email || '';
-        // Set image preview if available
+
         if (studentData.image_url) {
             imgPreview.src = studentData.image_url;
+            if (removeBtn) removeBtn.style.display = "block";
+        } else {
+            imgPreview.src = "/images/user/default.png";
+            if (removeBtn) removeBtn.style.display = "none";
         }
     }
-    modal.style.display = 'block';
-    console.log('Modal opened');
 
-    // Attach AJAX submit for both add and edit
+    modal.style.display = 'block';
+    console.log('Add/Edit modal opened');
+
+    const closeBtn = document.getElementById('closeAddModalBtn');
+    if (closeBtn) {
+        closeBtn.onclick = function(e) {
+            e.stopPropagation();
+            window.closeAddModal();
+        };
+    }
+
+    modal.onclick = function(event) {
+        if (event.target === modal) {
+            window.closeAddModal();
+        }
+    };
+
+    const modalContent = modal.querySelector('.modal-content');
+    if (modalContent) {
+        modalContent.onclick = function(e) {
+            e.stopPropagation();
+        };
+    }
+
     saveBtn.onclick = function(e) {
         e.preventDefault();
         var formData = new FormData(form);
@@ -294,7 +333,7 @@ window.openAddEditModal = function openAddEditModal(mode, studentData = null) {
             method = 'POST';
         } else if (mode === 'edit' && studentData) {
             url = '/Head/students/' + (studentData.id_num || studentData.s_id);
-            method = 'POST'; // Laravel expects POST with _method=PUT
+            method = 'POST';
             formData.append('_method', 'PUT');
         }
         fetch(url, {
@@ -318,15 +357,17 @@ window.openAddEditModal = function openAddEditModal(mode, studentData = null) {
             alert('An error occurred while saving.');
         });
     };
-}
+
+    };
+
 // Close modal
 window.closeAddModal = function closeAddModal() {
     var modal = document.getElementById('addStudentModal');
     if (modal) {
         modal.style.display = 'none';
-        console.log('Modal closed');
+        console.log('Add/Edit modal closed');
     }
-}
+};
 
 
 //_________________________________________________________________________________________
@@ -356,9 +397,7 @@ window.openViewStudentModal = function openViewStudentModal(s_id) {
                     ['view_religion', data.religion],
                     ['view_civil_status', data.civil_status],
                     ['view_educ_level', data.educ_level],
-                    ['view_program', data.program],
                     ['view_year_level', data.year_level],
-                    ['view_section', data.section],
                     ['view_father_name', data.father_name],
                     ['view_mother_name', data.mother_name],
                     ['view_guardian_name', data.guardian_name],
@@ -480,17 +519,6 @@ document.addEventListener('DOMContentLoaded', function() {
 // Archive Modal logic
 window.currentArchiveSId = null;
 
-window.openArchiveStudentModal = function openArchiveStudentModal(s_id) {
-    window.currentArchiveSId = s_id;
-    // Optionally fetch student data here if needed
-    var input = document.getElementById('archive_s_id');
-    if (input) input.value = s_id;
-    // Display the student ID in the modal title
-    var idDisplay = document.getElementById('archiveStudentIdDisplay');
-    if (idDisplay) idDisplay.textContent = `(${s_id})`;
-    var modal = document.getElementById('archiveStudentModal');
-    if (modal) modal.style.display = 'block';
-};
 
 window.closeArchiveModal = function closeArchiveModal() {
     var modal = document.getElementById('archiveStudentModal');
@@ -500,13 +528,19 @@ window.closeArchiveModal = function closeArchiveModal() {
     if (idDisplay) idDisplay.textContent = '';
 };
 
+// ================================
+// Archive Student Functions
+// ================================
+
+// Archive Only
 window.archiveStudentOnly = function archiveStudentOnly() {
     if (!window.currentArchiveSId) return;
-    var status = document.getElementById('archive_status') ? document.getElementById('archive_status').value : '';
+    var status = document.getElementById('archive_status').value;
     if (!status) {
         alert('Please select a status.');
         return;
     }
+
     fetch('/Head/students/archive', {
         method: 'POST',
         headers: {
@@ -515,28 +549,41 @@ window.archiveStudentOnly = function archiveStudentOnly() {
         },
         body: JSON.stringify({ s_id: window.currentArchiveSId, status: status })
     })
-    .then(res => {
-        if (!res.ok) {
-            return res.text().then(text => { throw new Error('Server error: ' + text); });
-        }
-        return res.json();
-    })
+    .then(res => res.json())
     .then(data => {
         window.closeArchiveModal();
-        location.reload();
+        // Always refresh the student table to show updated status
+        var tableList = document.getElementById('student-list');
+        if (tableList) {
+            fetch(window.location.href, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+                .then(response => response.text())
+                .then(html => {
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(html, 'text/html');
+                    const newTable = doc.getElementById('student-list');
+                    if (newTable && tableList) {
+                        tableList.innerHTML = newTable.innerHTML;
+                    }
+                });
+        }
+        if (!data.success) {
+            alert(data.error || data.message || 'Archiving failed.');
+        }
     })
     .catch(err => {
-        alert('Archive failed: ' + err.message);
+        window.closeArchiveModal();
+        console.log('Archive failed:', err.message);
     });
 };
 
 window.archiveStudentAndDisable = function archiveStudentAndDisable() {
     if (!window.currentArchiveSId) return;
-    var status = document.getElementById('archive_status') ? document.getElementById('archive_status').value : '';
+    var status = document.getElementById('archive_status').value;
     if (!status) {
         alert('Please select a status.');
         return;
     }
+
     fetch('/Head/students/archive-disable', {
         method: 'POST',
         headers: {
@@ -545,20 +592,73 @@ window.archiveStudentAndDisable = function archiveStudentAndDisable() {
         },
         body: JSON.stringify({ s_id: window.currentArchiveSId, status: status })
     })
-    .then(res => {
-        if (!res.ok) {
-            return res.text().then(text => { throw new Error('Server error: ' + text); });
-        }
-        return res.json();
-    })
+    .then(res => res.json())
     .then(data => {
         window.closeArchiveModal();
-        location.reload();
+        // Always refresh the student table to show updated status
+        var tableList = document.getElementById('student-list');
+        if (tableList) {
+            fetch(window.location.href, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+                .then(response => response.text())
+                .then(html => {
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(html, 'text/html');
+                    const newTable = doc.getElementById('student-list');
+                    if (newTable && tableList) {
+                        tableList.innerHTML = newTable.innerHTML;
+                    }
+                });
+        }
+        if (!data.success) {
+            alert(data.error || data.message || 'Archiving & disabling failed.');
+        }
     })
     .catch(err => {
-        alert('Archive & disable failed: ' + err.message);
+        window.closeArchiveModal();
+        console.log('Archive & disable failed:', err.message);
     });
 };
+// ================================
+// Helper: Update Student Status Cell
+// ================================
+function updateStudentStatusCell(s_id, newStatus) {
+    var row = document.querySelector(`#student-list tr[data-id="${s_id}"]`);
+    if (row) {
+        var statusCell = row.querySelector('td[data-status]');
+        if (statusCell) {
+            statusCell.textContent = newStatus;
+
+            // reset classes
+            statusCell.className = '';
+            if (newStatus.toLowerCase() === 'enrolled') {
+                statusCell.classList.add('badge', 'bg-success');
+            } else {
+                statusCell.classList.add('badge', 'bg-danger');
+            }
+        }
+    } else {
+        // fallback: reload table content via AJAX
+        fetch(window.location.href, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+            .then(res => res.text())
+            .then(html => {
+                document.querySelector('#student-list').innerHTML = html;
+            });
+    }
+}
+
+// ================================
+// Archive Modal
+// ================================
+window.openArchiveStudentModal = function openArchiveStudentModal(s_id) {
+    var modal = document.getElementById('archiveStudentModal');
+    var input = document.getElementById('archive_s_id');
+    var display = document.getElementById('archiveStudentIdDisplay');
+    window.currentArchiveSId = s_id;
+    if (input) input.value = s_id;
+    if (display) display.textContent = `(${s_id})`;
+    if (modal) modal.style.display = 'block';
+};
+
 
 // Attach click event to all archive buttons
 document.addEventListener('DOMContentLoaded', function() {
@@ -598,28 +698,35 @@ document.addEventListener('DOMContentLoaded', function() {
 // _________________________________________________________________________________________
 
 // Student export 
-const exportBtn = document.getElementById('exportDropdownBtn');
-const exportMenu = document.getElementById('exportDropdownMenu');
-if (exportBtn && exportMenu) {
-    exportBtn.addEventListener('click', function(e) {
-        e.stopPropagation();
-        exportMenu.style.display = exportMenu.style.display === 'block' ? 'none' : 'block';
-    });
-    document.addEventListener('click', function() {
-        exportMenu.style.display = 'none';
-    });
-    // Dropdown hover effect
-    document.querySelectorAll('.dropdown-item').forEach(function(item) {
-        item.addEventListener('mouseover', function() {
-            this.style.background = '#f3f4f6';
+document.addEventListener('DOMContentLoaded', function() {
+    const exportBtn = document.getElementById('exportDropdownBtn');
+    const exportMenu = document.getElementById('exportDropdownMenu');
+    if (exportBtn && exportMenu) {
+        exportBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            exportMenu.classList.toggle('show');
         });
-        item.addEventListener('mouseout', function() {
-            this.style.background = 'none';
+        document.addEventListener('mousedown', function(e) {
+            if (exportMenu.classList.contains('show')) {
+                if (!exportMenu.contains(e.target) && e.target !== exportBtn) {
+                    exportMenu.classList.remove('show');
+                }
+            }
         });
-    });
-}
+        document.querySelectorAll('.dropdown-item').forEach(function(item) {
+            item.addEventListener('mouseover', function() {
+                this.style.background = '#f3f4f6';
+            });
+            item.addEventListener('mouseout', function() {
+                this.style.background = 'none';
+            });
+        });
+    }
+});
+
 function downloadExport(format) {
-    if (exportMenu) exportMenu.style.display = 'none';
+    var exportMenu = document.getElementById('exportDropdownMenu');
+    if (exportMenu) exportMenu.classList.remove('show');
     let url = new URL(window.location.origin + '/Head/students/export');
     url.searchParams.set('format', format);
     // Add status filter if present

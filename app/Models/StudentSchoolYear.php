@@ -10,9 +10,7 @@ class StudentSchoolYear extends Model
         'student_id',
         'school_year_id',
         'year_level',
-        'section',
         'status',
-        'remarks',
     ];
 
     public function student()

@@ -9,14 +9,19 @@
                 @csrf
                 <div class="form-row image-name-row">
                     <div class="image-col">
-                        <div style="position: relative; display: inline-block;">
-                            <img id="studentImage" src="{{ asset('images/user/default.jpg') }}" data-default="{{ asset('images/user/default.jpg') }}" alt="Student Image" class="student-image-box pro-add-image">
-                            <button type="button" id="deleteProfileImageBtn" class="delete-profile-image-btn" title="Delete Profile Image">
-                                <i class="fi fi-rr-trash" style="color: #e53e3e; font-size: 1.2rem;"></i>
-                            </button>
+                        <div class="form-group">
+                            <div class="student-image-wrapper">
+                                <img id="studentImage" src="" alt="Image Preview" class="student-image-box">
+                                <button type="button" id="remove-image-btn" class="delete-profile-image-btn" style="display:none;">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                            <label class="custom-upload-btn" for="profile_image" style="margin-top:10px;">
+                                <i class="fas fa-image"></i> Choose Image
+                            </label>
+                            <input type="file" id="profile_image" name="profile_image" accept="image/*" style="display:none;">
+                            <span id="file-chosen" class="file-chosen-text">No file chosen</span>
                         </div>
-                        <input type="file" id="profile_image" name="profile_image" accept="image/*" class="pro-add-image-input">
-                        <input type="hidden" id="delete_profile_image" name="delete_profile_image" value="0">
                         <div class="student-id-row pro-add-id-row">
                             <label for="s_id_display" class="add-label" style="margin-bottom:0;">Student ID:</label>
                             <span id="s_id_display" class="pro-add-id-value">Loading...</span>
@@ -94,23 +99,13 @@
                                     <option value="Senior High School">Senior High School</option>
                                 </select>
                             </div>
+                            <div class="add-field-col">
+                                <label for="year_level" class="add-label">Year Level:</label>
+                                <select id="year_level" name="year_level" class="add-input" required>
+                                    <option value="">Select Year Level</option>
+                                </select>
+                            </div>
                         </div>
-                    </div>
-                </div>
-                <div class="form-row">
-                    <div class="add-field-col">
-                        <label for="program" class="add-label">Program:</label>
-                        <input type="text" id="program" name="program" class="add-input" disabled>
-                    </div>
-                    <div class="add-field-col">
-                        <label for="year_level" class="add-label">Year Level:</label>
-                        <select id="year_level" name="year_level" class="add-input" required>
-                            <option value="">Select Year Level</option>
-                        </select>
-                    </div>
-                    <div class="add-field-col">
-                        <label for="section" class="add-label">Section:</label>
-                        <input type="text" id="section" name="section" class="add-input">
                     </div>
                 </div>
 
@@ -252,21 +247,11 @@
                                 <label class="add-label">Educational Level:</label>
                                 <input type="text" id="view_educ_level" name="educ_level" class="add-input" readonly disabled>
                             </div>
+                            <div class="add-field-col">
+                                <label class="add-label">Year Level:</label>
+                                <input type="text" id="view_year_level" name="year_level" class="add-input" readonly disabled>
+                            </div>
                         </div>
-                    </div>
-                </div>
-                <div class="form-row">
-                    <div class="add-field-col">
-                        <label class="add-label">Program:</label>
-                        <input type="text" id="view_program" name="program" class="add-input" readonly disabled>
-                    </div>
-                    <div class="add-field-col">
-                        <label class="add-label">Year Level:</label>
-                        <input type="text" id="view_year_level" name="year_level" class="add-input" readonly disabled>
-                    </div>
-                    <div class="add-field-col">
-                        <label class="add-label">Section:</label>
-                        <input type="text" id="view_section" name="section" class="add-input" readonly disabled>
                     </div>
                 </div>
                 <div style="width: 100%; text-align: center; margin: 28px 0 18px 0; position: relative;">
@@ -385,3 +370,20 @@
 
 
 <!---------------------------------------------------------------------------------------->
+
+<!-- Crop Image Modal -->
+<div id="cropImageModal" class="modal" style="display:none;">
+    <div class="modal-content" style="max-width:600px; text-align:center;">
+        <h3>Crop Profile Image</h3>
+        <div style="max-height:400px; overflow:hidden;">
+            <img id="cropperImage" style="max-width:100%;">
+        </div>
+        <div style="margin-top:16px;">
+            <button type="button" id="cropApplyBtn" class="pro-add-save">Apply</button>
+            <button type="button" id="closeCropModalBtn" class="pro-add-save">Cancel</button>
+        </div>
+    </div>
+</div>
+
+<!-- Hidden input for cropped image -->
+<input type="hidden" id="cropped_image_data" name="cropped_image_data">

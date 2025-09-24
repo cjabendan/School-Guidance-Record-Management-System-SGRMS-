@@ -1,0 +1,69 @@
+#content {
+    position: relative;
+    left: 260px;
+    transition: 0.3s ease;
+    width: calc(100% - 260px);
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden; /* Prevent overflow */
+}
+
+#sidebar.hide + #content {
+    left: 60px;
+    width: calc(100% - 60px);
+}
+
+.dashboard-content {
+    background-color: #ffffff;
+    height: 100%;
+    padding: 1px;
+    gap: 8px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.welcome-box {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+}
+
+.welcome {
+    width: 100%;
+    height: 250px;
+    display: flex;
+    padding: 15px;
+    flex-direction: column;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.welcome .Counselor-name {
+    font-size: 1.8rem;
+    font-weight: 600;
+    color: #1ea7ff;
+    margin-bottom: 8px;
+}
+
+.welcome-note {
+    font-size: 1.25rem;
+    color: #747373;
+    margin-left: 2px;
+    margin-bottom: 8px;
+}
+
+.todo {
+    width: 60%;
+    height: 250px;
+    position: relative;
+    overflow-y: hidden;
+    border-radius: 7px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    background: #2395ff;
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+}

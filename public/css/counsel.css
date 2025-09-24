@@ -1,3 +1,9 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+
+body, input, select, textarea, button {
+    font-family: 'Poppins', sans-serif;
+}
+
 /* =========================
    Counselor Card 
 ========================= */
@@ -14,7 +20,7 @@
     border-radius: 12px;
     background: #fff;
     box-shadow: 0 4px 16px rgba(37,99,235,0.07);
-    padding: 18px 16px 16px 16px;
+    padding: 18px 16px;
     text-align: center;
     cursor: pointer;
     width: 220px;
@@ -46,14 +52,13 @@
     font-size: 1.08rem;
     color: #2563eb;
     font-weight: 700;
-    margin: 0;
-    margin-bottom: 4px;
+    margin: 0 0 4px 0;
     letter-spacing: 0.02em;
     text-align: center;
     word-break: break-word;
 }
 
-/* Add Counselor Card ( + ) */
+/* Add Counselor Card */
 .add-box {
     background-color: #f3f4f6;
     border: 2px dashed #2563eb;
@@ -84,14 +89,13 @@
     font-size: 1.08rem;
     color: #2563eb;
     font-weight: 700;
-    margin: 0;
-    margin-bottom: 4px;
+    margin: 0 0 4px 0;
     letter-spacing: 0.02em;
     text-align: center;
 }
 
 /* =========================
-   Counselor Modal Form 
+   Counselor Modal
 ========================= */
 .counselor-modal {
     display: none;
@@ -101,283 +105,285 @@
     top: 0;
     width: 100vw;
     height: 100vh;
-    background-color: rgba(0, 0, 0, 0.55);
-    box-sizing: border-box;
-    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-    align-items: center;
+    background-color: rgba(0,0,0,0.55);
     justify-content: center;
-    overflow-y: auto;
-    padding: 0;
-}
-.counselor-modal-content {
-    background: #fff;
-    border-radius: 14px;
-    box-shadow: 0 8px 32px rgba(37,99,235,0.13);
-    padding: 38px 36px 28px 36px;
-    width: 540px;
-    height: 90%;
-    margin: 2rem auto;
-    position: relative;
-    display: flex;
-    flex-direction: column;
     align-items: center;
+    overflow-y: auto;
 }
-.counselor-modal-title {
-    font-size: 1.7rem;
-    font-weight: 700;
-    color: #2563eb;
-    margin-bottom: 24px;
-    text-align: center;
-    letter-spacing: 1px;
+.counselor-modal.active {
+    display: flex !important;
 }
-.counselor-row {
+
+.counselor-modal-content {
+    background: #f8fafc;
+    border-radius: 18px;
+    box-shadow: 0 8px 32px rgba(37, 99, 235, 0.13);
+    padding: 40px 44px 32px 44px;
+    margin: 2.5rem auto;
     display: flex;
     flex-direction: column;
     gap: 32px;
+    box-sizing: border-box;
+    max-width: 1250px;
+    width: 100%;
+    position: relative;
+}
+
+/* Modal Title */
+.counselor-modal-title {
+    font-size: 2rem;
+    font-weight: 800;
+    color: #2563eb;
+    text-align: center;
+    margin-bottom: 28px;
+    width: 100%;
+}
+
+/* Close Icon */
+.counselor-close {
+    position: absolute;
+    top: 18px;
+    right: 24px;
+    font-size: 2.1rem;
+    color: #2563eb;
+    cursor: pointer;
+}
+
+/* Image + Name Row */
+.image-name-row {
+    display: flex;
+    gap: 36px;
     align-items: flex-start;
     width: 100%;
-    box-sizing: border-box;
-    margin-bottom: 18px;
 }
-.counselor-image-col {
+
+/* Left Column */
+.image-col {
     display: flex;
     flex-direction: column;
-    align-items: center;
-    width: 500px;
-    box-sizing: border-box;
+    align-items: flex-start;
+    width: 260px;
+    min-width: 260px;
+    max-width: 260px;
     padding-right: 18px;
-}
-.counselor-image-col img.pro-add-image {
-    width: 110px;
-    height: 110px;
-    object-fit: cover;
-    border-radius: 50%;
-    border: 3px solid #2563eb;
-    background: #f8fafc;
-    box-shadow: 0 2px 12px rgba(37,99,235,0.10);
-    margin-bottom: 14px;
-}
-.counselor-image-col input.pro-add-image-input {
-    margin-top: 8px;
-    width: 120px;
-    font-size: 1rem;
-    color: #334155;
-    border: 1.5px solid #cbd5e1;
-    border-radius: 7px;
-    padding: 7px 10px;
-    background: #fff;
-    box-shadow: 0 1px 4px rgba(37,99,235,0.04);
-    transition: border 0.2s;
-}
-.counselor-image-col input.pro-add-image-input:focus {
-    border: 1.5px solid #2563eb;
-    outline: none;
-}
-.counselor-fields-col {
-    flex: 1 1 0;
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-    padding-left: 32px;
+    border-right: 1.5px solid #e5e7eb;
     box-sizing: border-box;
 }
-.counselor-field-row {
+.counsel-image-wrapper {
+    position: relative;
+    width: 250px;
+    height: 225px;
+    margin-bottom: 12px;
+}
+.counselor-image-box {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 5px;
+    border: 2px solid #2563eb;
+    background: #f4f6fa;
+    box-shadow: 0 2px 10px rgba(44,62,80,0.1);
+}
+.counselor-delete-btn {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: rgba(229,62,62,0.1);
+    border: none;
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
     display: flex;
     align-items: center;
-    gap: 16px;
-    margin-bottom: 0;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.25s ease-in-out;
 }
-.counselor-field-row label.add-label {
-    font-weight: 700;
-    color: #1e293b;
-    font-size: 1.08rem;
-    min-width: 120px;
-    margin-bottom: 0;
-    letter-spacing: 0.01em;
+.counselor-delete-btn i {
+    color: #e53e3e;
 }
-.counselor-field-row input.add-input,
-.counselor-field-row select.add-input {
-    flex: 1 1 0;
-    padding: 8px 12px;
+.counselor-delete-btn:hover {
+    background: rgba(229,62,62,0.2);
+    transform: scale(1.1);
+}
+.counselor-delete-btn:hover i {
+    color: #c53030;
+    transform: rotate(-15deg);
+}
+
+/* Upload */
+.counsel-upload-btn {
+    width: 250px;
+    text-align: center;
+    padding: 10px 0;
+    background: #2563eb;
+    color: #fff;
     border-radius: 6px;
-    border: 1px solid #d1d5db;
-    font-size: 1rem;
-    background: #f8fafc;
-    color: #222;
-    transition: border 0.2s;
+    cursor: pointer;
+    font-weight: 600;
+    margin: 10px 0 16px 0;
 }
-.counselor-field-row input.add-input:focus,
-.counselor-field-row select.add-input:focus {
-    border-color: #2563eb;
-    outline: none;
-    background: #fff;
+.counsel-upload-btn:hover {
+    background: #1e40af;
 }
-.counselor-field-row .pro-add-id-value {
-    font-family: monospace;
-    font-size: 1.1em;
+.file-chosen-text {
+    font-size: 0.9rem;
+    color: #4b5563;
+    margin-top: -6px;
+}
+
+/* Counselor ID */
+.counselor-id-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 16px;
+    margin-bottom: 6px;
+    font-weight: 600;
+}
+.counselor-id-label {
+    font-weight: 700;
+    color: #2563eb;
+}
+.counselor-id-value {
+    font-weight: 700;
     color: #2563eb;
     background: #e0e7ff;
-    padding: 2px 8px;
-    border-radius: 6px;
-    display: inline-block;
+    padding: 2px 12px;
+    border-radius: 5px;
 }
-.counselor-field-row .view-field {
+
+/* Right Column */
+.name-fields-col {
+    flex: 1 1 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    padding-left: 32px;
+    box-sizing: border-box;
+    gap: 26px;
+}
+
+/* Fields */
+.counsel-field-col {
+    display: flex;
+    flex-direction: column;
+    min-width: 140px;
+}
+.counsel-label {
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 2px;
     font-size: 1.08rem;
-    color: #374151;
-    font-weight: 500;
-    word-break: break-word;
 }
-.pro-add-buttons {
+.counsel-input {
     width: 100%;
+    padding: 8px 10px;
+    font-size: 1.13rem;
+    font-weight: 600;
+    border-radius: 6px;
+    border: 1px solid #d1d5db;
+    background: #f9fafb;
+    transition: border 0.2s;
+}
+.counsel-input:focus {
+    border: 1.5px solid #2563eb;
+    outline: none;
+    background: #fff;
+}
+
+/* Radio */
+.counsel-radio-group {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+}
+
+/* Form Row */
+.form-row {
+    display: flex;
+    gap: 18px;
+    margin-bottom: 14px;
+    flex-wrap: wrap;
+}
+
+/* Buttons */
+.counselor-buttons {
     display: flex;
     justify-content: flex-end;
     margin-top: 18px;
+    gap: 12px;
 }
-.pro-add-save {
+.counsel-save-btn {
     background: #2563eb;
     color: #fff;
     font-weight: 700;
     border-radius: 6px;
     padding: 10px 32px;
-    font-size: 1.08rem;
-    border: none;
-    box-shadow: 0 2px 8px rgba(37,99,235,0.08);
-    transition: background 0.2s;
     cursor: pointer;
+    transition: background 0.2s;
 }
-.pro-add-save:hover {
+.counsel-save-btn:hover {
     background: #1e40af;
 }
-.close.add-modal-close.pro-add-close {
-    position: absolute;
-    top: 18px;
-    right: 24px;
-    font-size: 1.7rem;
-    color: #2563eb;
-    background: none;
-    border: none;
+.counsel-archive-btn {
+    background: #e53e3e;
+    color: #fff;
+    font-weight: 700;
+    border-radius: 6px;
+    padding: 10px 32px;
     cursor: pointer;
-    z-index: 10;
-    transition: color 0.2s;
+    transition: background 0.2s;
 }
-.close.add-modal-close.pro-add-close:hover {
-    color: #e11d48;
+.counsel-archive-btn:hover {
+    background: #c53030;
 }
 
 /* =========================
-   Archive Confirm Modal
+   Crop Modal (Counselor Image)
 ========================= */
-.archive-confirm-content {
-    background: #fff;
-    border-radius: 16px;
-    box-shadow: 0 8px 32px rgba(37,99,235,0.13);
-    padding: 38px 36px 28px 36px;
-    width: 500px;
-    height: 25%;
-    margin: 2rem auto;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    position: relative;
-}
-.archive-confirm-content h3 {
-    font-size: 1.35rem;
-    font-weight: 700;
-    color: #e11d48;
-    margin-bottom: 18px;
-    text-align: center;
-    letter-spacing: 1px;
-}
-.archive-confirm-content p {
-    font-size: 1.08rem;
-    color: #374151;
-    margin-bottom: 24px;
-    text-align: center;
-}
-.archive-confirm-actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 12px;
+#cropCounselorImageModal {
+    display: none;
+    position: fixed;
+    z-index: 2200;
+    left: 0;
+    top: 0;
     width: 100%;
-}
-.archive-confirm-btn {
-    background: #e11d48;
-    color: #fff;
-    font-weight: 700;
-    border-radius: 6px;
-    padding: 10px 28px;
-    font-size: 1.08rem;
-    border: none;
-    box-shadow: 0 2px 8px rgba(225,29,72,0.08);
-    transition: background 0.2s;
-    cursor: pointer;
-}
-.archive-confirm-btn:hover {
-    background: #be123c;
-}
-.archive-cancel-btn {
-    background: #f3f4f6;
-    color: #374151;
-    font-weight: 700;
-    border-radius: 6px;
-    padding: 10px 28px;
-    font-size: 1.08rem;
-    border: none;
-    box-shadow: 0 2px 8px rgba(37,99,235,0.08);
-    transition: background 0.2s;
-    cursor: pointer;
-}
-.archive-cancel-btn:hover {
-    background: #e0e7ff;
-}
-
-/* ______________________________________________________________________________ */
-
-/* Pagination Styles */
-.pagination {
-    display: flex;
-    flex-direction: row;
-    justify-content: right;
+    height: 100%;
+    background: rgba(0,0,0,0.55);
+    justify-content: center;
     align-items: center;
-    padding-top: 1.3rem;
-    gap: 0.5rem;
 }
 
-.pagination-links,
-.pagination .page-item > a,
-.pagination .page-item > span {
+#cropCounselorImageModal.active {
+    display: flex !important;
+}
+
+.crop-modal-content {
+    max-width: 600px;
+    text-align: center;
     background: #fff;
-    color: #1ea7ff;
-    border-radius: 6px;
-    padding: 8px 18px;
-    font-size: 16px;
-    border: 1px solid #bcd6f7;
-    font-weight: 500;
-    text-decoration: none;
-    transition: background 0.2s, color 0.2s, border 0.2s;
-    margin: 0 2px;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 8px 32px rgba(37,99,235,0.13);
+    z-index: 2210;
+}
+
+.crop-img-container {
+    max-height: 400px;
+    overflow: hidden;
+}
+
+#counselorCropperPreview {
+    max-width: 100%;
+    display: block;
+    margin: 0 auto;
+}
+
+.crop-btn-container {
+    margin-top: 16px;
     display: flex;
-    align-items: center;
-}
-
-.pagination .page-item.active .pagination-links,
-.pagination .page-item.active > span {
-    background: #1ea7ff;
-    color: #fff;
-    border-color: #1ea7ff;
-}
-
-.pagination .pagination-links:hover,
-.pagination .page-item > a:hover {
-    background: #0080ff;
-    color: #fff;
-    border-color: #0080ff;
-}
-
-.pagination .page-item.disabled .pagination-links,
-.pagination .page-item.disabled > span {
-    color: #bcd6f7;
-    background: #f5faff;
-    border-color: #bcd6f7;
-    cursor: not-allowed;
+    justify-content: center;
+    gap: 12px;
 }
