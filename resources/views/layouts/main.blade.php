@@ -1,67 +1,71 @@
     <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.19/index.global.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.19/index.global.min.js"></script>
-<!DOCTYPE html>
-<html lang="en">
+    <!DOCTYPE html>
+    <html lang="en">
 
-<head>
-    <meta charset="utf-8" />
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-    <title>@yield('title', 'SGRMS - School Guidance Records Management System')</title>
+    <head>
+        <meta charset="utf-8" />
+        <meta name="csrf-token" content="{{ csrf_token() }}">
+        <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+        <title>@yield('title', 'SGRMS - School Guidance Records Management System')</title>
 
-    {{-- Styles --}}
-    <link rel="icon" type="image/svg+xml" href="{{ asset('1.png') }}">
-    <link rel="stylesheet" href="{{ asset('css/tailwind.css') }}">
-    <link href="{{ asset('css/font-awesome.min.css') }}" rel="stylesheet" />
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;700&display=swap" rel="stylesheet">
-    <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/3.0.0/uicons-bold-rounded/css/uicons-bold-rounded.css'>
-    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet" />
-    <link rel='stylesheet'
-        href='https://cdn-uicons.flaticon.com/3.0.0/uicons-solid-rounded/css/uicons-solid-rounded.css'>
-    <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/3.0.0/uicons-regular-rounded/css/uicons-regular-rounded.css'>
-    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet" />
-   
+        {{-- Styles --}}
+        <link rel="icon" type="image/svg+xml" href="{{ asset('1.png') }}">
+        <link rel="stylesheet" href="{{ asset('css/tailwind.css') }}">
+        <link href="{{ asset('css/font-awesome.min.css') }}" rel="stylesheet" />
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;700&display=swap" rel="stylesheet">
+        <link rel='stylesheet'
+            href='https://cdn-uicons.flaticon.com/3.0.0/uicons-bold-rounded/css/uicons-bold-rounded.css'>
+        <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet" />
+        <link rel='stylesheet'
+            href='https://cdn-uicons.flaticon.com/3.0.0/uicons-solid-rounded/css/uicons-solid-rounded.css'>
+        <link rel='stylesheet'
+            href='https://cdn-uicons.flaticon.com/3.0.0/uicons-regular-rounded/css/uicons-regular-rounded.css'>
+        <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet" />
+        <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/3.0.0/uicons-regular-straight/css/uicons-regular-straight.css'>
 
-    <link rel="stylesheet" href="{{ asset('css/style.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/bar.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/dashboard.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/table.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/counsel.css') }}">
+        <link rel="stylesheet" href="{{ asset('css/style.css') }}">
+        <link rel="stylesheet" href="{{ asset('css/bar.css') }}">
+        <link rel="stylesheet" href="{{ asset('css/dashboard.css') }}">
+        <link rel="stylesheet" href="{{ asset('css/table.css') }}">
+        <link rel="stylesheet" href="{{ asset('css/counsel.css') }}">
         <link rel="stylesheet" href="{{ asset('css/counseling.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/announcements.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/appointments.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/caseModal.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/case.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/student.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/requests.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/messages.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/notify.css') }}">
-    <link href="{{ asset('css/cropper.min.css') }}" rel="stylesheet">
-    @yield('head')
+        <link rel="stylesheet" href="{{ asset('css/announcements.css') }}">
+        <link rel="stylesheet" href="{{ asset('css/appointments.css') }}">
+        <link rel="stylesheet" href="{{ asset('css/caseModal.css') }}">
+        <link rel="stylesheet" href="{{ asset('css/case.css') }}">
+        <link rel="stylesheet" href="{{ asset('css/student.css') }}">
+        <link rel="stylesheet" href="{{ asset('css/requests.css') }}">
+        <link rel="stylesheet" href="{{ asset('css/messages.css') }}">
+        <link rel="stylesheet" href="{{ asset('css/notify.css') }}">
+        <link href="{{ asset('css/cropper.min.css') }}" rel="stylesheet">
+        @yield('head')
 
-    @vite(['resources/js/app.js'])
-</head>
-<body>
+        @vite(['resources/js/app.js'])
+    </head>
 
-    <!-- SIDEBAR -->
+    <body>
 
-    @include('partials.head-sidebar')
-    @yield('content')
+        <!-- SIDEBAR -->
+
+        @include('partials.head-sidebar')
+        @yield('content')
 
 
 
-</body>
+    </body>
 
-@stack('scripts')
+    @stack('scripts')
 
-       
-</body>
 
-@stack('scripts')
+    </body>
 
-<script src="{{ asset('js/cropper.min.js') }}"></script>
-<script src="{{ asset('js/head.js') }}"></script>
-<script src="{{ asset('js/dashboard.js') }}"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-</html>
+    @stack('scripts')
+
+    <script src="{{ asset('js/cropper.min.js') }}"></script>
+    <script src="{{ asset('js/head.js') }}"></script>
+    <script src="{{ asset('js/dashboard.js') }}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    </html>

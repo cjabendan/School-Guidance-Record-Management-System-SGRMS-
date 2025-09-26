@@ -119,25 +119,6 @@
     display: inline-block;
 }
 
-.toggle-btn {
-    background: #1ea7ff;
-    color: #fff;
-    border: none;
-    border-radius: 7px;
-    padding: 8px 18px;
-    font-size: 1rem;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    box-shadow: 0 2px 8px rgba(30,167,255,0.08);
-    transition: background 0.18s;
-}
-
-.toggle-btn:hover, .toggle-btn:focus {
-    background: #168ed6;
-}
-
 .level-menu {
     display: none;
     position: absolute;

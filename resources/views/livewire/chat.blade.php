@@ -1,5 +1,4 @@
 <div class="chat-app">
-    {{-- Sidebar --}}
     <div class="message-sidebar">
         <div class="message-sidebar-header">
             <div class="message-sidebar-header-title">
@@ -7,67 +6,87 @@
                 <a href="#" wire:click.prevent="startNewChat" id="newChatBtn" class="new-chat-btn">+</a>
             </div>
             <div class="search-wrapper">
-                <input type="text" id="searchChat" placeholder="Search conversations..." class="search-input">
+                <input type="text" id="searchChat" wire:model.live="conversationSearch"
+                    placeholder="Search conversations..." class="search-input">
                 <svg class="search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
-            </div>
-            <div class="chat-filters" id="chat-filters">
-                <ul>
-                    <li>
-                        <a href="#"
-                            class="chat-nav {{ request('category') == 'recent' || !request()->has('category') ? 'active' : '' }}"
-                            data-filter="recent">All</a>
-                    </li>
-                    <li>
-                        <a href="#" class="chat-nav {{ request('category') == 'unread' ? 'active' : '' }}"
-                            data-filter="unread">Unread</a>
-                    </li>
-                    <li>
-                        <a href="#" class="chat-nav {{ request('category') == 'counselor' ? 'active' : '' }}"
-                            data-filter="counselor">Counselors</a>
-                    </li>
+                <ul class="convo-results">
+                    @forelse($conversationSearchResults as $u)
+                        <li wire:click="selectNewChatUser({{ $u->id }})"
+                            style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+                            <img src="{{ asset('images/user/' . $u->profile_image) }}" class="search-user-img">
+                            <span>{{ $u->first_name }} {{ $u->last_name }}</span>
+                        </li>
+                    @empty
+                        @if (strlen($conversationSearch) > 1)
+                            <div class="no-result-convo">
+                                <p class="no-results">Nothing found.</p>
+                                <p>Try searching for different keywords.</p>
+                            </div>
+                        @endif
+                    @endforelse
                 </ul>
             </div>
 
+            @if (empty($conversationSearch))
+                <div class="chat-filters" id="chat-filters">
+                    <ul>
+                        <li>
+                            <a href="#" wire:click.prevent="setFilter('recent')"
+                                class="chat-nav {{ $filter == 'recent' ? 'active' : '' }}" data-filter="recent">All</a>
+                        </li>
+                        <li>
+                            <a href="#" wire:click.prevent="setFilter('unread')"
+                                class="chat-nav {{ $filter == 'unread' ? 'active' : '' }}"
+                                data-filter="unread">Unread</a>
+                        </li>
+                        <li>
+                            <a href="#" wire:click.prevent="setFilter('counselor')"
+                                class="chat-nav {{ $filter == 'counselor' ? 'active' : '' }}"
+                                data-filter="counselor">Counselors</a>
+                        </li>
+                    </ul>
+                </div>
+            @endif
+
         </div>
-        <div id="chatList" class="chat-list">
-            @foreach ($users as $user)
-                <div wire:click="selectUser({{ $user->id }})"
-                    class="chat-item {{ $selectedUser && $selectedUser->id === $user->id ? 'active' : '' }}">
-                    <img src="{{ asset('images/user/' . $user->profile_image) }}" class="user-img" alt="User">
-                    <div class="chat-item-info">
-                        <h3 class="chat-item-username">{{ $user->first_name }} {{ $user->last_name }}</h3>
-                        <div class="chat-item-preview">
-                            <span
-                                class="chat-item-lastmessage
-                        @if ($user->lastMessage && !$user->lastMessage->is_read && $user->lastMessage->sender_id !== Auth::id()) unread @endif">
-                                @if ($user->lastMessage)
-                                    @if ($user->lastMessage->sender_id === Auth::id())
-                                        You: {{ Str::limit($user->lastMessage->message, 20) }}
+        @if (empty($conversationSearch))
+            <div id="chatList" class="chat-list">
+                @foreach ($users as $user)
+                    <div wire:click="selectUser({{ $user->id }})"
+                        class="chat-item {{ $selectedUser && $selectedUser->id === $user->id ? 'active' : '' }}">
+                        <img src="{{ asset('images/user/' . $user->profile_image) }}" class="user-img" alt="User">
+                        <div class="chat-item-info">
+                            <h3 class="chat-item-username">{{ $user->first_name }} {{ $user->last_name }}</h3>
+                            <div class="chat-item-preview">
+                                <span
+                                    class="chat-item-lastmessage
+                                @if ($user->lastMessage && !$user->lastMessage->is_read && $user->lastMessage->sender_id !== Auth::id()) unread @endif">
+                                    @if ($user->lastMessage)
+                                        @if ($user->lastMessage->sender_id === Auth::id())
+                                            You: {{ Str::limit($user->lastMessage->message, 18) }}
+                                        @else
+                                            {{ Str::limit($user->lastMessage->message, 18) }}
+                                        @endif
                                     @else
-                                        {{ Str::limit($user->lastMessage->message, 20) }}
+                                        No messages yet.
                                     @endif
-                                @else
-                                    No messages yet.
-                                @endif
-                            </span>
-                            <span class="chat-item-time"
-                                data-time="{{ $user->lastMessage?->created_at?->diffForHumans() }}">
-                                {{ $user->lastMessage?->created_at?->diffForHumans() }}
-                            </span>
+                                </span>
+                                <span class="chat-item-time" data-time="{{ $user->lastMessage?->created_at }}">
+                                    {{ $user->lastMessage?->created_at?->diffForHumans() }}
+                                </span>
+                            </div>
                         </div>
                     </div>
-                </div>
-            @endforeach
-        </div>
-
+                @endforeach
+            </div>
+        @endif
     </div>
 
-    {{-- Main chat area --}}
     <div class="main-chat" id="mainChat">
-        {{-- === NEW CHAT MODE === --}}
+    <div class="chat-container">
         @if ($newChatMode)
             <div class="new-chat-header">
                 <span>To:</span>
@@ -75,7 +94,7 @@
                     placeholder="Type a name...">
 
                 <ul class="user-results">
-                    @forelse($searchResults as $u)
+                    @forelse($newChatSearchResults as $u)
                         <li wire:click="selectNewChatUser({{ $u->id }})"
                             style="display:flex;align-items:center;gap:8px;cursor:pointer;">
                             <img src="{{ asset('images/user/' . $u->profile_image) }}" class="search-user-img">
@@ -92,7 +111,6 @@
             <div class="messages-container" id="messagesContainer"></div>
         @endif
 
-        {{-- === SELECTED CHAT MODE === --}}
         @if ($selectedUser && !$newChatMode)
             <div class="chat-header">
                 <div class="chat-header-left">
@@ -105,99 +123,210 @@
                     </div>
                 </div>
                 <div class="chat-header-right">
-                    <i class="fi fi-sr-info"></i>
+                    {{-- ⭐ Toggling the Profile Pane --}}
+                    <i class="fi fi-sr-info" wire:click="toggleUserProfile"></i>
                 </div>
             </div>
 
             <div class="messages-container" id="messagesContainer">
                 @if ($messages->isEmpty())
                     <div class="no-messages-user">
-                        <p>No messages yet. Start the conversation 👋</p>
+                        <p class="no-conversation-placeholder">No messages yet.
+                            <br>Start the conversation 👋
+                        </p>
                     </div>
                 @else
-                    @php $nextSenderId = null; @endphp
+                    @php
+                        // Find the latest message sent by me that is read
+                        $latestSeenMessageId = null;
+                        foreach ($messages as $msg) {
+                            if ($msg->sender_id === Auth::id() && $msg->is_read) {
+                                $latestSeenMessageId = $msg->id;
+                                break; // messages are in reverse order (latest first)
+                            }
+                        }
+                    @endphp
 
                     @foreach ($messages as $index => $message)
                         @php
-                            $nextMessage = $messages[$index + 1] ?? null;
-                            $nextSenderId = $nextMessage ? $nextMessage->sender_id : null;
-                        @endphp
+                            $prevMessage = $messages[$index - 1] ?? null;
+                            $prevSenderId = $prevMessage ? $prevMessage->sender_id : null;
 
-                        <div class="message-row {{ $message->sender_id === Auth::id() ? 'sent' : 'received' }}">
-                            @if ($message->sender_id !== Auth::id())
-                                {{-- Show avatar only if next message is from a different sender or this is last message --}}
-                                @if ($nextSenderId !== $message->sender_id)
+                            $isToday = $message->created_at->isToday();
+                            $tooltip = $isToday
+                                ? $message->created_at->format('h:i A')
+                                : $message->created_at->format('M d, Y');
+
+                            $isSentByMe = $message->sender_id === Auth::id();
+                        @endphp
+                        {{-- Show seen status only for the latest seen message --}}
+                        @if ($isSentByMe && $message->id === $latestSeenMessageId)
+                            <div class="seen-status">
+                                <img src="{{ asset('images/user/' . $selectedUser->profile_image) }}"
+                                    class="seen-img" title="Seen {{ $tooltip }}" alt="Seen">
+                            </div>
+                        @endif
+
+                        <div class="message-row {{ $isSentByMe ? 'sent' : 'received' }}">
+                            {{-- Sender Profile Image for RECEIVED messages --}}
+                            @if (!$isSentByMe)
+                                @if ($prevSenderId !== $message->sender_id)
                                     <div class="sender-info">
                                         <img src="{{ asset('images/user/' . $selectedUser->profile_image) }}"
                                             class="sender-img" alt="User">
                                     </div>
                                 @else
-                                    <div class="sender-info" style="width: 40px;"></div> {{-- keep alignment --}}
+                                    <div class="sender-info" style="width: 40px;"></div>
                                 @endif
                             @endif
 
-                            <div class="message-data {{ $message->sender_id === Auth::id() ? 'sent' : 'received' }}">
+                            <div class="message-data {{ $isSentByMe ? 'sent' : 'received' }}"
+                                title="{{ $tooltip }}">
                                 <p>{{ $message->message }}</p>
                             </div>
-
-                            <span class="message-time">{{ $message->created_at->diffForHumans() }}</span>
                         </div>
                     @endforeach
-
 
                 @endif
             </div>
 
 
             <div class="chat-footer">
-                <form wire:submit="submit" id="messageForm">
-                    <input wire:model.live="newMessage" type="text" id="messageInput" placeholder="Type a message..."
-                        required>
-                    <button type="submit"><i class="fi fi-sr-paper-plane-top"></i></button>
-                </form>
+                @if ($isBlocked)
+                    <div class="blocked-status-message">
+                        <p>Communication has been temporarily suspended due to potential violations of the system's Terms of Service. Please contact the Guidance Office immediately for a resolution.</p>
+                    </div>
+                @elseif ($hasBlocked)
+                    <div class="blocked-status-message">
+                        <p>You have blocked <span class="blocked-user-name">{{ $selectedUser->first_name }}</span>. Unblock them to chat.</p>
+                    </div>
+                @else
+                    <form wire:submit="submit" id="messageForm">
+                        <input wire:model.live="newMessage" type="text" id="messageInput"
+                            placeholder="Type a message..." required>
+                        <button type="submit"><i class="fi fi-sr-paper-plane-top"></i></button>
+                    </form>
+                @endif
+                
+            </div>
+
+        @endif 
+        
+        @if ($showInactiveUserMessage)
+            <div class="no-conversation-holder">
+                <img src="{{ asset('images/img/no-convo.png') }}" alt="No convo" class="no-conversation-image">
+                <p class="no-conversation-placeholder">
+                    This user is currently Inactive and unavailable for messaging.
+                </p>
             </div>
         @endif
+        
+        @if ($users->isEmpty() && !$newChatMode && !$selectedUser && !$showInactiveUserMessage)
+            <div class="no-conversation-holder">
+                <img src="{{ asset('images/img/no-convo.png') }}" alt="No convo" class="no-conversation-image">
+                <p class="no-conversation-placeholder">
+                    Looks like you don't have any conversations yet.<br>Start a new conversation!
+                </p>
+            </div>
+        @endif
+
     </div>
-    <div class="user-chat-profile-info" id="userChatProfileInfo"></div>
+</div>
+    @if ($selectedUser)
+        <div class="user-chat-profile-info {{ $showUserProfile ? 'active' : '' }}" id="userChatProfileInfo"
+            data-user-id="{{ $selectedUser->id }}">
+            <div class="user-chat-profile-container">
+                {{-- ⭐ Fix the missing close button header --}}
+                <div class="user-profile-header" style="position: absolute; top: 10px; right: 10px;">
+                    <a href="#" class="close-profile-btn" wire:click.prevent="toggleUserProfile">&times;</a>
+                </div>
+                <div class="user-profile-img-wrapper">
+                    <img src="{{ asset('images/user/' . $selectedUser->profile_image) }}" class="user-profile-img"
+                        alt="User">
+                </div>
+                <div class="user-chat-header-info">
+                    <h2 class="user-profile-name">{{ $selectedUser->first_name }} {{ $selectedUser->last_name }}</h2>
+                    <p class="user-profile-role">{{ $selectedUser->role }}</p>
+                </div>
+                <div class="user-chat-section">
+                    <ul>
+                        <li class="user-chat-icon">
+                            <i class="fi fi-sr-envelope"></i>
+                            <p>Email</p>
+                        </li>
+                        <li class="user-chat-icon">
+                            <i class="fi fi-sr-phone-call"></i>
+                            <p>Contact</p>
+                        </li>
+                    </ul>
+                </div>
+                <div class="user-chat-privacy">
+                    <div class="privacy-header" wire:click="togglePrivacyDropdown">
+                        <div>
+                            <h3>Privacy & support</h3>
+                        </div>
+                        <div>
+                            <i class="fi fi-br-angle-small-{{ $showPrivacyDropdown ? 'up' : 'down' }}"></i>
+                        </div>
+                    </div>
+                    <div class="privacy-dropdown{{ $showPrivacyDropdown ? ' active' : '' }}">
+                        <ul>
+                            <li>
+                                <i class="fi fi-sr-minus-circle"></i>
+                                <a href="#" wire:click.prevent="toggleBlockUser">
+                                    {{ $hasBlocked ? 'Unblock User' : 'Block User' }}
+                                </a>
+                            </li>
+                            <li>
+                                <i class="fi fi-sr-trash"></i>
+                                <a href="#">Delete chat</a>
+                            </li>
+                            @if ($isBlocked)
+                                <li style="color: #dc3545; font-size: 12px; padding: 5px 15px;">
+                                    <i class="fi fi-sr-lock"></i>
+                                    You are blocked by this user.
+                                </li>
+                            @endif
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endif
 </div>
 
 <script>
-    function scrollMessagesToBottom(force = false) {
-        const container = document.getElementById("messagesContainer");
-        if (!container) return;
-
-        const isNearBottom =
-            container.scrollHeight - container.scrollTop - container.clientHeight < 100;
-
-        if (force || isNearBottom) {
-            container.scrollTo({
-                top: container.scrollHeight,
-                behavior: "smooth"
-            });
-        }
-    }
-
-    document.addEventListener("DOMContentLoaded", () => {
-        // Initial scroll when page loads
-        scrollMessagesToBottom(true);
-
-        // After Livewire updates the DOM (new message, switched chat, etc.)
-        Livewire.hook("message.processed", () => {
-            scrollMessagesToBottom(true);
+    document.addEventListener('livewire:initialized', () => {
+        Livewire.on('requestProfilePaneState', ({
+            localStorageKey
+        }) => {
+            const state = localStorage.getItem(localStorageKey);
+            Livewire.dispatchSelf('setUserProfileState', state === 'true');
         });
 
-        // If you also dispatch a browser event when switching chats
-        window.addEventListener("chat:selected", () => {
-            setTimeout(() => scrollMessagesToBottom(true), 50);
+        Livewire.on('saveProfilePaneState', ({
+            isVisible,
+            localStorageKey
+        }) => {
+            localStorage.setItem(localStorageKey, isVisible ? 'true' : 'false');
         });
 
-        // Listen for custom event after message sent/received
-        window.addEventListener("chat:messageSent", () => {
-            setTimeout(() => scrollMessagesToBottom(true), 50);
+        Livewire.on('chat:selected', () => {
+            setTimeout(() => {
+                const container = document.getElementById('messagesContainer');
+                if (container) {
+                    container.scrollTop = container.scrollHeight;
+                }
+            }, 50);
+        });
+
+        Livewire.on('chat:messageSent', () => {
+            setTimeout(() => {
+                const container = document.getElementById('messagesContainer');
+                if (container) {
+                    container.scrollTop = container.scrollHeight;
+                }
+            }, 50);
         });
     });
-
-    // Optionally, dispatch this event from Livewire after submit or receiving a message
-    // In your Livewire component, after pushing a message:
-    // $this->dispatchBrowserEvent('chat:messageSent');
 </script>

@@ -10,6 +10,7 @@
 }
 @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap");
 
+
 * {
     margin: 0;
     padding: 0;
@@ -426,7 +427,7 @@ select:focus {
     border: 1px solid #8f8f8f65;
     border-radius: 5px;
     color: #5757578f;
-    padding: 10px;
+    padding: 9px 10px;
     font-size: 1rem;
     font-weight: 200;
     justify-content: center;

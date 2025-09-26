@@ -11,17 +11,19 @@
                         <div class="table-filter">
                             <div class="filters">
                                 <li>
-                                    <div class="a-nav active">All</div>
-                                    <div class="a-nav">Minor</div>
-                                    <div class="a-nav">Major</div>
-                                    <div class="a-nav">Grave</div>
+                                    <a href="#" class="a-nav active" data-filter="all">All</a>
+                                    <a href="#" class="a-nav" data-filter="minor">Minor</a>
+                                    <a href="#" class="a-nav" data-filter="major">Major</a>
+                                    <a href="#" class="a-nav" data-filter="grave">Grave</a>
                                 </li>
                             </div>
-                            <button class="add-btn" data-bs-toggle="modal" data-bs-target="#addCaseModal"
-                            ><i class="fi fi-br-plus"></i>Add Case</button>
-                            <form action="<?php echo e(route('Head.cases.import')); ?>" method="POST" enctype="multipart/form-data" style="display:inline;">
+                            <button class="add-btn" data-bs-toggle="modal" data-bs-target="#addCaseModal"><i
+                                    class="fi fi-br-plus"></i>Add Case</button>
+                            <form action="<?php echo e(route('Head.cases.import')); ?>" method="POST" enctype="multipart/form-data"
+                                style="display:inline;">
                                 <?php echo csrf_field(); ?>
-                                <input type="file" name="import_file" accept=".csv" style="display:none;" id="import-file-input">
+                                <input type="file" name="import_file" accept=".csv" style="display:none;"
+                                    id="import-file-input">
                                 <button type="button" class="pro-add-import" id="import-btn">Import</button>
                             </form>
                             <a href="<?php echo e(route('Head.cases.export')); ?>" class="pro-add-export">
@@ -111,78 +113,88 @@
     <?php echo $__env->make('Head.Modal.caseModal', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
 
     <script>
-$(document).ready(function() {
-    // Existing live search
-    $('#case-search-input').on('input', function() {
-        let query = $(this).val();
-        let level = $('.level-option.active').data('level') || '';
-        $.ajax({
-            url: "<?php echo e(route('Head.cases.index')); ?>",
-            type: "GET",
-            data: { search: query, level: level },
-            success: function(response) {
-                let html = $(response).find('#cases-list').html();
-                $('#cases-list').html(html);
-            }
+        $(document).ready(function() {
+            // Existing live search
+            $('#case-search-input').on('input', function() {
+                let query = $(this).val();
+                let level = $('.level-option.active').data('level') || '';
+                $.ajax({
+                    url: "<?php echo e(route('Head.cases.index')); ?>",
+                    type: "GET",
+                    data: {
+                        search: query,
+                        level: level
+                    },
+                    success: function(response) {
+                        let html = $(response).find('#cases-list').html();
+                        $('#cases-list').html(html);
+                    }
+                });
+            });
+
+            // Toggle dropdown
+            $('#toggle-view-btn').on('click', function(e) {
+                e.stopPropagation();
+                $('#level-menu').toggle();
+            });
+
+            // Hide dropdown when clicking outside
+            $(document).on('click', function() {
+                $('#level-menu').hide();
+            });
+
+            // Filter by level
+            $('.level-option').on('click', function() {
+                $('.level-option').removeClass('active');
+                $(this).addClass('active');
+                let level = $(this).data('level');
+                let search = $('#case-search-input').val();
+                $('#level-menu').hide();
+                $('#toggle-label').text($(this).text());
+                $.ajax({
+                    url: "<?php echo e(route('Head.cases.index')); ?>",
+                    type: "GET",
+                    data: {
+                        search: search,
+                        level: level
+                    },
+                    success: function(response) {
+                        let html = $(response).find('#cases-list').html();
+                        $('#cases-list').html(html);
+                    }
+                });
+            });
+
+            // Import button triggers file input
+            $('#import-btn').on('click', function() {
+                $('#import-file-input').click();
+            });
+            $('#import-file-input').on('change', function() {
+                $(this).closest('form').submit();
+            });
+
+            // Case severity filter (structure now matches announcements)
+            $('.filters .a-nav').on('click', function(e) {
+                e.preventDefault();
+                $('.filters .a-nav').removeClass('active');
+                $(this).addClass('active');
+                let severity = $(this).data('filter');
+                let search = $('#case-search-input').val();
+                $.ajax({
+                    url: "<?php echo e(route('Head.cases.index')); ?>",
+                    type: "GET",
+                    data: {
+                        search: search,
+                        filter_severity: severity === 'all' ? '' : severity
+                    },
+                    success: function(response) {
+                        let html = $(response).find('#cases-list').html();
+                        $('#cases-list').html(html);
+                    }
+                });
+            });
         });
-    });
-
-    // Toggle dropdown
-    $('#toggle-view-btn').on('click', function(e) {
-        e.stopPropagation();
-        $('#level-menu').toggle();
-    });
-
-    // Hide dropdown when clicking outside
-    $(document).on('click', function() {
-        $('#level-menu').hide();
-    });
-
-    // Filter by level
-    $('.level-option').on('click', function() {
-        $('.level-option').removeClass('active');
-        $(this).addClass('active');
-        let level = $(this).data('level');
-        let search = $('#case-search-input').val();
-        $('#level-menu').hide();
-        $('#toggle-label').text($(this).text());
-        $.ajax({
-            url: "<?php echo e(route('Head.cases.index')); ?>",
-            type: "GET",
-            data: { search: search, level: level },
-            success: function(response) {
-                let html = $(response).find('#cases-list').html();
-                $('#cases-list').html(html);
-            }
-        });
-    });
-
-    // Import button triggers file input
-    $('#import-btn').on('click', function() {
-        $('#import-file-input').click();
-    });
-    $('#import-file-input').on('change', function() {
-        $(this).closest('form').submit();
-    });
-
-    $('.severity-filter').on('click', function(e) {
-        e.preventDefault();
-        $('.severity-filter').removeClass('active');
-        $(this).addClass('active');
-        let severity = $(this).text().trim() === 'All' ? '' : $(this).text().trim();
-        let search = $('#case-search-input').val();
-        $.ajax({
-            url: "<?php echo e(route('Head.cases.index')); ?>",
-            type: "GET",
-            data: { search: search, filter_severity: severity },
-            success: function(response) {
-                let html = $(response).find('#cases-list').html();
-                $('#cases-list').html(html);
-            }
-        });
-    });
-});
-</script>
+    </script>
 <?php $__env->stopSection(); ?>
 
 <?php echo $__env->make('layouts.main', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\Administrator\School-Guidance-Record-Management-System-SGRMS\resources\views/Head/case.blade.php ENDPATH**/ ?>

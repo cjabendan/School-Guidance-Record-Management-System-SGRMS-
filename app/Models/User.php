@@ -2,8 +2,14 @@
 
 namespace App\Models;
 
+
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+
+/**
+ * @property \Illuminate\Database\Eloquent\Relations\BelongsToMany $blockedBy
+ * @property \Illuminate\Database\Eloquent\Relations\BelongsToMany $blocks
+ */
 
 class User extends Authenticatable
 {
@@ -45,21 +51,15 @@ class User extends Authenticatable
         'login_token',
     ];
 
-    // === Relationships ===
-
-    // If this user is a student
     public function student()
     {
         return $this->hasOne(Student::class, 'user_id');
     }
 
-    // If this user is a counselor
     public function counselor()
     {
         return $this->hasOne(Counselor::class, 'user_id');
     }
-
-    // If this user is a parent
 
     public function parentProfile()
     {
@@ -67,19 +67,25 @@ class User extends Authenticatable
         return $this->hasOne(ParentModel::class, 'user_id');
     }
 
-    // If this user is an admin
-
     public function admin()
     {
         return $this->hasOne(Admins::class, 'user_id');
     }
 
     public function lastMessage()
-{
-    return $this->hasOne(ChatMessage::class, 'sender_id')
-        ->orWhere('receiver_id', $this->id)
-        ->latest();
-}
+    {
+        return $this->hasOne(ChatMessage::class, 'sender_id')
+            ->orWhere('receiver_id', $this->id)
+            ->latest();
+    }
 
-  
+    public function blocks()
+    {
+        return $this->belongsToMany(User::class, 'user_blocks', 'blocker_id', 'blocked_id');
+    }
+
+    public function blockedBy()
+    {
+        return $this->belongsToMany(User::class, 'user_blocks', 'blocked_id', 'blocker_id');
+    }
 }

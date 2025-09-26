@@ -84,7 +84,7 @@
 
 .chat-nav {
   display: block;
-  padding: 12px 16px;
+  padding: 8px 14px;
   border-radius: 50px;
   font-weight: 500;
   font-size: 0.95rem;
@@ -225,12 +225,11 @@
 }
 
 .chat-header-right i {
-    font-size: 1.8rem;
+    font-size: 1.6rem;
     color: #1ea7ff;
     cursor: pointer;
     margin-right: .7rem;
 }
-
 
 .chat-header-info {
     display: flex;
@@ -261,15 +260,16 @@
 
 .messages-container {
     flex: 1; 
-      min-height: 0; 
+    min-height: 0; 
     max-height: 100%;
     overflow-y: auto; 
     background-color: #ffffff;
     padding: 16px;
     display: flex;
-    flex-direction: column;
+    flex-direction: column-reverse;
     gap: 16px;
     scroll-behavior: smooth;
+     position: relative; 
 }
 
 .message-data {
@@ -290,8 +290,6 @@
 
 .message-row {
     display: flex;
-    flex-direction: row;
-    justify-content: flex-start;
     align-items: center;
     gap: 8px;
     position: relative;
@@ -319,6 +317,22 @@
     color: #000000;
     border-radius: 32px 32px 32px 3px;
     align-self: flex-start;
+}
+
+.seen-status {
+    width: 100%; 
+    display: flex;
+    justify-content: flex-end; 
+    margin-top: -5px; 
+}
+
+/* Style for the actual profile image icon */
+.seen-img {
+    width: 18px; /* Make the image small */
+    height: 18px;
+    border-radius: 50%;
+    object-fit: cover;
+    opacity: 0.8; 
 }
 
 .sender-info {
@@ -459,8 +473,8 @@
 }
 
 .new-chat-btn {
-    height: 40px;
-    width: 40px;
+    height: 35px;
+    width: 35px;
     cursor: pointer;
     border-radius: 8px;
     background: linear-gradient(
@@ -483,7 +497,8 @@
     );
 }
 
-.no-conversation-holder {
+.no-conversation-holder,
+.no-messages-user {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -526,6 +541,19 @@
     display: flex;
     align-items: center;
 }
+
+.convo-results {
+  position: absolute;
+    left: 0;
+    right: 0;
+    top: 40;
+    width: 100%;
+    max-width: 360px;
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 1000;
+}
+
 .user-results {
     position: absolute;
     left: 60;
@@ -539,12 +567,30 @@
     z-index: 1000;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
 }
-.user-results li {
-    padding: 0.5rem;
+
+
+.user-results li,
+.convo-results li {
+    padding: 0.8rem;
     cursor: pointer;
+    border-radius: 8px;
 }
-.user-results li:hover {
+.user-results li:hover,
+.convo-results li:hover {
     background: #f0f0f0;
+}
+
+.no-result-convo {
+    text-align: center;
+    justify-content: center;
+    padding: 5px 20px 0 20px;
+    gap: 10px;
+    color: #6b7280;
+}
+
+.no-result-convo .no-results {
+    font-size: 1.1rem;
+    color: #000000;
 }
 
 /* User Profile Style */
@@ -563,8 +609,6 @@
 .user-chat-profile-info .user-chat-profile-container {
     display: flex;    
     flex-direction: column;
-    align-items: center;
-    
     flex: 1;
     padding: 25px 20px;
     height: 100%;
@@ -574,17 +618,158 @@
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
 }
 
-.user-profile-img {
+.user-profile-img-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.user-profile-img-wrapper .user-profile-img {
     width: 80px;
     height: 80px;
     border-radius: 50%;
     margin-bottom: 12px;
     object-fit: cover;
+    align-items: center;
 }
 
-.user-profile-name {
+.user-profile-name{
     font-size: 1.4rem;
     font-weight: 600;
     color: #1f2937;
     margin-bottom: 4px;
+    text-align: center;
+}
+
+.user-profile-role {
+    font-size: 1rem;
+    font-weight: 500;
+    color: #6b7280;
+    text-align: center;
+    margin-bottom: 12px;
+}
+
+.user-chat-section {
+    display: flex;
+    width: 100%;
+}
+
+.user-chat-section ul {
+    display: flex;
+    flex: 1;
+    gap: 35px;
+    margin-top: 8px;
+    justify-content: center;
+}
+
+.user-chat-section ul .user-chat-icon {
+    display: flex;
+    gap: 10px;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.user-chat-section ul .user-chat-icon i {
+    font-size: 1.2rem;
+    background-color: #ebebeb;
+    padding: 15px;
+    color: black;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: color 0.2s ease;
+}
+
+.user-chat-privacy {
+    flex: 1;
+    margin-top: 12px;
+}
+
+.user-chat-privacy .privacy-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px;
+    cursor: pointer;
+}
+
+.privacy-header:hover {
+    background-color: #eeeeee;
+    border-radius: 8px;
+}
+
+.user-chat-privacy .privacy-header h3,
+.user-chat-privacy .privacy-header i {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #1f2937;
+    align-items: center;
+}
+
+.privacy-dropdown {
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    transition: max-height 0.3s cubic-bezier(0.4,0,0.2,1), opacity 0.2s;
+    border-radius: 0 0 8px 8px;
+    box-shadow: none;
+}
+
+.privacy-dropdown.active {
+    max-height: 300px;
+    opacity: 1;
+}
+
+.privacy-dropdown ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.privacy-dropdown li {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 8px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.privacy-dropdown li:last-child {
+    border-bottom: none;
+}
+
+.privacy-dropdown li:hover {
+    background: #e6f2ff;
+    border-radius: 6px;
+}
+
+.privacy-dropdown i {
+    font-size: 1.1rem;
+    color: #242424;
+}
+
+.privacy-dropdown a {
+    color: #1f2937;
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.2s;
+    font-size: 1.1rem;
+}
+
+.privacy-dropdown li:hover {
+    background-color: #eeeeee;
+}
+
+.blocked-status-message {
+    background-color: #eeeeee;
+    padding: 12px 16px;
+    border-radius: 8px;
+    text-align: center;
+    font-weight: 500;
+    font-size: 1rem;
+}
+
+.blocked-user-name {
+    font-weight: 600;
 }

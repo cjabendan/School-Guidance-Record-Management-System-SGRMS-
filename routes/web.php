@@ -52,8 +52,13 @@ Route::get('/announcements/view/{id}', [AnnouncementsController::class, 'view'])
 
 // =========================== Authentication Routes ===================================== //
 Route::middleware('web')->group(function () {
-    Route::post('/login', [LoginController::class, 'login'])->name('login');
+    Route::post('/', function () {
+        return view('landing');
+    });
 });
+
+Route::get('login', [LoginController::class, 'showLoginForm'])->name('login'); // Show login form
+Route::post('login', [LoginController::class, 'login']); // Handle login
 
 
 Route::get('register', [RegisterController::class, 'showForm'])->name('register');
@@ -62,7 +67,6 @@ Route::post('register', [RegisterController::class, 'register']);
 
 // Activation link
 Route::get('/activate/{token}', [RegisterController::class, 'activate'])->name('activate');
-
 Route::get('/verify-email', [RegisterController::class, 'showVerificationEmail'])->name('verify');
 Route::get('/success-verification', [RegisterController::class, 'showSuccessEmail'])->name('success');
 Route::post('/verification/resend', [RegisterController::class, 'resendActivationLink'])->name('verification.resend');
