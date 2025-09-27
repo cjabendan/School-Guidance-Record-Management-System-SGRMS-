@@ -4,14 +4,18 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Conversation;
 
+// Auth Controllers
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\LogoutController;
 use App\Http\Controllers\Auth\LoginController;
 
+// Global/Shared Controllers
 use App\Http\Controllers\StaffController;
 use App\Http\Controllers\AnnouncementsController;
 use App\Http\Controllers\ChatController;
+use App\Http\Controllers\NotifyController;
 
+// Head Controllers
 use App\Http\Controllers\Head\HeadDashboardController;
 use App\Http\Controllers\Head\HeadCounselorController;
 use App\Http\Controllers\Head\HeadStudentController;
@@ -24,70 +28,89 @@ use App\Http\Controllers\Head\HeadAppointmentController;
 use App\Http\Controllers\Head\HeadAnnouncementController;
 use App\Http\Controllers\Head\HeadSettingsController;
 
+// Counselor Controllers
 use App\Http\Controllers\Counselor\CounselorDashboardController;
 use App\Http\Controllers\Counselor\CounselorMessageController;
 
+// Parent Controllers
 use App\Http\Controllers\Parents\ParentDashboardController;
 use App\Http\Controllers\Parents\ParentChildController;
 use App\Http\Controllers\Parents\ParentRequestController;
 use App\Http\Controllers\Parents\ParentMessageController;
-use Illuminate\Routing\Events\RouteMatched;
 
-use App\Http\Controllers\NotifyController;
+// Unused or redundant imports (removed for cleanliness)
+// use Illuminate\Routing\Events\RouteMatched;
+// use App\Http\Controllers\Head\StudentController; 
+// use App\Models\Counselor;
+// use Dompdf\FrameDecorator\Page;
 
-use App\Http\Controllers\Head\StudentController;
-use App\Models\Counselor;
-use Dompdf\FrameDecorator\Page;
+/*
+|--------------------------------------------------------------------------
+| Public Routes (Landing, Announcements, Auth)
+|--------------------------------------------------------------------------
+*/
 
-// ========================= Landing Page - Staffs ============================= //
 Route::get('/', [StaffController::class, 'index']);
 
-// ========================= Landing Page - Announcements ============================= //
-Route::get('/announcements', [AnnouncementsController::class, 'index'])
-    ->name('announcements.index');
-
-Route::get('/announcements/view/{id}', [AnnouncementsController::class, 'view'])
-    ->name('announcements.view');
-
-
-// =========================== Authentication Routes ===================================== //
-Route::middleware('web')->group(function () {
-    Route::post('/', function () {
-        return view('landing');
-    });
+// Announcements
+Route::prefix('announcements')->name('announcements.')->group(function () {
+    Route::get('/', [AnnouncementsController::class, 'index'])->name('index');
+    Route::get('/view/{id}', [AnnouncementsController::class, 'view'])->name('view');
 });
 
-Route::get('login', [LoginController::class, 'showLoginForm'])->name('login'); // Show login form
-Route::post('login', [LoginController::class, 'login']); // Handle login
-
+// Authentication
+Route::get('login', [LoginController::class, 'showLoginForm'])->name('login');
+Route::post('login', [LoginController::class, 'login']); 
 
 Route::get('register', [RegisterController::class, 'showForm'])->name('register');
 Route::post('register', [RegisterController::class, 'register']);
 
-
-// Activation link
+// Email Verification
 Route::get('/activate/{token}', [RegisterController::class, 'activate'])->name('activate');
 Route::get('/verify-email', [RegisterController::class, 'showVerificationEmail'])->name('verify');
 Route::get('/success-verification', [RegisterController::class, 'showSuccessEmail'])->name('success');
 Route::post('/verification/resend', [RegisterController::class, 'resendActivationLink'])->name('verification.resend');
 
-
 Route::post('/logout', [LogoutController::class, 'logout'])->name('logout');
 
 
-// =========================== Dashboard Routes ===================================== //
+/*
+|--------------------------------------------------------------------------
+| Authenticated Routes (Role-Protected Dashboards & Notifications)
+|--------------------------------------------------------------------------
+*/
+
 Route::middleware('auth')->group(function () {
-    Route::get('/Head/dashboard', [HeadDashboardController::class, 'dashboard'])->name('Head.dashboard');
-    Route::get('/Counselor/dashboard', [CounselorDashboardController::class, 'dashboard'])->name('Counselor.dashboard');
-    Route::get('/Parent/dashboard', [ParentDashboardController::class, 'dashboard'])->name('Parent.dashboard');
+    
+    // Dashboard Routes with specific role middleware for protection
+    Route::get('/Head/dashboard', [HeadDashboardController::class, 'dashboard'])
+        ->middleware('role.head')
+        ->name('Head.dashboard');
+        
+    Route::get('/Counselor/dashboard', [CounselorDashboardController::class, 'dashboard'])
+        ->middleware('role.counselor') 
+        ->name('Counselor.dashboard');
+        
+    Route::get('/Parent/dashboard', [ParentDashboardController::class, 'dashboard'])
+        ->middleware('role.parent')
+        ->name('Parent.dashboard');
+
+    // Notifications
+    Route::get('/notify/fetch', [NotifyController::class, 'fetchNotifications'])->name('notify.fetch');
+    Route::get('/Head/notify/notification', [NotifyController::class, 'index'])
+        ->middleware('role.head')
+        ->name('Head.notify.notification');
 });
 
-Route::get('/notify/fetch', [NotifyController::class, 'fetchNotifications'])->name('notify.fetch');
-Route::get('/Head/notify/notification', [NotifyController::class, 'index'])
-    ->name('Head.notify.notification');
 
-// ========================== Administrator (Head) Routes ================================ //
-Route::prefix('Head')->name('Head.')->middleware('auth')->group(function () {
+/*
+|--------------------------------------------------------------------------
+| Head (Administrator) Routes
+|--------------------------------------------------------------------------
+| Uses 'auth' and 'role.head' middleware to prevent unauthorized access.
+*/
+
+Route::prefix('Head')->name('Head.')->middleware(['auth', 'role.head'])->group(function () {
 
     // Counselors
     Route::get('/counselors', [HeadCounselorController::class, 'index'])->name('counselors.index');
@@ -140,8 +163,7 @@ Route::prefix('Head')->name('Head.')->middleware('auth')->group(function () {
     Route::get('/messages/fetch/{conversationId}', [HeadMessageController::class, 'fetchConversation'])->name('messages.fetch-conversation');
     Route::post('/messages/send/{conversationId}', [HeadMessageController::class, 'sendMessage'])->name('messages.send-message');
     Route::post('/messages/mark-as-read/{conversationId}', [HeadMessageController::class, 'markAsRead']);
-    Route::get('/Head/messages/sidebar-list', [HeadMessageController::class, 'sidebarList'])->name('Head.messages.sidebar-list');
-
+    Route::get('/messages/sidebar-list', [HeadMessageController::class, 'sidebarList'])->name('messages.sidebar-list'); // Removed redundant prefix from path
 
     // Requests
     Route::get('/requests', [HeadRequestController::class, 'index'])->name('requests.index');
@@ -161,10 +183,17 @@ Route::prefix('Head')->name('Head.')->middleware('auth')->group(function () {
     Route::get('/settings', [HeadSettingsController::class, 'index'])->name('settings.index');
 });
 
-// ============================== Counselor Routes ==================================== //
-Route::prefix('Counselor')->name('Counselor.')->middleware('auth')->group(function () {
 
-    // Blade view
+/*
+|--------------------------------------------------------------------------
+| Counselor Routes
+|--------------------------------------------------------------------------
+| Uses 'auth' and 'role.counselor' middleware to prevent unauthorized access.
+*/
+
+Route::prefix('Counselor')->name('Counselor.')->middleware(['auth', 'role.counselor'])->group(function () {
+
+    // Messages
     Route::get('/messages', [CounselorMessageController::class, 'index'])->name('messages.index');
     Route::get('/messages/search-users', [CounselorMessageController::class, 'searchUsers'])->name('messages.search-users');
     Route::post('/messages/conversations/{receiverId}', [CounselorMessageController::class, 'startConversation'])->name('messages.start-conversation');
@@ -174,16 +203,21 @@ Route::prefix('Counselor')->name('Counselor.')->middleware('auth')->group(functi
 });
 
 
+/*
+|--------------------------------------------------------------------------
+| Parent Routes
+|--------------------------------------------------------------------------
+| Uses 'auth' and 'role.parent' middleware to prevent unauthorized access.
+*/
 
+Route::prefix('Parent')->name('Parent.')->middleware(['auth', 'role.parent'])->group(function () {
 
-// ============================== Parent Routes ==================================== //
-Route::prefix('Parent')->name('Parent.')->middleware('auth')->group(function () {
-
+    // Child Management
     Route::get('/child', [ParentChildController::class, 'index'])->name('child.index');
     Route::post('/children/link-request', [ParentChildController::class, 'sendLinkRequest'])->name('link.request');
     Route::get('/children/search-students', [ParentChildController::class, 'searchStudents'])->name('search.students');
 
-    //Messages
+    // Messages
     Route::get('/messages', [ParentMessageController::class, 'index'])->name('messages.index');
     Route::get('/messages/search-users', [ParentMessageController::class, 'searchUsers'])->name('messages.search-users');
     Route::post('/messages/conversations/{receiverId}', [ParentMessageController::class, 'startConversation'])->name('messages.start-conversation');
@@ -196,4 +230,14 @@ Route::prefix('Parent')->name('Parent.')->middleware('auth')->group(function () 
 });
 
 
-// ============================== Student Routes ==================================== //
+/*
+|--------------------------------------------------------------------------
+| Student Routes
+|--------------------------------------------------------------------------
+| Add routes here if you implement a separate Student login/dashboard.
+*/
+
+// Currently, there are no specific student routes defined here.
+
+// Note: Ensure you update your `AppServiceProvider` to use the correct middleware aliases:
+// 'role.head' (instead of 'role.admin'), 'role.counselor', 'role.parent', 'role.student'.

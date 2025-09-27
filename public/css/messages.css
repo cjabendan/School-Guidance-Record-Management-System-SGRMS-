@@ -773,3 +773,45 @@
 .blocked-user-name {
     font-weight: 600;
 }
+
+.search-convo-result-item {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding: 10px;
+   
+}
+
+.scri-img img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-right: 12px;
+}
+
+.scri-content {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.scri-name {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #000000;
+}
+
+.scri-message {
+    font-size: 0.95rem;
+    color: #6b7280;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 220px;
+}
+
+.highlight-word {
+    color: #000000;
+    font-weight: bold;
+}

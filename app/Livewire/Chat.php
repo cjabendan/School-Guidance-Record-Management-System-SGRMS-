@@ -31,6 +31,9 @@ class Chat extends Component
     public $hasBlocked = false;
     public $showInactiveUserMessage = false;
     public $showPrivacyDropdown = false;
+    public $searchModeInProfile = false;
+    public $profileSearchQuery = '';
+    public $profileSearchResults = [];
 
     private const ACTIVE_CONVO_SESSION_KEY = 'active_chat_user_id';
     public const USER_PROFILE_STATE_KEY = 'sgrms_user_profile_visible_';
@@ -472,10 +475,65 @@ class Chat extends Component
         ]);
     }
 
+
+    public function toggleSearchMode()
+    {
+        // Toggles the view between user profile and conversation search
+        $this->searchModeInProfile = !$this->searchModeInProfile;
+
+        // Reset search results/query when exiting search mode
+        if (!$this->searchModeInProfile) {
+            $this->profileSearchQuery = '';
+            $this->profileSearchResults = [];
+        }
+    }
+
+
     public function setUserProfileState($isVisible)
     {
         $this->showUserProfile = $isVisible;
     }
+
+    public function searchInConversation()
+    {
+        if (!$this->selectedUser || empty($this->profileSearchQuery)) {
+            $this->profileSearchResults = [];
+            return;
+        }
+
+        $query = trim($this->profileSearchQuery);
+        $authId = $this->authId;
+        $selectedUserId = $this->selectedUser->id;
+
+        // Use REGEXP for exact word match, case-insensitive
+        $regexp = '[[:<:]]' . preg_quote($query, '/') . '[[:>:]]';
+
+        $this->profileSearchResults = ChatMessage::query()
+            ->where(function ($q) use ($authId, $selectedUserId) {
+                $q->where(function ($q2) use ($authId, $selectedUserId) {
+                    $q2->where('sender_id', $authId)
+                        ->where('receiver_id', $selectedUserId);
+                })
+                    ->orWhere(function ($q2) use ($authId, $selectedUserId) {
+                        $q2->where('sender_id', $selectedUserId)
+                            ->where('receiver_id', $authId);
+                    });
+            })
+            ->whereRaw("LOWER(message) REGEXP ?", [strtolower($regexp)])
+            ->latest()
+            ->take(10)
+            ->get();
+
+        $this->dispatch('profileSearchCompleted');
+    }
+
+
+    public function goToMessage($messageId)
+    {
+
+        $this->dispatch('scrollToMessage', messageId: $messageId);
+    }
+
     public function render()
     {
         return view('livewire.chat');

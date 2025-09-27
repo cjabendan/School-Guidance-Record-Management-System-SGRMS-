@@ -23,7 +23,7 @@ class LoginController extends Controller
     public function login(Request $request)
     {
         $credentials = $request->validate([
-            'login' => 'required|string', // email or role_id
+            'login' => 'required|string',
             'password' => 'required|string|min:8',
         ]);
 
@@ -31,18 +31,16 @@ class LoginController extends Controller
         $user = null;
         $role_id = null;
 
-        // Check if input is email
         if (filter_var($loginInput, FILTER_VALIDATE_EMAIL)) {
             $user = \App\Models\User::where('email', $loginInput)->first();
         } else {
-            // Try to find user by role-specific ID
-            // Admin
+            
             $admin = Admins::where('a_id', $loginInput)->first();
             if ($admin && $admin->user) {
                 $user = $admin->user;
                 $role_id = $admin->a_id;
             }
-            // Student
+        
             if (!$user) {
                 $student = Student::where('s_id', $loginInput)->first();
                 if ($student && $student->user) {
@@ -50,7 +48,7 @@ class LoginController extends Controller
                     $role_id = $student->s_id;
                 }
             }
-            // Parent
+     
             if (!$user) {
                 $parent = ParentModel::where('p_id', $loginInput)->first();
                 if ($parent && $parent->user) {
@@ -58,7 +56,7 @@ class LoginController extends Controller
                     $role_id = $parent->p_id;
                 }
             }
-            // Counselor
+          
             if (!$user) {
                 $counselor = Counselor::where('c_id', $loginInput)->first();
                 if ($counselor && $counselor->user) {
@@ -74,11 +72,10 @@ class LoginController extends Controller
             ]);
         }
 
-        // Attempt login with found user's email and provided password
         if (Auth::attempt(['email' => $user->email, 'password' => $credentials['password']])) {
             $request->session()->regenerate();
 
-            // 🔒 Check if user has verified their email (activation_token is still set)
+          
             if (!is_null($user->activation_token)) {
                 Auth::logout(); // log them out immediately
                 return back()->withErrors([
