@@ -15,14 +15,22 @@
     <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/3.0.0/uicons-bold-rounded/css/uicons-bold-rounded.css'>
     <link rel='stylesheet'
         href='https://cdn-uicons.flaticon.com/3.0.0/uicons-solid-rounded/css/uicons-solid-rounded.css'>
+     <link rel='stylesheet'
+            href='https://cdn-uicons.flaticon.com/3.0.0/uicons-regular-straight/css/uicons-regular-straight.css'>
+
     <link rel="stylesheet" href="<?php echo e(asset('css/style.css')); ?>">
     <link rel="stylesheet" href="<?php echo e(asset('css/bar.css')); ?>">
     <link rel="stylesheet" href="<?php echo e(asset('css/dashboard.css')); ?>">
     <link rel="stylesheet" href="<?php echo e(asset('css/table.css')); ?>">
     <link rel="stylesheet" href="<?php echo e(asset('css/counsel.css')); ?>">
     <link rel="stylesheet" href="<?php echo e(asset('css/messages.css')); ?>">
+    <link rel="stylesheet" href="<?php echo e(asset('css/settings.css')); ?>">
     <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet" />
     <?php echo $__env->yieldContent('head'); ?>
+
+    <?php echo \Livewire\Mechanisms\FrontendAssets\FrontendAssets::styles(); ?>
+
+    <?php echo app('Illuminate\Foundation\Vite')(['resources/css/app.css', 'resources/js/app.js']); ?>
 </head>
 
 <body>
@@ -32,6 +40,12 @@
     <?php echo $__env->make('partials.counselor-sidebar', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
     <?php echo $__env->yieldContent('content'); ?>
 
+    <?php if(isset($slot)): ?>
+        <?php echo e($slot); ?>
+
+    <?php endif; ?>
+
+    <?php echo \Livewire\Mechanisms\FrontendAssets\FrontendAssets::scripts(); ?>
 
 
 

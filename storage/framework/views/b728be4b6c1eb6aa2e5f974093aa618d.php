@@ -44,8 +44,8 @@
                         <span class="text">Appointments</span>
                     </a>
                 </li>
-                <li class="<?php echo e(Request::is('Parent/settings*') ? 'active' : ''); ?>">
-                    <a href="<?php echo e(url('Parent/settings')); ?>">
+                <li class="<?php echo e(Request::is('settings*') ? 'active' : ''); ?>">
+                    <a href="<?php echo e(url('settings')); ?>">
                         <i class='bx bxs-cog'></i>
                         <span class="text">Settings</span>
                     </a>

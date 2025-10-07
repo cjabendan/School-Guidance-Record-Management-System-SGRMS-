@@ -12,7 +12,10 @@
                     alt="User">
             </div>
             <div class="user-chat-header-info">
-                <h2 class="user-profile-name"><?php echo e($selectedUser->first_name); ?> <?php echo e($selectedUser->last_name); ?></h2>
+                <h2 class="user-profile-name"><?php echo e($selectedUser->first_name); ?> <?php echo e($selectedUser->last_name); ?><!--[if BLOCK]><![endif]--><?php if(in_array($selectedUser->role, ['admin', 'counselor'])): ?>
+                        <i class="fi fi-sr-badge-check official-badge" title="Verified"></i>
+                    <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+                </h2>
                 <p class="user-profile-role"><?php echo e($selectedUser->role); ?></p>
             </div>
             <div class="user-chat-section">
@@ -21,15 +24,20 @@
                         <a href="https://mail.google.com/mail/u/0/?view=cm&fs=1&tf=1&to=<?php echo e($selectedUser->email); ?>"
                             target="_blank">
                             <i class="fi fi-sr-envelope"></i>
-                            <p>Email</p>
                         </a>
+                        <p>Email</p>
                     </li>
                     <li class="user-chat-icon">
-                        <i class="fi fi-sr-phone-call"></i>
+                        <a href="tel:<?php echo e($selectedUser->phone); ?>" target="_blank">
+                            <i class="fi fi-sr-phone-call"></i>
+                        </a>
                         <p>Contact</p>
                     </li>
                     <li class="user-chat-icon" wire:click="toggleSearchMode" style="cursor: pointer;">
-                        <i class="fi fi-br-search"></i>
+                        <a href="#">
+                            <i class="fi fi-br-search"></i>
+                        </a>
+
                         <p>Search</p>
                     </li>
                 </ul>
@@ -72,7 +80,7 @@
                     <i class="fi fi-br-angle-left"></i>
                 </a>
                 <form wire:submit.prevent="searchInConversation" style="flex-grow: 1; display: flex;">
-                    
+
                     <input type="text" wire:model="profileSearchQuery"
                         wire:keydown.enter.prevent="searchInConversation" placeholder="Search in conversation..."
                         class="search-input">
@@ -82,7 +90,7 @@
                     </svg>
 
                     <button type="submit" style="background: transparent; border: none; ">
-                        
+
                     </button>
                 </form>
             </div>
@@ -131,16 +139,16 @@
                     </div>
                 <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                     <!--[if BLOCK]><![endif]--><?php if(!empty($profileSearchQuery)): ?>
-                        <div style="padding: 20px; text-align: center;">
-                            <i class="fi fi-sr-info" style="font-size: 24px; color: #999;"></i>
-                            <p style="color: #999; margin-top: 10px;">
+                        <div
+                            style="display: flex; flex-direction: column; padding: 10px 20px; text-align: center; gap: 10px;">
+                            <p style="color: #999;">
                                 No messages found matching "<span
                                     style="font-weight: bold;"><?php echo e($profileSearchQuery); ?></span>" in this chat.
                             </p>
                             <small style="color: #bbb;">Try a different word or phrase.</small>
                         </div>
                     <?php else: ?>
-                        <p style="text-align: center; color: #999; margin-top: 20px;">Enter a word or phrase to search
+                        <p style="text-align: center; color: #999;">Enter a word or phrase to search
                             messages in this conversation.</p>
                     <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                 <?php endif; ?><!--[if ENDBLOCK]><![endif]-->

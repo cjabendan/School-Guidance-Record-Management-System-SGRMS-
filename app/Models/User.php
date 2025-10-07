@@ -5,6 +5,9 @@ namespace App\Models;
 
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Str;
+use Laravel\Fortify\TwoFactorAuthenticatable;
+
 
 /**
  * @property \Illuminate\Database\Eloquent\Relations\BelongsToMany $blockedBy
@@ -50,6 +53,19 @@ class User extends Authenticatable
         'activation_token',
         'login_token',
     ];
+
+
+    /**
+     * Get the user's initials
+     */
+    public function initials(): string
+    {
+        return Str::of($this->name)
+            ->explode(' ')
+            ->take(2)
+            ->map(fn($word) => Str::substr($word, 0, 1))
+            ->implode('');
+    }
 
     public function student()
     {

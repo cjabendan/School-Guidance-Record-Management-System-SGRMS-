@@ -1,0 +1,185 @@
+.settings-wrapper {
+    padding: 0.5rem 1rem;
+}
+
+.settings-header {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #aaaaaa7c;
+}
+
+.settings-header h2 {
+    font-size: 22px;
+    color: #003060;
+    font-weight: 520;
+}
+
+.settings-subheading {
+    color: #aaaaaa;
+    font-size: 1rem;
+}
+
+.settings-flex-container {
+    display: flex;
+    gap: 1rem;
+}
+
+/* Sidebar */
+.settings-sidebar {
+    width: 20%;
+    color: #aaaaaa;
+    padding: 1rem;
+}
+
+.settings-sidebar-list button {
+    width: 100%;
+    background: none;
+    border: none;
+    color: inherit;
+    text-align: left;
+    padding: 0.5rem 0.75rem;
+    cursor: pointer;
+    font-size: 1rem;
+}
+
+.settings-sidebar-list button:hover {
+    background-color: #eeeeee;
+    border-radius: 7px;
+}
+
+/* Right Content */
+.settings-right-content {
+    width: 80%;
+    padding: 1.25rem 1.5rem;
+}
+
+.settings-form {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    gap: 20px;
+}
+
+.settings-form-header {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 5px;
+}
+
+.settings-form-heading {
+    font-size: 1.25rem;
+    font-weight: 500;
+    padding-bottom: 5px;
+}
+
+.settings-form-subheading {
+    color: #aaaaaa;
+    font-size: 1rem;
+}
+
+.settings-flex-row {
+    display: flex;
+    gap: 1.5rem;
+    flex: 1;
+}
+
+.settings-form-label {
+    font-size: 16px;
+    font-weight: 500;
+    color: #003060;
+    letter-spacing: 0;
+}
+
+.settings-form-input {
+    width: 100%;
+    padding: 0.5rem 0.8rem;
+    border: 1px solid #cccccc;
+    border-radius: 7px;
+    background-color: #ffffff;
+    color: #000000;
+}
+
+.settings-form-input:focus {
+    outline: none;
+    border-color: #003060;
+}
+
+.settings-form-button {
+    margin-top: 0.5rem;
+    padding: 0.5rem 1rem;
+    background-color: #003060;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1rem;
+    align-items: center;
+}
+
+.settings-form-button .icons,
+.recoverycodes-container .icons {
+    width: 18px;
+    height: 18px;
+    margin-right: 6px;
+    align-items: center;
+}
+
+/* Align icons and text in buttons and headers */
+.settings-form-button,
+.recoverycodes-header {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    vertical-align: middle;
+}
+
+.settings-form-button .icons,
+.recoverycodes-header .icons {
+    width: 18px;
+    height: 18px;
+    margin-right: 0;
+    vertical-align: middle;
+    display: inline-block;
+}
+
+.settings-form-button.Disabled,
+.settings-form-button.Delete {
+    background-color: #fa1515;
+}
+
+.twoFactor-status {
+    font-weight: 600;
+    padding: 0.35rem 0.7rem;
+    border-radius: 7px;
+}
+
+.twoFactor-status.Enabled {
+    background-color: #d1ffdb;
+    color: #0a8d28;
+}
+.twoFactor-status.Disabled {
+    background-color: #ffd8d8;
+    color: #e22121;
+}
+.settings-form-footer {
+    margin-top: 1.5rem;
+}
+
+/* Recovery Codes */
+.recoverycodes-container {
+    display: flex;
+    width: 55%;
+    flex-direction: column;
+    border: 1px solid #cccccc;
+    padding: 1.5rem;
+    border-radius: 7px;
+    gap: 0.8rem;
+}
+
+.recoverycodes-header {
+    font-size: 1.2rem;
+    font-weight: 500;
+    color: #000000;
+}

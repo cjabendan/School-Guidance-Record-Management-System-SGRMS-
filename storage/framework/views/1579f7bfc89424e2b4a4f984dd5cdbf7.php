@@ -22,7 +22,7 @@
                                     data-filter="declined">Declined</a>
                             </li>
                         </div>
-                        <a href="#" class="add-btn"><i class="fi fi-br-plus"></i>Create Appointment</a>
+                        <a href="#" class="add-btn"><i class="fi fi-br-plus"></i>Create appointment</a>
                     </div>
                     <div class="search-bar">
                         <div class="table-search">

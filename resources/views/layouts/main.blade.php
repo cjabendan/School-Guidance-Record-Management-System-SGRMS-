@@ -22,8 +22,8 @@
             href='https://cdn-uicons.flaticon.com/3.0.0/uicons-solid-rounded/css/uicons-solid-rounded.css'>
         <link rel='stylesheet'
             href='https://cdn-uicons.flaticon.com/3.0.0/uicons-regular-rounded/css/uicons-regular-rounded.css'>
-        <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet" />
-        <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/3.0.0/uicons-regular-straight/css/uicons-regular-straight.css'>
+        <link rel='stylesheet'
+            href='https://cdn-uicons.flaticon.com/3.0.0/uicons-regular-straight/css/uicons-regular-straight.css'>
 
         <link rel="stylesheet" href="{{ asset('css/style.css') }}">
         <link rel="stylesheet" href="{{ asset('css/bar.css') }}">
@@ -39,10 +39,12 @@
         <link rel="stylesheet" href="{{ asset('css/requests.css') }}">
         <link rel="stylesheet" href="{{ asset('css/messages.css') }}">
         <link rel="stylesheet" href="{{ asset('css/notify.css') }}">
+        <link rel="stylesheet" href="{{ asset('css/settings.css') }}">
         <link href="{{ asset('css/cropper.min.css') }}" rel="stylesheet">
         @yield('head')
-
-        @vite(['resources/js/app.js'])
+       
+        @livewireStyles
+        @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
 
     <body>
@@ -52,15 +54,14 @@
         @include('partials.head-sidebar')
         @yield('content')
 
+        @isset($slot)
+            {{ $slot }}
+        @endisset
 
 
+         @livewireScripts
     </body>
-
-    @stack('scripts')
-
-
-    </body>
-
+  
     @stack('scripts')
 
     <script src="{{ asset('js/cropper.min.js') }}"></script>

@@ -38,11 +38,12 @@ use App\Http\Controllers\Parents\ParentChildController;
 use App\Http\Controllers\Parents\ParentRequestController;
 use App\Http\Controllers\Parents\ParentMessageController;
 
-// Unused or redundant imports (removed for cleanliness)
-// use Illuminate\Routing\Events\RouteMatched;
-// use App\Http\Controllers\Head\StudentController; 
-// use App\Models\Counselor;
-// use Dompdf\FrameDecorator\Page;
+// Chatbot Controller
+use App\Http\Controllers\ChatbotController;
+use App\Http\Controllers\RagController;
+
+Route::post('/rag/docs', [RagController::class, 'store']);
+Route::post('/chatbot/generate', [ChatbotController::class, 'generateResponse'])->name('chatbot.generate');
 
 /*
 |--------------------------------------------------------------------------
@@ -97,6 +98,7 @@ Route::middleware('auth')->group(function () {
 
     // Notifications
     Route::get('/notify/fetch', [NotifyController::class, 'fetchNotifications'])->name('notify.fetch');
+    Route::post('/notify/mark-as-read', [NotifyController::class, 'markAsRead'])->name('notify.markAsRead');
     Route::get('/Head/notify/notification', [NotifyController::class, 'index'])
         ->middleware('role.head')
         ->name('Head.notify.notification');
@@ -111,6 +113,9 @@ Route::middleware('auth')->group(function () {
 */
 
 Route::prefix('Head')->name('Head.')->middleware(['auth', 'role.head'])->group(function () {
+
+    // Dashboard
+    Route::get('/messages/{user?}', [HeadMessageController::class, 'index'])->name('messages');
 
     // Counselors
     Route::get('/counselors', [HeadCounselorController::class, 'index'])->name('counselors.index');
@@ -158,13 +163,7 @@ Route::prefix('Head')->name('Head.')->middleware(['auth', 'role.head'])->group(f
 
     // Messages
     Route::get('/messages', [HeadMessageController::class, 'index'])->name('messages.index');
-    Route::get('/messages/search-users', [HeadMessageController::class, 'searchUsers'])->name('messages.search-users');
-    Route::post('/messages/conversations/{receiverId}', [HeadMessageController::class, 'startConversation'])->name('messages.start-conversation');
-    Route::get('/messages/fetch/{conversationId}', [HeadMessageController::class, 'fetchConversation'])->name('messages.fetch-conversation');
-    Route::post('/messages/send/{conversationId}', [HeadMessageController::class, 'sendMessage'])->name('messages.send-message');
-    Route::post('/messages/mark-as-read/{conversationId}', [HeadMessageController::class, 'markAsRead']);
-    Route::get('/messages/sidebar-list', [HeadMessageController::class, 'sidebarList'])->name('messages.sidebar-list'); // Removed redundant prefix from path
-
+    
     // Requests
     Route::get('/requests', [HeadRequestController::class, 'index'])->name('requests.index');
     Route::get('/requests/{type}/{id}', [HeadRequestController::class, 'show'])->name('requests.show');
@@ -180,7 +179,9 @@ Route::prefix('Head')->name('Head.')->middleware(['auth', 'role.head'])->group(f
     Route::get('/api/announcements', [HeadAnnouncementController::class, 'getEvents'])->name('announcements.api');
     Route::put('/announcements/{announcement}', [HeadAnnouncementController::class, 'update'])->name('announcements.update');
 
-    Route::get('/settings', [HeadSettingsController::class, 'index'])->name('settings.index');
+   
+
+
 });
 
 
@@ -241,3 +242,7 @@ Route::prefix('Parent')->name('Parent.')->middleware(['auth', 'role.parent'])->g
 
 // Note: Ensure you update your `AppServiceProvider` to use the correct middleware aliases:
 // 'role.head' (instead of 'role.admin'), 'role.counselor', 'role.parent', 'role.student'.
+
+
+ // Settings
+    Route::get('settings', \App\Livewire\Settings::class)->name('settings');

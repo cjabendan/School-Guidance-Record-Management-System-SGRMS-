@@ -1,0 +1,310 @@
+
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+
+* {
+    font-family: 'Poppins', sans-serif;
+}
+
+/* Wrapper for notification bell */
+.notification-wrapper {
+    position: relative;
+    display: inline-block;
+}
+
+/* Bell icon */
+.notification-bell {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    font-size: 1.5rem;
+    color: #374151; /* slate gray */
+    cursor: pointer;
+    transition: color 0.2s ease-in-out;
+}
+.notification-bell:hover {
+    color: #1d4ed8; /* blue highlight */
+}
+
+/* Red badge for unread count */
+.notification-bell .badge {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    background: #e11d48; /* red */
+    color: #fff;
+    font-size: 0.7rem;
+    font-weight: 600;
+    padding: 2px 6px;
+    border-radius: 9999px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+}
+
+/* Dropdown container */
+.notification-dropdown {
+    position: absolute;
+    right: -60;
+    top: 150%;
+    z-index: 1000;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    min-width: 320px;
+    max-height: 400px;
+    overflow-y: hidden;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+    animation: dropdownFade 0.25s ease;
+}
+
+/* Fade-in animation */
+@keyframes dropdownFade {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Title */
+.notify-title {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+    padding: 12px 16px;
+    border-bottom: 1px solid #f1f5f9;
+    color: #111827;
+    background: #f9fafb;
+    border-radius: 10px 10px 0 0;
+}
+
+/* Notification items */
+.notify-list {
+    max-height: 350px;
+    overflow-y: auto;
+}
+
+.notify-item {
+    display: flex;
+    gap: 12px;
+    padding: 12px 16px;
+    align-items: flex-start;
+    border-bottom: 1px solid #f3f4f6;
+    transition: background 0.2s ease;
+    cursor: pointer;
+}
+.notify-item:last-child {
+    border-bottom: none;
+}
+.notify-item:hover {
+    background: #f9fafb;
+}
+
+/* Icon */
+.notify-icon {
+    font-size: 1.4rem;
+    min-width: 24px;
+    text-align: center;
+}
+
+/* Text & time */
+.notify-text {
+    margin: 0;
+    font-weight: 500;
+    color: #000000; 
+}
+
+.notify-text-read {
+    color: #6b7280 !important;
+    font-weight: 500;
+}
+
+.notify-time {
+    color: #6b7280;
+    font-size: 0.75rem;
+    display: block;
+    margin-top: 2px;
+}
+
+/* Empty state */
+.notify-empty {
+    text-align: center;
+    opacity: 0.7;
+    padding: 24px 16px;
+}
+.notify-empty .notify-icon {
+    font-size: 2rem;
+    display: block;
+    margin-bottom: 8px;
+}
+
+/* ============================
+   Notification Page Styles
+============================ */
+
+/* Container */
+.notification-container {
+    max-width: 100%;
+    margin: 30px auto;
+    padding: 20px;
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    width: 60%;
+    overflow-y: auto;
+}
+
+.notification-container,
+.notify-list {
+    overflow-y: auto;
+    scrollbar-gutter: stable;       
+    scrollbar-width: thin;          
+}
+
+.notification-container::-webkit-scrollbar,
+.notify-list::-webkit-scrollbar {
+    width: 8px;                   
+    height: 8px;
+}
+
+.notification-container::-webkit-scrollbar-track,
+.notify-list::-webkit-scrollbar-track {
+    background: transparent;       
+}
+
+.notification-container::-webkit-scrollbar-thumb,
+.notify-list::-webkit-scrollbar-thumb {
+    background: transparent;       
+    border-radius: 10px;
+    transition: background-color 120ms ease, opacity 120ms ease;
+}
+
+
+.notification-container:hover::-webkit-scrollbar-thumb,
+.notify-list:hover::-webkit-scrollbar-thumb,
+.notification-container:focus-within::-webkit-scrollbar-thumb,
+.notify-list:focus-within::-webkit-scrollbar-thumb {
+    background: rgba(16, 24, 40, 0.12); 
+}
+
+
+.notification-container,
+.notify-list {
+    scrollbar-color: transparent transparent; 
+}
+.notification-container:hover,
+.notify-list:hover,
+.notification-container:focus-within,
+.notify-list:focus-within {
+    scrollbar-color: rgba(16,24,40,0.16) transparent;
+}
+
+/* Header */
+.notification-header {
+    margin-bottom: 20px;
+    text-align: center;
+}
+.notification-header p {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #111827;
+    margin-top: 6px;
+}
+
+/* Board */
+.notification-board {
+    border-top: 1px solid #e5e7eb;
+    padding-top: 15px;
+}
+
+/* Notification List */
+.notifications-list {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+/* Empty state */
+.notifications-list p {
+    text-align: center;
+    color: #6b7280;
+    padding: 30px 0;
+    font-weight: 500;
+}
+
+/* Notification row layout */
+.notification-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 14px 16px;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    background: #f9fafb;
+    transition: background 0.18s ease, box-shadow 0.18s ease;
+}
+.notification-item:hover {
+    background: #f3f4f6;
+    box-shadow: 0 3px 10px rgba(2,6,23,0.06); 
+    transform: none;
+}
+
+/* Icon */
+.notification-icon {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.notification-icon .notification-svg {
+    width: 50px;
+    height: 40px;
+    color: #2563eb; 
+}
+
+/* Unread vs Read */
+.notification-item.unread {
+    background: #eff6ff;   /* soft blue */
+    border-left: 4px solid #2563eb;
+}
+.notification-item.unread .notification-message {
+    color: #111827;
+    font-weight: 600;
+}
+
+.notification-item.read {
+    background: #f9fafb;   /* neutral gray */
+    border-left: 4px solid #d1d5db;
+}
+.notification-item.read .notification-message {
+    color: #6b7280;
+    font-weight: 500;
+}
+
+/* Message */
+.notification-message {
+    flex: 1;
+    margin: 0;
+    font-size: 0.95rem;
+    line-height: 1.4;
+}
+
+/* Time */
+.notification-time {
+    flex-shrink: 0;
+    font-size: 0.8rem;
+    color: #6b7280;
+    white-space: nowrap;
+    font-weight: 500;
+}
+
+.notif-section-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #374151;
+    margin: 20px 0 10px;
+    border-bottom: 1px solid #e5e7eb;
+    padding-bottom: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+

@@ -1,1 +1,0 @@
-<?php /**PATH C:\Users\Administrator\School-Guidance-Record-Management-System-SGRMS-\resources\views\Head\modal\reviewModal.blade.php ENDPATH**/ ?>

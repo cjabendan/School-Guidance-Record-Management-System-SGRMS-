@@ -3,15 +3,17 @@
         @if ($newChatMode)
             <div class="new-chat-header">
                 <span>To:</span>
-                <input type="text" wire:model.live="searchQuery" class="user-search-input"
-                    placeholder="Type a name...">
+                <input type="text" wire:model.live="searchQuery" class="user-search-input" placeholder="Type a name...">
 
                 <ul class="user-results">
                     @forelse($newChatSearchResults as $u)
                         <li wire:click="selectNewChatUser({{ $u->id }})"
                             style="display:flex;align-items:center;gap:8px;cursor:pointer;">
                             <img src="{{ asset('images/user/' . $u->profile_image) }}" class="search-user-img">
-                            <span>{{ $u->first_name }} {{ $u->last_name }}</span>
+                            <span>{{ $u->first_name }} {{ $u->last_name }}@if (in_array($u->role, ['admin', 'counselor']))
+                                    <i class="fi fi-sr-badge-check official-badge" title="Verified"></i>
+                                @endif
+                            </span>
                         </li>
                     @empty
                         @if (strlen($searchQuery) > 1)
@@ -31,7 +33,9 @@
                         <img src="{{ asset('images/user/' . $selectedUser->profile_image) }}" alt="User">
                     </div>
                     <div class="chat-header-info">
-                        <h2>{{ $selectedUser->first_name }} {{ $selectedUser->last_name }}</h2>
+                        <h2>{{ $selectedUser->first_name }} {{ $selectedUser->last_name }} @if (in_array($selectedUser->role, ['admin', 'counselor']))
+                                    <i class="fi fi-sr-badge-check official-badge" title="Verified"></i>
+                                @endif</h2>
                         <p>Online</p>
                     </div>
                 </div>
@@ -74,12 +78,13 @@
                         {{-- Show seen status only for the latest seen message --}}
                         @if ($isSentByMe && $message->id === $latestSeenMessageId)
                             <div class="seen-status">
-                                <img src="{{ asset('images/user/' . $selectedUser->profile_image) }}"
-                                    class="seen-img" title="Seen {{ $tooltip }}" alt="Seen">
+                                <img src="{{ asset('images/user/' . $selectedUser->profile_image) }}" class="seen-img"
+                                    title="Seen {{ $tooltip }}" alt="Seen">
                             </div>
                         @endif
 
-                        <div class="message-row {{ $isSentByMe ? 'sent' : 'received' }}" id="message-{{ $message->id }}">
+                        <div class="message-row {{ $isSentByMe ? 'sent' : 'received' }}"
+                            id="message-{{ $message->id }}">
                             {{-- Sender Profile Image for RECEIVED messages --}}
                             @if (!$isSentByMe)
                                 @if ($prevSenderId !== $message->sender_id)
@@ -106,11 +111,13 @@
             <div class="chat-footer">
                 @if ($isBlocked)
                     <div class="blocked-status-message">
-                        <p>Communication has been temporarily suspended due to potential violations of the system's Terms of Service. Please contact the Guidance Office immediately for a resolution.</p>
+                        <p>Communication has been temporarily suspended due to potential violations of the system's
+                            Terms of Service. Please contact the Guidance Office immediately for a resolution.</p>
                     </div>
                 @elseif ($hasBlocked)
                     <div class="blocked-status-message">
-                        <p>You have blocked <span class="blocked-user-name">{{ $selectedUser->first_name }}</span>. Unblock them to chat.</p>
+                        <p>You have blocked <span class="blocked-user-name">{{ $selectedUser->first_name }}</span>.
+                            Unblock them to chat.</p>
                     </div>
                 @else
                     <form wire:submit="submit" id="messageForm">

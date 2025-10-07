@@ -95,8 +95,8 @@
                 </li>
 
 
-                <li class="<?php echo e(Request::is('Head/settings*') ? 'active' : ''); ?>">
-                    <a href="<?php echo e(url('Head/settings')); ?>">
+                <li class="<?php echo e(Request::is('settings*') ? 'active' : ''); ?>">
+                    <a href="<?php echo e(url('settings')); ?>">
                         <i class='bx bxs-cog'></i>
                         <span class="text">Settings</span>
                     </a>
@@ -106,7 +106,6 @@
 
         <div class="bottom-side">
             <ul class="side-menu">
-                <!-- Logout -->
                 <li>
                     <form method="POST" action="<?php echo e(route('logout')); ?>" class="logout-form">
                         <?php echo csrf_field(); ?>

@@ -3,15 +3,17 @@
         <!--[if BLOCK]><![endif]--><?php if($newChatMode): ?>
             <div class="new-chat-header">
                 <span>To:</span>
-                <input type="text" wire:model.live="searchQuery" class="user-search-input"
-                    placeholder="Type a name...">
+                <input type="text" wire:model.live="searchQuery" class="user-search-input" placeholder="Type a name...">
 
                 <ul class="user-results">
                     <!--[if BLOCK]><![endif]--><?php $__empty_1 = true; $__currentLoopData = $newChatSearchResults; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $u): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                         <li wire:click="selectNewChatUser(<?php echo e($u->id); ?>)"
                             style="display:flex;align-items:center;gap:8px;cursor:pointer;">
                             <img src="<?php echo e(asset('images/user/' . $u->profile_image)); ?>" class="search-user-img">
-                            <span><?php echo e($u->first_name); ?> <?php echo e($u->last_name); ?></span>
+                            <span><?php echo e($u->first_name); ?> <?php echo e($u->last_name); ?><!--[if BLOCK]><![endif]--><?php if(in_array($u->role, ['admin', 'counselor'])): ?>
+                                    <i class="fi fi-sr-badge-check official-badge" title="Verified"></i>
+                                <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+                            </span>
                         </li>
                     <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                         <!--[if BLOCK]><![endif]--><?php if(strlen($searchQuery) > 1): ?>
@@ -31,7 +33,9 @@
                         <img src="<?php echo e(asset('images/user/' . $selectedUser->profile_image)); ?>" alt="User">
                     </div>
                     <div class="chat-header-info">
-                        <h2><?php echo e($selectedUser->first_name); ?> <?php echo e($selectedUser->last_name); ?></h2>
+                        <h2><?php echo e($selectedUser->first_name); ?> <?php echo e($selectedUser->last_name); ?> <!--[if BLOCK]><![endif]--><?php if(in_array($selectedUser->role, ['admin', 'counselor'])): ?>
+                                    <i class="fi fi-sr-badge-check official-badge" title="Verified"></i>
+                                <?php endif; ?><!--[if ENDBLOCK]><![endif]--></h2>
                         <p>Online</p>
                     </div>
                 </div>
@@ -74,12 +78,13 @@
                         
                         <!--[if BLOCK]><![endif]--><?php if($isSentByMe && $message->id === $latestSeenMessageId): ?>
                             <div class="seen-status">
-                                <img src="<?php echo e(asset('images/user/' . $selectedUser->profile_image)); ?>"
-                                    class="seen-img" title="Seen <?php echo e($tooltip); ?>" alt="Seen">
+                                <img src="<?php echo e(asset('images/user/' . $selectedUser->profile_image)); ?>" class="seen-img"
+                                    title="Seen <?php echo e($tooltip); ?>" alt="Seen">
                             </div>
                         <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
 
-                        <div class="message-row <?php echo e($isSentByMe ? 'sent' : 'received'); ?>" id="message-<?php echo e($message->id); ?>">
+                        <div class="message-row <?php echo e($isSentByMe ? 'sent' : 'received'); ?>"
+                            id="message-<?php echo e($message->id); ?>">
                             
                             <!--[if BLOCK]><![endif]--><?php if(!$isSentByMe): ?>
                                 <!--[if BLOCK]><![endif]--><?php if($prevSenderId !== $message->sender_id): ?>
@@ -106,11 +111,13 @@
             <div class="chat-footer">
                 <!--[if BLOCK]><![endif]--><?php if($isBlocked): ?>
                     <div class="blocked-status-message">
-                        <p>Communication has been temporarily suspended due to potential violations of the system's Terms of Service. Please contact the Guidance Office immediately for a resolution.</p>
+                        <p>Communication has been temporarily suspended due to potential violations of the system's
+                            Terms of Service. Please contact the Guidance Office immediately for a resolution.</p>
                     </div>
                 <?php elseif($hasBlocked): ?>
                     <div class="blocked-status-message">
-                        <p>You have blocked <span class="blocked-user-name"><?php echo e($selectedUser->first_name); ?></span>. Unblock them to chat.</p>
+                        <p>You have blocked <span class="blocked-user-name"><?php echo e($selectedUser->first_name); ?></span>.
+                            Unblock them to chat.</p>
                     </div>
                 <?php else: ?>
                     <form wire:submit="submit" id="messageForm">
@@ -142,4 +149,5 @@
         <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
 
     </div>
-</div><?php /**PATH C:\Users\Administrator\School-Guidance-Record-Management-System-SGRMS\resources\views/livewire/chat-main.blade.php ENDPATH**/ ?>
+</div>
+<?php /**PATH C:\Users\Administrator\School-Guidance-Record-Management-System-SGRMS\resources\views/livewire/chat-main.blade.php ENDPATH**/ ?>

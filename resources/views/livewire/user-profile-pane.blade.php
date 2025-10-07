@@ -12,7 +12,10 @@
                     alt="User">
             </div>
             <div class="user-chat-header-info">
-                <h2 class="user-profile-name">{{ $selectedUser->first_name }} {{ $selectedUser->last_name }}</h2>
+                <h2 class="user-profile-name">{{ $selectedUser->first_name }} {{ $selectedUser->last_name }}@if (in_array($selectedUser->role, ['admin', 'counselor']))
+                        <i class="fi fi-sr-badge-check official-badge" title="Verified"></i>
+                    @endif
+                </h2>
                 <p class="user-profile-role">{{ $selectedUser->role }}</p>
             </div>
             <div class="user-chat-section">
@@ -21,15 +24,20 @@
                         <a href="https://mail.google.com/mail/u/0/?view=cm&fs=1&tf=1&to={{ $selectedUser->email }}"
                             target="_blank">
                             <i class="fi fi-sr-envelope"></i>
-                            <p>Email</p>
                         </a>
+                        <p>Email</p>
                     </li>
                     <li class="user-chat-icon">
-                        <i class="fi fi-sr-phone-call"></i>
+                        <a href="tel:{{ $selectedUser->phone }}" target="_blank">
+                            <i class="fi fi-sr-phone-call"></i>
+                        </a>
                         <p>Contact</p>
                     </li>
                     <li class="user-chat-icon" wire:click="toggleSearchMode" style="cursor: pointer;">
-                        <i class="fi fi-br-search"></i>
+                        <a href="#">
+                            <i class="fi fi-br-search"></i>
+                        </a>
+
                         <p>Search</p>
                     </li>
                 </ul>
@@ -71,7 +79,7 @@
                     <i class="fi fi-br-angle-left"></i>
                 </a>
                 <form wire:submit.prevent="searchInConversation" style="flex-grow: 1; display: flex;">
-                    {{-- Using wire:model.live is often better for a search input but wire:submit.prevent also works if user must press Enter/click Search --}}
+
                     <input type="text" wire:model="profileSearchQuery"
                         wire:keydown.enter.prevent="searchInConversation" placeholder="Search in conversation..."
                         class="search-input">
@@ -81,7 +89,7 @@
                     </svg>
 
                     <button type="submit" style="background: transparent; border: none; ">
-                        {{-- The button is here just to enable form submission if the user clicks the space where the icon would be, the SVG is currently placed outside the button but inside the form --}}
+
                     </button>
                 </form>
             </div>
@@ -128,16 +136,16 @@
                     </div>
                 @empty
                     @if (!empty($profileSearchQuery))
-                        <div style="padding: 20px; text-align: center;">
-                            <i class="fi fi-sr-info" style="font-size: 24px; color: #999;"></i>
-                            <p style="color: #999; margin-top: 10px;">
+                        <div
+                            style="display: flex; flex-direction: column; padding: 10px 20px; text-align: center; gap: 10px;">
+                            <p style="color: #999;">
                                 No messages found matching "<span
                                     style="font-weight: bold;">{{ $profileSearchQuery }}</span>" in this chat.
                             </p>
                             <small style="color: #bbb;">Try a different word or phrase.</small>
                         </div>
                     @else
-                        <p style="text-align: center; color: #999; margin-top: 20px;">Enter a word or phrase to search
+                        <p style="text-align: center; color: #999;">Enter a word or phrase to search
                             messages in this conversation.</p>
                     @endif
                 @endforelse

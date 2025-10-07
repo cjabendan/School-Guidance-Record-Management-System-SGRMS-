@@ -136,10 +136,13 @@
 
 #sidebar .side-menu li {
     height: 48px;
-    margin-left: 6px;
     border-radius: 48px 0 0 48px;
     padding: 4px;
     background: transparent;
+}
+
+#sidebar .side-menu.top li {
+    margin-left: 6px;
 }
 
 #sidebar .side-menu li.active {
@@ -218,7 +221,7 @@
 /* Logout form wrapper stays full width */
 
 .bottom-side {
-    margin: 0 5px 20px 0;
+    margin: 15px 10px;
 }
 
 #sidebar .side-menu li .logout-form {

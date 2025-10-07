@@ -1,65 +1,19 @@
 <div class="messages-box">
     <h1>Messages</h1>
-    <div class="messages-lists">
-        <div class="message-item">
-            <div style="display: flex; flex-direction: row; align-items: center; gap: 20px;">
-                <img src="<?php echo e(asset('images/user/default.jpg')); ?>" alt="User Photo"
-                    class="user-photo">
-                <div class="message-content">
-                    <h2 class="message-sender">Chris Morich</h2>
-                    <p class="message-preview">Hey, are we still on for the meeting tomorrow?</p>
-                </div>
-            </div>
-        </div>
-        <div class="message-item">
-            <div style="display: flex; flex-direction: row; align-items: center; gap: 20px;">
-                <img src="<?php echo e(asset('images/user/default.jpg')); ?>" alt="User Photo"
-                    class="user-photo">
-                <div class="message-content">
-                    <h2 class="message-sender">Chris Morich</h2>
-                    <p class="message-preview">Hey, are we still on for the meeting tomorrow?</p>
-                </div>
-            </div>
-        </div>
-        <div class="message-item">
-            <div style="display: flex; flex-direction: row; align-items: center; gap: 20px;">
-                <img src="<?php echo e(asset('images/user/default.jpg')); ?>" alt="User Photo"
-                    class="user-photo">
-                <div class="message-content">
-                    <h2 class="message-sender">Chris Morich</h2>
-                    <p class="message-preview">Hey, are we still on for the meeting tomorrow?</p>
-                </div>
-            </div>
-        </div>
-        <div class="message-item">
-            <div style="display: flex; flex-direction: row; align-items: center; gap: 20px;">
-                <img src="<?php echo e(asset('images/user/default.jpg')); ?>" alt="User Photo"
-                    class="user-photo">
-                <div class="message-content">
-                    <h2 class="message-sender">Chris Morich</h2>
-                    <p class="message-preview">Hey, are we still on for the meeting tomorrow?</p>
-                </div>
-            </div>
-        </div>
-        <div class="message-item">
-            <div style="display: flex; flex-direction: row; align-items: center; gap: 20px;">
-                <img src="<?php echo e(asset('images/user/default.jpg')); ?>" alt="User Photo"
-                    class="user-photo">
-                <div class="message-content">
-                    <h2 class="message-sender">Chris Morich</h2>
-                    <p class="message-preview">Hey, are we still on for the meeting tomorrow?</p>
-                </div>
-            </div>
-        </div>
-        <div class="message-item">
-            <div style="display: flex; flex-direction: row; align-items: center; gap: 20px;">
-                <img src="<?php echo e(asset('images/user/default.jpg')); ?>" alt="User Photo"
-                    class="user-photo">
-                <div class="message-content">
-                    <h2 class="message-sender">Chris Morich</h2>
-                    <p class="message-preview">Hey, are we still on for the meeting tomorrow?</p>
-                </div>
-            </div>
-        </div>
-    </div>
+    <?php
+$__split = function ($name, $params = []) {
+    return [$name, $params];
+};
+[$__name, $__params] = $__split('dashboard-chat-list');
+
+$__html = app('livewire')->mount($__name, $__params, 'lw-1228215890-0', $__slots ?? [], get_defined_vars());
+
+echo $__html;
+
+unset($__html);
+unset($__name);
+unset($__params);
+unset($__split);
+if (isset($__slots)) unset($__slots);
+?>
 </div><?php /**PATH C:\Users\Administrator\School-Guidance-Record-Management-System-SGRMS\resources\views/Head/dashboard-sections/messages.blade.php ENDPATH**/ ?>

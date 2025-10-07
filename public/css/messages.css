@@ -583,7 +583,7 @@
 .no-result-convo {
     text-align: center;
     justify-content: center;
-    padding: 5px 20px 0 20px;
+    padding: 20px;
     gap: 10px;
     color: #6b7280;
 }
@@ -659,12 +659,14 @@
     flex: 1;
     gap: 35px;
     margin-top: 8px;
+    align-items: center;
     justify-content: center;
+    
 }
 
 .user-chat-section ul .user-chat-icon {
     display: flex;
-    gap: 10px;
+    gap: 15px;
     flex-direction: column;
     justify-content: center;
     align-items: center;
@@ -673,7 +675,7 @@
 .user-chat-section ul .user-chat-icon i {
     font-size: 1.2rem;
     background-color: #ebebeb;
-    padding: 15px;
+    padding: 12px 15px 10px 15px;
     color: black;
     border-radius: 50%;
     cursor: pointer;
@@ -814,4 +816,13 @@
 .highlight-word {
     color: #000000;
     font-weight: bold;
+}
+
+/* Badge for verified users */
+.official-badge {
+    color: #1ea7ff;
+    margin-left: 3px;
+    font-size: 1.25rem;
+    vertical-align: middle;
+    cursor: pointer;
 }

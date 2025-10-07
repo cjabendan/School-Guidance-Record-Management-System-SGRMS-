@@ -20,7 +20,7 @@
                                 </li>
                             </div>
                             <button class="add-btn" data-bs-toggle="modal" data-bs-target="#addCaseModal"><i
-                                    class="fi fi-br-plus"></i>Add Counseling Note</button>
+                                    class="fi fi-br-plus"></i>Add counseling note</button>
                         </div>
                     </div>
                     <div class="table-bar">

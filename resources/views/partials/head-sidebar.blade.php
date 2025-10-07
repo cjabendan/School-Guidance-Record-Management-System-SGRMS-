@@ -95,8 +95,8 @@
                 </li>
 
 
-                <li class="{{ Request::is('Head/settings*') ? 'active' : '' }}">
-                    <a href="{{ url('Head/settings') }}">
+                <li class="{{ Request::is('settings*') ? 'active' : '' }}">
+                    <a href="{{ url('settings') }}">
                         <i class='bx bxs-cog'></i>
                         <span class="text">Settings</span>
                     </a>
@@ -106,7 +106,6 @@
 
         <div class="bottom-side">
             <ul class="side-menu">
-                <!-- Logout -->
                 <li>
                     <form method="POST" action="{{ route('logout') }}" class="logout-form">
                         @csrf

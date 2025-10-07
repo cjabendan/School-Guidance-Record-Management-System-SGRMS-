@@ -7,24 +7,31 @@ use App\Models\Announcements;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
+use App\Models\Notification;
+use Illuminate\Support\Facades\Log;
+
+
 class HeadAnnouncementController extends Controller
 {
     public function index(Request $request)
     {
+        // DEBUG: Log all announcements and their status
+        Log::info('All announcements:', Announcements::all()->toArray());
+
         $query = Announcements::where('status', 'active');
 
-        if ($request->has('category') && $request->category != 'recent') {
+        // Only filter by category if provided and not 'recent'
+        if ($request->has('category') && $request->category != 'recent' && $request->category != '') {
             $query->where('category', $request->category);
+            // If filtering by event, exclude past events
+            if (strtolower($request->category) === 'event') {
+                $query->where('end_datetime', '>=', now());
+            }
         }
 
         if ($request->has('search') && $request->search != '') {
             $query->where('title', 'like', '%' . $request->search . '%');
         }
-
-        // Exclude past events automatically if filtering by events
-        $query->when($request->category === 'event', function ($q) {
-            $q->where('end_datetime', '>=', now());
-        });
 
         $announcements = $query->orderBy('created_at', 'desc')->get();
 
@@ -117,16 +124,29 @@ class HeadAnnouncementController extends Controller
         $data['user_id'] = Auth::id();
         $data['date_posted'] = now();
 
+        // Ensure status is always set to 'active' if not provided
+        if (empty($data['status'])) {
+            $data['status'] = 'active';
+        }
+
         if ($request->hasFile('image')) {
             $image = $request->file('image');
             $filename = time() . '_' . $image->getClientOriginalName();
             $image->move(public_path('images/announcements'), $filename);
             $data['image'] = $filename;
-        }else {
+        } else {
             $data['image'] = 'default.png'; 
         }
 
-        Announcements::create($data);
+        $announcement = Announcements::create($data);
+
+        Notification::create([
+            'user_id'    => Auth::id(),
+            'message'    => 'New announcement posted: ' . $announcement->title,
+            'timestamp'  => now(),
+            'is_read'    => 0, 
+            'related_id' => $announcement->id,
+        ]);
 
         return redirect()->route('Head.announcements.index')->with('success', 'Announcement posted!');
     }
@@ -155,6 +175,11 @@ class HeadAnnouncementController extends Controller
             'end_datetime'
         ]);
 
+        // Ensure status is always set to 'active' if not provided
+        if (empty($data['status'])) {
+            $data['status'] = 'active';
+        }
+
         if ($request->hasFile('image')) {
             $image = $request->file('image');
             $filename = time() . '_' . $image->getClientOriginalName();
@@ -164,6 +189,27 @@ class HeadAnnouncementController extends Controller
 
         $announcement->update($data);
 
+        Notification::create([
+            'user_id'    => Auth::id(),
+            'message'    => 'New announcement posted: ' . $announcement->title,
+            'timestamp'  => now(),
+            'is_read'    => 0, 
+            'related_id' => $announcement->id,
+        ]);
+
         return redirect()->route('Head.announcements.index')->with('success', 'Announcement updated!');
     }
+
+    public function showFromNotification($id, $notifId = null)
+    {
+        $announcement = Announcements::findOrFail($id);
+
+        if ($notifId) {
+            Notification::where('id', $notifId)
+                ->update(['is_read' => 1]);
+        }
+
+        return view('Head.Notify.notification', compact('announcement'));
+    }
+
 }

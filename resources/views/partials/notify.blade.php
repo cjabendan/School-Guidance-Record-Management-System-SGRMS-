@@ -3,13 +3,17 @@
 <div class="notify">
     <h3 class="notify-title">Notifications</h3>
     <div class="notify-list">
-        @forelse($notifications as $notify)
-            <a href="{{ $notify['link'] ? $notify['link'] . (str_contains($notify['link'], '?') ? '&' : '?') . 'notify=1' : '#' }}" class="notify-item" style="text-decoration:none; color:inherit;">
+        @forelse($notifications as $index => $notify)
+            <a href="{{ $notify['link'] ? $notify['link'] . (str_contains($notify['link'], '?') ? '&' : '?') . 'notify_id=' . $notify['id'] : '#' }}"
+               class="notify-item"
+               style="text-decoration:none; color:inherit;"
+               data-notify-index="{{ $index }}"
+               data-notify-id="{{ $notify['id'] ?? '' }}">
                 <span class="notify-icon">
                     {{ $notify['icon'] ?? NotificationHelper::getIcon($notify['text'] ?? '') }}
                 </span>
                 <div>
-                    <p class="notify-text">{{ $notify['text'] ?? 'Notification' }}</p>
+                    <p class="notify-text{{ isset($notify['is_read']) && $notify['is_read'] ? ' notify-text-read' : '' }}">{{ $notify['text'] ?? 'Notification' }}</p>
                     <small class="notify-time">{{ $notify['time'] ?? '' }}</small>
                 </div>
             </a>
@@ -22,3 +26,31 @@
         @endforelse
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.notify-item[data-notify-id]').forEach(function(item) {
+        item.addEventListener('click', function(e) {
+            var notifyId = this.getAttribute('data-notify-id');
+            var notifyText = this.querySelector('.notify-text');
+            if (notifyId) {
+                fetch("{{ route('notify.markAsRead') }}", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    body: JSON.stringify({ id: notifyId })
+                }).then(res => res.json()).then(data => {
+                    if (data.success && notifyText) {
+                        notifyText.classList.add('notify-text-read');
+                        window.location.href = this.href;
+                    }
+                });
+                e.preventDefault();
+            }
+        });
+    });
+});
+</script>
+

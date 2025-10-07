@@ -18,7 +18,7 @@
                                 </li>
                             </div>
                             <button class="add-btn" data-bs-toggle="modal" data-bs-target="#addCaseModal"><i
-                                    class="fi fi-br-plus"></i>Add Case</button>
+                                    class="fi fi-br-plus"></i>Add case</button>
                             <form action="<?php echo e(route('Head.cases.import')); ?>" method="POST" enctype="multipart/form-data"
                                 style="display:inline;">
                                 <?php echo csrf_field(); ?>
@@ -48,8 +48,6 @@
                         <div class="filter-dropdown" style="position:relative; display:inline-block;">
                             <button class="toggle-btn" id="toggle-view-btn" type="button">
                                 <i class="fi fi-br-bars-filter" id="toggle-icon"></i>
-                                <span id="toggle-label">Filter Level</span>
-                                <i class="fi fi-br-angle-down" style="margin-left:6px;"></i>
                             </button>
                             <div id="level-menu" class="level-menu">
                                 <button class="level-option" data-level="" type="button">All Levels</button>
@@ -114,7 +112,7 @@
 
     <script>
         $(document).ready(function() {
-            // Existing live search
+            
             $('#case-search-input').on('input', function() {
                 let query = $(this).val();
                 let level = $('.level-option.active').data('level') || '';
@@ -132,18 +130,15 @@
                 });
             });
 
-            // Toggle dropdown
             $('#toggle-view-btn').on('click', function(e) {
                 e.stopPropagation();
                 $('#level-menu').toggle();
             });
 
-            // Hide dropdown when clicking outside
             $(document).on('click', function() {
                 $('#level-menu').hide();
             });
 
-            // Filter by level
             $('.level-option').on('click', function() {
                 $('.level-option').removeClass('active');
                 $(this).addClass('active');
@@ -173,7 +168,6 @@
                 $(this).closest('form').submit();
             });
 
-            // Case severity filter (structure now matches announcements)
             $('.filters .a-nav').on('click', function(e) {
                 e.preventDefault();
                 $('.filters .a-nav').removeClass('active');

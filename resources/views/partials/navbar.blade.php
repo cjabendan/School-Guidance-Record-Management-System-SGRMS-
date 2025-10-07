@@ -20,14 +20,14 @@
                     'Head.requests.index' => 'Requests',
                     'Head.appointments.index' => 'Appointments',
                     'Head.announcements.index' => 'Announcements',
-                    'Head.settings.index' => 'Settings',
+            
 
                     // Counselor
                     'Counselor.dashboard' => 'Dashboard',
                     'Counselor.counseling.index' => 'Counseling',
                     'Counselor.message.index' => 'Messages',
                     'Counselor.appointment.index' => 'Appointments',
-                    'Counselor.settings.index' => 'Settings',
+                    
 
                     // Parent
                     'Parent.dashboard' => 'Dashboard',
@@ -35,10 +35,16 @@
                     'Parent.messages.index' => 'Messages',
                     'Parent.requests.index' => 'Requests',
                     'Parent.appointments.index' => 'Appointments',
-                    'Parent.settings.index' => 'Settings',
+                    
+
+                    // Student
+                    'Student.dashboard' => 'Dashboard',
+                    'Student.counseling.index' => 'Counseling',
+                    'Student.messages.index' => 'Messages',
+                    'Student.appointments.index' => 'Appointments',
                 ];
 
-                $page = $pages[Route::currentRouteName()] ?? 'Welcome';
+                $page = $pages[Route::currentRouteName()] ?? '';
             @endphp
             {{ $page }}
         </a>

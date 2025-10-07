@@ -44,8 +44,8 @@
                         <span class="text">Appointments</span>
                     </a>
                 </li>
-                <li class="{{ Request::is('Parent/settings*') ? 'active' : '' }}">
-                    <a href="{{ url('Parent/settings') }}">
+                <li class="{{ Request::is('settings*') ? 'active' : '' }}">
+                    <a href="{{ url('settings') }}">
                         <i class='bx bxs-cog'></i>
                         <span class="text">Settings</span>
                     </a>

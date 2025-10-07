@@ -20,14 +20,14 @@
                     'Head.requests.index' => 'Requests',
                     'Head.appointments.index' => 'Appointments',
                     'Head.announcements.index' => 'Announcements',
-                    'Head.settings.index' => 'Settings',
+            
 
                     // Counselor
                     'Counselor.dashboard' => 'Dashboard',
                     'Counselor.counseling.index' => 'Counseling',
                     'Counselor.message.index' => 'Messages',
                     'Counselor.appointment.index' => 'Appointments',
-                    'Counselor.settings.index' => 'Settings',
+                    
 
                     // Parent
                     'Parent.dashboard' => 'Dashboard',
@@ -35,10 +35,16 @@
                     'Parent.messages.index' => 'Messages',
                     'Parent.requests.index' => 'Requests',
                     'Parent.appointments.index' => 'Appointments',
-                    'Parent.settings.index' => 'Settings',
+                    
+
+                    // Student
+                    'Student.dashboard' => 'Dashboard',
+                    'Student.counseling.index' => 'Counseling',
+                    'Student.messages.index' => 'Messages',
+                    'Student.appointments.index' => 'Appointments',
                 ];
 
-                $page = $pages[Route::currentRouteName()] ?? 'Welcome';
+                $page = $pages[Route::currentRouteName()] ?? '';
             ?>
             <?php echo e($page); ?>
 
@@ -58,9 +64,9 @@
         <div class="notification-wrapper">
             <a href="#" id="notificationBell" class="notification-bell">
                 <i class='bx bxs-bell'></i>
-                <?php if($notifCount > 0): ?>
+                <!--[if BLOCK]><![endif]--><?php if($notifCount > 0): ?>
                     <span class="badge"><?php echo e($notifCount); ?></span>
-                <?php endif; ?>
+                <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
             </a>
             <div id="notificationDropdown" class="notification-dropdown" style="display:none;">
                 <div id="notificationDropdownContent"><!-- loaded by AJAX --></div>

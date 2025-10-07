@@ -26,7 +26,7 @@
                                 </li>
                             </div>
                             <button class="add-btn" onclick="openModal()"><i class="fi fi-br-plus"></i>Add
-                                Announcement</button>
+                                announcement</button>
                         </div>
                     </div>
                     <div class="search-bar">

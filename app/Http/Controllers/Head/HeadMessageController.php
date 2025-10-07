@@ -18,24 +18,4 @@ class HeadMessageController extends Controller
         return view('Head.messages');
     }
 
-
-    /**
-     * Search users for new conversation
-     */
-    public function searchUsers(Request $request)
-    {
-        $query = $request->input('query');
-        $user = Auth::user();
-
-        $users = User::whereIn('role', ['counselor', 'parent'])
-            ->where('status', 'active')
-            ->where(function ($q) use ($query) {
-                $q->where('first_name', 'like', "%$query%")
-                    ->orWhere('last_name', 'like', "%$query%");
-            })
-            ->limit(5)
-            ->get();
-
-        return response()->json($users);
-    }
 }

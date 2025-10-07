@@ -11,6 +11,17 @@
       0 => 'Barryvdh\\DomPDF\\ServiceProvider',
     ),
   ),
+  'cloudstudio/ollama-laravel' => 
+  array (
+    'aliases' => 
+    array (
+      'Ollama' => 'Cloudstudio\\Ollama\\Facades\\Ollama',
+    ),
+    'providers' => 
+    array (
+      0 => 'Cloudstudio\\Ollama\\OllamaServiceProvider',
+    ),
+  ),
   'laravel/pail' => 
   array (
     'providers' => 
@@ -30,6 +41,17 @@
     'providers' => 
     array (
       0 => 'Laravel\\Tinker\\TinkerServiceProvider',
+    ),
+  ),
+  'livewire/flux' => 
+  array (
+    'aliases' => 
+    array (
+      'Flux' => 'Flux\\Flux',
+    ),
+    'providers' => 
+    array (
+      0 => 'Flux\\FluxServiceProvider',
     ),
   ),
   'livewire/livewire' => 
@@ -73,6 +95,13 @@
     'providers' => 
     array (
       0 => 'Termwind\\Laravel\\TermwindServiceProvider',
+    ),
+  ),
+  'phiki/phiki' => 
+  array (
+    'providers' => 
+    array (
+      0 => 'Phiki\\Adapters\\Laravel\\PhikiServiceProvider',
     ),
   ),
 );

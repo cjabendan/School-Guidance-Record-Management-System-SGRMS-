@@ -1,84 +1,101 @@
-const chatBody = document.querySelector(".chatbot-body");
-const messageInput = document.querySelector(".message-input");
-const sendMessageButton = document.querySelector("#send-message");
+document.addEventListener("DOMContentLoaded", function() {
+    const chatBody = document.querySelector(".chatbot-body");
+    const messageInput = document.querySelector(".message-input");
+    const sendMessageButton = document.querySelector("#send-message");
+    const chatbotToggler = document.querySelector("#chatbot-toggler");
+    const closeChatBot = document.querySelector("#close-chatbot");
 
-const chatbotToggler = document.querySelector("#chatbot-toggler");
-const closeChatBot = document.querySelector("#close-chatbot");
+    // Get the dynamic Laravel route URL and CSRF token
+    const chatEndpoint = document.querySelector(".chatbot-popup").dataset.chatUrl;
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
-const createMessageElement = (content, ...classes) => {
-    const div = document.createElement("div");
-    div.classList.add("message", ...classes);
-    div.innerHTML = content;
-    return div;
-};
 
-const generateBotResponse = async (incomingMessageDiv, userMessage) => {
-    const messageElement = incomingMessageDiv.querySelector(".message-text");
+    // --- Helper Functions ---
+    const createMessageElement = (content, ...classes) => {
+        const div = document.createElement("div");
+        div.classList.add("message", ...classes);
+        div.innerHTML = content;
+        return div;
+    };
 
-    try {
-        const response = await fetch("../../view/Student/chatbot.php", {
-            method: "POST",
-            headers: { "Content-Type": "application/x-www-form-urlencoded" },
-            body: `prompt=${encodeURIComponent(userMessage)}`
-        });
+    const generateBotResponse = async (incomingMessageDiv, userMessage) => {
+        const messageElement = incomingMessageDiv.querySelector(".message-text");
 
-        if (!response.ok) throw new Error("Network response was not ok");
+        try {
+            // *** UPDATED: Use the Laravel route and include CSRF token ***
+            const response = await fetch(chatEndpoint, {
+                method: "POST",
+                headers: { 
+                    "Content-Type": "application/x-www-form-urlencoded",
+                    "X-CSRF-TOKEN": csrfToken // Include the CSRF token
+                },
+                body: `prompt=${encodeURIComponent(userMessage)}`
+            });
 
-        const data = await response.text();
+            if (!response.ok) {
+                // If the response is not 200 OK, throw an error
+                throw new Error(`Server returned status: ${response.status}`);
+            }
 
-        messageElement.innerText = data;
-    } catch (error) {
-        messageElement.innerText = "Oops! Something went wrong.";
-        console.error("Bot response error:", error);
-    }
+            const data = await response.text();
 
-    incomingMessageDiv.classList.remove("thinking");
-};
+            messageElement.innerText = data;
+        } catch (error) {
+            messageElement.innerText = "Oops! Something went wrong on the server.";
+            console.error("Bot response error:", error);
+        }
 
-const handleOutgoingMessage = (e) => {
-    e.preventDefault();
-    const message = messageInput.value.trim();
-    if (!message) return;
+        incomingMessageDiv.classList.remove("thinking");
+    };
 
-    // Clear input
-    messageInput.value = "";
 
-    // Create and append user message
-    const userMessageContent = `<div class="message-text"></div>`;
-    const outgoingMessageDiv = createMessageElement(userMessageContent, "user-message");
-    outgoingMessageDiv.querySelector(".message-text").textContent = message;
-    chatBody.appendChild(outgoingMessageDiv);
-    chatBody.scrollTop = chatBody.scrollHeight;
+    // --- Event Handlers ---
+    const handleOutgoingMessage = (e) => {
+        e.preventDefault();
+        const message = messageInput.value.trim();
+        if (!message) return;
 
-    // Small delay to simulate bot thinking
-    setTimeout(() => {
-        // Create and append bot message with thinking dots
-        const botMessageContent = `
-            <svg class="bot-avatar" xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 1024 1024">
-                <path d="M738.3 287.6H285.7c-59 0-106.8 47.8-106.8 106.8v303.1c0 59 47.8 106.8 106.8 106.8h81.5v111.1c0 .7.8 1.1 1.4.7l166.9-110.6 41.8-.8h117.4l43.6-.4c59 0 106.8-47.8 106.8-106.8V394.5c0-59-47.8-106.9-106.8-106.9zM351.7 448.2c0-29.5 23.9-53.5 53.5-53.5s53.5 23.9 53.5 53.5-23.9 53.5-53.5 53.5-53.5-23.9-53.5-53.5zm157.9 267.1c-67.8 0-123.8-47.5-132.3-109h264.6c-8.6 61.5-64.5 109-132.3 109zm110-213.7c-29.5 0-53.5-23.9-53.5-53.5s23.9-53.5 53.5-53.5 53.5 23.9 53.5 53.5-23.9 53.5-53.5 53.5zM867.2 644.5V453.1h26.5c19.4 0 35.1 15.7 35.1 35.1v121.1c0 19.4-15.7 35.1-35.1 35.1h-26.5zM95.2 609.4V488.2c0-19.4 15.7-35.1 35.1-35.1h26.5v191.3h-26.5c-19.4 0-35.1-15.7-35.1-35.1zM561.5 149.6c0 23.4-15.6 43.3-36.9 49.7v44.9h-30v-44.9c-21.4-6.5-36.9-26.3-36.9-49.7 0-28.6 23.3-51.9 51.9-51.9s51.9 23.3 51.9 51.9z"></path>
-            </svg>
-            <div class="message-text">
-                <div class="thinking-indicator">
-                    <div class="dot"></div>
-                    <div class="dot"></div>
-                    <div class="dot"></div>
-                </div>
-            </div>`;
-        const incomingMessageDiv = createMessageElement(botMessageContent, "bot-message", "thinking");
-        chatBody.appendChild(incomingMessageDiv);
+        // Clear input
+        messageInput.value = "";
+
+        // Create and append user message
+        const userMessageContent = `<div class="message-text"></div>`;
+        const outgoingMessageDiv = createMessageElement(userMessageContent, "user-message");
+        outgoingMessageDiv.querySelector(".message-text").textContent = message;
+        chatBody.appendChild(outgoingMessageDiv);
         chatBody.scrollTop = chatBody.scrollHeight;
 
-        generateBotResponse(incomingMessageDiv, message);
-    }, 600);
-};
+        // Small delay to simulate bot thinking
+        setTimeout(() => {
+            // Create and append bot message with thinking dots
+            const botMessageContent = `
+                <svg class="bot-avatar" xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 1024 1024">
+                    <path d="M738.3 287.6H285.7c-59 0-106.8 47.8-106.8 106.8v303.1c0 59 47.8 106.8 106.8 106.8h81.5v111.1c0 .7.8 1.1 1.4.7l166.9-110.6 41.8-.8h117.4l43.6-.4c59 0 106.8-47.8 106.8-106.8V394.5c0-59-47.8-106.9-106.8-106.9zM351.7 448.2c0-29.5 23.9-53.5 53.5-53.5s53.5 23.9 53.5 53.5-23.9 53.5-53.5 53.5-53.5-23.9-53.5-53.5zm157.9 267.1c-67.8 0-123.8-47.5-132.3-109h264.6c-8.6 61.5-64.5 109-132.3 109zm110-213.7c-29.5 0-53.5-23.9-53.5-53.5s23.9-53.5 53.5-53.5 53.5 23.9 53.5 53.5-23.9 53.5-53.5 53.5zM867.2 644.5V453.1h26.5c19.4 0 35.1 15.7 35.1 35.1v121.1c0 19.4-15.7 35.1-35.1 35.1h-26.5zM95.2 609.4V488.2c0-19.4 15.7-35.1 35.1-35.1h26.5v191.3h-26.5c-19.4 0-35.1-15.7-35.1-35.1zM561.5 149.6c0 23.4-15.6 43.3-36.9 49.7v44.9h-30v-44.9c-21.4-6.5-36.9-26.3-36.9-49.7 0-28.6 23.3-51.9 51.9-51.9s51.9 23.3 51.9 51.9z"></path>
+                </svg>
+                <div class="message-text">
+                    <div class="thinking-indicator">
+                        <div class="dot"></div>
+                        <div class="dot"></div>
+                        <div class="dot"></div>
+                    </div>
+                </div>`;
+            const incomingMessageDiv = createMessageElement(botMessageContent, "bot-message", "thinking");
+            chatBody.appendChild(incomingMessageDiv);
+            chatBody.scrollTop = chatBody.scrollHeight;
 
-messageInput.addEventListener("keydown", (e) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-        handleOutgoingMessage(e);
-    }
-});
+            generateBotResponse(incomingMessageDiv, message);
+        }, 600);
+    };
 
-sendMessageButton.addEventListener("click", (e) => handleOutgoingMessage(e));
+    messageInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" && !e.shiftKey) {
+            handleOutgoingMessage(e);
+        }
+    });
 
-chatbotToggler.addEventListener("click", () => document.body.classList.toggle("show-chatbot"));
-closeChatBot.addEventListener("click", () => document.body.classList.remove("show-chatbot"));
+    sendMessageButton.addEventListener("click", (e) => handleOutgoingMessage(e));
+
+    chatbotToggler.addEventListener("click", () => document.body.classList.toggle("show-chatbot"));
+    closeChatBot.addEventListener("click", () => document.body.classList.remove("show-chatbot"));
+
+    });

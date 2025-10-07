@@ -22,8 +22,8 @@
             href='https://cdn-uicons.flaticon.com/3.0.0/uicons-solid-rounded/css/uicons-solid-rounded.css'>
         <link rel='stylesheet'
             href='https://cdn-uicons.flaticon.com/3.0.0/uicons-regular-rounded/css/uicons-regular-rounded.css'>
-        <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet" />
-        <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/3.0.0/uicons-regular-straight/css/uicons-regular-straight.css'>
+        <link rel='stylesheet'
+            href='https://cdn-uicons.flaticon.com/3.0.0/uicons-regular-straight/css/uicons-regular-straight.css'>
 
         <link rel="stylesheet" href="<?php echo e(asset('css/style.css')); ?>">
         <link rel="stylesheet" href="<?php echo e(asset('css/bar.css')); ?>">
@@ -39,10 +39,13 @@
         <link rel="stylesheet" href="<?php echo e(asset('css/requests.css')); ?>">
         <link rel="stylesheet" href="<?php echo e(asset('css/messages.css')); ?>">
         <link rel="stylesheet" href="<?php echo e(asset('css/notify.css')); ?>">
+        <link rel="stylesheet" href="<?php echo e(asset('css/settings.css')); ?>">
         <link href="<?php echo e(asset('css/cropper.min.css')); ?>" rel="stylesheet">
         <?php echo $__env->yieldContent('head'); ?>
+       
+        <?php echo \Livewire\Mechanisms\FrontendAssets\FrontendAssets::styles(); ?>
 
-        <?php echo app('Illuminate\Foundation\Vite')(['resources/js/app.js']); ?>
+        <?php echo app('Illuminate\Foundation\Vite')(['resources/css/app.css', 'resources/js/app.js']); ?>
     </head>
 
     <body>
@@ -52,15 +55,16 @@
         <?php echo $__env->make('partials.head-sidebar', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
         <?php echo $__env->yieldContent('content'); ?>
 
+        <?php if(isset($slot)): ?>
+            <?php echo e($slot); ?>
 
+        <?php endif; ?>
+
+
+         <?php echo \Livewire\Mechanisms\FrontendAssets\FrontendAssets::scripts(); ?>
 
     </body>
-
-    <?php echo $__env->yieldPushContent('scripts'); ?>
-
-
-    </body>
-
+  
     <?php echo $__env->yieldPushContent('scripts'); ?>
 
     <script src="<?php echo e(asset('js/cropper.min.js')); ?>"></script>
