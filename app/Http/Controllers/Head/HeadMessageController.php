@@ -13,9 +13,9 @@ class HeadMessageController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
-    {
-        return view('Head.messages');
-    }
 
+    public function index(Request $request, $user = null)
+    {
+        return view('Head.messages', ['selectedUserId' => $user]);
+    }
 }

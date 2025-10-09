@@ -8,10 +8,32 @@ use Illuminate\Http\Request;
 
 class HeadAppointmentController extends Controller
 {
+    public function json($id)
+    {
+        $appointment = Appointments::with(['students.user', 'counselor', 'type', 'requester'])->findOrFail($id);
+        return response()->json([
+            'appointment_id' => $appointment->appointment_id,
+            'counselor_id' => $appointment->counselor_id,
+            'type_id' => $appointment->type ? $appointment->type->type_id : null,
+            'student_ids' => $appointment->students->pluck('s_id')->toArray(),
+            'reason' => $appointment->reason,
+            'appointment_datetime' => $appointment->appointment_datetime ? $appointment->appointment_datetime->format('Y-m-d\TH:i') : null,
+        ]);
+    }
+    public function move(Request $request, $id)
+    {
+    $appointment = Appointments::findOrFail($id);
+    // Convert UTC to Asia/Manila timezone
+    $utcDate = $request->input('appointment_datetime');
+    $manilaDate = \Carbon\Carbon::parse($utcDate)->setTimezone('Asia/Manila');
+    $appointment->appointment_datetime = $manilaDate;
+    $appointment->save();
+    return response()->json(['success' => true]);
+    }
     public function index(Request $request)
     {
 
-        $query = Appointments::with(['student', 'counselor', 'requester', 'type']);
+        $query = Appointments::with(['students', 'counselor', 'requester', 'type']);
 
         // Apply filters if any
         if ($request->has('status') && $request->status != 'all') {
@@ -35,7 +57,11 @@ class HeadAppointmentController extends Controller
 
         $appointments = $query->orderBy('appointment_datetime', 'desc')->get();
 
-        return view('Head.appointments', compact('appointments'));
+    $counselors = \App\Models\User::whereIn('role', ['Counselor', 'Head', 'admin'])->get();
+        $types = \App\Models\AppointmentType::all();
+        $children = \App\Models\Student::with('user')->get();
+
+        return view('Head.appointments', compact('appointments', 'counselors', 'types', 'children'));
     }
 
     public function reschedule(Request $request, $id)
@@ -81,5 +107,67 @@ class HeadAppointmentController extends Controller
         return response()->json($appointments);
     }
 
+    public function approve($id)
+    {
+        $appointment = Appointments::findOrFail($id);
+        $appointment->status = 'Approved';
+        $appointment->save();
 
+        return redirect()->back()->with('success', 'Appointment approved successfully.');
+    }
+
+    public function decline(Request $request, $id)
+    {
+        $request->validate([
+            'decline_reason' => 'required|string',
+        ]);
+        $appointment = Appointments::findOrFail($id);
+        $appointment->status = 'Declined';
+        $appointment->decline_reason = $request->decline_reason;
+        $appointment->save();
+
+        return redirect()->back()->with('success', 'Appointment declined successfully.');
+    }
+    public function store(Request $request)
+    {
+        $request->validate([
+            'counselor_id' => 'required|exists:users,id',
+            'type_id' => 'required|exists:appointment_types,id',
+            'student_id' => 'required|array',
+            'reason' => 'required|string',
+            'appointment_datetime' => 'required|date',
+        ]);
+
+        // Treat submitted time as Asia/Manila local time
+        $manilaDate = \Carbon\Carbon::createFromFormat('Y-m-d\TH:i', $request->appointment_datetime)->toIso8601String();
+
+        // Conflict check: any appointment at the same time
+        $globalConflict = Appointments::where('appointment_datetime', $manilaDate)
+            ->whereIn('status', ['Pending', 'Approved'])
+            ->exists();
+
+        // Conflict check: any selected student has appointment at same time
+        $studentConflict = Appointments::where('appointment_datetime', $manilaDate)
+            ->whereIn('status', ['Pending', 'Approved'])
+            ->whereHas('students', function($q) use ($request) {
+                $q->whereIn('student_user_id', $request->student_id);
+            })->exists();
+
+        if ($globalConflict || $studentConflict) {
+            return back()->withErrors(['appointment_datetime' => 'Appointment cannot be booked. A schedule already exists'])->withInput();
+        }
+
+        $appointment = Appointments::create([
+            'counselor_id' => $request->counselor_id,
+            'appointment_type_id' => $request->type_id, // <-- FIXED HERE
+            'reason' => $request->reason,
+            'appointment_datetime' => $manilaDate,
+            'status' => 'Pending',
+            'requester_id' => auth()->id(),
+        ]);
+
+        $appointment->students()->sync($request->student_id);
+
+        return redirect()->back()->with('success', 'Appointment requested successfully.');
+    }
 }

@@ -1,1 +1,0 @@
-<?php /**PATH C:\Users\Administrator\School-Guidance-Record-Management-System-SGRMS\resources\views/livewire/head/settings/password.blade.php ENDPATH**/ ?>

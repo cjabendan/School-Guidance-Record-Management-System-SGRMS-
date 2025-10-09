@@ -2,7 +2,7 @@
 .chat-app {
     display: flex;
     height: 100%;
-      min-height: 0;
+    min-height: 0;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
     border-radius: 8px;
     padding: 1px;
@@ -65,43 +65,43 @@
 }
 
 .chat-filters {
-  display: flex;
-  flex: 1;
+    display: flex;
+    flex: 1;
 }
 
 .chat-filters ul {
-  display: flex;
-  flex: 1;
-  gap: 12px;
-  list-style: none;
-  padding: 0;
-  margin: 0;
+    display: flex;
+    flex: 1;
+    gap: 12px;
+    list-style: none;
+    padding: 0;
+    margin: 0;
 }
 
 .chat-filters li {
-  flex: 1;
+    flex: 1;
 }
 
 .chat-nav {
-  display: block;
-  padding: 8px 14px;
-  border-radius: 50px;
-  font-weight: 500;
-  font-size: 0.95rem;
-  color: #292929;
-  text-decoration: none;
-  text-align: center;
-  transition: all 0.25s ease;
+    display: block;
+    padding: 8px 14px;
+    border-radius: 50px;
+    font-weight: 500;
+    font-size: 0.95rem;
+    color: #292929;
+    text-decoration: none;
+    text-align: center;
+    transition: all 0.25s ease;
 }
 
 .chat-nav:hover {
-  background: #edeff1;
+    background: #edeff1;
 }
 
 .chat-nav.active {
-  background: #c1e7ffb7;
-  color: rgb(6, 113, 219);
-  box-shadow: 0 2px 6px rgba(0, 88, 175, 0.25);
+    background: #c1e7ffb7;
+    color: rgb(6, 113, 219);
+    box-shadow: 0 2px 6px rgba(0, 88, 175, 0.25);
 }
 
 .chat-list {
@@ -132,12 +132,14 @@
     height: 48px;
     border-radius: 50%;
     margin-right: 12px;
+    border: 1px solid #cccccc;
 }
 
 .chat-item-info {
     flex: 1;
     display: flex;
     flex-direction: column;
+    min-width: 0;
 }
 
 .chat-item-username {
@@ -149,9 +151,27 @@
 .chat-item-preview {
     display: flex;
     justify-content: space-between;
-    font-size: 0.875rem;
+    align-items: center;
+    min-width: 0;
+    overflow: hidden;
+}
+
+.chat-item-lastmessage {
+    flex: 1;
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
     color: #6b7280;
-    margin-top: 2px;
+    font-size: 0.9rem;
+    text-overflow: ellipsis;
+}
+
+.chat-item-time {
+    flex-shrink: 0;
+    white-space: nowrap;
+    margin-left: 8px;
+    color: #6b7280;
+    font-size: 0.8rem;
 }
 
 /* Main Chat */
@@ -162,15 +182,15 @@
     background-color: #f0f0f0;
     padding: 15px;
     min-height: 0; /* important */
-        height: 100%;
+    height: 100%;
 }
 
-.chat-container{
+.chat-container {
     display: flex;
     flex-direction: column;
     flex: 1;
     min-height: 0; /* allow flex children to shrink for scrolling */
-     height: 100%;
+    height: 100%;
     background: #ffffff;
     border-radius: 8px;
     overflow: hidden;
@@ -228,7 +248,7 @@
     font-size: 1.6rem;
     color: #1ea7ff;
     cursor: pointer;
-    margin-right: .7rem;
+    margin-right: 0.7rem;
 }
 
 .chat-header-info {
@@ -237,12 +257,12 @@
     justify-content: center;
 }
 
-
 .chat-header img {
     width: 45px;
     height: 45px;
     border-radius: 50%;
     margin-right: 14px;
+    border: 1px solid #cccccc;
 }
 
 .chat-header h2 {
@@ -259,21 +279,21 @@
 /* Messages Area */
 
 .messages-container {
-    flex: 1; 
-    min-height: 0; 
+    flex: 1;
+    min-height: 0;
     max-height: 100%;
-    overflow-y: auto; 
+    overflow-y: auto;
     background-color: #ffffff;
     padding: 16px;
     display: flex;
     flex-direction: column-reverse;
     gap: 16px;
     scroll-behavior: smooth;
-     position: relative; 
+    position: relative;
 }
 
 .message-data {
-    display: inline-block; 
+    display: inline-block;
     max-width: 500px;
     min-width: 60px;
     border-radius: 32px 32px 3px 32px;
@@ -286,7 +306,6 @@
     background-color: #1ea7ff;
     line-height: 1.4;
 }
-
 
 .message-row {
     display: flex;
@@ -320,10 +339,10 @@
 }
 
 .seen-status {
-    width: 100%; 
+    width: 100%;
     display: flex;
-    justify-content: flex-end; 
-    margin-top: -5px; 
+    justify-content: flex-end;
+    margin-top: -5px;
 }
 
 /* Style for the actual profile image icon */
@@ -332,12 +351,11 @@
     height: 18px;
     border-radius: 50%;
     object-fit: cover;
-    opacity: 0.8; 
+    opacity: 0.8;
 }
 
 .sender-info {
     display: flex;
-    align-items: center;
     gap: 8px;
 }
 
@@ -352,24 +370,9 @@
     height: 40px;
     border-radius: 50%;
     object-fit: cover;
+    border: 1px solid #cccccc;
 }
 
-.message-time {
-    font-size: 0.8em;
-    color: #888;
-    margin-top: 2px;
-    margin-left: 4px;
-}
-
-
-.chat-item-lastmessage {
-    font-size: 0.9rem;
-    color: #6b7280;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 220px;
-}
 /* Bold for unread last message in chat list */
 .chat-item-lastmessage.unread {
     font-weight: bold;
@@ -405,7 +408,8 @@
 }
 
 @keyframes dotPulse {
-    0%, 44% {
+    0%,
+    44% {
         transform: translateY(0);
     }
 
@@ -526,13 +530,13 @@
     letter-spacing: 0.5px;
 }
 
-
 .search-user-img {
     width: 30px;
     height: 30px;
     border-radius: 50%;
     object-fit: cover;
     margin-right: 8px;
+    border: 1px solid #cccccc;
 }
 
 .new-chat-header {
@@ -543,7 +547,7 @@
 }
 
 .convo-results {
-  position: absolute;
+    position: absolute;
     left: 0;
     right: 0;
     top: 40;
@@ -567,7 +571,6 @@
     z-index: 1000;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
 }
-
 
 .user-results li,
 .convo-results li {
@@ -602,12 +605,12 @@
     flex-direction: column;
 }
 
-.user-chat-profile-info.active{
+.user-chat-profile-info.active {
     display: flex;
 }
 
 .user-chat-profile-info .user-chat-profile-container {
-    display: flex;    
+    display: flex;
     flex-direction: column;
     flex: 1;
     padding: 25px 20px;
@@ -631,9 +634,10 @@
     margin-bottom: 12px;
     object-fit: cover;
     align-items: center;
+    border: 1px solid #cccccc;
 }
 
-.user-profile-name{
+.user-profile-name {
     font-size: 1.4rem;
     font-weight: 600;
     color: #1f2937;
@@ -661,7 +665,6 @@
     margin-top: 8px;
     align-items: center;
     justify-content: center;
-    
 }
 
 .user-chat-section ul .user-chat-icon {
@@ -712,7 +715,7 @@
     max-height: 0;
     overflow: hidden;
     opacity: 0;
-    transition: max-height 0.3s cubic-bezier(0.4,0,0.2,1), opacity 0.2s;
+    transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s;
     border-radius: 0 0 8px 8px;
     box-shadow: none;
 }
@@ -781,7 +784,6 @@
     flex-direction: row;
     align-items: center;
     padding: 10px;
-   
 }
 
 .scri-img img {

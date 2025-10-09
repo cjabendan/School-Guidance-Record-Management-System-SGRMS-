@@ -181,3 +181,37 @@
     background: #f6fbff;
     color: #1ea7ff;
 }
+
+/* Layout fixes to show calendar beside the appointments list */
+.table-management {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+}
+
+.table-list {
+    flex: 1 1 auto;
+    min-width: 0; /* allow flex children to shrink properly */
+}
+
+#calendar-view {
+    flex: 0 0 420px; /* fixed sidebar-like calendar */
+    width: 420px;
+}
+
+#calendar {
+    width: 100%;
+    min-height: 520px; /* ensure calendar area is visible */
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+    padding: 12px;
+    box-sizing: border-box;
+}
+
+@media (max-width: 900px) {
+    .table-management {
+        flex-direction: column;
+    }
+    #calendar-view { width: 100%; flex: 1 1 auto; }
+}

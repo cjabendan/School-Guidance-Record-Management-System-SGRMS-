@@ -8,7 +8,7 @@
 $__split = function ($name, $params = []) {
     return [$name, $params];
 };
-[$__name, $__params] = $__split('chat');
+[$__name, $__params] = $__split('chat', ['selectedUserId' => $selectedUserId ?? null]);
 
 $__html = app('livewire')->mount($__name, $__params, 'lw-1245946830-0', $__slots ?? [], get_defined_vars());
 
@@ -20,7 +20,7 @@ unset($__params);
 unset($__split);
 if (isset($__slots)) unset($__slots);
 ?>
-     
+
     </section>
 <?php $__env->stopSection(); ?>
 

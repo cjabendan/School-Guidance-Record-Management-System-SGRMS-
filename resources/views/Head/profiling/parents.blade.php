@@ -59,15 +59,11 @@
                             @endphp
                             <div class="table-card">
                                 <div class="table-col title">
-                                    @if ($parent->user && $parent->user->profile_image)
+                                 
                                         <img src="{{ asset('images/user/' . $parent->user->profile_image) }}"
                                             alt="Parent Image" class="parent-photo"
-                                            style="width:32px;height:32px;border-radius:50%;margin-right:12px;">
-                                    @else
-                                        <img src="{{ asset('images/user/default.jpg') }}" alt="Default Image"
-                                            class="parent-photo"
-                                            style="width:32px;height:32px;border-radius:50%;margin-right:8px;">
-                                    @endif
+                                            style="width:32px;height:32px;border-radius:50%;margin-right:12px;  border: 1px solid #cccccc;">
+                                   
                                     {{ $parent->user->first_name ?? $parent->first_name }}
                                     {{ $parent->user->last_name ?? $parent->last_name }}
                                 </div>

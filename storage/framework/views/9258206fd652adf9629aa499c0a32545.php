@@ -64,9 +64,9 @@
         <div class="notification-wrapper">
             <a href="#" id="notificationBell" class="notification-bell">
                 <i class='bx bxs-bell'></i>
-                <!--[if BLOCK]><![endif]--><?php if($notifCount > 0): ?>
+                <?php if($notifCount > 0): ?>
                     <span class="badge"><?php echo e($notifCount); ?></span>
-                <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+                <?php endif; ?>
             </a>
             <div id="notificationDropdown" class="notification-dropdown" style="display:none;">
                 <div id="notificationDropdownContent"><!-- loaded by AJAX --></div>

@@ -5,6 +5,7 @@ namespace App\Livewire;
 use Illuminate\Http\Request;
 use Livewire\Component;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Session;
 
 class Settings extends Component
 {
@@ -14,13 +15,29 @@ class Settings extends Component
     public function mount()
     {
         $this->role = Auth::user()->role;
+        $this->tab = request()->query('tab', 'profile');
     }
 
-    public function switchTab($tab)
+    public function switchTab($newTab)
     {
-        $this->tab = $tab;
+        $sensitiveTabs = ['twofactor', 'system'];
+
+        if (in_array($newTab, $sensitiveTabs)) {
+            $timeout = config('auth.password_timeout', 900);
+
+            if (!Session::has('auth.password_confirmed_at') || time() - Session::get('auth.password_confirmed_at') > $timeout) {
+
+                // Store intended URL after successful confirmation
+                Session::put('url.intended', route('settings', ['tab' => $newTab]));
+
+                // Redirect user to password confirmation
+                return redirect()->route('confirm-password');
+            }
+        }
+
+        $this->tab = $newTab;
     }
-    
+
     public function render()
     {
         $layout = match ($this->role) {

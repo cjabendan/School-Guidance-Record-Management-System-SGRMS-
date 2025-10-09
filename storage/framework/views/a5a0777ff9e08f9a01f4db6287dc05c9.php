@@ -115,14 +115,14 @@ unset($__defined_vars, $__key, $__value); ?>
 
     <?php if (isset($component)) { $__componentOriginalb581a7e3a55d371fae986833ecafa668 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginalb581a7e3a55d371fae986833ecafa668 = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'laravel-exceptions-renderer::components.request-url','data' => ['request' => $exception->request(),'class' => 'relative z-50']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'laravel-exceptions-renderer::components.request-url','data' => ['exception' => $exception,'request' => $exception->request(),'class' => 'relative z-50']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
 <?php $component->withName('laravel-exceptions-renderer::request-url'); ?>
 <?php if ($component->shouldRender()): ?>
 <?php $__env->startComponent($component->resolveView(), $component->data()); ?>
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
 <?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['request' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($exception->request()),'class' => 'relative z-50']); ?>
+<?php $component->withAttributes(['exception' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($exception),'request' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($exception->request()),'class' => 'relative z-50']); ?>
 <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginalb581a7e3a55d371fae986833ecafa668)): ?>

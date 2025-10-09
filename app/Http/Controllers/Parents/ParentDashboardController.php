@@ -50,7 +50,7 @@ class ParentDashboardController extends Controller
         }
         // Upcoming appointments
         $filter = $request->input('filter', 'today');
-        $query = Appointments::with(['student', 'counselor', 'requester', 'type'])
+        $query = Appointments::with(['students', 'counselor', 'requester', 'type'])
             ->where('requester_id', $userId)
             ->where('status', 'approved')
             ->where('appointment_datetime', '>', now());
@@ -70,6 +70,9 @@ class ParentDashboardController extends Controller
 
         $upcomingAppointments = $query->orderBy('appointment_datetime', 'asc')->limit(5)->get();
 
+        // Counselors for dropdown
+        $counselors = \App\Models\User::whereIn('role', ['Counselor', 'Head', 'admin'])->get();
+
         if ($request->ajax()) {
             $html = view('Parents.dashboard.appointments-table', compact('upcomingAppointments'))->render();
             return response()->json(['html' => $html]);
@@ -80,7 +83,8 @@ class ParentDashboardController extends Controller
             'upcomingAppointments',
             'childCount',
             'casesCount',
-            'pendingRequestCount'
+            'pendingRequestCount',
+            'counselors'    
         ));
     }
 }

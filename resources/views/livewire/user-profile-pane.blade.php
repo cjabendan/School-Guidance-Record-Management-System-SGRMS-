@@ -3,9 +3,8 @@
     <div class="user-chat-profile-container">
 
         @if (!$searchModeInProfile)
-            {{-- DEFAULT USER PROFILE VIEW --}}
             <div class="user-profile-header" style="position: absolute; top: 10px; right: 10px;">
-                <a href="#" class="close-profile-btn" wire:click.prevent="toggleUserProfile">&times;</a>
+
             </div>
             <div class="user-profile-img-wrapper">
                 <img src="{{ asset('images/user/' . $selectedUser->profile_image) }}" class="user-profile-img"

@@ -35,7 +35,7 @@ class CounselorAppointmentController extends Controller
 
         $appointments = $query->orderBy('appointment_datetime', 'desc')->get();
 
-    return view('Counselor.appointment', compact('appointments'));
+    return view('Counselor.appointments', compact('appointments'));
     }
 
     public function reschedule(Request $request, $id)

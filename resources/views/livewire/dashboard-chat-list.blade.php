@@ -1,4 +1,4 @@
-<div id="chatList" class="chat-list" wire:poll.5s="loadChatList">
+<div id="chatList" class="chat-list" wire:poll.3s="loadChatList">
     @foreach ($users as $user)
         <a href="{{ route('Head.messages', ['user' => $user->id]) }}"
             class="chat-item">
@@ -15,16 +15,16 @@
                         @if ($user->lastMessage && !$user->lastMessage->is_read && $user->lastMessage->sender_id !== Auth::id()) unread @endif">
                         @if ($user->lastMessage)
                             @if ($user->lastMessage->sender_id === Auth::id())
-                                You: {{ Str::limit($user->lastMessage->message, 18) }}
+                                You: {{ $user->lastMessage->message }}
                             @else
-                                {{ Str::limit($user->lastMessage->message, 18) }}
+                                {{ $user->lastMessage->message}}
                             @endif
                         @else
                             No messages yet.
                         @endif
                     </span>
                     <span class="chat-item-time" data-time="{{ $user->lastMessage?->created_at }}">
-                        {{ $user->lastMessage?->created_at?->diffForHumans() }}
+                        {{ $this->formatTimeShort($user->lastMessage?->created_at) }} 
                     </span>
                 </div>
             </div>

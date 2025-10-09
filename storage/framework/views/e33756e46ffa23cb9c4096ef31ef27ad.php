@@ -3,10 +3,8 @@
 $__newAttributes = [];
 $__propNames = \Illuminate\View\ComponentAttributeBag::extractPropNames(([
     'code',
-    'grammar',
-    'lightTheme' => 'light-plus',
-    'darkTheme' => 'dark-plus',
-    'withGutter' => false,
+    'language',
+    'editor' => false,
     'startingLine' => 1,
     'highlightedLine' => null,
     'truncate' => false,
@@ -27,10 +25,8 @@ unset($__newAttributes);
 
 foreach (array_filter(([
     'code',
-    'grammar',
-    'lightTheme' => 'light-plus',
-    'darkTheme' => 'dark-plus',
-    'withGutter' => false,
+    'language',
+    'editor' => false,
     'startingLine' => 1,
     'highlightedLine' => null,
     'truncate' => false,
@@ -46,34 +42,57 @@ foreach ($attributes->all() as $__key => $__value) {
 
 unset($__defined_vars, $__key, $__value); ?>
 
-<?php use \Phiki\Phiki; ?>
-<?php use \Phiki\Grammar\Grammar; ?>
-<?php use \Phiki\Theme\Theme; ?>
-<?php use \Phiki\Transformers\Decorations\GutterDecoration; ?>
-<?php use \Phiki\Transformers\Decorations\LineDecoration; ?>
-<?php use \Phiki\Transformers\Decorations\PreDecoration; ?>
-
 <?php
-    $highlightedCode = (new Phiki)->codeToHtml($code, $grammar, ['light' => $lightTheme, 'dark' => $darkTheme])
-        ->withGutter($withGutter)
-        ->startingLine($startingLine)
-        ->decoration(
-            PreDecoration::make()->class('bg-transparent!', $truncate ? ' truncate' : ''),
-            GutterDecoration::make()->class('mr-6 text-neutral-500! dark:text-neutral-600!'),
-        );
+    $fallback = $truncate ? '<pre class="truncate"><code>' : '<pre><code>';
 
-    if ($highlightedLine !== null) {
-        $highlightedCode->decoration(
-            LineDecoration::forLine($highlightedLine)->class('bg-rose-200! [&_.line-number]:dark:text-white! dark:bg-rose-900!'),
-        );
+    if ($editor) {
+        $lines = explode("\n", $code);
+
+        foreach ($lines as $index => $line) {
+            $lineNumber = $startingLine + $index;
+            $highlight = $highlightedLine === $index;
+            $lineClass = implode(' ', [
+                'block px-4 py-1 h-7 even:bg-white odd:bg-white/2 even:dark:bg-white/2 odd:dark:bg-white/4',
+                $highlight ? 'bg-rose-200! dark:bg-rose-900!' : '',
+            ]);
+            $lineNumberClass = implode(' ', [
+                'mr-6 text-neutral-500! dark:text-neutral-600!',
+                $highlight ? 'dark:text-white!' : '',
+            ]);
+
+            $fallback .= '<span class="' . $lineClass . '">';
+            $fallback .= '<span class="' . $lineNumberClass . '">' . $lineNumber . '</span>';
+            $fallback .= htmlspecialchars($line);
+            $fallback .= '</span>';
+        }
+
+    } else {
+        $fallback .= htmlspecialchars($code);
     }
+
+    $fallback .= '</code></pre>';
 ?>
 
 <div
+    x-data="{ highlightedCode: null }"
+    x-init="
+        highlightedCode = window.highlight(
+            <?php echo e(Illuminate\Support\Js::from($code)); ?>,
+            <?php echo e(Illuminate\Support\Js::from($language)); ?>,
+            <?php echo e(Illuminate\Support\Js::from($truncate)); ?>,
+            <?php echo e(Illuminate\Support\Js::from($editor)); ?>,
+            <?php echo e(Illuminate\Support\Js::from($startingLine)); ?>,
+            <?php echo e(Illuminate\Support\Js::from($highlightedLine)); ?>
+
+        );
+    "
     <?php echo e($attributes); ?>
 
 >
-    <?php echo $highlightedCode; ?>
-
+    <div
+        x-cloak
+        x-html="highlightedCode"
+    ></div>
+    <div x-show="!highlightedCode"><?php echo $fallback; ?></div>
 </div>
 <?php /**PATH C:\Users\Administrator\School-Guidance-Record-Management-System-SGRMS\vendor\laravel\framework\src\Illuminate\Foundation\Providers/../resources/exceptions/renderer/components/syntax-highlight.blade.php ENDPATH**/ ?>

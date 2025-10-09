@@ -38,6 +38,9 @@ class User extends Authenticatable
         'address',
         'profile_image',
         'password',
+        'two_factor_secret',
+        'two_factor_recovery_codes',
+        'two_factor_confirmed_at',
         'role',
         'profile_image',
         'status',
@@ -47,6 +50,9 @@ class User extends Authenticatable
 
     protected $hidden = [
         'password',
+        'two_factor_secret',
+        'two_factor_recovery_codes',
+        'two_factor_confirmed_at',
         'google_token',
         'google_refresh_token',
         'remember_token',

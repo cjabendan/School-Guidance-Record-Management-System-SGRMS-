@@ -53,11 +53,17 @@ class RegisterController extends Controller
         $data['contact_num'] = '+63' . $data['phonenumber'];
         $data['sex'] = $data['gender'];
 
+
         unset($data['phonenumber'], $data['gender']);
 
         // 1. Create user (parent, pending)
         $user = User::create($data);
 
+        if (empty($user->profile_image)) {
+            $user->profile_image = $user->sex === 'Male'
+                ? 'male.png'
+                : 'female.png';
+        }
 
         // Generate activation token for email verification
         $user->activation_token = Str::random(64);

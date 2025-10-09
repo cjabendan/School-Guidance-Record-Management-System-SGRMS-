@@ -25,6 +25,7 @@ class Chat extends Component
     public $conversationSearchResults = [];
     public $newChatSearchResults = [];
     public $selectedUser = null;
+    public $selectedUserId = null;
     public $showUserProfile = false;
     public $authRole;
     public $isBlocked = false;
@@ -40,7 +41,7 @@ class Chat extends Component
 
 
 
-    public function mount()
+    public function mount($selectedUserId = null)
     {
         $this->loginID = Auth::id();
         $this->authId = $this->loginID;
@@ -48,14 +49,20 @@ class Chat extends Component
 
         $this->loadChatList();
 
-        $activeUserId = Session::get(self::ACTIVE_CONVO_SESSION_KEY);
-        $restoredUser = null;
-
-        if ($activeUserId) {
-            $restoredUser = $this->users->firstWhere('id', $activeUserId);
+        // Use selectedUserId from route if provided
+        if ($selectedUserId) {
+            $restoredUser = $this->users->firstWhere('id', $selectedUserId);
+            if ($restoredUser) {
+                $this->selectedUser = $restoredUser;
+                Session::put(self::ACTIVE_CONVO_SESSION_KEY, $restoredUser->id);
+            } else {
+                $this->selectedUser = $this->users->first();
+            }
+        } else {
+            $activeUserId = Session::get(self::ACTIVE_CONVO_SESSION_KEY);
+            $restoredUser = $activeUserId ? $this->users->firstWhere('id', $activeUserId) : null;
+            $this->selectedUser = $restoredUser ?? $this->users->first();
         }
-
-        $this->selectedUser = $restoredUser ?? $this->users->first();
 
         if ($this->selectedUser) {
             Session::put(self::ACTIVE_CONVO_SESSION_KEY, $this->selectedUser->id);
@@ -78,6 +85,54 @@ class Chat extends Component
         $this->conversationSearchResults = [];
     }
 
+    private function formatTimeShort($timestamp)
+    {
+        if (!$timestamp) {
+            return null;
+        }
+
+        // 1. Calculate the difference in seconds from the current time
+        $diffInSeconds = $timestamp->diffInSeconds(\Illuminate\Support\Carbon::now());
+
+        // 2. Apply the custom rule: if less than 60 seconds, force it to '1m'
+        if ($diffInSeconds < 60) {
+            return '1 m';
+        }
+
+        // 3. For 60 seconds (1 minute) and above, use Carbon's diffForHumans
+        //    and then apply the standard abbreviations.
+        $diff = $timestamp->diffForHumans([
+            'syntax' => \Carbon\CarbonInterface::DIFF_ABSOLUTE,
+            'options' => \Carbon\Carbon::JUST_NOW | \Carbon\Carbon::ONE_DAY_WORDS,
+            'parts' => 1, // Only show the largest unit (e.g., 5 minutes, not 5 minutes 30 seconds)
+        ]);
+
+        // Simple mapping to shorten the output string
+        $replacements = [
+            'years' => 'y',
+            'year' => 'y',
+            'months' => 'mon',
+            'month' => 'mon',
+            'weeks' => 'w',
+            'week' => 'w',
+            'days' => 'd',
+            'day' => 'd',
+            'hours' => 'hr',
+            'hour' => 'hr',
+            'minutes' => 'm',
+            'minute' => 'm',
+            // Note: 'second(s)' are handled by the rule above, but included for completeness
+            'seconds' => 's',
+            'second' => 's',
+        ];
+
+        // Replace the full words with the abbreviations and remove 'ago' if present
+        return str_replace(
+            array_keys($replacements),
+            array_values($replacements),
+            str_replace(' ago', '', $diff)
+        );
+    }
     /**
      * Loads the block status for the selected user relative to the authenticated user.
      */
@@ -209,6 +264,7 @@ class Chat extends Component
         }
     }
 
+ 
 
     public function selectUser($id)
     {

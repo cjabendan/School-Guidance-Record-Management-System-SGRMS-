@@ -29,20 +29,20 @@ foreach ($attributes->all() as $__key => $__value) {
 unset($__defined_vars, $__key, $__value); ?>
 
 <div
-    class="text-sm rounded-b-lg bg-neutral-50 border-t border-neutral-100 [&_.line]:block [&_.line]:px-4 [&_.line]:py-1 [&_.line]:even:bg-white [&_.line]:odd:bg-white/2 [&_.line]:even:dark:bg-white/2 [&_.line]:odd:dark:bg-white/4 dark:bg-neutral-900 dark:border-white/10"
+    class="text-sm rounded-b-lg bg-neutral-50 border-t border-neutral-100 dark:bg-neutral-900 dark:border-white/10"
     <?php echo e($attributes); ?>
 
 >
     <?php if (isset($component)) { $__componentOriginal12cb286571f553eebcbe98210b217f94 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal12cb286571f553eebcbe98210b217f94 = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'laravel-exceptions-renderer::components.syntax-highlight','data' => ['code' => $code,'grammar' => 'php','withGutter' => true,'startingLine' => max(1, $highlightedLine - 5),'highlightedLine' => min(5, $highlightedLine - 1),'class' => 'overflow-x-auto']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'laravel-exceptions-renderer::components.syntax-highlight','data' => ['code' => $code,'language' => 'php','editor' => true,'startingLine' => max(1, $highlightedLine - 5),'highlightedLine' => min(5, $highlightedLine - 1),'class' => 'overflow-x-auto']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
 <?php $component->withName('laravel-exceptions-renderer::syntax-highlight'); ?>
 <?php if ($component->shouldRender()): ?>
 <?php $__env->startComponent($component->resolveView(), $component->data()); ?>
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
 <?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['code' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($code),'grammar' => 'php','with-gutter' => true,'starting-line' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute(max(1, $highlightedLine - 5)),'highlighted-line' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute(min(5, $highlightedLine - 1)),'class' => 'overflow-x-auto']); ?>
+<?php $component->withAttributes(['code' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($code),'language' => 'php','editor' => true,'starting-line' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute(max(1, $highlightedLine - 5)),'highlighted-line' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute(min(5, $highlightedLine - 1)),'class' => 'overflow-x-auto']); ?>
 <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginal12cb286571f553eebcbe98210b217f94)): ?>

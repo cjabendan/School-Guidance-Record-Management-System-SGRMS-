@@ -10,7 +10,7 @@ use App\Models\ParentModel;
 use App\Models\Counselor;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-
+use Illuminate\Support\Facades\Hash;
 
 class LoginController extends Controller
 {
@@ -24,7 +24,7 @@ class LoginController extends Controller
     {
         $credentials = $request->validate([
             'login' => 'required|string',
-            'password' => 'required|string|min:8',
+            'password' => 'required|string',
         ]);
 
         $loginInput = $credentials['login'];
@@ -34,13 +34,13 @@ class LoginController extends Controller
         if (filter_var($loginInput, FILTER_VALIDATE_EMAIL)) {
             $user = \App\Models\User::where('email', $loginInput)->first();
         } else {
-            
+
             $admin = Admins::where('a_id', $loginInput)->first();
             if ($admin && $admin->user) {
                 $user = $admin->user;
                 $role_id = $admin->a_id;
             }
-        
+
             if (!$user) {
                 $student = Student::where('s_id', $loginInput)->first();
                 if ($student && $student->user) {
@@ -48,7 +48,7 @@ class LoginController extends Controller
                     $role_id = $student->s_id;
                 }
             }
-     
+
             if (!$user) {
                 $parent = ParentModel::where('p_id', $loginInput)->first();
                 if ($parent && $parent->user) {
@@ -56,7 +56,7 @@ class LoginController extends Controller
                     $role_id = $parent->p_id;
                 }
             }
-          
+
             if (!$user) {
                 $counselor = Counselor::where('c_id', $loginInput)->first();
                 if ($counselor && $counselor->user) {
@@ -72,18 +72,31 @@ class LoginController extends Controller
             ]);
         }
 
+        // Verify password without logging in
+        if (!Hash::check($credentials['password'], $user->password)) {
+            return back()->withErrors([
+                'login' => 'The provided credentials do not match our records.',
+            ])->onlyInput('login');
+        }
+
+        // If user has 2FA secret (and confirmed), don't log them in yet — redirect to 2FA challenge
+        if (!empty($user->two_factor_secret) /* you can also check two_factor_confirmed_at */) {
+            // store the pending user id in session and redirect to challenge
+            session(['2fa:user:id' => $user->id, 'pending_role_id' => $role_id, 'pending_role' => $user->role]);
+            return redirect()->route('two-factor-challenge');
+        }
+
+        // No 2FA -> proceed to log in
         if (Auth::attempt(['email' => $user->email, 'password' => $credentials['password']])) {
             $request->session()->regenerate();
 
-          
             if (!is_null($user->activation_token)) {
-                Auth::logout(); // log them out immediately
+                Auth::logout();
                 return back()->withErrors([
                     'login' => 'Please verify your email before logging in. Check your inbox for the activation link.',
                 ]);
             }
 
-            // 🔒 Check if user is active
             if ($user->status !== 'active') {
                 Auth::logout();
                 return back()->withErrors([
@@ -127,6 +140,7 @@ class LoginController extends Controller
             }
         }
 
+        // fallback (shouldn't reach because we checked Hash::check earlier)
         return back()->withErrors([
             'login' => 'The provided credentials do not match our records.',
         ])->onlyInput('login');

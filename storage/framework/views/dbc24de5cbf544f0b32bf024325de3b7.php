@@ -3,9 +3,8 @@
     <div class="user-chat-profile-container">
 
         <!--[if BLOCK]><![endif]--><?php if(!$searchModeInProfile): ?>
-            
             <div class="user-profile-header" style="position: absolute; top: 10px; right: 10px;">
-                <a href="#" class="close-profile-btn" wire:click.prevent="toggleUserProfile">&times;</a>
+
             </div>
             <div class="user-profile-img-wrapper">
                 <img src="<?php echo e(asset('images/user/' . $selectedUser->profile_image)); ?>" class="user-profile-img"

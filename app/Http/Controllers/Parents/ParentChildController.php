@@ -32,11 +32,12 @@ class ParentChildController extends Controller
                 'id' => $student->s_id,
                 'name' => $student->user ? $student->user->first_name . ' ' . $student->user->last_name : 'N/A',
                 'email' => $student->user ? $student->user->email : 'N/A',
+                
             ];
         });
 
         return view('Parent.child', compact('children'));
-    }
+    } 
 
     public function searchStudents(Request $request)
     {

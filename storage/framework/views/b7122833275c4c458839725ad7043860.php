@@ -45,7 +45,7 @@
                 </div>
             </div>
 
-            <div class="messages-container" id="messagesContainer">
+            <div class="messages-container" id="messagesContainer" >
                 <!--[if BLOCK]><![endif]--><?php if($messages->isEmpty()): ?>
                     <div class="no-messages-user">
                         <p class="no-conversation-placeholder">No messages yet.

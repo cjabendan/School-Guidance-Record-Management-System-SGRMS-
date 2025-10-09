@@ -130,7 +130,6 @@ select:focus {
     color: #1ea7ff;
 }
 
-
 /* Calendar Styling */
 #calendar {
     width: 100%;
@@ -514,6 +513,3 @@ select:focus {
     border-color: #bcd6f7;
     cursor: not-allowed;
 }
-
-
-

@@ -9,6 +9,8 @@
         "php": "^8.2",
         "barryvdh/laravel-dompdf": "^3.1",
         "cloudstudio/ollama-laravel": "^1.1",
+        "endroid/qr-code": "^6.0",
+        "laravel/fortify": "^1.31",
         "laravel/framework": "^12.0",
         "laravel/tinker": "^2.10.1",
         "livewire/flux": "^2.5",

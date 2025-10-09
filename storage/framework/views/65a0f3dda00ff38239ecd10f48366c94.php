@@ -1,4 +1,3 @@
-
 <?php $__empty_1 = true; $__currentLoopData = $appointments; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $appointment): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
     <div class="table-card">
         <div class="table-col type">
@@ -13,10 +12,17 @@
                 N/A
             <?php endif; ?>
         </div>
-        <div class="table-col student">
-            <?php if($appointment->student): ?>
-                <?php echo e($appointment->student->first_name); ?> <?php echo e($appointment->student->last_name); ?>
+       <div class="table-col student">
+            <?php
+                $studentCount = $appointment->students->count();
+                $firstStudent = $appointment->students->first();
+            ?>
+            <?php if($studentCount === 1): ?>
+                <?php echo e($firstStudent->user->first_name ?? ''); ?> <?php echo e($firstStudent->user->last_name ?? ''); ?>
 
+            <?php elseif($studentCount > 1): ?>
+                <?php echo e($firstStudent->user->first_name ?? ''); ?> <?php echo e($firstStudent->user->last_name ?? ''); ?>&nbsp;
+                <span class="see-more-text" style="color: #888;">see more</span>
             <?php else: ?>
                 N/A
             <?php endif; ?>
@@ -64,11 +70,37 @@
         </div>
         <div class="table-col actions">
             <a href="#" title="View" class="view-btn"
-                onclick="openAppointmentModal(<?php echo e($appointment->appointment_id); ?>, 'view')">
+                onclick="openReviewModal(<?php echo e($appointment->appointment_id); ?>,
+                    `<div><strong>Type:</strong> <?php echo e($appointment->type ? $appointment->type->type_name : 'N/A'); ?><br>
+                    <strong>Requester:</strong> <?php echo e($appointment->requester ? $appointment->requester->first_name . ' ' . $appointment->requester->last_name : 'N/A'); ?><br>
+                    <strong>Student:</strong> <?php $studentCount = $appointment->students->count(); ?>
+                    <?php if($studentCount === 1): ?>
+                        <?php echo e($appointment->students->first()->user->first_name ?? ''); ?> <?php echo e($appointment->students->first()->user->last_name ?? ''); ?>
+
+                    <?php elseif($studentCount > 1): ?>
+                        <?php echo $appointment->students->map(fn($s) => e(($s->user->first_name ?? '') . ' ' . ($s->user->last_name ?? '')))->implode('<br>'); ?>
+
+                    <?php else: ?>
+                        N/A
+                    <?php endif; ?><br>
+                    <strong>Date & Time:</strong> <?php echo e($appointment->appointment_datetime ? $appointment->appointment_datetime->format('M d, Y h:i A') : 'N/A'); ?><br>
+                    <strong>Counselor:</strong> <?php echo e($appointment->counselor ? $appointment->counselor->first_name . ' ' . $appointment->counselor->last_name : 'N/A'); ?><br>
+                    <strong>Status:</strong> <?php echo e(ucfirst($appointment->status)); ?><br>
+                    <?php if($appointment->rescheduled_count > 0): ?>
+                        <span class='badge badge-warning'>Rescheduled (<?php echo e($appointment->rescheduled_count); ?>x)</span><br>
+                    <?php endif; ?>
+                    <?php if(strtolower($appointment->status) === 'declined' && !empty($appointment->decline_reason)): ?>
+                        <div class='alert alert-danger mt-2' style='padding:4px 8px; font-size:0.95em;'><strong>Decline Reason:</strong> <?php echo e($appointment->decline_reason); ?></div>
+                    <?php endif; ?>
+                    </div>`,
+                    '<?php echo e(route('Head.appointments.approve', $appointment->appointment_id)); ?>',
+                    '<?php echo e(route('Head.appointments.decline', $appointment->appointment_id)); ?>',
+                    '<?php echo e(strtolower($appointment->status)); ?>'
+                )">
                 <i class='bx bx-show'></i>
             </a>
-            <a href="#" title="Reschedule" class="edit-btn"
-                onclick="openAppointmentModal(<?php echo e($appointment->appointment_id); ?>, 'reschedule')">
+            <a href="#" title="Edit/Reschedule" class="edit-btn"
+                onclick="openRescheduleModal(<?php echo e($appointment->appointment_id); ?>); return false;">
                 <i class='bx bx-edit'></i>
             </a>
         </div>

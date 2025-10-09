@@ -32,9 +32,9 @@ unset($__defined_vars, $__key, $__value); ?>
 
 <div
     x-data="{ expanded: false }"
-    class="group rounded-lg border border-neutral-200"
+    class="group rounded-lg border border-neutral-200 dark:border-white/5"
     :class="{
-        'bg-white dark:border-white/5 dark:bg-white/5 shadow-xs': expanded,
+        'bg-white dark:bg-white/5 shadow-xs': expanded,
         'border-dashed border-neutral-300 bg-neutral-50 opacity-90 dark:border-white/10 dark:bg-white/1': !expanded,
     }"
 >
@@ -140,7 +140,7 @@ unset($__defined_vars, $__key, $__value); ?>
         </button>
     </div>
 
-    <div class="flex flex-col rounded-b-lg divide-y divide-neutral-200 border-t border-neutral-200 dark:divide-white/5 dark:border-white/5" x-show="expanded">
+    <div x-cloak class="flex flex-col rounded-b-lg divide-y divide-neutral-200 border-t border-neutral-200 dark:divide-white/5 dark:border-white/5" x-show="expanded">
         <?php $__currentLoopData = $frames; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $frame): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
             <div class="flex flex-col divide-y divide-neutral-200 dark:divide-white/5">
                 <?php if (isset($component)) { $__componentOriginal96f0b6f4219e16dc62468d91b0335b32 = $component; } ?>

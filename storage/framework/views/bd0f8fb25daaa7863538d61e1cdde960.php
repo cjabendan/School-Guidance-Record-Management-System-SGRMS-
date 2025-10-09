@@ -70,10 +70,10 @@
                                 <?php if($user->lastMessage && !$user->lastMessage->is_read && $user->lastMessage->sender_id !== Auth::id()): ?> unread <?php endif; ?>">
                                     <!--[if BLOCK]><![endif]--><?php if($user->lastMessage): ?>
                                         <!--[if BLOCK]><![endif]--><?php if($user->lastMessage->sender_id === Auth::id()): ?>
-                                            You: <?php echo e(Str::limit($user->lastMessage->message, 18)); ?>
+                                            You: <?php echo e($user->lastMessage->message); ?>
 
                                         <?php else: ?>
-                                            <?php echo e(Str::limit($user->lastMessage->message, 18)); ?>
+                                            <?php echo e($user->lastMessage->message,); ?>
 
                                         <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                                     <?php else: ?>
@@ -81,8 +81,7 @@
                                     <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                                 </span>
                                 <span class="chat-item-time" data-time="<?php echo e($user->lastMessage?->created_at); ?>">
-                                    <?php echo e($user->lastMessage?->created_at?->diffForHumans()); ?>
-
+                                    <?php echo e($this->formatTimeShort($user->lastMessage?->created_at)); ?> 
                                 </span>
                             </div>
                         </div>
