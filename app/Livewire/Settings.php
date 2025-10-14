@@ -12,10 +12,11 @@ class Settings extends Component
     public string $tab = 'profile';
     public string $role;
 
+    protected $queryString = ['tab' => ['except' => 'profile']];
+
     public function mount()
     {
         $this->role = Auth::user()->role;
-        $this->tab = request()->query('tab', 'profile');
     }
 
     public function switchTab($newTab)
@@ -26,11 +27,7 @@ class Settings extends Component
             $timeout = config('auth.password_timeout', 900);
 
             if (!Session::has('auth.password_confirmed_at') || time() - Session::get('auth.password_confirmed_at') > $timeout) {
-
-                // Store intended URL after successful confirmation
                 Session::put('url.intended', route('settings', ['tab' => $newTab]));
-
-                // Redirect user to password confirmation
                 return redirect()->route('confirm-password');
             }
         }
@@ -51,3 +48,4 @@ class Settings extends Component
         return view('livewire.settings')->layout($layout);
     }
 }
+

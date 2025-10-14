@@ -96,7 +96,7 @@
 .settings-form-label {
     font-size: 16px;
     font-weight: 500;
-    color: #003060;
+    color: #000000;
     letter-spacing: 0;
 }
 
@@ -336,7 +336,7 @@
 .qr-icon {
     width: 28px;
     height: 28px;
-    color: #000;
+    color: #1ea7ff;
 }
 
 .qr-code-container {
@@ -411,4 +411,35 @@
         opacity: 1;
         transform: scale(1);
     }
+}
+
+/* Phone num css */ 
+.input-wrapper {
+    position: relative;
+    display: flex;
+}
+.input-wrapper .ph-flag {
+    position: absolute;
+    left: 10px;
+    display: flex;
+    align-items: center;
+}
+.input-wrapper .ph-flag img {
+    width: 22px;
+    height: 15px;
+    border-radius: 2px;
+    display: block;
+}
+.input-wrapper .prefix {
+    position: absolute;
+    left: 40px;
+    font-size: 0.95rem;
+    color: #093c70;
+}
+.input-wrapper input {
+    padding-left: 2.5rem;
+}
+/* ensure settings-form-input sizing remains consistent */
+.settings-form-input {
+    box-sizing: border-box;
 }

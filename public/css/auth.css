@@ -26,12 +26,12 @@
 .auth-icon {
     width: 30px;
     height: 30px;
-    color: #003060;
+    color: #1ea7ff;
 }
 
 .auth-header {
     font-weight: 500;
-    color: #003060;
+    color: #000000;
 }
 
 .auth-subheader {
@@ -73,7 +73,7 @@
 }
 
 .auth-label {
-    color: #003060;
+    color: #000000;
     font-weight: 500;
 }
 
@@ -95,11 +95,12 @@
 .auth-button {
     flex: 1;
     width: 100%;
-    padding: 0.75rem 0;
+    padding: 0.75rem 1rem;
     border-radius: 7px;
-    background-color: #003060;
+    background-color: #1ea7ff;
     color: white;
-    font-size: 0.8rem;
+    font-size: 0.95rem;
+    font-weight: 500;
 }
 
 .auth-link {

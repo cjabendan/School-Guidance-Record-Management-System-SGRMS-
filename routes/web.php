@@ -9,6 +9,9 @@ use Illuminate\Support\Facades\Auth;
 |--------------------------------------------------------------------------
 */
 
+// Models
+use App\Models\ChatbotSession;
+
 // Auth Controllers
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\LoginController;
@@ -39,6 +42,7 @@ use App\Http\Controllers\Head\HeadSettingsController;
 // Counselor Controllers
 use App\Http\Controllers\Counselor\CounselorDashboardController;
 use App\Http\Controllers\Counselor\CounselorMessageController;
+use App\Http\Controllers\Counselor\CounselorAppointmentController;
 
 // Parent Controllers
 use App\Http\Controllers\Parents\ParentDashboardController;
@@ -80,8 +84,16 @@ Route::controller(RegisterController::class)->group(function () {
 Route::post('/logout', [LogoutController::class, 'logout'])->name('logout');
 
 // Chatbot and RAG
-Route::post('/rag/docs', [RagController::class, 'store']);
-Route::post('/chatbot/generate', [ChatbotController::class, 'generateResponse'])->name('chatbot.generate');
+Route::post('/rag/docs', [RagController::class, 'store']) ->name('rag.store');
+Route::post('/chatbot/generate', [ChatbotController::class, 'generateResponse'])
+->middleware('normalize.chat')
+->name('chatbot.generate');
+
+Route::post('/chatbot/clear', function () {
+    $sessionId = session()->getId();
+    ChatbotSession::where('session_id', $sessionId)->delete();
+    return response()->json(['message' => 'Chat memory cleared.']);
+});
 
 
 /*
@@ -97,7 +109,7 @@ use App\Livewire\Auth\TwoFactorChallenge;
 
 Route::get('/two-factor-challenge', TwoFactorChallenge::class)->name('two-factor-challenge');
 
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth', 'maintenance'])->group(function () {
 
     // General Settings
     Route::get('/settings', Settings::class)->name('settings');
@@ -197,6 +209,7 @@ Route::prefix('Head')->name('Head.')->middleware(['auth', 'role.head'])->group(f
 
     // Appointments
     Route::get('/appointments', [HeadAppointmentController::class, 'index'])->name('appointments.index');
+    Route::post('/appointments/{id}/move', [HeadAppointmentController::class, 'move'])->name('appointments.move');
     Route::post('/appointments/{id}/approve', [HeadAppointmentController::class, 'approve'])->name('appointments.approve');
     Route::post('/appointments/{id}/decline', [HeadAppointmentController::class, 'decline'])->name('appointments.decline');
     Route::post('/appointments/store', [HeadAppointmentController::class, 'store'])->name('appointments.store');
@@ -218,13 +231,17 @@ Route::prefix('Head')->name('Head.')->middleware(['auth', 'role.head'])->group(f
 |--------------------------------------------------------------------------
 */
 
-Route::prefix('Counselor')->name('Counselor.')->middleware(['auth', 'role.counselor'])->group(function () {
+Route::prefix('Counselor')->name('Counselor.')->middleware(['auth', 'role.counselor', 'maintenance'])->group(function () {
 
-    Route::get('/messages/{user?}', [CounselorMessageController::class, 'index'])->name('messages');
+    Route::get('/messages/{user?}', [CounselorMessageController::class, 'index'])
+    ->middleware('feature:chat')
+    ->name('messages');
 
-    Route::get('/appointments', [CounselorDashboardController::class, 'appointments'])->name('appointments.index');
+    Route::get('/appointments', [CounselorDashboardController::class, 'appointments'])
+    ->middleware('feature:appointment')
+    ->name('appointments.index');
     Route::post('/appointments/{id}/move', [CounselorDashboardController::class, 'move'])->name('appointments.move');
-
+    Route::post('/appointments', [CounselorAppointmentController::class, 'store'])->name('appointments.store');
     Route::post('/appointments/{id}/approve', [CounselorDashboardController::class, 'approve'])->name('appointments.approve');
     Route::post('/appointments/{id}/decline', [CounselorDashboardController::class, 'decline'])->name('appointments.decline');
 });
@@ -236,7 +253,7 @@ Route::prefix('Counselor')->name('Counselor.')->middleware(['auth', 'role.counse
 |--------------------------------------------------------------------------
 */
 
-Route::prefix('Parent')->name('Parent.')->middleware(['auth', 'role.parent'])->group(function () {
+Route::prefix('Parent')->name('Parent.')->middleware(['auth', 'role.parent', 'maintenance'])->group(function () {
 
     // Child Management
     Route::get('/child', [ParentChildController::class, 'index'])->name('child.index');
@@ -244,12 +261,18 @@ Route::prefix('Parent')->name('Parent.')->middleware(['auth', 'role.parent'])->g
     Route::get('/children/search-students', [ParentChildController::class, 'searchStudents'])->name('search.students');
 
     // Messages
-    Route::get('/messages/{user?}', [ParentMessageController::class, 'index'])->name('messages');
+    Route::get('/messages/{user?}', [ParentMessageController::class, 'index'])
+     ->middleware('feature:chat')
+     ->name('messages');
 
     // Requests
-    Route::get('/requests', [ParentRequestController::class, 'index'])->name('requests.index');
+    Route::get('/requests', [ParentRequestController::class, 'index'])
+    ->middleware('feature:request')
+    ->name('requests.index');
 
     //Appointments
-    Route::get('/appointments', [ParentAppointmentController::class, 'index'])->name('appointments.index');
+    Route::get('/appointments', [ParentAppointmentController::class, 'index'])
+    ->middleware('feature:appointment')
+    ->name('appointments.index');
     Route::post('/appointments', [ParentAppointmentController::class, 'store'])->name('appointments.store');
 });

@@ -47,34 +47,50 @@ class Chat extends Component
         $this->authId = $this->loginID;
         $this->authRole = Auth::user()->role;
 
-        $this->loadChatList();
+        $this->loadChatList(); // Load sidebar users
 
-        // Use selectedUserId from route if provided
+        $user = null;
+
+        // 1️⃣ Priority: route parameter
         if ($selectedUserId) {
-            $restoredUser = $this->users->firstWhere('id', $selectedUserId);
-            if ($restoredUser) {
-                $this->selectedUser = $restoredUser;
-                Session::put(self::ACTIVE_CONVO_SESSION_KEY, $restoredUser->id);
-            } else {
-                $this->selectedUser = $this->users->first();
-            }
-        } else {
-            $activeUserId = Session::get(self::ACTIVE_CONVO_SESSION_KEY);
-            $restoredUser = $activeUserId ? $this->users->firstWhere('id', $activeUserId) : null;
-            $this->selectedUser = $restoredUser ?? $this->users->first();
+            $user = $this->users->firstWhere('id', $selectedUserId);
         }
 
-        if ($this->selectedUser) {
-            Session::put(self::ACTIVE_CONVO_SESSION_KEY, $this->selectedUser->id);
-            $this->loadMessages();
-            $this->markMessagesAsRead();
-            $this->loadBlockStatus();
-            $this->dispatch('requestProfilePaneState', [
-                'localStorageKey' => self::USER_PROFILE_STATE_KEY . $this->selectedUser->id,
-            ]);
+        // 2️⃣ Fallback: session
+        if (!$user) {
+            $activeUserId = Session::get(self::ACTIVE_CONVO_SESSION_KEY);
+            $user = $activeUserId ? $this->users->firstWhere('id', $activeUserId) : null;
+        }
+
+        // 3️⃣ Fallback: first user in list
+        $user = $user ?? $this->users->first();
+
+        if ($user) {
+            $this->setActiveConversation($user);
         } else {
             Session::forget(self::ACTIVE_CONVO_SESSION_KEY);
         }
+    }
+
+
+    private function setActiveConversation(User $user)
+    {
+        $this->selectedUser = $user;
+
+        // Update session
+        Session::put(self::ACTIVE_CONVO_SESSION_KEY, $user->id);
+
+        // Load conversation state
+        $this->loadMessages();
+        $this->markMessagesAsRead();
+        $this->loadBlockStatus();
+        $this->loadChatList();
+
+        // Dispatch Livewire events
+        $this->dispatch('chat:selected');
+        $this->dispatch('requestProfilePaneState', [
+            'localStorageKey' => self::USER_PROFILE_STATE_KEY . $user->id,
+        ]);
     }
 
     public function setFilter($filter)
@@ -264,32 +280,30 @@ class Chat extends Component
         }
     }
 
- 
-
     public function selectUser($id)
     {
         $this->newChatMode = false;
         $this->showInactiveUserMessage = false;
-        $this->selectedUser = User::where('id', $id)->where('status', 'active')->first();
 
-        if (!$this->selectedUser) {
+        $user = User::where('id', $id)
+            ->where('status', 'active')
+            ->first();
+
+        if (!$user) {
             $this->showInactiveUserMessage = true;
-            return;
-        }
-
-        if ($this->authRole === 'parent' && !in_array($this->selectedUser->role, ['admin', 'counselor'])) {
             $this->selectedUser = null;
             return;
         }
 
-        Session::put(self::ACTIVE_CONVO_SESSION_KEY, $id);
+        if (in_array($this->authRole, ['parent', 'student']) && !in_array($user->role, ['admin', 'counselor'])) {
+            $this->selectedUser = null;
+            return;
+        }
 
-        $this->markMessagesAsRead();
-        $this->loadMessages();
-        $this->loadBlockStatus();
-        $this->loadChatList();
-        $this->dispatch('chat:selected');
+        $this->setActiveConversation($user);
     }
+
+
 
     public function loadMessages()
     {
@@ -317,13 +331,17 @@ class Chat extends Component
         $this->messages = collect();
         $this->showUserProfile = false;
 
+        // Clear session
         Session::forget(self::ACTIVE_CONVO_SESSION_KEY);
+
+        // Reset search & filters
         $this->searchQuery = '';
         $this->conversationSearch = '';
         $this->newChatSearchResults = [];
         $this->conversationSearchResults = [];
         $this->filter = 'recent';
     }
+
 
     public function updatedSearchQuery()
     {
@@ -336,16 +354,14 @@ class Chat extends Component
                 ->where('status', 'active')
                 ->where('id', '!=', $this->authId);
 
-            if ($this->authRole === 'parent') {
-
+            if (in_array($this->authRole, ['parent', 'student'])) {
                 $userQuery->whereIn('role', ['admin', 'counselor']);
             } elseif (in_array($this->authRole, ['admin', 'counselor'])) {
-
-                $userQuery->whereIn('role', ['admin', 'counselor', 'parent']);
+                $userQuery->whereIn('role', ['admin', 'counselor', 'parent', 'student']);
             } else {
-                // If not a standard role, block search
                 $userQuery->whereRaw('1 = 0');
             }
+
 
             $this->newChatSearchResults = $userQuery->take(10)->get();
         } else {
@@ -388,54 +404,43 @@ class Chat extends Component
         $this->conversationSearchResults = $userQuery->take(20)->get();
     }
 
-
     public function selectNewChatUser($userId)
     {
-
         $this->newChatMode = false;
         $this->showInactiveUserMessage = false;
 
-        $this->selectedUser = User::where('id', $userId)->where('status', 'active')->first();
+        $user = User::where('id', $userId)
+            ->where('status', 'active')
+            ->first();
 
-        if (!$this->selectedUser) {
+        if (!$user) {
             $this->showInactiveUserMessage = true;
-            return;
-        }
-
-        if ($this->authRole === 'parent' && !in_array($this->selectedUser->role, ['admin', 'counselor'])) {
             $this->selectedUser = null;
             return;
         }
 
-        Session::put(self::ACTIVE_CONVO_SESSION_KEY, $userId);
+        if (in_array($this->authRole, ['parent', 'student']) && !in_array($user->role, ['admin', 'counselor'])) {
+            $this->selectedUser = null;
+            return;
+        }
 
-        $existingMessages = ChatMessage::query()
-            ->where(function ($q) use ($userId) {
-                $q->where('sender_id', $this->authId)
-                    ->where('receiver_id', $userId);
-            })
-            ->orWhere(function ($q) use ($userId) {
-                $q->where('sender_id', $userId)
-                    ->where('receiver_id', $this->authId);
-            })
-            ->latest()
-            ->take(50)
-            ->get()
-            ->values();
+        $this->setActiveConversation($user);
 
-        $this->messages = $existingMessages->isNotEmpty() ? $existingMessages : collect();
-        $this->newChatMode = false;
+        // Clear new chat search & conversation states
+        $this->messages = $this->messages ?? collect();
         $this->searchQuery = '';
         $this->conversationSearch = '';
         $this->newChatSearchResults = collect();
         $this->conversationSearchResults = collect();
-        $this->loadBlockStatus();
-        $this->dispatch('chat:selected');
     }
+
 
     public function submit()
     {
-        if ($this->authRole === 'parent' && !in_array($this->selectedUser->role, ['admin', 'counselor'])) {
+        if (
+            in_array($this->authRole, ['parent', 'student'])
+            && !in_array($this->selectedUser->role, ['admin', 'counselor'])
+        ) {
             return;
         }
 
@@ -526,11 +531,10 @@ class Chat extends Component
 
     public function updatedSelectedUser()
     {
-        $this->dispatch('requestProfilePaneState', [
-            'localStorageKey' => self::USER_PROFILE_STATE_KEY . ($this->selectedUser ? $this->selectedUser->id : ''),
-        ]);
+        if ($this->selectedUser) {
+            $this->setActiveConversation($this->selectedUser);
+        }
     }
-
 
     public function toggleSearchMode()
     {

@@ -1195,23 +1195,36 @@ footer {
     padding-top: 2rem;
     border-top: 1px solid #37474f;
     display: flex;
-    flex-wrap: wrap;
     justify-content: center;
     align-items: center;
 }
-.footer-certificates {
+
+.footer-affiliation {
     display: flex;
-    gap: 1.5rem;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    flex-wrap: wrap;
     margin-bottom: 1rem;
 }
-.footer-certificate {
-    height: 40px;
+
+.footer-school-logo {
+    width: 50px;
     border-radius: 0.5rem;
-    transition: opacity 0.3s;
+    background-color: transparent; /* prevent white halo on rounded logos */
+    object-fit: cover;
 }
-.footer-certificate:hover {
-    opacity: 0.8;
+
+.footer-affiliation-text {
+    color: #b0bec5;
+    font-size: 0.9rem;
+    font-weight: 500;
 }
+
+.footer-affiliation-text:hover {
+    color: #fff;
+}
+
 .footer-copyright {
     color: #b0bec5;
     font-size: 0.95rem;

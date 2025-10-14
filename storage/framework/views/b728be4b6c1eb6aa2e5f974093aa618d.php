@@ -26,24 +26,30 @@
                         <span class="text">My Children</span>
                     </a>
                 </li>
-                <li class="<?php echo e(Request::is('Parent/messages*') ? 'active' : ''); ?>">
-                    <a href="<?php echo e(url('Parent/messages')); ?>">
-                        <i class="fi fi-sr-comment"></i>
-                        <span class="text">Messages</span>
-                    </a>
-                </li>
-                <li class="<?php echo e(Request::is('Parent/requests*') ? 'active' : ''); ?>">
-                    <a href="<?php echo e(url('Parent/requests')); ?>">
-                        <i class="fi fi-sr-inbox"></i>
-                        <span class="text">Requests</span>
-                    </a>
-                </li>
-                <li class="<?php echo e(Request::is('Parent/appointments*') ? 'active' : ''); ?>">
-                    <a href="<?php echo e(url('Parent/appointments')); ?>">
-                        <i class='bx bxs-calendar'></i>
-                        <span class="text">Appointments</span>
-                    </a>
-                </li>
+                <?php if(\App\Models\Feature::isEnabled('chat', 'parent')): ?>
+                    <li class="<?php echo e(Request::is('Parent/messages*') ? 'active' : ''); ?>">
+                        <a href="<?php echo e(url('Parent/messages')); ?>">
+                            <i class="fi fi-sr-comment"></i>
+                            <span class="text">Messages</span>
+                        </a>
+                    </li>
+                <?php endif; ?>
+                <?php if(\App\Models\Feature::isEnabled('request', 'parent')): ?>
+                    <li class="<?php echo e(Request::is('Parent/requests*') ? 'active' : ''); ?>">
+                        <a href="<?php echo e(url('Parent/requests')); ?>">
+                            <i class="fi fi-sr-inbox"></i>
+                            <span class="text">Requests</span>
+                        </a>
+                    </li>
+                <?php endif; ?>
+                <?php if(\App\Models\Feature::isEnabled('appointment', 'parent')): ?>
+                    <li class="<?php echo e(Request::is('Parent/appointments*') ? 'active' : ''); ?>">
+                        <a href="<?php echo e(url('Parent/appointments')); ?>">
+                            <i class='bx bxs-calendar'></i>
+                            <span class="text">Appointments</span>
+                        </a>
+                    </li>
+                <?php endif; ?>
                 <li class="<?php echo e(Request::is('settings*') ? 'active' : ''); ?>">
                     <a href="<?php echo e(url('settings')); ?>">
                         <i class='bx bxs-cog'></i>

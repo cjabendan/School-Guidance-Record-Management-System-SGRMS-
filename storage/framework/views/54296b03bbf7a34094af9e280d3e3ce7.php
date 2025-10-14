@@ -65,7 +65,29 @@
         </div>
         <div class="flex-1" style="display:flex; flex-direction: column; gap: .3rem;">
             <label class="settings-form-label">Phone</label>
-            <input type="email" value="<?php echo e(Auth::user()->contact_num); ?>" wire:model="num" class="settings-form-input">
+
+            <div class="input-wrapper" style="align-items:center; gap:8px;">
+                <span class="ph-flag">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/9/99/Flag_of_the_Philippines.svg"
+                        alt="PH">
+                </span>
+                <span class="prefix">+63</span>
+
+                <input type="tel" wire:model.defer="num" class="settings-form-input" placeholder="9123456789"
+                    pattern="\d{10}" maxlength="10" oninput="this.value = this.value.replace(/\D/g,'').slice(0,10)"
+                    style="padding-left: 4.8rem; flex:1;">
+            </div>
+
+            <!--[if BLOCK]><![endif]--><?php $__errorArgs = ['num'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                <div class="text-red-500 mt-1"><?php echo e($message); ?></div>
+            <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
         </div>
         <div class="flex-1"></div>
     </div>

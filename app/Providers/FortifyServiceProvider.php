@@ -18,25 +18,21 @@ class FortifyServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        // Disable all default Fortify routes (login, register, password reset, confirm-password)
-        Fortify::ignoreRoutes();
-
-        // Enable only 2FA
+        // Force only 2FA
         config(['fortify.features' => [
             Features::twoFactorAuthentication(),
         ]]);
 
-        // Rate limiting for 2FA challenge
+        // Ignore all default routes
+        Fortify::ignoreRoutes();
+
+        // Rate limiters
         RateLimiter::for('two-factor', function (Request $request) {
-            return Limit::perMinute(5)->by($request->session()->get('login.id'));
+            return Limit::perMinute(5)->by($request->session()->get('2fa:user:id') ?: $request->ip());
         });
 
-        // Optional: you can also add login rate limiter if you want to protect your Livewire login
         RateLimiter::for('login', function (Request $request) {
             return Limit::perMinute(5)->by($request->ip());
         });
-
-     
-       
     }
 }

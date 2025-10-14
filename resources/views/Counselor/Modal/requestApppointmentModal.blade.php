@@ -3,7 +3,7 @@
   <!-- Select2 CSS -->
   <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
   <div class="custom-modal-content">
-    <form method="POST" action="{{ route('Head.appointments.store') }}">
+    <form method="POST" action="{{ route('Counselor.appointments.store') }}">
       @csrf
       <div class="modal-header">
         <h5 class="modal-title">Request Appointment</h5>

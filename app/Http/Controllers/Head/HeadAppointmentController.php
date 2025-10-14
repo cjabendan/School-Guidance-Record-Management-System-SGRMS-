@@ -22,13 +22,33 @@ class HeadAppointmentController extends Controller
     }
     public function move(Request $request, $id)
     {
-    $appointment = Appointments::findOrFail($id);
-    // Convert UTC to Asia/Manila timezone
-    $utcDate = $request->input('appointment_datetime');
-    $manilaDate = \Carbon\Carbon::parse($utcDate)->setTimezone('Asia/Manila');
-    $appointment->appointment_datetime = $manilaDate;
-    $appointment->save();
-    return response()->json(['success' => true]);
+        $appointment = Appointments::findOrFail($id);
+
+        $data = $request->validate([
+            'appointment_datetime' => 'required|string',
+        ]);
+
+        try {
+            // FullCalendar sends ISO string in UTC via toISOString()
+            $dt = \Carbon\Carbon::parse($data['appointment_datetime']);
+
+            // Convert to the timezone you store in DB (example: Asia/Manila)
+            $manila = $dt->setTimezone('Asia/Manila');
+
+            $appointment->appointment_datetime = $manila;
+            $appointment->save();
+
+            return response()->json([
+                'success' => true,
+                'saved_datetime' => $manila->toDateTimeString(),
+            ]);
+        } catch (\Throwable $e) {
+            \Log::error('Appointment move error: ' . $e->getMessage(), [
+                'id' => $id,
+                'payload' => $request->all()
+            ]);
+            return response()->json(['success' => false, 'error' => $e->getMessage()], 500);
+        }
     }
     public function index(Request $request)
     {

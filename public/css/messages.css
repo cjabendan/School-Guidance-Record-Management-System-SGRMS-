@@ -295,15 +295,12 @@
 .message-data {
     display: inline-block;
     max-width: 500px;
-    min-width: 60px;
     border-radius: 32px 32px 3px 32px;
-    padding: 16px 22px;
+    padding: 12px 16px;
     position: relative;
     display: inline-block;
     word-wrap: break-word;
     font-size: 1rem;
-    color: #ffffff;
-    background-color: #1ea7ff;
     line-height: 1.4;
 }
 
@@ -311,7 +308,6 @@
     display: flex;
     align-items: center;
     gap: 8px;
-    position: relative;
 }
 
 .message-row.sent {
@@ -329,6 +325,7 @@
 .message-row.received {
     flex-direction: row;
     justify-content: flex-start;
+    align-items: flex-end;
 }
 
 .message-row .message-data.received {
@@ -357,6 +354,7 @@
 .sender-info {
     display: flex;
     gap: 8px;
+    
 }
 
 .sender-data {
@@ -369,8 +367,8 @@
     width: 40px;
     height: 40px;
     border-radius: 50%;
-    object-fit: cover;
     border: 1px solid #cccccc;
+   
 }
 
 /* Bold for unread last message in chat list */

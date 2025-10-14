@@ -12,7 +12,11 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        //
+        $middleware->alias([
+            'maintenance' => \App\Http\Middleware\CheckMaintenanceMode::class,
+            'feature' => \App\Http\Middleware\CheckFeature::class,
+            'normalize.chat' => \App\Http\Middleware\NormalizeChatQuery::class,
+        ]);
     })
     ->withProviders([
         App\Providers\FortifyServiceProvider::class,

@@ -28,23 +28,7 @@
             localStorage.setItem(localStorageKey, isVisible ? 'true' : 'false');
         });
 
-        Livewire.on('chat:selected', () => {
-            setTimeout(() => {
-                const container = document.getElementById('messagesContainer');
-                if (container) {
-                    container.scrollTop = container.scrollHeight;
-                }
-            }, 50);
-        });
-
-        Livewire.on('chat:messageSent', () => {
-            setTimeout(() => {
-                const container = document.getElementById('messagesContainer');
-                if (container) {
-                    container.scrollTop = container.scrollHeight;
-                }
-            }, 50);
-        });
+     
     });
     
 

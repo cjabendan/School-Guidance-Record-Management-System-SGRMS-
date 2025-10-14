@@ -32,7 +32,7 @@ class LoginController extends Controller
         $role_id = null;
 
         if (filter_var($loginInput, FILTER_VALIDATE_EMAIL)) {
-            $user = \App\Models\User::where('email', $loginInput)->first();
+            $user = User::where('email', $loginInput)->first();
         } else {
 
             $admin = Admins::where('a_id', $loginInput)->first();
@@ -80,8 +80,10 @@ class LoginController extends Controller
         }
 
         // If user has 2FA secret (and confirmed), don't log them in yet — redirect to 2FA challenge
-        if (!empty($user->two_factor_secret) /* you can also check two_factor_confirmed_at */) {
-            // store the pending user id in session and redirect to challenge
+        if (!empty($user->two_factor_secret)) {
+          
+            $request->session()->regenerate();
+
             session(['2fa:user:id' => $user->id, 'pending_role_id' => $role_id, 'pending_role' => $user->role]);
             return redirect()->route('two-factor-challenge');
         }

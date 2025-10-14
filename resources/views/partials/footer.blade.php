@@ -3,7 +3,8 @@
         <div class="footer-grid">
             <div class="footer-section footer-company">
                 <img src="{{ asset('images/logo/logo.svg') }}" alt="Company Logo" class="footer-logo">
-                <p class="footer-desc">Empowering businesses through innovative solutions. We strive to create meaningful impact through technology and sustainable practices.</p>
+                <p class="footer-desc">Empowering school institutions through innovative solutions. We strive to create meaningful
+                    impact through technology and sustainable practices.</p>
                 <div class="footer-social">
                     <a href="#" class="footer-social-link facebook"><i class="fab fa-facebook-f"></i></a>
                     <a href="#" class="footer-social-link twitter"><i class="fab fa-twitter"></i></a>
@@ -11,7 +12,7 @@
                 </div>
             </div>
             <div class="footer-section footer-links">
-                <h3 class="footer-title">Company</h3>
+                <h3 class="footer-title">School</h3>
                 <ul class="footer-list">
                     <li><a href="#" class="footer-link">About Us</a></li>
                     <li><a href="#" class="footer-link">Contact</a></li>
@@ -39,7 +40,12 @@
             </div>
         </div>
         <div class="footer-bottom">
-            <p class="footer-copyright">&copy; <span id="year">2025</span> SGRMS. All rights reserved.</p>
+            <div class="footer-affiliation">
+                <img src="{{ asset('images/logo/school-logo.png') }}" alt="School Logo" class="footer-school-logo">
+                <p class="footer-affiliation-text">An initiative of the Guidance Office of <strong>Montessori Academy
+                        Southern Cebu Inc.</strong></p>
+                <p class="footer-copyright">&copy; <span id="year">2025</span> SGRMS. All rights reserved.</p>
+            </div>
         </div>
     </div>
 </footer>

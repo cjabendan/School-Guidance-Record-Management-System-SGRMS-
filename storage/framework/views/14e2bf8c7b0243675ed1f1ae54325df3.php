@@ -1,0 +1,1 @@
+<?php /**PATH C:\Users\Administrator\School-Guidance-Record-Management-System-SGRMS\resources\views/livewire/settings/system-features.blade.php ENDPATH**/ ?>

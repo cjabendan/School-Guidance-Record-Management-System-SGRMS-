@@ -29,6 +29,7 @@
 
 <body>
 
+    @yield('content')
 
     {{ $slot ?? '' }}
 

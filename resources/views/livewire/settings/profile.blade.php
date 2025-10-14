@@ -65,7 +65,22 @@
         </div>
         <div class="flex-1" style="display:flex; flex-direction: column; gap: .3rem;">
             <label class="settings-form-label">Phone</label>
-            <input type="email" value="{{ Auth::user()->contact_num }}" wire:model="num" class="settings-form-input">
+
+            <div class="input-wrapper" style="align-items:center; gap:8px;">
+                <span class="ph-flag">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/9/99/Flag_of_the_Philippines.svg"
+                        alt="PH">
+                </span>
+                <span class="prefix">+63</span>
+
+                <input type="tel" wire:model.defer="num" class="settings-form-input" placeholder="9123456789"
+                    pattern="\d{10}" maxlength="10" oninput="this.value = this.value.replace(/\D/g,'').slice(0,10)"
+                    style="padding-left: 4.8rem; flex:1;">
+            </div>
+
+            @error('num')
+                <div class="text-red-500 mt-1">{{ $message }}</div>
+            @enderror
         </div>
         <div class="flex-1"></div>
     </div>

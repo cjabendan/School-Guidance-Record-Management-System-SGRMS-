@@ -21,20 +21,24 @@
                         <span class="text">Dashboard</span>
                     </a>
                 </li>
-                <li class="{{ Request::is('Counselor/messages*') ? 'active' : '' }}">
-                    <a href="{{ url('Counselor/messages') }}">
-                        <i class="fi fi-sr-comment"></i>
-                        <span class="text">Messages</span>
-                    </a>
-                </li>
-                <li class="{{ Request::is('Counselor/appointments*') ? 'active' : '' }}">
-                    <a href="{{ url('Counselor/appointments') }}">
-                        <i class='bx bxs-calendar'></i>
-                        <span class="text">Appointments</span>
-                    </a>
-                </li>
-                <li class="{{ Request::is('Counselor/settings*') ? 'active' : '' }}">
-                    <a href="{{ url('Counselor/settings') }}">
+               @if (\App\Models\Feature::isEnabled('chat', 'counselor'))
+                    <li class="{{ Request::is('Counselor/messages*') ? 'active' : '' }}">
+                        <a href="{{ url('Counselor/messages') }}">
+                            <i class="fi fi-sr-comment"></i>
+                            <span class="text">Messages</span>
+                        </a>
+                    </li>
+                @endif
+                @if (\App\Models\Feature::isEnabled('appointment', 'counselor'))
+                    <li class="{{ Request::is('Counselor/appointments*') ? 'active' : '' }}">
+                        <a href="{{ url('Counselor/appointments') }}">
+                            <i class='bx bxs-calendar'></i>
+                            <span class="text">Appointments</span>
+                        </a>
+                    </li>
+                @endif
+                <li class="{{ Request::is('/settings*') ? 'active' : '' }}">
+                    <a href="{{ url('/settings') }}">
                         <i class='bx bxs-cog'></i>
                         <span class="text">Settings</span>
                     </a>
