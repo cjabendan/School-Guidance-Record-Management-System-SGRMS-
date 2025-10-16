@@ -4,87 +4,150 @@ namespace App\Imports;
 
 use App\Models\Student;
 use App\Models\User;
-use Illuminate\Support\Facades\Hash;
+use App\Models\EducLevel;
+use App\Models\YearLevel;
+use App\Models\SchoolYear;
+use App\Models\StudentSchoolYear;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Maatwebsite\Excel\Concerns\ToModel;
+use Maatwebsite\Excel\Concerns\OnEachRow;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
+use Maatwebsite\Excel\Row;
 
-class StudentsImport implements ToModel, WithHeadingRow
+class StudentsImport implements OnEachRow, WithHeadingRow
 {
     public $errors = [];
-    public function model(array $row)
+
+    public function onRow(Row $row)
     {
-    Log::info('Importing row', $row);
+        $data = $row->toArray();
+
         try {
-            // Create user first
-            $user = User::create([
-                'first_name' => $row['first_name'] ?? '',
-                'middle_name' => $row['middle_name'] ?? '',
-                'last_name' => $row['last_name'] ?? '',
-                'suffix' => $row['suffix'] ?? '',
-                'email' => $row['email'] ?? '',
-                'contact_num' => $row['contact_num'] ?? '',
-                'sex' => $row['sex'] ?? '',
-                'bod' => $row['bod'] ?? null,
-                'address' => $row['address'] ?? '',
-                'profile_image' => $row['profile_image'] ?? 'default.png',
-                'password' => Hash::make(ucfirst(strtolower($row['last_name'] ?? 'password'))),
-                'role' => 'student',
-                'status' => 'active', // Always set to active for imported users
-            ]);
+            // 🧹 Clean the data
+            $data = array_map(fn($v) => is_string($v) ? trim(preg_replace('/\x{FEFF}/u', '', $v)) : $v, $data);
 
-            // Find or create educ_level
-            $educLevelModel = \App\Models\EducLevel::firstOrCreate([
-                'educ_level' => $row['educ_level'] ?? null
-            ]);
-
-            // Find or create year_level (must link to educ_level)
-            $yearLevelModel = \App\Models\YearLevel::firstOrCreate([
-                'year_level' => $row['year_level'] ?? null,
-                'e_id' => $educLevelModel->e_id
-            ]);
-
-            // Set program to N/A if not Senior High School
-            $program = ($row['educ_level'] === 'Senior High School' && !empty($row['program'])) ? $row['program'] : 'N/A';
-
-            // Create student
-            $student = Student::create([
-                's_id' => $row['s_id'],
-                'user_id' => $user->id,
-                'section' => $row['section'] ?? null,
-                'program' => $program,
-                'religion' => $row['religion'] ?? null,
-                'civil_status' => $row['civil_status'] ?? null,
-                'father_name' => $row['father_name'] ?? null,
-                'mother_name' => $row['mother_name'] ?? null,
-                'guardian_name' => $row['guardian_name'] ?? null,
-                'relationship' => $row['relationship'] ?? null,
-                'guardian_contact' => $row['guardian_contact'] ?? null,
-                'guardian_email' => $row['guardian_email'] ?? null,
-            ]);
-
-            // Get active school year
-            $activeSchoolYear = \App\Models\SchoolYear::where('is_active', 1)->first();
-
-            // Create student_schoolyear record
-            if ($activeSchoolYear) {
-                \App\Models\StudentSchoolYear::create([
-                    'student_id' => $student->s_id,
-                    'school_year_id' => $activeSchoolYear->id,
-                    'year_level' => $row['year_level'] ?? null,
-                    'section' => $row['section'] ?? null,
-                    'status' => $row['status'] ?? 'Enrolled',
-                    'remarks' => null,
-                ]);
+            if (empty($data['s_id'])) {
+                throw new \Exception('Missing student ID');
             }
 
-            return $student;
+            $activeSY = SchoolYear::where('is_active', 1)->firstOrFail();
+
+            $educ = EducLevel::firstOrCreate(['educ_level' => $data['educ_level'] ?? null]);
+            $year = YearLevel::firstOrCreate([
+                'year_level' => $data['year_level'] ?? null,
+                'e_id' => $educ->e_id,
+            ]);
+
+            $student = Student::where('s_id', $data['s_id'])->first();
+
+            if ($student) {
+                Log::info("🔁 Updating existing student {$data['s_id']}");
+
+                $user = $student->user;
+
+                // 🧠 If user missing, reconnect by contact number
+                if (!$user && !empty($data['contact_num'])) {
+                    $user = User::where('contact_num', $data['contact_num'])->first();
+                    if ($user) {
+                        $student->update(['user_id' => $user->id]);
+                    }
+                }
+
+                // 🆕 Recreate user if still missing
+                if (!$user) {
+                    $password = ucfirst(strtolower($data['last_name'])) . preg_replace('/[^0-9]/', '', substr($data['s_id'], -4));
+                    $user = User::create([
+                        'first_name' => $data['first_name'],
+                        'middle_name' => $data['middle_name'] ?? null,
+                        'last_name' => $data['last_name'],
+                        'suffix' => $data['suffix'] ?? null,
+                        'email' => $data['email'] ?? null,
+                        'contact_num' => $data['contact_num'] ?? null,
+                        'sex' => $data['sex'] ?? null,
+                        'bod' => $data['bod'] ?? null,
+                        'address' => $data['address'] ?? null,
+                        'profile_image' => 'default.jpg',
+                        'password' => bcrypt($password),
+                        'role' => 'student',
+                        'status' => 'active',
+                    ]);
+                    $student->update(['user_id' => $user->id]);
+                }
+
+                // ✅ Always update user with latest info from CSV
+                DB::table('users')->where('id', $user->id)->update([
+                    'first_name' => $data['first_name'],
+                    'middle_name' => $data['middle_name'] ?? null,
+                    'last_name' => $data['last_name'],
+                    'suffix' => $data['suffix'] ?? null,
+                    'email' => $data['email'] ?? null,
+                    'contact_num' => $data['contact_num'] ?? null, // ✅ Force overwrite
+                    'sex' => $data['sex'] ?? null,
+                    'bod' => $data['bod'] ?? null,
+                    'address' => $data['address'] ?? null,
+                    'status' => 'active',
+                ]);
+
+                // ✅ Always update student record
+                DB::table('students')->where('s_id', $data['s_id'])->update([
+                    'religion' => $data['religion'] ?? null,
+                    'civil_status' => $data['civil_status'] ?? null,
+                    'father_name' => $data['father_name'] ?? null,
+                    'mother_name' => $data['mother_name'] ?? null,
+                    'guardian_name' => $data['guardian_name'] ?? null,
+                    'relationship' => $data['relationship'] ?? null,
+                    'guardian_contact' => $data['guardian_contact'] ?? null,
+                    'guardian_email' => $data['guardian_email'] ?? null,
+                ]);
+
+                Log::info("✅ Student {$data['s_id']} successfully updated");
+
+            } else {
+                // 🆕 Create new student + user
+                $password = ucfirst(strtolower($data['last_name'])) . preg_replace('/[^0-9]/', '', substr($data['s_id'], -4));
+                $user = User::create([
+                    'first_name' => $data['first_name'],
+                    'middle_name' => $data['middle_name'] ?? null,
+                    'last_name' => $data['last_name'],
+                    'suffix' => $data['suffix'] ?? null,
+                    'email' => $data['email'] ?? null,
+                    'contact_num' => $data['contact_num'] ?? null,
+                    'sex' => $data['sex'] ?? null,
+                    'bod' => $data['bod'] ?? null,
+                    'address' => $data['address'] ?? null,
+                    'profile_image' => 'default.jpg',
+                    'password' => bcrypt($password),
+                    'role' => 'student',
+                    'status' => 'active',
+                ]);
+
+                Student::create([
+                    's_id' => $data['s_id'],
+                    'user_id' => $user->id,
+                    'religion' => $data['religion'] ?? null,
+                    'civil_status' => $data['civil_status'] ?? null,
+                    'father_name' => $data['father_name'] ?? null,
+                    'mother_name' => $data['mother_name'] ?? null,
+                    'guardian_name' => $data['guardian_name'] ?? null,
+                    'relationship' => $data['relationship'] ?? null,
+                    'guardian_contact' => $data['guardian_contact'] ?? null,
+                    'guardian_email' => $data['guardian_email'] ?? null,
+                ]);
+
+                Log::info("🆕 Created new student {$data['s_id']}");
+            }
+
+            // 🎓 Link to active school year
+            StudentSchoolYear::updateOrCreate(
+                ['student_id' => $data['s_id'], 'school_year_id' => $activeSY->id],
+                ['year_level' => $year->year_level, 'status' => $data['status'] ?? 'Enrolled']
+            );
+
+            Log::info("📘 Linked {$data['s_id']} to SY {$activeSY->year_label}");
+
         } catch (\Throwable $e) {
-            $this->errors[] = [
-                'row' => $row,
-                'error' => $e->getMessage(),
-            ];
-            return null;
+            Log::error("❌ Import error: " . $e->getMessage(), ['row' => $data]);
+            $this->errors[] = ['row' => $data, 'error' => $e->getMessage()];
         }
     }
-    }
+}

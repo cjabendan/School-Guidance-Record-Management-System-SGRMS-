@@ -15,12 +15,14 @@
         <div class="table-col student">
             <?php
                 $studentCount = $appointment->students->count();
+                $firstStudent = $appointment->students->first();
             ?>
             <?php if($studentCount === 1): ?>
-                <?php echo e($appointment->students->first()->user->first_name ?? ''); ?> <?php echo e($appointment->students->first()->user->last_name ?? ''); ?>
+                <?php echo e($firstStudent->user->first_name ?? ''); ?> <?php echo e($firstStudent->user->last_name ?? ''); ?>
 
             <?php elseif($studentCount > 1): ?>
-                Multiple Students
+                <?php echo e($firstStudent->user->first_name ?? ''); ?> <?php echo e($firstStudent->user->last_name ?? ''); ?>&nbsp;
+                <span class="see-more-text" style="color: #888;">see more</span>
             <?php else: ?>
                 N/A
             <?php endif; ?>

@@ -22,33 +22,13 @@ class HeadAppointmentController extends Controller
     }
     public function move(Request $request, $id)
     {
-        $appointment = Appointments::findOrFail($id);
-
-        $data = $request->validate([
-            'appointment_datetime' => 'required|string',
-        ]);
-
-        try {
-            // FullCalendar sends ISO string in UTC via toISOString()
-            $dt = \Carbon\Carbon::parse($data['appointment_datetime']);
-
-            // Convert to the timezone you store in DB (example: Asia/Manila)
-            $manila = $dt->setTimezone('Asia/Manila');
-
-            $appointment->appointment_datetime = $manila;
-            $appointment->save();
-
-            return response()->json([
-                'success' => true,
-                'saved_datetime' => $manila->toDateTimeString(),
-            ]);
-        } catch (\Throwable $e) {
-            \Log::error('Appointment move error: ' . $e->getMessage(), [
-                'id' => $id,
-                'payload' => $request->all()
-            ]);
-            return response()->json(['success' => false, 'error' => $e->getMessage()], 500);
-        }
+    $appointment = Appointments::findOrFail($id);
+    // Convert UTC to Asia/Manila timezone
+    $utcDate = $request->input('appointment_datetime');
+    $manilaDate = \Carbon\Carbon::parse($utcDate)->setTimezone('Asia/Manila');
+    $appointment->appointment_datetime = $manilaDate;
+    $appointment->save();
+    return response()->json(['success' => true]);
     }
     public function index(Request $request)
     {
@@ -150,13 +130,36 @@ class HeadAppointmentController extends Controller
     }
     public function store(Request $request)
     {
+        // Basic validation; we'll handle 'other' specially below
         $request->validate([
             'counselor_id' => 'required|exists:users,id',
-            'type_id' => 'required|exists:appointment_types,id',
+            'type_id' => 'required',
             'student_id' => 'required|array',
             'reason' => 'required|string',
             'appointment_datetime' => 'required|date',
         ]);
+
+        // If the user selected 'other', require other_type
+        if ($request->type_id === 'other') {
+            $request->validate([
+                'other_type' => 'required|string|max:255',
+            ]);
+            $typeName = trim($request->other_type);
+            // Find existing type (case-insensitive) or create
+            $type = \App\Models\AppointmentType::whereRaw('LOWER(type_name) = ?', [strtolower($typeName)])->first();
+            if (!$type) {
+                $type = \App\Models\AppointmentType::create([
+                    'type_name' => $typeName,
+                ]);
+            }
+            $typeId = $type->id;
+        } else {
+            // ensure provided type exists
+            $request->validate([
+                'type_id' => 'exists:appointment_types,id',
+            ]);
+            $typeId = $request->type_id;
+        }
 
         // Treat submitted time as Asia/Manila local time
         $manilaDate = \Carbon\Carbon::createFromFormat('Y-m-d\TH:i', $request->appointment_datetime)->toIso8601String();
@@ -179,7 +182,7 @@ class HeadAppointmentController extends Controller
 
         $appointment = Appointments::create([
             'counselor_id' => $request->counselor_id,
-            'appointment_type_id' => $request->type_id, // <-- FIXED HERE
+            'appointment_type_id' => $typeId,
             'reason' => $request->reason,
             'appointment_datetime' => $manilaDate,
             'status' => 'Pending',
@@ -189,5 +192,73 @@ class HeadAppointmentController extends Controller
         $appointment->students()->sync($request->student_id);
 
         return redirect()->back()->with('success', 'Appointment requested successfully.');
+    }
+
+    /**
+     * Update an existing appointment (from the reschedule/edit modal)
+     */
+    public function update(Request $request, $id)
+    {
+        $appointment = Appointments::findOrFail($id);
+
+        // Basic validation
+        $request->validate([
+            'counselor_id' => 'required|exists:users,id',
+            'type_id' => 'required',
+            'student_id' => 'required|array',
+            'reason' => 'required|string',
+            'appointment_datetime' => 'required|date',
+        ]);
+
+        if ($request->type_id === 'other') {
+            $request->validate([
+                'other_type' => 'required|string|max:255',
+            ]);
+            $typeName = trim($request->other_type);
+            $type = \App\Models\AppointmentType::whereRaw('LOWER(type_name) = ?', [strtolower($typeName)])->first();
+            if (!$type) {
+                $type = \App\Models\AppointmentType::create([
+                    'type_name' => $typeName,
+                ]);
+            }
+            $typeId = $type->id;
+        } else {
+            $request->validate([
+                'type_id' => 'exists:appointment_types,id',
+            ]);
+            $typeId = $request->type_id;
+        }
+
+        // Convert submitted datetime (local Manila) to ISO string
+        $manilaDate = \Carbon\Carbon::createFromFormat('Y-m-d\TH:i', $request->appointment_datetime)->toIso8601String();
+
+        // Conflict checks excluding the current appointment
+        $globalConflict = Appointments::where('appointment_datetime', $manilaDate)
+            ->whereIn('status', ['Pending', 'Approved'])
+            ->where('appointment_id', '!=', $appointment->appointment_id)
+            ->exists();
+
+        $studentConflict = Appointments::where('appointment_datetime', $manilaDate)
+            ->whereIn('status', ['Pending', 'Approved'])
+            ->where('appointment_id', '!=', $appointment->appointment_id)
+            ->whereHas('students', function($q) use ($request) {
+                $q->whereIn('student_user_id', $request->student_id);
+            })->exists();
+
+        if ($globalConflict || $studentConflict) {
+            return back()->withErrors(['appointment_datetime' => 'Appointment cannot be booked. A schedule already exists'])->withInput();
+        }
+
+        // Update fields
+        $appointment->counselor_id = $request->counselor_id;
+        $appointment->appointment_type_id = $typeId;
+        $appointment->reason = $request->reason;
+        $appointment->appointment_datetime = $manilaDate;
+        $appointment->save();
+
+        // Sync students
+        $appointment->students()->sync($request->student_id);
+
+        return redirect()->back()->with('success', 'Appointment updated successfully.');
     }
 }

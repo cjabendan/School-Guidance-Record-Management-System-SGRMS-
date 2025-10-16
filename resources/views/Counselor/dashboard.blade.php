@@ -4,14 +4,23 @@
 
     <!-- MAIN CONTENT -->
     <section id="content">
-     @include('partials.navbar')
+        @include('partials.navbar')
         <div class="wrapper">
-            <!-- HEAD -->
-            <div class="head-title">
-                <div class="left">
-                    <h1>Dashboard</h1>
+            <div class="dashboard-content">
+                <div class="welcome-box">
+                    @include('Counselor.dashboard-sections.welcome-stats')
+                    @include('Counselor.dashboard-sections.todo')
                 </div>
+
+            {{-- <div class="appointment-container">
+                    <div class="flex-bottom">
+                        <div class="appointments-box">
+                           @include('Counselor.dashboard-sections.appointments') 
+                        </div>
+                    </div>
+                </div> --}}
             </div>
+        </div>
 
 
 @endsection

@@ -13,18 +13,17 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/3.0.0/uicons-bold-rounded/css/uicons-bold-rounded.css'>
-    <link rel='stylesheet'
-        href='https://cdn-uicons.flaticon.com/3.0.0/uicons-solid-rounded/css/uicons-solid-rounded.css'>
-     <link rel='stylesheet'
-            href='https://cdn-uicons.flaticon.com/3.0.0/uicons-regular-straight/css/uicons-regular-straight.css'>
+    <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/3.0.0/uicons-solid-rounded/css/uicons-solid-rounded.css'>
+    <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/3.0.0/uicons-regular-straight/css/uicons-regular-straight.css'>
 
     <link rel="stylesheet" href="{{ asset('css/style.css') }}">
     <link rel="stylesheet" href="{{ asset('css/bar.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/dashboard.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/table.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/counsel.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/guidance.css') }}">
     <link rel="stylesheet" href="{{ asset('css/messages.css') }}">
     <link rel="stylesheet" href="{{ asset('css/settings.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/notify.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/table.css') }}">
+    
     <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet" />
     @yield('head')
 
@@ -42,6 +41,11 @@
     @isset($slot)
         {{ $slot }}
     @endisset
+
+    <script>
+        window.userId = {{ Auth::id() ?? 'null' }};
+        window.userRole = "{{ Auth::user()->role ?? '' }}";
+    </script>
 
     @livewireScripts
 

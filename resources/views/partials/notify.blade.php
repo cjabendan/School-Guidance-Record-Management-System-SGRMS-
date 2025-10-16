@@ -18,7 +18,7 @@
                 </div>
             </a>
         @empty
-            <div class="notify-item notify-empty">
+            <div class="notify-empty">
                 <span class="notify-icon">🔔</span>
                 <p class="notify-text">You're all caught up!</p>
                 <small class="notify-time">No new notifications at this time.</small>
@@ -29,10 +29,9 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    document.querySelectorAll('.notify-item[data-notify-id]').forEach(function(item) {
+    document.querySelectorAll('.notification-dropdown .notify-item[data-notify-id]').forEach(function(item) {
         item.addEventListener('click', function(e) {
-            var notifyId = this.getAttribute('data-notify-id');
-            var notifyText = this.querySelector('.notify-text');
+            const notifyId = this.getAttribute('data-notify-id');
             if (notifyId) {
                 fetch("{{ route('notify.markAsRead') }}", {
                     method: 'POST',
@@ -42,8 +41,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     },
                     body: JSON.stringify({ id: notifyId })
                 }).then(res => res.json()).then(data => {
-                    if (data.success && notifyText) {
-                        notifyText.classList.add('notify-text-read');
+                    if (data.success) {
                         window.location.href = this.href;
                     }
                 });
@@ -53,4 +51,3 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 </script>
-

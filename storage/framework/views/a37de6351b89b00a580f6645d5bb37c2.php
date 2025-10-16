@@ -42,7 +42,7 @@
         <link rel="stylesheet" href="<?php echo e(asset('css/settings.css')); ?>">
         <link href="<?php echo e(asset('css/cropper.min.css')); ?>" rel="stylesheet">
         <?php echo $__env->yieldContent('head'); ?>
-       
+
         <?php echo \Livewire\Mechanisms\FrontendAssets\FrontendAssets::styles(); ?>
 
         <?php echo app('Illuminate\Foundation\Vite')(['resources/css/app.css', 'resources/js/app.js']); ?>
@@ -60,12 +60,11 @@
 
         <?php endif; ?>
 
+        <?php echo \Livewire\Mechanisms\FrontendAssets\FrontendAssets::scripts(); ?>
 
-         <?php echo \Livewire\Mechanisms\FrontendAssets\FrontendAssets::scripts(); ?>
 
+        <?php echo $__env->yieldPushContent('scripts'); ?>
     </body>
-  
-    <?php echo $__env->yieldPushContent('scripts'); ?>
 
     <script src="<?php echo e(asset('js/cropper.min.js')); ?>"></script>
     <script src="<?php echo e(asset('js/head.js')); ?>"></script>

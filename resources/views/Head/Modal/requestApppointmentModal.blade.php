@@ -1,6 +1,12 @@
 <!-- filepath: c:\Users\Rhylyn\School-Guidance-Record-Management-System-SGRMS-\resources\views\Parent\modal\requestApppointmentModal.blade.php -->
 
-<div id="requestAppointmentModal" class="custom-modal" style="display:none;">
+@php
+  // Determine whether to show the modal on page load. If there are validation errors
+  // or old input exists for appointment_datetime, keep the modal open so the user
+  // can correct issues without being bounced back to the appointments table.
+  $modalDisplay = ($errors->any() || old('appointment_datetime')) ? 'flex' : 'none';
+@endphp
+<div id="requestAppointmentModal" class="custom-modal" style="display:{{ $modalDisplay }};">
   <!-- Select2 CSS -->
   <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
   <style>
@@ -35,7 +41,7 @@
           <select name="counselor_id" id="counselor_id" class="form-control" required>
             <option value="">Select Counselor</option>
             @foreach($counselors as $counselor)
-              <option value="{{ $counselor->id }}">{{ $counselor->first_name }} {{ $counselor->last_name }}</option>
+              <option value="{{ $counselor->id }}" {{ (string)old('counselor_id') === (string)$counselor->id ? 'selected' : '' }}>{{ $counselor->first_name }} {{ $counselor->last_name }}</option>
             @endforeach
           </select>
         </div>
@@ -45,16 +51,22 @@
           <select name="type_id" id="type_id" class="form-control" required>
             <option value="">Select Type</option>
             @foreach($types as $type)
-              <option value="{{ $type->id }}">{{ $type->type_name }}</option>
+              <option value="{{ $type->id }}" {{ (string)old('type_id') === (string)$type->id ? 'selected' : '' }}>{{ $type->type_name }}</option>
             @endforeach
+            <option value="other" {{ old('type_id') === 'other' ? 'selected' : '' }}>Other</option>
           </select>
+        </div>
+        <div class="divider"></div>
+        <div class="mb-3" id="other-type-wrapper" style="display:{{ old('type_id') === 'other' ? 'block' : 'none' }};">
+          <label for="other_type" class="form-label">Other Type</label>
+          <input type="text" name="other_type" id="other_type" class="form-control" placeholder="Enter custom appointment type" value="{{ old('other_type') }}">
         </div>
         <div class="divider"></div>
         <div class="mb-3">
           <label for="student_id" class="form-label">Child</label>
           <select name="student_id[]" id="student_id" class="form-control" multiple required style="width: 100%;">
             @foreach($children as $child)
-              <option value="{{ $child->s_id }}">
+              <option value="{{ $child->s_id }}" {{ (is_array(old('student_id')) && in_array($child->s_id, old('student_id'))) ? 'selected' : '' }}>
                 [ID: {{ $child->s_id }}] {{ $child->user->first_name ?? '' }} {{ $child->user->last_name ?? '' }}
               </option>
             @endforeach
@@ -63,12 +75,12 @@
         <div class="divider"></div>
         <div class="mb-3">
           <label for="reason" class="form-label">Reason</label>
-          <textarea name="reason" id="reason" class="form-control" required></textarea>
+          <textarea name="reason" id="reason" class="form-control" required>{{ old('reason') }}</textarea>
         </div>
         <div class="divider"></div>
         <div class="mb-3">
           <label for="appointment_datetime" class="form-label">Date & Time</label>
-          <input type="datetime-local" name="appointment_datetime" id="appointment_datetime" class="form-control" required>
+          <input type="datetime-local" name="appointment_datetime" id="appointment_datetime" class="form-control" required value="{{ old('appointment_datetime') }}">
         </div>
       </div>
       <div class="modal-footer">
@@ -82,22 +94,46 @@
   <script>
 // Edit/Reschedule logic
 function openRescheduleModal(appointmentId) {
-  alert('Edit button clicked!'); // Debug: confirm button triggers JS
-  // Fetch appointment data via AJAX
+  // Show modal immediately with a loading state so users see instant feedback
+  const modal = document.getElementById('requestAppointmentModal');
+  const form = document.querySelector('#requestAppointmentModal form');
+  modal.style.display = 'flex';
+
+  // Optionally show a small loading indicator inside the modal
+  let loadingEl = document.getElementById('modal-loading-indicator');
+  if (!loadingEl) {
+    loadingEl = document.createElement('div');
+    loadingEl.id = 'modal-loading-indicator';
+    loadingEl.style.cssText = 'position:relative;padding:8px 0;text-align:center;color:#555;font-weight:600;';
+    loadingEl.textContent = 'Loading appointment...';
+    const modalBody = modal.querySelector('.modal-body');
+    if (modalBody) modalBody.insertBefore(loadingEl, modalBody.firstChild);
+  }
+
+  // Disable form inputs while loading
+  const disableForm = (disable) => {
+    form.querySelectorAll('input, textarea, button, select').forEach(el => el.disabled = disable);
+  };
+  disableForm(true);
+
   fetch(`/Head/appointments/${appointmentId}/json`)
-    .then(response => response.json())
+    .then(response => {
+      if (!response.ok) throw new Error('Network response was not ok');
+      return response.json();
+    })
     .then(data => {
-      // Show modal
-      document.getElementById('requestAppointmentModal').style.display = 'flex';
       // Pre-fill fields
-      document.getElementById('counselor_id').value = data.counselor_id;
-      document.getElementById('type_id').value = data.type_id;
+      document.getElementById('counselor_id').value = data.counselor_id || '';
+      document.getElementById('type_id').value = data.type_id || '';
       // Set students (Select2)
-      $('#student_id').val(data.student_ids).trigger('change');
-      document.getElementById('reason').value = data.reason;
-      document.getElementById('appointment_datetime').value = data.appointment_datetime.replace(' ', 'T');
+      if (window.jQuery && $('#student_id').length) {
+        $('#student_id').val(data.student_ids || []).trigger('change');
+      }
+      document.getElementById('reason').value = data.reason || '';
+      if (data.appointment_datetime) {
+        document.getElementById('appointment_datetime').value = data.appointment_datetime.replace(' ', 'T');
+      }
       // Change form action/method for update
-      const form = document.querySelector('#requestAppointmentModal form');
       form.action = `/Head/appointments/${appointmentId}`;
       // Add hidden _method input for PUT
       let methodInput = form.querySelector('input[name="_method"]');
@@ -109,7 +145,28 @@ function openRescheduleModal(appointmentId) {
       }
       methodInput.value = 'PUT';
       // Change submit button text
-      form.querySelector('button[type="submit"]').textContent = 'Update';
+      const submitBtn = form.querySelector('button[type="submit"]');
+      if (submitBtn) submitBtn.textContent = 'Update';
+    })
+    .catch(err => {
+      console.error('Failed to load appointment data:', err);
+      // Show error to user inside modal
+      let errEl = document.getElementById('modal-error-message');
+      if (!errEl) {
+        errEl = document.createElement('div');
+        errEl.id = 'modal-error-message';
+        errEl.style.cssText = 'margin:8px 0;padding:8px;border-radius:6px;background:#fff0f0;color:#b91c1c;border:1px solid #fca5a5;font-weight:600;';
+        const modalBody = modal.querySelector('.modal-body');
+        if (modalBody) modalBody.insertBefore(errEl, modalBody.firstChild);
+      }
+      errEl.textContent = 'Unable to load appointment. Please try again.';
+      // leave modal open so user can retry or cancel
+    })
+    .finally(() => {
+      // Remove loading indicator and re-enable form
+      const loading = document.getElementById('modal-loading-indicator');
+      if (loading) loading.remove();
+      disableForm(false);
     });
 }
 // Reset modal on close
@@ -122,14 +179,57 @@ function closeModal() {
   form.reset();
   $('#student_id').val(null).trigger('change');
   form.querySelector('button[type="submit"]').textContent = 'Request';
+  // hide other type input when closing/reset
+  const otherWrapper = document.getElementById('other-type-wrapper');
+  const otherInput = document.getElementById('other_type');
+  if (otherWrapper) otherWrapper.style.display = 'none';
+  if (otherInput) otherInput.value = '';
 }
-    $(document).ready(function() {
-      $('#student_id').select2({
-        placeholder: 'Search Student',
-        allowClear: true,
-        width: 'resolve',
-        dropdownParent: $('#requestAppointmentModal')
+      $(document).ready(function() {
+        // Initialize Select2 for student multi-select and restore old values if any
+        $('#student_id').select2({
+          placeholder: 'Search Student',
+          allowClear: true,
+          width: 'resolve',
+          dropdownParent: $('#requestAppointmentModal')
+        });
+
+        // Restore previous student selections from old input (if any)
+        var oldStudents = @json(old('student_id', []));
+        if (Array.isArray(oldStudents) && oldStudents.length > 0) {
+          $('#student_id').val(oldStudents).trigger('change');
+        }
+
+        // Show/hide Other type input and set required when necessary
+        const typeSelect = document.getElementById('type_id');
+        const otherWrapper = document.getElementById('other-type-wrapper');
+        const otherInput = document.getElementById('other_type');
+        function updateOtherVisibility() {
+          if (!typeSelect) return;
+          if (typeSelect.value === 'other') {
+            if (otherWrapper) otherWrapper.style.display = 'block';
+            if (otherInput) otherInput.required = true;
+          } else {
+            if (otherWrapper) otherWrapper.style.display = 'none';
+            if (otherInput) {
+              otherInput.required = false;
+              // don't wipe value if we want to preserve it on error; only clear when changing away interactively
+            }
+          }
+        }
+
+        if (typeSelect) {
+          typeSelect.addEventListener('change', function() {
+            // If user changes away from 'other' interactively, clear the other_type field
+            if (this.value !== 'other' && otherInput) {
+              otherInput.value = '';
+            }
+            updateOtherVisibility();
+          });
+        }
+
+        // Run once on load to set correct state (handles old input)
+        updateOtherVisibility();
       });
-    });
   </script>
 </div>

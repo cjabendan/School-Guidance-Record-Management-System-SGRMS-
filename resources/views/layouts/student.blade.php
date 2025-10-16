@@ -5,7 +5,6 @@
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
     <title>@yield('title', 'SGRMS - School Guidance Records Management System')</title>
-    <meta name="csrf-token" content="{{ csrf_token() }}">
 
     {{-- Styles --}}
     <link rel="icon" type="image/svg+xml" href="{{ asset('1.png') }}">
@@ -16,20 +15,15 @@
     <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/3.0.0/uicons-bold-rounded/css/uicons-bold-rounded.css'>
     <link rel='stylesheet'
         href='https://cdn-uicons.flaticon.com/3.0.0/uicons-solid-rounded/css/uicons-solid-rounded.css'>
-    <link rel="stylesheet"
-        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,1,0" />
-     <link rel='stylesheet'
-            href='https://cdn-uicons.flaticon.com/3.0.0/uicons-regular-straight/css/uicons-regular-straight.css'>
+    <link rel='stylesheet'
+        href='https://cdn-uicons.flaticon.com/3.0.0/uicons-regular-straight/css/uicons-regular-straight.css'>
 
-    
     <link rel="stylesheet" href="{{ asset('css/style.css') }}">
     <link rel="stylesheet" href="{{ asset('css/bar.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/dashboard-parent.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/table.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/chatbot.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/child.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/dashboard-student.css') }}">
     <link rel="stylesheet" href="{{ asset('css/messages.css') }}">
     <link rel="stylesheet" href="{{ asset('css/settings.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/notify.css') }}">
     <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet" />
     @yield('head')
 
@@ -42,13 +36,16 @@
     <!-- SIDEBAR -->
 
     @include('partials.student-sidebar')
-    @include('components.chatbot')
-    @include('components.child-link')
     @yield('content')
 
     @isset($slot)
         {{ $slot }}
     @endisset
+
+    <script>
+        window.userId = {{ Auth::id() ?? 'null' }};
+        window.userRole = "{{ Auth::user()->role ?? '' }}";
+    </script>
 
     @livewireScripts
 
@@ -57,6 +54,5 @@
 @stack('scripts')
 <script src="{{ asset('js/head.js') }}"></script>
 <script src="{{ asset('js/dashboard.js') }}"></script>
-<script src="{{ asset('js/chatbot.js') }}"></script>
 
 </html>

@@ -18,10 +18,10 @@
         href='https://cdn-uicons.flaticon.com/3.0.0/uicons-solid-rounded/css/uicons-solid-rounded.css'>
     <link rel="stylesheet"
         href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,1,0" />
-     <link rel='stylesheet'
-            href='https://cdn-uicons.flaticon.com/3.0.0/uicons-regular-straight/css/uicons-regular-straight.css'>
+    <link rel='stylesheet'
+        href='https://cdn-uicons.flaticon.com/3.0.0/uicons-regular-straight/css/uicons-regular-straight.css'>
 
-    
+
     <link rel="stylesheet" href="<?php echo e(asset('css/style.css')); ?>">
     <link rel="stylesheet" href="<?php echo e(asset('css/bar.css')); ?>">
     <link rel="stylesheet" href="<?php echo e(asset('css/dashboard-parent.css')); ?>">
@@ -30,6 +30,7 @@
     <link rel="stylesheet" href="<?php echo e(asset('css/child.css')); ?>">
     <link rel="stylesheet" href="<?php echo e(asset('css/messages.css')); ?>">
     <link rel="stylesheet" href="<?php echo e(asset('css/settings.css')); ?>">
+    <link rel="stylesheet" href="<?php echo e(asset('css/notify.css')); ?>">
     <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet" />
     <?php echo $__env->yieldContent('head'); ?>
 
@@ -52,7 +53,14 @@
 
     <?php endif; ?>
 
+
+    <script>
+        window.userId = <?php echo e(Auth::id() ?? 'null'); ?>;
+        window.userRole = "<?php echo e(Auth::user()->role ?? ''); ?>";
+    </script>
+
     <?php echo \Livewire\Mechanisms\FrontendAssets\FrontendAssets::scripts(); ?>
+
 
 
 </body>

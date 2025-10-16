@@ -12,10 +12,14 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
-use App\Helpers\NotificationHelper;
 
 class HeadStudentController extends Controller
 {
+    public function partialTable()
+    {
+        $students = Student::paginate(10);
+        return view('partials.student_table', compact('students'));
+    }
 
     public function index(Request $request)
     {
@@ -224,7 +228,14 @@ class HeadStudentController extends Controller
 
         // Set username and password
         $username = $validated['s_id'];
-        $password = ucfirst(strtolower($validated['last_name']));
+
+        // Extract last 4 digits from ID (after the dash)
+        $idSuffix = preg_replace('/[^0-9]/', '', substr($validated['s_id'], -4));
+        $lastName = ucfirst(strtolower($validated['last_name']));
+
+        // Combine last name + last 4 digits
+        $password = $lastName . $idSuffix;
+
 
         $user = \App\Models\User::create([
             'first_name' => $validated['first_name'],
@@ -572,18 +583,18 @@ class HeadStudentController extends Controller
                 $errorMessages = collect($importer->errors)->map(function($err) {
                     $rowInfo = isset($err['row']['s_id']) ? $err['row']['s_id'] : json_encode($err['row']);
                     return 'Student ID: ' . $rowInfo . ' - Error: ' . $err['error'];
-                })->implode(' | ');
-                return redirect()->back()->with('error', 'Import completed with errors: ' . $errorMessages);
+                })->toArray();
+                return redirect()->back()->with(['import_errors' => $errorMessages]);
             }
             return redirect()->back()->with('success', 'Students imported successfully!');
         } catch (\Maatwebsite\Excel\Validators\ValidationException $e) {
             $failures = $e->failures();
             $messages = collect($failures)->map(function($failure) {
                 return 'Row ' . $failure->row() . ': ' . implode(', ', $failure->errors());
-            })->implode(' | ');
-            return redirect()->back()->with('error', 'Import failed: ' . $messages);
+            })->toArray();
+            return redirect()->back()->with(['import_errors' => $messages]);
         } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Import failed: ' . $e->getMessage());
+            return redirect()->back()->with(['import_errors' => ['Import failed: ' . $e->getMessage()]]);
         }
 
         }
@@ -752,6 +763,3 @@ class HeadStudentController extends Controller
         }
     }
 }
-
-
-

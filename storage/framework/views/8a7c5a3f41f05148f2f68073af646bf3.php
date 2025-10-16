@@ -137,23 +137,36 @@ unset($__errorArgs, $__bag); ?>
 
                     </div>
 
-                    <button type="submit" class="register-btn">
-                        <span>Sign Up</span>
-                    </button>
+                    <?php
+                        $registration = \App\Models\SystemSetting::getValue('registration', 'on');
+                    ?>
+
+                    <?php if($registration === 'off'): ?>
+                        <button type="button" class="register-btn" disabled>
+                            <span>Registration Closed</span>
+                        </button>
+                        <p class="message text-danger mt-2">Registration is temporarily unavailable. Please try again later.
+                        </p>
+                    <?php else: ?>
+                        <button type="submit" class="register-btn">
+                            <span>Sign Up</span>
+                        </button>
+                    <?php endif; ?>
+
                     <div>
                         <p class="message">Already have an account?<a href="<?php echo e(url('/?login=true')); ?>" class="link">Log
                                 in instead</a></p>
                     </div>
                 </form>
                 <script>
-                document.addEventListener('DOMContentLoaded', function() {
-                    var signupForm = document.getElementById('signupForm');
-                    if (signupForm) {
-                        signupForm.addEventListener('submit', function() {
-                            if (typeof showLoader === 'function') showLoader();
-                        });
-                    }
-                });
+                    document.addEventListener('DOMContentLoaded', function() {
+                        var signupForm = document.getElementById('signupForm');
+                        if (signupForm) {
+                            signupForm.addEventListener('submit', function() {
+                                if (typeof showLoader === 'function') showLoader();
+                            });
+                        }
+                    });
                 </script>
             </div>
         </div>

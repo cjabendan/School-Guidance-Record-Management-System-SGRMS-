@@ -111,15 +111,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
     if (removeBtn && studentImage && imageInput) {
         removeBtn.addEventListener('click', function () {
-            // Reset to default image
             studentImage.src = '/images/user/default.png'; 
             imageInput.value = '';
             if (fileChosen) fileChosen.textContent = 'No file chosen';
-
-            // Show backend this image was deleted (only for edit mode)
             if (deleteField) deleteField.value = '1';
-
-            // Hide button again after deleting
             removeBtn.style.display = 'none';
         });
     }
@@ -128,21 +123,19 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Add/Edit Modal logic
 window.openAddEditModal = function openAddEditModal(mode, studentData = null) {
-    // ✅ If edit mode and only s_id is provided, fetch full data via AJAX
     if (mode === 'edit' && studentData && studentData.s_id && Object.keys(studentData).length === 1) {
         fetch(`/Head/students/${studentData.s_id}/json`)
             .then(response => response.json())
             .then(data => {
                 if (data.error) {
-                    alert('Student not found!');
+                    Swal.fire('Error', 'Student not found!', 'error');
                     return;
                 }
-                // Call again with full student data
                 window.openAddEditModal('edit', data);
             })
             .catch(err => {
                 console.error("Failed to fetch student:", err);
-                alert("Error fetching student details.");
+                Swal.fire('Error', 'Error fetching student details.', 'error');
             });
         return;
     }
@@ -156,21 +149,18 @@ window.openAddEditModal = function openAddEditModal(mode, studentData = null) {
     const removeBtn = document.getElementById('remove-image-btn');
     const fileChosen = document.getElementById('file-chosen');
 
-    // Reset form
     form.reset();
     if (fileChosen) fileChosen.textContent = 'No file chosen';
     if (imageInput) imageInput.value = "";
 
-    // Reset image
     if (mode === 'add') {
         imgPreview.src = '/images/user/default.png'; 
-        if (removeBtn) removeBtn.style.display = 'none'; // hidden by default
+        if (removeBtn) removeBtn.style.display = 'none';
     } else {
         imgPreview.src = '';
         if (removeBtn) removeBtn.style.display = 'none';
     }
 
-    // Image upload + crop logic (same as before)...
     if (imageInput) {
         imageInput.onchange = function(event) {
             const [file] = event.target.files;
@@ -227,7 +217,6 @@ window.openAddEditModal = function openAddEditModal(mode, studentData = null) {
         };
     }
 
-    // Set mode details
     if (mode === 'add') {
         title.textContent = 'Add Student';
         saveBtn.textContent = 'Save';
@@ -252,9 +241,8 @@ window.openAddEditModal = function openAddEditModal(mode, studentData = null) {
             form.appendChild(methodInput);
         }
 
-        // Fill in fields from studentData
-        document.getElementById('s_id_display').textContent = studentData.id_num || '';
-        document.getElementById('s_id').value = studentData.id_num || '';
+        document.getElementById('s_id_display').textContent = studentData.s_id || studentData.id_num || '';
+        document.getElementById('s_id').value = studentData.s_id || studentData.id_num || '';
         document.getElementById('first_name').value = studentData.fname || '';
         document.getElementById('middle_name').value = studentData.mname || '';
         document.getElementById('last_name').value = studentData.lname || '';
@@ -348,17 +336,22 @@ window.openAddEditModal = function openAddEditModal(mode, studentData = null) {
         .then(data => {
             if (data.success || data.message) {
                 window.closeAddModal();
-                location.reload();
+                refreshStudentTable();
+                Swal.fire({
+                    icon: 'success',
+                    title: mode === 'add' ? 'Student Added' : 'Student Updated',
+                    timer: 1200,
+                    showConfirmButton: false
+                });
             } else {
-                alert('Save failed!');
+                Swal.fire('Error', 'Save failed.', 'error');
             }
         })
         .catch(() => {
-            alert('An error occurred while saving.');
+            Swal.fire('Error', 'An error occurred while saving.', 'error');
         });
     };
-
-    };
+};
 
 // Close modal
 window.closeAddModal = function closeAddModal() {
@@ -531,119 +524,181 @@ window.closeArchiveModal = function closeArchiveModal() {
 // ================================
 // Archive Student Functions
 // ================================
-
-// Archive Only
 window.archiveStudentOnly = function archiveStudentOnly() {
     if (!window.currentArchiveSId) return;
-    var status = document.getElementById('archive_status').value;
+
+    const status = document.getElementById("archive_status").value;
     if (!status) {
-        alert('Please select a status.');
+        Swal.fire("Missing Status", "Please select a status.", "warning");
         return;
     }
 
-    fetch('/Head/students/archive', {
-        method: 'POST',
+    fetch("/Head/students/archive", {
+        method: "POST",
         headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            "Content-Type": "application/json",
+            "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute("content"),
         },
-        body: JSON.stringify({ s_id: window.currentArchiveSId, status: status })
+        body: JSON.stringify({ s_id: window.currentArchiveSId, status }),
     })
-    .then(res => res.json())
-    .then(data => {
-        window.closeArchiveModal();
-        // Always refresh the student table to show updated status
-        var tableList = document.getElementById('student-list');
-        if (tableList) {
-            fetch(window.location.href, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
-                .then(response => response.text())
-                .then(html => {
-                    const parser = new DOMParser();
-                    const doc = parser.parseFromString(html, 'text/html');
-                    const newTable = doc.getElementById('student-list');
-                    if (newTable && tableList) {
-                        tableList.innerHTML = newTable.innerHTML;
-                    }
+        .then(async (res) => {
+            const text = await res.text();
+            let data = {};
+            try {
+                data = text ? JSON.parse(text) : {};
+            } catch {
+                data = {};
+            }
+
+            if (data.success || res.ok) {
+                updateStudentStatusCell(window.currentArchiveSId, status);
+                closeArchiveModal();
+                refreshStudentTable();
+
+                Swal.fire({
+                    icon: "success",
+                    title: "Status Updated",
+                    text: "Student status updated successfully!",
+                    timer: 1200,
+                    showConfirmButton: false,
                 });
-        }
-        if (!data.success) {
-            alert(data.error || data.message || 'Archiving failed.');
-        }
-    })
-    .catch(err => {
-        window.closeArchiveModal();
-        console.log('Archive failed:', err.message);
-    });
+            } else {
+                Swal.fire("Error", data.error || "Failed to update student status.", "error");
+            }
+        })
+        .catch((err) => {
+            console.error("Fetch error:", err);
+            Swal.fire("Error", "An unexpected error occurred.", "error");
+        });
 };
 
 window.archiveStudentAndDisable = function archiveStudentAndDisable() {
     if (!window.currentArchiveSId) return;
-    var status = document.getElementById('archive_status').value;
+
+    const status = document.getElementById("archive_status").value;
     if (!status) {
-        alert('Please select a status.');
+        Swal.fire("Missing Status", "Please select a status.", "warning");
         return;
     }
 
-    fetch('/Head/students/archive-disable', {
-        method: 'POST',
+    fetch("/Head/students/archive-disable", {
+        method: "POST",
         headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            "Content-Type": "application/json",
+            "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute("content"),
         },
-        body: JSON.stringify({ s_id: window.currentArchiveSId, status: status })
+        body: JSON.stringify({ s_id: window.currentArchiveSId, status }),
     })
-    .then(res => res.json())
-    .then(data => {
-        window.closeArchiveModal();
-        // Always refresh the student table to show updated status
-        var tableList = document.getElementById('student-list');
-        if (tableList) {
-            fetch(window.location.href, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
-                .then(response => response.text())
-                .then(html => {
-                    const parser = new DOMParser();
-                    const doc = parser.parseFromString(html, 'text/html');
-                    const newTable = doc.getElementById('student-list');
-                    if (newTable && tableList) {
-                        tableList.innerHTML = newTable.innerHTML;
-                    }
+        .then(async (res) => {
+            const text = await res.text();
+            let data = {};
+            try {
+                data = text ? JSON.parse(text) : {};
+            } catch {
+                data = {};
+            }
+
+            if (data.success || res.ok) {
+                updateStudentStatusCell(window.currentArchiveSId, status);
+                closeArchiveModal();
+                refreshStudentTable();
+
+                Swal.fire({
+                    icon: "success",
+                    title: "Updated & Disabled",
+                    text: "Student status updated and account disabled!",
+                    timer: 1200,
+                    showConfirmButton: false,
                 });
-        }
-        if (!data.success) {
-            alert(data.error || data.message || 'Archiving & disabling failed.');
-        }
-    })
-    .catch(err => {
-        window.closeArchiveModal();
-        console.log('Archive & disable failed:', err.message);
-    });
+            } else {
+                Swal.fire("Error", data.error || "Failed to update student status.", "error");
+            }
+        })
+        .catch((err) => {
+            console.error("Fetch error:", err);
+            Swal.fire("Error", "An unexpected error occurred.", "error");
+        });
 };
+
 // ================================
 // Helper: Update Student Status Cell
 // ================================
 function updateStudentStatusCell(s_id, newStatus) {
-    var row = document.querySelector(`#student-list tr[data-id="${s_id}"]`);
-    if (row) {
-        var statusCell = row.querySelector('td[data-status]');
-        if (statusCell) {
-            statusCell.textContent = newStatus;
+    const colorMap = {
+        Enrolled: "#16a34a",
+        Incoming: "#f97316",
+        Probation: "#eab308",
+        Suspended: "#dc2626",
+        Dropped: "#475569",
+        Transferred: "#3b82f6",
+        Graduated: "#8b5cf6",
+        Deceased: "#94a3b8",
+        Expelled: "#b91c1c",
+    };
 
-            // reset classes
-            statusCell.className = '';
-            if (newStatus.toLowerCase() === 'enrolled') {
-                statusCell.classList.add('badge', 'bg-success');
-            } else {
-                statusCell.classList.add('badge', 'bg-danger');
-            }
+    const color = colorMap[newStatus] || "#64748b"; // default gray
+
+    // Find student card in your current responsive layout
+    const card = document.querySelector(`#student-list .table-card[data-id="${s_id}"]`);
+    if (card) {
+        const cols = card.querySelectorAll(".table-col");
+        if (cols.length >= 6) {
+            const statusCol = cols[5];
+            statusCol.innerHTML = `
+                <span style="display:inline-block;
+                             padding:4px 14px;
+                             border-radius:16px;
+                             font-weight:600;
+                             background:${color}20;
+                             color:${color};
+                             border:1px solid ${color};
+                             min-width:90px;
+                             text-align:center;">
+                    ${newStatus}
+                </span>`;
         }
-    } else {
-        // fallback: reload table content via AJAX
-        fetch(window.location.href, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
-            .then(res => res.text())
-            .then(html => {
-                document.querySelector('#student-list').innerHTML = html;
-            });
     }
+}
+
+
+// ================================
+// Refresh Student Table (Real-Time)
+// ================================
+function refreshStudentTable() {
+    fetch("/Head/students/table", {
+        headers: { "X-Requested-With": "XMLHttpRequest" }
+    })
+        .then((res) => {
+            if (!res.ok) throw new Error("Failed to fetch updated student list.");
+            return res.text();
+        })
+        .then((html) => {
+            const temp = document.createElement("div");
+            temp.innerHTML = html.trim();
+
+            const newContent = temp.querySelector(".table");
+            const newPagination = temp.querySelector(".pagination");
+            const currentList = document.querySelector("#student-list");
+
+            if (currentList && newContent) {
+                // Replace table cards
+                const existingTable = currentList.querySelector(".table");
+                if (existingTable) {
+                    existingTable.replaceWith(newContent);
+                } else {
+                    currentList.appendChild(newContent);
+                }
+
+                // Replace pagination (if any)
+                const existingPagination = currentList.querySelector(".pagination");
+                if (existingPagination && newPagination) {
+                    existingPagination.replaceWith(newPagination);
+                } else if (newPagination) {
+                    currentList.appendChild(newPagination);
+                }
+            }
+        })
+        .catch((err) => console.error("Error refreshing table:", err));
 }
 
 // ================================
@@ -662,9 +717,6 @@ window.openArchiveStudentModal = function openArchiveStudentModal(s_id) {
 
 // Attach click event to all archive buttons
 document.addEventListener('DOMContentLoaded', function() {
-    // No need to attach click handler here if using inline onclick in Blade
-
-    // Archive modal close button
     var closeArchiveBtn = document.getElementById('closeArchiveModalBtn');
     if (closeArchiveBtn) {
         closeArchiveBtn.onclick = function(e) {
@@ -673,6 +725,35 @@ document.addEventListener('DOMContentLoaded', function() {
         };
     }
 });
+
+// Show meaning of selected status in archive modal
+document.addEventListener('DOMContentLoaded', function() {
+    const statusDropdown = document.getElementById('archive_status');
+    const statusMeaning = document.getElementById('statusMeaning');
+
+    if (statusDropdown && statusMeaning) {
+        const meanings = {
+            'Enrolled': 'Student is currently registered and attending classes.',
+            'Incoming': 'Student is expected to enroll soon but has not completed registration.',
+            'Probation': 'Student is under academic or behavioral monitoring and must improve performance.',
+            'Suspended': 'Student is temporarily removed from classes due to disciplinary action.',
+            'Dropped': 'Student voluntarily withdrew from the program or course.',
+            'Transferred': 'Student has officially moved to another school.',
+            'Graduated': 'Student has completed all requirements and successfully finished the program.',
+            'Deceased': 'Student is no longer active due to passing away or other permanent reasons.',
+            'Expelled': 'Student is permanently removed due to serious disciplinary violations.'
+        };
+
+        statusDropdown.addEventListener('change', function() {
+            const selected = statusDropdown.value;
+            statusMeaning.textContent = meanings[selected] || 'Select a status to see its meaning.';
+        });
+
+        // Optional: show meaning on load
+        statusMeaning.textContent = meanings[statusDropdown.value] || 'Select a status to see its meaning.';
+    }
+});
+
 
 
 // _________________________________________________________________________________________

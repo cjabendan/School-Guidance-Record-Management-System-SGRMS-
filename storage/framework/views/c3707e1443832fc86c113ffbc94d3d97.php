@@ -1,7 +1,27 @@
 
 <div id="requestAppointmentModal" class="custom-modal" style="display:none;">
   <div class="custom-modal-content">
-  <form method="POST" action="<?php echo e(route('Head.appointments.store')); ?>">
+  <!-- Select2 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+  <style>
+    /* Make selected items in Select2 render in a vertical column inside the modal */
+    #requestAppointmentModal .select2-container--default .select2-selection--multiple {
+      display: flex;
+      flex-direction: column;
+      max-height: 150px;
+    }
+    #requestAppointmentModal .select2-container--default .select2-selection__choice {
+      display: block;
+      width: 100%;
+      border-radius: 6px;
+    }
+    /* Keep the search input usable and full width */
+    #requestAppointmentModal .select2-container--default .select2-search--inline {
+      display: block;
+      width: 100%;
+    }
+  </style>
+  <form method="POST" action="<?php echo e(route('Parent.appointments.store')); ?>">
       <?php echo csrf_field(); ?>
       <div class="modal-header">
         <h5 class="modal-title">Request Appointment</h5>
@@ -32,12 +52,18 @@
             <?php $__currentLoopData = $types; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $type): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
               <option value="<?php echo e($type->id); ?>"><?php echo e($type->type_name); ?></option>
             <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+            <option value="other">Other</option>
           </select>
+        </div>
+        <div class="divider"></div>
+        <div class="mb-3" id="other-type-wrapper" style="display:none;">
+          <label for="other_type" class="form-label">Other Type</label>
+          <input type="text" name="other_type" id="other_type" class="form-control" placeholder="Enter custom appointment type">
         </div>
         <!-- Child -->
         <div class="mb-3">
           <label for="student_id" class="form-label">Child</label>
-          <select name="student_id[]" id="student_id" class="form-control" multiple required>
+          <select name="student_id[]" id="student_id" class="form-control" multiple required style="width:100%;">
             <?php $__currentLoopData = $children; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $child): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                 <option value="<?php echo e($child->s_id); ?>">
                     <?php echo e($child->user->first_name ?? ''); ?> <?php echo e($child->user->last_name ?? ''); ?>
@@ -71,6 +97,78 @@
             document.getElementById('appointment_datetime').value = value;
           }
           setManilaNow();
+
+          // Show/hide Other type input
+          const typeSelect = document.getElementById('type_id');
+          const otherWrapper = document.getElementById('other-type-wrapper');
+          const otherInput = document.getElementById('other_type');
+          if (typeSelect) {
+            typeSelect.addEventListener('change', function() {
+              if (this.value === 'other') {
+                if (otherWrapper) otherWrapper.style.display = 'block';
+                if (otherInput) otherInput.required = true;
+              } else {
+                if (otherWrapper) otherWrapper.style.display = 'none';
+                if (otherInput) { otherInput.required = false; otherInput.value = ''; }
+              }
+            });
+          }
+          // Initialize Select2 for student search (dropdownParent ensures it renders inside modal)
+          // Load jQuery and Select2 if not already present on the page
+          (function initSelect2() {
+            function doInit() {
+              if (typeof $ === 'undefined' || typeof $.fn.select2 === 'undefined') {
+                return;
+              }
+              $('#student_id').select2({
+                placeholder: 'Search by name or ID',
+                allowClear: true,
+                width: 'resolve',
+                dropdownParent: $('#requestAppointmentModal'),
+                minimumInputLength: 1,
+                // Only show results when parent types; match both option text and option value (ID)
+                matcher: function(params, data) {
+                  // If there is no search term, don't display any results
+                  if ($.trim(params.term) === '') {
+                    return null;
+                  }
+                  // Default matcher: check text
+                  var term = params.term.toLowerCase();
+                  if (data.text && data.text.toLowerCase().indexOf(term) > -1) {
+                    return data;
+                  }
+                  // Also check the option value (ID)
+                  var id = data.id ? data.id.toString().toLowerCase() : '';
+                  if (id.indexOf(term) > -1) {
+                    return data;
+                  }
+                  // No match
+                  return null;
+                }
+              });
+            }
+
+            // If jQuery or select2 not loaded, inject scripts then init
+            if (typeof $ === 'undefined') {
+              var jq = document.createElement('script');
+              jq.src = 'https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js';
+              jq.onload = function() {
+                var s2 = document.createElement('script');
+                s2.src = 'https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js';
+                s2.onload = doInit;
+                document.body.appendChild(s2);
+              };
+              document.body.appendChild(jq);
+            } else if (typeof $.fn.select2 === 'undefined') {
+              var s2 = document.createElement('script');
+              s2.src = 'https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js';
+              s2.onload = doInit;
+              document.body.appendChild(s2);
+            } else {
+              // both present
+              doInit();
+            }
+          })();
         });
         </script>
       </div>
@@ -79,4 +177,6 @@
       </div>
     </form>
   </div>
+
+  
 </div><?php /**PATH C:\Users\Administrator\School-Guidance-Record-Management-System-SGRMS\resources\views/Parent/modal/requestApppointmentModal.blade.php ENDPATH**/ ?>

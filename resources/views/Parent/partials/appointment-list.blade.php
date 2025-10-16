@@ -13,11 +13,13 @@
         <div class="table-col student">
             @php
                 $studentCount = $appointment->students->count();
+                $firstStudent = $appointment->students->first();
             @endphp
             @if($studentCount === 1)
-                {{ $appointment->students->first()->user->first_name ?? '' }} {{ $appointment->students->first()->user->last_name ?? '' }}
+                {{ $firstStudent->user->first_name ?? '' }} {{ $firstStudent->user->last_name ?? '' }}
             @elseif($studentCount > 1)
-                Multiple Students
+                {{ $firstStudent->user->first_name ?? '' }} {{ $firstStudent->user->last_name ?? '' }}&nbsp;
+                <span class="see-more-text" style="color: #888;">see more</span>
             @else
                 N/A
             @endif

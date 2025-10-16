@@ -325,48 +325,52 @@
 
 <!---------------------------------------------------------------------------------------->
 
-<!-- Archive Modal -->
+<!-- Student Status Update Modal -->
 <div id="archiveStudentModal" class="modal" style="display:none;">
-    <div class="modal-content" style="max-width:480px;">
-        <span class="close add-modal-close pro-add-close" id="closeArchiveModalBtn">&times;</span>
-    <h2 class="add-modal-title pro-add-title">Archive Student <span id="archiveStudentIdDisplay" style="color:#2563eb;font-size:1.1rem;font-weight:600;"></span></h2>
+  <div class="modal-content">
+    <span class="close add-modal-close pro-add-close" id="closeArchiveModalBtn">&times;</span>
 
-        <form id="archiveStudentForm" method="POST" action="{{ url('/students/archive') }}">
-            @csrf
-            <input type="hidden" name="s_id" id="archive_s_id">
-            <p style="font-size:1.05rem; margin-bottom:18px;">
-                Select the archive status for this student. You may also disable their login if needed.
-            </p>
+    <h2 class="add-modal-title pro-add-title">
+      Update Student Record
+      <span id="archiveStudentIdDisplay" class="student-id"></span>
+    </h2>
 
-            <!-- Archive Status -->
-            <div class="form-row" style="margin-bottom:18px;">
-                <div class="add-field-col" style="width:100%;">
-                    <label for="archive_status" class="add-label">Archive Status:</label>
-                    <select id="archive_status" name="status" class="add-input" required>
-                        <option value="">Select Status</option>
-                        <option value="Inactive">Inactive</option>
-                        <option value="Pending">Pending</option>
-                        <option value="Graduated">Graduated</option>
-                        <option value="Transferred">Transferred</option>
-                        <option value="Dropped">Dropped</option>
-                        <option value="Suspended">Suspended</option>
-                        <option value="Expelled">Expelled</option>
-                    </select>
-                    <small id="statusMeaning" style="display:block; margin-top:4px; color:#64748b; font-size:0.9rem;">
-                        Select a status to see its meaning.
-                    </small>
-                </div>
-            </div>
+    <form id="archiveStudentForm" method="POST" action="{{ url('/students/archive') }}">
+      @csrf
+      <input type="hidden" name="s_id" id="archive_s_id">
 
-            <!-- Action Buttons -->
-            <div class="pro-add-buttons" style="justify-content:center; gap: 16px;">
-                <button type="button" class="pro-add-save" onclick="archiveStudentOnly()">Archive Only</button>
-                <button type="button" class="pro-add-save" style="background:#e11d48;" onclick="archiveStudentAndDisable()">Archive & Disable Account</button>
-            </div>
-        </form>
-    </div>
+      <p class="modal-description">
+        Select the most accurate status for this student below. You may also disable their account access if the record should no longer be active.
+      </p>
+
+      <!-- Student Status -->
+      <div class="form-row">
+        <div class="add-field-col">
+          <label for="archive_status" class="add-label">Student Status</label>
+          <select id="archive_status" name="status" class="add-input" required>
+            <option value="">Select Status</option>
+            <option value="Enrolled">Enrolled</option>
+            <option value="Incoming">Incoming</option>
+            <option value="Probation">Probation</option>
+            <option value="Suspended">Suspended</option>
+            <option value="Dropped">Dropped</option>
+            <option value="Transferred">Transferred</option>
+            <option value="Graduated">Graduated</option>
+            <option value="Deceased">Deceased</option>
+            <option value="Expelled">Expelled</option>
+          </select>
+          <small id="statusMeaning">Select a status to view its description.</small>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="pro-add-buttons">
+        <button type="button" class="pro-add-save" onclick="archiveStudentOnly()">Save Changes</button>
+        <button type="button" class="pro-add-save danger" onclick="archiveStudentAndDisable()">Save & Disable Account</button>
+      </div>
+    </form>
+  </div>
 </div>
-
 
 
 <!---------------------------------------------------------------------------------------->

@@ -42,7 +42,7 @@
         <link rel="stylesheet" href="{{ asset('css/settings.css') }}">
         <link href="{{ asset('css/cropper.min.css') }}" rel="stylesheet">
         @yield('head')
-       
+
         @livewireStyles
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
@@ -58,11 +58,10 @@
             {{ $slot }}
         @endisset
 
+        @livewireScripts
 
-         @livewireScripts
+        @stack('scripts')
     </body>
-  
-    @stack('scripts')
 
     <script src="{{ asset('js/cropper.min.js') }}"></script>
     <script src="{{ asset('js/head.js') }}"></script>

@@ -39,10 +39,9 @@
     box-shadow: 0 2px 6px rgba(0,0,0,0.2);
 }
 
-/* Dropdown container */
 .notification-dropdown {
     position: absolute;
-    right: -60;
+    right: -60px;
     top: 150%;
     z-index: 1000;
     background: #fff;
@@ -50,9 +49,37 @@
     border-radius: 10px;
     min-width: 320px;
     max-height: 400px;
-    overflow-y: hidden;
+    overflow-y: auto;
     box-shadow: 0 6px 20px rgba(0,0,0,0.1);
     animation: dropdownFade 0.25s ease;
+}
+
+.notification-dropdown::-webkit-scrollbar {
+    width: 8px;
+}
+.notification-dropdown::-webkit-scrollbar-track {
+    background: transparent;
+}
+.notification-dropdown::-webkit-scrollbar-thumb {
+    background: transparent;
+    border-radius: 10px;
+    transition: background-color 0.2s ease;
+}
+
+/* Show scrollbar only when hovering or active inside */
+.notification-dropdown:hover::-webkit-scrollbar-thumb,
+.notification-dropdown:focus-within::-webkit-scrollbar-thumb {
+    background: rgba(16, 24, 40, 0.2);
+}
+
+/* Firefox support */
+.notification-dropdown {
+    scrollbar-width: thin;
+    scrollbar-color: transparent transparent;
+}
+.notification-dropdown:hover,
+.notification-dropdown:focus-within {
+    scrollbar-color: rgba(16, 24, 40, 0.2) transparent;
 }
 
 /* Fade-in animation */
@@ -123,6 +150,11 @@
 
 /* Empty state */
 .notify-empty {
+    gap: 12px;
+    align-items: flex-start;
+    border-bottom: 1px solid #f3f4f6;
+    transition: background 0.2s ease;
+    cursor: pointer;
     text-align: center;
     opacity: 0.7;
     padding: 24px 16px;

@@ -18,10 +18,10 @@
         href='https://cdn-uicons.flaticon.com/3.0.0/uicons-solid-rounded/css/uicons-solid-rounded.css'>
     <link rel="stylesheet"
         href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,1,0" />
-     <link rel='stylesheet'
-            href='https://cdn-uicons.flaticon.com/3.0.0/uicons-regular-straight/css/uicons-regular-straight.css'>
+    <link rel='stylesheet'
+        href='https://cdn-uicons.flaticon.com/3.0.0/uicons-regular-straight/css/uicons-regular-straight.css'>
 
-    
+
     <link rel="stylesheet" href="{{ asset('css/style.css') }}">
     <link rel="stylesheet" href="{{ asset('css/bar.css') }}">
     <link rel="stylesheet" href="{{ asset('css/dashboard-parent.css') }}">
@@ -30,6 +30,7 @@
     <link rel="stylesheet" href="{{ asset('css/child.css') }}">
     <link rel="stylesheet" href="{{ asset('css/messages.css') }}">
     <link rel="stylesheet" href="{{ asset('css/settings.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/notify.css') }}">
     <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet" />
     @yield('head')
 
@@ -50,7 +51,14 @@
         {{ $slot }}
     @endisset
 
+
+    <script>
+        window.userId = {{ Auth::id() ?? 'null' }};
+        window.userRole = "{{ Auth::user()->role ?? '' }}";
+    </script>
+
     @livewireScripts
+
 
 </body>
 

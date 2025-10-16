@@ -6,9 +6,43 @@ use Illuminate\Http\Request;
 use App\Models\Notification;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
+use App\Events\NewNotification;
 
 class NotifyController extends Controller
 {
+
+    public function store(Request $request)
+    {
+        if ($request->has('announcement') && $request->announcement) {
+            // Get all users except admin
+            $users = \App\Models\User::whereIn('role', ['counselor', 'parent', 'student'])->get();
+
+            foreach ($users as $user) {
+                $notification = Notification::create([
+                    'user_id' => $user->id,
+                    'message' => $request->message,
+                    'timestamp' => now(),
+                    'is_read' => 0,
+                ]);
+                broadcast(new NewNotification($notification, false));
+            }
+
+            return response()->json(['success' => true, 'type' => 'announcement']);
+        } else {
+            $notification = Notification::create([
+                'user_id' => $request->user_id,
+                'message' => $request->message,
+                'timestamp' => now(),
+                'is_read' => 0,
+            ]);
+
+            broadcast(new NewNotification($notification));
+
+            return response()->json(['success' => true]);
+        }
+    }
+
+
     // Mark notification as read (AJAX)
     public function markAsRead(Request $request)
     {
@@ -18,20 +52,25 @@ class NotifyController extends Controller
         if ($notif && $notif->is_read == 0) {
             $notif->is_read = 1;
             $notif->save();
+
+            broadcast(new \App\Events\NotificationRead($notif));
+
             return response()->json(['success' => true]);
         }
+
         return response()->json(['success' => false], 404);
     }
     
     public function index(Request $request)
     {
         $userId = Auth::id();
+        $role = Auth::user()->role ?? null;
 
         if ($request->has('notify_id')) {
-        Notification::where('id', $request->notify_id)
-            ->where('user_id', $userId)
-            ->update(['is_read' => 1]);
-    }
+            Notification::where('id', $request->notify_id)
+                ->where('user_id', $userId)
+                ->update(['is_read' => 1]);
+        }
 
         // Fetch all user notifications sorted by newest first
         $notifications = Notification::where('user_id', $userId)
@@ -50,8 +89,20 @@ class NotifyController extends Controller
             $n->is_read == 1 && \Carbon\Carbon::parse($n->timestamp)->isBefore(\Carbon\Carbon::today())
         );
 
-        return view('Head.Notify.notification', compact('new', 'today', 'earlier'));
+        // Return view based on role
+        if (in_array($role, ['head', 'admin'])) {
+            return view('Head.Notify.notification', compact('new', 'today', 'earlier'));
+        } elseif ($role === 'counselor') {
+            return view('Counselor.Notify.notification', compact('new', 'today', 'earlier'));
+        } elseif ($role === 'parent') {
+            return view('Parent.Notify.notification', compact('new', 'today', 'earlier'));
+        } elseif ($role === 'student') {
+            return view('Student.Notify.notification', compact('new', 'today', 'earlier'));
+        } else {
+            abort(403, 'Unauthorized access');
+        }
     }
+
 
     // Fetch UNREAD notifications for navbar dropdown
     public function fetchNotifications(Request $request)
@@ -83,7 +134,20 @@ class NotifyController extends Controller
                 $icon = '📢';
             }
 
-           $link = route('Head.notify.notification') . '?notify_id=' . $n->id;
+
+            $link = '#';
+            $role = Auth::user()->role ?? null;
+
+            if ($role === 'head' || $role === 'admin') {
+                $link = route('Head.notify.notification') . '?notify_id=' . $n->id;
+            } elseif ($role === 'counselor') {
+                $link = route('Counselor.notify.notification') . '?notify_id=' . $n->id;
+            } elseif ($role === 'parent') {
+                $link = route('Parent.notify.notification') . '?notify_id=' . $n->id;
+            } elseif ($role === 'student') {
+                $link = route('Student.notify.notification') . '?notify_id=' . $n->id;
+            }
+
 
             return [
                 'id' => $n->id,
@@ -100,7 +164,8 @@ class NotifyController extends Controller
             return response()->json([
                 'html' => $html,
                 'debug_notifications' => $notifications,
-                'debug_user_id' => $userId
+                'debug_user_id' => $userId,
+                'unread_count' => $unread->count(),
             ]);
         }
 

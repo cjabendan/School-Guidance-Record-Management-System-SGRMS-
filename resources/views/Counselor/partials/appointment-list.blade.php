@@ -99,6 +99,11 @@
                 )">
                 <i class='bx bx-show'></i>
             </a>
+            {{-- Edit/Reschedule (match Head style) --}}
+            <a href="#" title="Edit/Reschedule" class="edit-btn"
+                onclick="openRescheduleModal({{ $appointment->appointment_id }}); return false;">
+                <i class='bx bx-edit'></i>
+            </a>
         </div>
     </div>
 @empty

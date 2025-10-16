@@ -77,18 +77,88 @@ function closeReviewModal() {
 function openRescheduleModal(appointmentId) {
   // Close review modal
   closeReviewModal();
-  // Fetch appointment data via AJAX and pre-fill modal
-  fetch(`/head/appointments/${appointmentId}/json`)
-    .then(response => response.json())
+
+  // Open the request modal immediately to improve perceived responsiveness
+  const requestModal = document.getElementById('requestAppointmentModal');
+  if (requestModal) requestModal.style.display = 'flex';
+
+  // Add a small loading indicator inside the modal if not present
+  let loadingEl = document.getElementById('modal-loading-indicator');
+  const modalBody = requestModal ? requestModal.querySelector('.modal-body') : null;
+  if (!loadingEl && modalBody) {
+    loadingEl = document.createElement('div');
+    loadingEl.id = 'modal-loading-indicator';
+    loadingEl.style.cssText = 'position:relative;padding:8px 0;text-align:center;color:#555;font-weight:600;';
+    loadingEl.textContent = 'Loading appointment...';
+    modalBody.insertBefore(loadingEl, modalBody.firstChild);
+  }
+
+  // Disable form inputs while loading
+  const form = document.querySelector('#requestAppointmentModal form');
+  const disableForm = (disable) => {
+    if (!form) return;
+    form.querySelectorAll('input, textarea, button, select').forEach(el => {
+      // Keep the close button enabled
+      if (el.classList && el.classList.contains('close-modal-btn')) return;
+      el.disabled = disable;
+    });
+  };
+  disableForm(true);
+
+  // Fetch appointment data via AJAX and pre-fill counselor request modal
+  fetch(`/Counselor/appointments/${appointmentId}/json`)
+    .then(response => {
+      if (!response.ok) throw new Error('Network response was not ok');
+      return response.json();
+    })
     .then(data => {
-      // Open the request appointment modal
-      document.getElementById('requestAppointmentModal').style.display = 'flex';
-      // Fill in the form fields
-      if (data.counselor_id) $('#counselor_id').val(data.counselor_id).trigger('change');
-      if (data.type_id) $('#type_id').val(data.type_id).trigger('change');
-      if (data.student_ids) $('#student_id').val(data.student_ids).trigger('change');
-      if (data.reason) $('#reason').val(data.reason);
-      if (data.appointment_datetime) $('#appointment_datetime').val(data.appointment_datetime.replace(' ', 'T'));
+      // Fill in the form fields (using jQuery/select2 if available)
+      if (window.jQuery && $('#counselor_id').length) $('#counselor_id').val(data.counselor_id).trigger('change');
+      if (window.jQuery && $('#type_id').length) $('#type_id').val(data.type_id).trigger('change');
+      if (window.jQuery && $('#student_id').length) $('#student_id').val(data.student_ids).trigger('change');
+      if (data.reason) {
+        const reasonEl = document.getElementById('reason');
+        if (reasonEl) reasonEl.value = data.reason;
+      }
+      if (data.appointment_datetime) {
+        const dtEl = document.getElementById('appointment_datetime');
+        if (dtEl) dtEl.value = data.appointment_datetime.replace(' ', 'T');
+      }
+
+      // Change the form to perform an update (PUT) on the counselor endpoint
+      if (form) {
+        form.action = `/Counselor/appointments/${appointmentId}`;
+        // Add/replace _method hidden input to PUT
+        let methodInput = form.querySelector('input[name="_method"]');
+        if (!methodInput) {
+          methodInput = document.createElement('input');
+          methodInput.type = 'hidden';
+          methodInput.name = '_method';
+          form.appendChild(methodInput);
+        }
+        methodInput.value = 'PUT';
+        // Change submit button text if present
+        const submitBtn = form.querySelector('button[type="submit"]');
+        if (submitBtn) submitBtn.textContent = 'Update';
+      }
+    })
+    .catch(err => {
+      console.error('Failed to load counselor appointment data:', err);
+      // Show an inline error message
+      let errEl = document.getElementById('modal-error-message');
+      if (!errEl && modalBody) {
+        errEl = document.createElement('div');
+        errEl.id = 'modal-error-message';
+        errEl.style.cssText = 'margin:8px 0;padding:8px;border-radius:6px;background:#fff0f0;color:#b91c1c;border:1px solid #fca5a5;font-weight:600;';
+        modalBody.insertBefore(errEl, modalBody.firstChild);
+      }
+      if (errEl) errEl.textContent = 'Unable to load appointment. Please try again.';
+    })
+    .finally(() => {
+      // Remove loading indicator and re-enable form
+      const loading = document.getElementById('modal-loading-indicator');
+      if (loading) loading.remove();
+      disableForm(false);
     });
 }
 </script>

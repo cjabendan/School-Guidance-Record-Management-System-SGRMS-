@@ -252,7 +252,6 @@ label {
 
 textarea {
     resize: vertical;
-    min-height: 60px;
 }
 
 .form-row {

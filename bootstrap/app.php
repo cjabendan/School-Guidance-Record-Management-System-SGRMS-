@@ -13,7 +13,7 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->alias([
-            'maintenance' => \App\Http\Middleware\CheckMaintenanceMode::class,
+            'system.access' => \App\Http\Middleware\CheckSystemAccess::class,
             'feature' => \App\Http\Middleware\CheckFeature::class,
             'normalize.chat' => \App\Http\Middleware\NormalizeChatQuery::class,
         ]);

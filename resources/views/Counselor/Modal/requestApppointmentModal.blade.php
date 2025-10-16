@@ -1,5 +1,9 @@
 <!-- filepath: c:\Users\Rhylyn\School-Guidance-Record-Management-System-SGRMS-\resources\views\Parent\modal\requestApppointmentModal.blade.php -->
-<div id="requestAppointmentModal" class="custom-modal" style="display:none;">
+@php
+  // Keep modal open when there are validation errors or when old input exists
+  $modalDisplay = ($errors->any() || old('appointment_datetime')) ? 'flex' : 'none';
+@endphp
+<div id="requestAppointmentModal" class="custom-modal" style="display:{{ $modalDisplay }};">
   <!-- Select2 CSS -->
   <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
   <div class="custom-modal-content">
@@ -22,7 +26,7 @@
           <select name="counselor_id" id="counselor_id" class="form-control" required>
             <option value="">Select Counselor</option>
             @foreach($counselors as $counselor)
-              <option value="{{ $counselor->id }}">{{ $counselor->first_name }} {{ $counselor->last_name }}</option>
+              <option value="{{ $counselor->id }}" {{ old('counselor_id') == $counselor->id ? 'selected' : '' }}>{{ $counselor->first_name }} {{ $counselor->last_name }}</option>
             @endforeach
           </select>
         </div>
@@ -32,46 +36,60 @@
           <select name="type_id" id="type_id" class="form-control" required>
             <option value="">Select Type</option>
             @foreach($types as $type)
-              <option value="{{ $type->id }}">{{ $type->type_name }}</option>
+              <option value="{{ $type->id }}" {{ old('type_id') == $type->id ? 'selected' : '' }}>{{ $type->type_name }}</option>
             @endforeach
+            <option value="other" {{ old('type_id') === 'other' ? 'selected' : '' }}>Other</option>
           </select>
+        </div>
+        <div class="divider"></div>
+        <div class="mb-3" id="other-type-wrapper" style="display:{{ old('type_id') === 'other' ? 'block' : 'none' }};">
+          <label for="other_type" class="form-label">Other Type</label>
+          <input type="text" name="other_type" id="other_type" class="form-control" placeholder="Enter custom appointment type" value="{{ old('other_type') }}">
         </div>
         <!-- Child -->
         <div class="mb-3">
           <label for="student_id" class="form-label">Child</label>
-          <select name="student_id[]" id="student_id" class="form-control" multiple required style="width: 100%;">
-      @foreach($children as $child)
-        <option value="{{ $child->s_id }}">
-          [ID: {{ $child->s_id }}] {{ $child->user->first_name ?? '' }} {{ $child->user->last_name ?? '' }}
-        </option>
-      @endforeach
-          </select>
+            <select name="student_id[]" id="student_id" class="form-control" multiple required style="width: 100%;">
+              @foreach($children as $child)
+                <option value="{{ $child->s_id }}" {{ (is_array(old('student_id')) && in_array($child->s_id, old('student_id'))) ? 'selected' : '' }}>
+                  [ID: {{ $child->s_id }}] {{ $child->user->first_name ?? '' }} {{ $child->user->last_name ?? '' }}
+                </option>
+              @endforeach
+            </select>
         </div>
         <!-- Reason -->
         <div class="mb-3">
           <label for="reason" class="form-label">Reason</label>
-          <textarea name="reason" id="reason" class="form-control" required></textarea>
+          <textarea name="reason" id="reason" class="form-control" required>{{ old('reason') }}</textarea>
         </div>
         <!-- Date & Time -->
         <div class="mb-3">
           <label for="appointment_datetime" class="form-label">Date & Time</label>
-          <input type="datetime-local" name="appointment_datetime" id="appointment_datetime" class="form-control" required>
+          <input type="datetime-local" name="appointment_datetime" id="appointment_datetime" class="form-control" required value="{{ old('appointment_datetime') }}">
         </div>
         <script>
         document.addEventListener('DOMContentLoaded', function() {
-          // Always use Asia/Manila timezone for input
-          function setManilaNow() {
-            const now = new Date();
-            // Convert to Asia/Manila
-            const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
-            const manilaOffset = 8 * 60; // UTC+8
-            const manila = new Date(utc + (manilaOffset * 60000));
-            // Format for datetime-local
-            const pad = n => n.toString().padStart(2, '0');
-            const value = `${manila.getFullYear()}-${pad(manila.getMonth()+1)}-${pad(manila.getDate())}T${pad(manila.getHours())}:${pad(manila.getMinutes())}`;
-            document.getElementById('appointment_datetime').value = value;
+          // Show/hide Other type input and set required when necessary
+          const typeSelect = document.getElementById('type_id');
+          const otherWrapper = document.getElementById('other-type-wrapper');
+          const otherInput = document.getElementById('other_type');
+          function updateOtherVisibility() {
+            if (!typeSelect) return;
+            if (typeSelect.value === 'other') {
+              if (otherWrapper) otherWrapper.style.display = 'block';
+              if (otherInput) otherInput.required = true;
+            } else {
+              if (otherWrapper) otherWrapper.style.display = 'none';
+              if (otherInput) { otherInput.required = false; otherInput.value = ''; }
+            }
           }
-          setManilaNow();
+          if (typeSelect) {
+            typeSelect.addEventListener('change', function() {
+              updateOtherVisibility();
+            });
+          }
+          // Run once to handle old input
+          updateOtherVisibility();
         });
         </script>
       </div>
@@ -89,8 +107,15 @@
       $('#student_id').select2({
         placeholder: 'Search Student',
         allowClear: true,
-        width: 'resolve'
+        width: 'resolve',
+        dropdownParent: $('#requestAppointmentModal')
       });
+
+      // Restore previous student selections from old input (if any)
+      var oldStudents = @json(old('student_id', []));
+      if (Array.isArray(oldStudents) && oldStudents.length > 0) {
+        $('#student_id').val(oldStudents).trigger('change');
+      }
     });               
   </script>
 </div>

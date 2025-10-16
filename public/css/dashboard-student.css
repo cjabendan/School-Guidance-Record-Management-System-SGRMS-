@@ -1,0 +1,25 @@
+#content {
+    position: relative;
+    left: 260px;
+    transition: 0.3s ease;
+    width: calc(100% - 260px);
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden; /* Prevent overflow */
+}
+
+#sidebar.hide + #content {
+    left: 60px;
+    width: calc(100% - 60px);
+}
+
+.dashboard-content {
+    background-color: #ffffff;
+    height: 100%;
+    padding: 1px;
+    gap: 8px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}

@@ -10,29 +10,38 @@ use Illuminate\Support\Facades\Session;
 class Settings extends Component
 {
     public string $tab = 'profile';
+    public string $subtab = 'system';
     public string $role;
 
-    protected $queryString = ['tab' => ['except' => 'profile']];
+    protected $queryString = [
+        'tab' => ['except' => 'profile'],
+        'subtab' => ['except' => 'system'],
+    ];
 
     public function mount()
     {
         $this->role = Auth::user()->role;
     }
 
-    public function switchTab($newTab)
+    public function switchTab($newTab, $newSubtab = null)
     {
         $sensitiveTabs = ['twofactor', 'system'];
 
         if (in_array($newTab, $sensitiveTabs)) {
             $timeout = config('auth.password_timeout', 900);
 
-            if (!Session::has('auth.password_confirmed_at') || time() - Session::get('auth.password_confirmed_at') > $timeout) {
+            if (!Session::has('auth.password_confirmed_at') ||
+                time() - Session::get('auth.password_confirmed_at') > $timeout) {
                 Session::put('url.intended', route('settings', ['tab' => $newTab]));
                 return redirect()->route('confirm-password');
             }
         }
 
         $this->tab = $newTab;
+
+        if ($newSubtab) {
+            $this->subtab = $newSubtab;
+        }
     }
 
     public function render()
@@ -48,4 +57,3 @@ class Settings extends Component
         return view('livewire.settings')->layout($layout);
     }
 }
-

@@ -794,114 +794,132 @@
     padding: 8px 12px;
 }
 
-/* Archive Modal Styles */
+/* ================================
+   Student Status Update Modal
+   ================================ */
+
 #archiveStudentModal .modal-content {
-    max-width: 480px;
-    padding: 36px 32px;
-    background: #f9fafb;
-    border-radius: 14px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+  max-width: 480px;
+  padding: 40px 34px;
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  font-family: 'Inter', sans-serif;
 }
 
-#archiveStudentModal .modal-content h2 {
-    font-size: 1.9rem;
-    font-weight: 700;
-    color: #2563eb;
-    margin-bottom: 20px;
-    text-align: center;
+#archiveStudentModal .add-modal-title {
+  font-size: 1.85rem;
+  font-weight: 700;
+  color: #1e3a8a;
+  margin-bottom: 16px;
+  text-align: center;
+}
+
+#archiveStudentModal .student-id {
+  display: block;
+  font-size: 1.05rem;
+  color: #2563eb;
+  margin-top: 4px;
+  font-weight: 600;
+}
+
+#archiveStudentModal .modal-description {
+  font-size: 1rem;
+  color: #334155;
+  text-align: center;
+  margin-bottom: 22px;
+  line-height: 1.6;
 }
 
 #archiveStudentModal .form-row {
-    width: 100%;
-    margin-bottom: 18px;
-    display: flex;
-    flex-direction: column;
+  width: 100%;
+  margin-bottom: 20px;
 }
 
-#archiveStudentModal label.add-label {
-    font-weight: 600;
-    color: #1e293b;
-    margin-bottom: 6px;
-    font-size: 1.05rem;
+#archiveStudentModal .add-label {
+  font-weight: 600;
+  color: #0f172a;
+  font-size: 1.05rem;
+  margin-bottom: 8px;
+  display: block;
 }
 
-#archiveStudentModal select.add-input {
-    padding: 10px 12px;
-    border-radius: 8px;
-    border: 1.5px solid #d1d5db;
-    font-size: 1.05rem;
-    background: #fff;
-    transition: border-color 0.2s, box-shadow 0.2s;
+#archiveStudentModal .add-input {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1.6px solid #d1d5db;
+  font-size: 1.05rem;
+  background-color: #f9fafb;
+  transition: border-color 0.2s, box-shadow 0.2s;
 }
 
-#archiveStudentModal select.add-input:focus {
-    border-color: #2563eb;
-    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
-    outline: none;
+#archiveStudentModal .add-input:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+  outline: none;
+  background: #ffffff;
 }
 
-/* Checkbox Styling */
-#archiveStudentModal input[type="checkbox"] {
-    width: 22px;
-    height: 22px;
-    border-radius: 5px;
-    border: 1.5px solid #d1d5db;
-    accent-color: #2563eb; /* modern colored checkbox */
-    cursor: pointer;
-    transition: all 0.2s;
-}
-
-#archiveStudentModal input[type="checkbox"]:hover {
-    border-color: #1e40af;
-}
-
-/* Checkbox label */
-#archiveStudentModal label[for="disable_login"] {
-    font-size: 1rem;
-    font-weight: 500;
-    color: #1e293b;
-}
-
-/* Meaning text under select */
 #archiveStudentModal #statusMeaning {
-    margin-top: 6px;
-    font-size: 0.92rem;
-    color: #64748b;
+  display: block;
+  margin-top: 6px;
+  font-size: 0.9rem;
+  color: #64748b;
+  font-style: italic;
 }
 
-/* Confirm button */
+/* Buttons */
+#archiveStudentModal .pro-add-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 10px;
+}
+
 #archiveStudentModal .pro-add-save {
-    background: #2563eb;
-    color: #fff;
-    font-weight: 600;
-    border-radius: 8px;
-    padding: 10px 28px;
-    font-size: 1.05rem;
-    cursor: pointer;
-    transition: background 0.2s, box-shadow 0.2s;
+  background: #2563eb;
+  color: #ffffff;
+  font-weight: 600;
+  border-radius: 8px;
+  padding: 10px 26px;
+  font-size: 1rem;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s ease;
 }
 
 #archiveStudentModal .pro-add-save:hover {
-    background: #1e40af;
-    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15);
+  background: #1e40af;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
 }
 
-/* Close icon */
+#archiveStudentModal .pro-add-save.danger {
+  background: #dc2626;
+}
+
+#archiveStudentModal .pro-add-save.danger:hover {
+  background: #b91c1c;
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.25);
+}
+
+/* Close Icon */
 #archiveStudentModal .close {
-    position: absolute;
-    top: 16px;
-    right: 20px;
-    font-size: 2rem;
-    color: #888;
-    cursor: pointer;
-    transition: color 0.2s;
+  position: absolute;
+  top: 16px;
+  right: 20px;
+  font-size: 1.8rem;
+  color: #94a3b8;
+  cursor: pointer;
+  transition: color 0.2s ease;
 }
 
 #archiveStudentModal .close:hover {
-    color: #dc2626;
+  color: #dc2626;
 }
 
 /* ______________________________________________________________________________ */

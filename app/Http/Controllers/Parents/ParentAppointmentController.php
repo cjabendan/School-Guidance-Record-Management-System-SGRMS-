@@ -31,7 +31,8 @@ class ParentAppointmentController extends Controller
         $appointments = $query->orderBy('appointment_datetime', 'desc')->get();
 
         // Fetch counselors (including Head), types, and children for modal
-        $counselors = \App\Models\User::whereIn('role', ['Counselor', 'Head'])->get();
+    // Include 'admin' role as well so admins who function as counselors are listed
+    $counselors = \App\Models\User::whereIn('role', ['Counselor', 'Head', 'admin'])->get();
         $types = \App\Models\AppointmentType::all();
         $p_id = DB::table('parents')->where('user_id', auth()->id())->value('p_id');
         $children = Student::whereIn('s_id', function($query) use ($p_id) {
@@ -53,8 +54,18 @@ class ParentAppointmentController extends Controller
             'reason' => 'required|string',
             'appointment_datetime' => 'required|date',
         ]);
- 
-        $type_id = $request->type_id === 'general' ? null : $request->type_id;
+        // Handle 'other' appointment type
+        if ($request->type_id === 'other') {
+            $request->validate(['other_type' => 'required|string|max:255']);
+            $typeName = trim($request->other_type);
+            $type = \App\Models\AppointmentType::whereRaw('LOWER(type_name) = ?', [strtolower($typeName)])->first();
+            if (!$type) {
+                $type = \App\Models\AppointmentType::create(['type_name' => $typeName]);
+            }
+            $type_id = $type->id;
+        } else {
+            $type_id = $request->type_id === 'general' ? null : $request->type_id;
+        }
 
         // Conflict check: any appointment at the same time
         $globalConflict = \App\Models\Appointments::where('appointment_datetime', $request->appointment_datetime)

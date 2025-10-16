@@ -207,12 +207,21 @@
                                 </div>`
                             };
                         },
-                        selectable: false,
+                        selectable: true,
                         editable: true, // Enable drag and drop
                         slotMinTime: "06:00:00",
                         slotMaxTime: "20:00:00",
                         allDaySlot: false,
                         nowIndicator: true,
+                        dateClick: function(info) {
+                            openModal();
+                            var dtInput = document.getElementById('appointment_datetime');
+                            if (dtInput) {
+                                // default time 08:00 like Counselor calendar
+                                dtInput.value = info.dateStr + 'T08:00';
+                            }
+                        },
+
                         eventClick: function(info) {
                             let props = info.event.extendedProps;
                             alert(
@@ -224,88 +233,39 @@
                             );
                         },
                         eventDrop: function(info) {
-                            const url = `/Head/appointments/${info.event.id}/move`;
-                            fetch(url, {
+                            fetch('/Head/appointments/' + info.event.id + '/move', {
                                 method: 'POST',
-                                credentials: 'same-origin',
                                 headers: {
                                     'Content-Type': 'application/json',
-                                    'Accept': 'application/json',
                                     'X-CSRF-TOKEN': '{{ csrf_token() }}'
                                 },
                                 body: JSON.stringify({
-                                    appointment_datetime: info.event.start ? info.event.start.toISOString() : null
+                                    appointment_datetime: info.event.start.toISOString()
                                 })
                             })
-                            .then(async res => {
-                                if (!res.ok) {
-                                    const txt = await res.text();
-                                    console.error('Move failed', res.status, txt);
-                                    info.revert();
-                                    return;
-                                }
-                                const data = await res.json();
+                            .then(response => response.json())
+                            .then(data => {
                                 if (!data.success) {
-                                    console.error('Move error', data);
+                                    alert('Failed to update appointment!');
                                     info.revert();
                                 }
                             })
-                            .catch(err => {
-                                console.error('Move request error', err);
+                            .catch(() => {
+                                alert('Failed to update appointment!');
                                 info.revert();
                             });
                         }
                     });
                     calendar.render();
                 }
-
-                // If calendar is initialized later, add dateClick handler in the calendar config.
-                // Example calendar initialization (where you're creating `calendar`) should include:
-                if (calendar) {
-                    // ensure calendar allows clicking a date
-                    calendar.setOption('selectable', true);
-
-                    // add handler for clicking a date to open the request modal
-                    calendar.setOption('dateClick', function(info) {
-                        // info.dateStr is YYYY-MM-DD or YYYY-MM-DDTHH:mm:ss depending on view
-                        const clickedIso = info.dateStr || (info.date && info.date.toISOString && info.date.toISOString());
-                        // set modal input if it exists (try id then name)
-                        const inputById = document.getElementById('appointment_datetime');
-                        const inputByName = document.querySelector('input[name="appointment_datetime"]');
-                        const inputByAlt = document.getElementById('appointment-datetime'); // common alt id
-                        const valToSet = clickedIso ? clickedIso : '';
-
-                        if (inputById) inputById.value = valToSet;
-                        else if (inputByAlt) inputByAlt.value = valToSet;
-                        else if (inputByName) inputByName.value = valToSet;
-
-                        // open modal (openModal updated below accepts an optional date)
-                        openModal(valToSet);
-                    });
-                }
             });
 </script>
 <script>
-function openModal(dateValue) {
-    const modal = document.getElementById('requestAppointmentModal');
-    if (!modal) return;
-    // If a date value was provided, set the form field(s)
-    if (dateValue) {
-        const inputById = document.getElementById('appointment_datetime');
-        const inputByName = document.querySelector('input[name="appointment_datetime"]');
-        const inputByAlt = document.getElementById('appointment-datetime');
-
-        if (inputById) inputById.value = dateValue;
-        else if (inputByAlt) inputByAlt.value = dateValue;
-        else if (inputByName) inputByName.value = dateValue;
-    }
-
-    modal.style.display = 'flex';
+function openModal() {
+    document.getElementById('requestAppointmentModal').style.display = 'flex';
 }
 function closeModal() {
-    const modal = document.getElementById('requestAppointmentModal');
-    if (!modal) return;
-    modal.style.display = 'none';
+    document.getElementById('requestAppointmentModal').style.display = 'none';
 }
 
 // Optional: Close modal when clicking outside content

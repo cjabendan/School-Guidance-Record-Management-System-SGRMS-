@@ -51,6 +51,8 @@ use App\Http\Controllers\Parents\ParentChildController;
 use App\Http\Controllers\Parents\ParentRequestController;
 use App\Http\Controllers\Parents\ParentMessageController;
 
+// Student Controllers
+use App\Http\Controllers\Student\StudentDashboardController;
 
 /*
 |--------------------------------------------------------------------------
@@ -109,7 +111,7 @@ use App\Livewire\Auth\TwoFactorChallenge;
 
 Route::get('/two-factor-challenge', TwoFactorChallenge::class)->name('two-factor-challenge');
 
-Route::middleware(['auth', 'maintenance'])->group(function () {
+Route::middleware(['auth', 'system.access'])->group(function () {
 
     // General Settings
     Route::get('/settings', Settings::class)->name('settings');
@@ -119,10 +121,20 @@ Route::middleware(['auth', 'maintenance'])->group(function () {
 
 
     // Notifications
-    Route::prefix('notify')->name('notify.')->group(function () {
-        Route::get('/fetch', [NotifyController::class, 'fetchNotifications'])->name('fetch');
-        Route::post('/mark-as-read', [NotifyController::class, 'markAsRead'])->name('markAsRead');
-    });
+    Route::get('/notify/fetch', [NotifyController::class, 'fetchNotifications'])->name('notify.fetch');
+    Route::post('/notify/mark-as-read', [NotifyController::class, 'markAsRead'])->name('notify.markAsRead');
+    Route::get('/Head/notify/notification', [NotifyController::class, 'index'])
+        ->middleware('role.head')
+        ->name('Head.notify.notification');
+    Route::get('/Counselor/notify/notification', [NotifyController::class, 'index'])
+        ->middleware('role.counselor')
+        ->name('Counselor.notify.notification');
+    Route::get('/Parent/notify/notification', [NotifyController::class, 'index'])
+        ->middleware('role.parent')
+        ->name('Parent.notify.notification');
+    Route::get('/Student/notify/notification', [NotifyController::class, 'index'])
+        ->middleware('role.student')
+        ->name('Student.notify.notification');
 
     // Role-based Dashboards
     Route::get('/Head/dashboard', [HeadDashboardController::class, 'dashboard'])
@@ -133,6 +145,10 @@ Route::middleware(['auth', 'maintenance'])->group(function () {
 
     Route::get('/Parent/dashboard', [ParentDashboardController::class, 'dashboard'])
         ->middleware('role.parent')->name('Parent.dashboard');
+
+    Route::get('/Student/dashboard', [StudentDashboardController::class, 'dashboard'])
+        ->middleware('role.student')
+        ->name('Student.dashboard');
 });
 
 
@@ -172,6 +188,7 @@ Route::prefix('Head')->name('Head.')->middleware(['auth', 'role.head'])->group(f
         Route::post('/archive-disable', [HeadStudentController::class, 'archiveAndDisableStudent'])->name('archive-disable');
         Route::get('/{s_id}/cases', [HeadStudentController::class, 'getStudentCases']);
         Route::get('/search', [HeadCaseController::class, 'searchStudent'])->name('search');
+        Route::get('/Head/students/table', [HeadStudentController::class, 'partialTable']);
     });
 
     // Parents
@@ -213,7 +230,12 @@ Route::prefix('Head')->name('Head.')->middleware(['auth', 'role.head'])->group(f
     Route::post('/appointments/{id}/approve', [HeadAppointmentController::class, 'approve'])->name('appointments.approve');
     Route::post('/appointments/{id}/decline', [HeadAppointmentController::class, 'decline'])->name('appointments.decline');
     Route::post('/appointments/store', [HeadAppointmentController::class, 'store'])->name('appointments.store');
+      // Update appointment (reschedule/edit)
+    Route::put('/appointments/{id}', [HeadAppointmentController::class, 'update'])->name('appointments.update');
     Route::get('/appointments/{id}/json', [HeadAppointmentController::class, 'json'])->name('appointments.json');
+    // Allow moving appointments via drag-and-drop in calendar for Head
+    Route::post('/appointments/store', [HeadAppointmentController::class, 'store'])->name('appointments.store');
+
 
     // Announcements
     Route::prefix('announcements')->name('announcements.')->group(function () {
@@ -231,7 +253,7 @@ Route::prefix('Head')->name('Head.')->middleware(['auth', 'role.head'])->group(f
 |--------------------------------------------------------------------------
 */
 
-Route::prefix('Counselor')->name('Counselor.')->middleware(['auth', 'role.counselor', 'maintenance'])->group(function () {
+Route::prefix('Counselor')->name('Counselor.')->middleware(['auth', 'role.counselor', 'system.access'])->group(function () {
 
     Route::get('/messages/{user?}', [CounselorMessageController::class, 'index'])
     ->middleware('feature:chat')
@@ -244,6 +266,9 @@ Route::prefix('Counselor')->name('Counselor.')->middleware(['auth', 'role.counse
     Route::post('/appointments', [CounselorAppointmentController::class, 'store'])->name('appointments.store');
     Route::post('/appointments/{id}/approve', [CounselorDashboardController::class, 'approve'])->name('appointments.approve');
     Route::post('/appointments/{id}/decline', [CounselorDashboardController::class, 'decline'])->name('appointments.decline');
+    Route::post('/appointments', [\App\Http\Controllers\Counselor\CounselorAppointmentController::class, 'store'])->name('appointments.store');
+    Route::get('/appointments/{id}/json', [\App\Http\Controllers\Counselor\CounselorAppointmentController::class, 'json'])->name('appointments.json');
+    Route::put('/appointments/{id}', [\App\Http\Controllers\Counselor\CounselorAppointmentController::class, 'update'])->name('appointments.update');
 });
 
 
@@ -253,7 +278,7 @@ Route::prefix('Counselor')->name('Counselor.')->middleware(['auth', 'role.counse
 |--------------------------------------------------------------------------
 */
 
-Route::prefix('Parent')->name('Parent.')->middleware(['auth', 'role.parent', 'maintenance'])->group(function () {
+Route::prefix('Parent')->name('Parent.')->middleware(['auth', 'role.parent', 'system.access'])->group(function () {
 
     // Child Management
     Route::get('/child', [ParentChildController::class, 'index'])->name('child.index');
@@ -271,8 +296,17 @@ Route::prefix('Parent')->name('Parent.')->middleware(['auth', 'role.parent', 'ma
     ->name('requests.index');
 
     //Appointments
-    Route::get('/appointments', [ParentAppointmentController::class, 'index'])
-    ->middleware('feature:appointment')
-    ->name('appointments.index');
+    Route::get('/appointments', [ParentAppointmentController::class, 'index'])->name('appointments.index');
     Route::post('/appointments', [ParentAppointmentController::class, 'store'])->name('appointments.store');
+});
+
+
+/*
+|--------------------------------------------------------------------------
+| Student Routes
+|--------------------------------------------------------------------------
+*/
+
+Route::prefix('Student')->name('Student.')->middleware(['auth', 'role.student', 'system.access'])->group(function () {
+    // Future student-specific routes can be added here
 });

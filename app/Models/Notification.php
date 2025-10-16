@@ -14,7 +14,11 @@ class Notification extends Model
         'timestamp',
         'is_read',
         'user_id',
-        'user_id',
         'related_id',
     ];
+
+    public function relatedAnnouncement()
+    {
+        return $this->belongsTo(\App\Models\Announcements::class, 'related_id');
+    }
 }

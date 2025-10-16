@@ -16,6 +16,12 @@
     
     <?php echo $__env->make('landing-sections.faq', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
 
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            fetch('/sanctum/csrf-cookie').catch(() => {});
+        });
+    </script>
+    
 <?php $__env->stopSection(); ?>
 
 <?php echo $__env->make('layouts.app', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\Administrator\School-Guidance-Record-Management-System-SGRMS\resources\views/landing.blade.php ENDPATH**/ ?>

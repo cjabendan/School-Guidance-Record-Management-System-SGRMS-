@@ -23,6 +23,7 @@ class Appointments extends Model
         'appointment_datetime',
         'location',
         'status',
+        'decline_reason',
         'rescheduled_count',
         'last_rescheduled_at',
     ];

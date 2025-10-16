@@ -18,4 +18,10 @@
     {{-- FAQ Section --}}
     @include('landing-sections.faq')
 
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            fetch('/sanctum/csrf-cookie').catch(() => {});
+        });
+    </script>
+    
 @endsection
