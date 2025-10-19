@@ -22,13 +22,13 @@ class HeadAppointmentController extends Controller
     }
     public function move(Request $request, $id)
     {
-    $appointment = Appointments::findOrFail($id);
-    // Convert UTC to Asia/Manila timezone
-    $utcDate = $request->input('appointment_datetime');
-    $manilaDate = \Carbon\Carbon::parse($utcDate)->setTimezone('Asia/Manila');
-    $appointment->appointment_datetime = $manilaDate;
-    $appointment->save();
-    return response()->json(['success' => true]);
+        $appointment = Appointments::findOrFail($id);
+        // Convert UTC to Asia/Manila timezone
+        $utcDate = $request->input('appointment_datetime');
+        $manilaDate = \Carbon\Carbon::parse($utcDate)->setTimezone('Asia/Manila');
+        $appointment->appointment_datetime = $manilaDate;
+        $appointment->save();
+        return response()->json(['success' => true]);
     }
     public function index(Request $request)
     {
@@ -44,9 +44,9 @@ class HeadAppointmentController extends Controller
             $search = $request->search;
             $query->where(function ($q) use ($search) {
                 $q->where('appointment_id', 'like', '%' . $search . '%')
-                  ->orWhereHas('type', function ($typeQuery) use ($search) {
-                      $typeQuery->where('type_name', 'like', '%' . $search . '%');
-                  });
+                    ->orWhereHas('type', function ($typeQuery) use ($search) {
+                        $typeQuery->where('type_name', 'like', '%' . $search . '%');
+                    });
             });
         }
 
@@ -57,7 +57,7 @@ class HeadAppointmentController extends Controller
 
         $appointments = $query->orderBy('appointment_datetime', 'desc')->get();
 
-    $counselors = \App\Models\User::whereIn('role', ['Counselor', 'Head', 'admin'])->get();
+        $counselors = \App\Models\User::whereIn('role', ['Counselor', 'Head', 'admin'])->get();
         $types = \App\Models\AppointmentType::all();
         $children = \App\Models\Student::with('user')->get();
 
@@ -82,30 +82,36 @@ class HeadAppointmentController extends Controller
         $start = $request->query('start');
         $end = $request->query('end');
 
-        $appointments = Appointments::where('status', 'Approved')
-            ->where(function ($query) use ($start, $end) {
-                $query->where(function ($q) use ($start, $end) {
-                    $q->whereNotNull('appointment_datetime')
-                        ->whereDate('appointment_datetime', '>=', $start)
-                        ->whereDate('appointment_datetime', '<=', $end);
-                });
-            })
-            ->get()
-            ->map(function ($a) {
-                return [
-                    'Type' => $a->type,
-                    'start' => \Carbon\Carbon::parse($a->appointment_datetime)->toIso8601String(),
-                    'end'   => \Carbon\Carbon::parse($a->appointment_datetime)->addHours(1)->toIso8601String(),
-                    'allDay' => false,
-                    'extendedProps' => [
-                        'status' => $a->status,
-                        'requested' => $a->requester->name,
-                    ]
-                ];
-            });
+        $query = Appointments::where('status', 'Approved')
+            ->whereNotNull('appointment_datetime')
+            ->whereDate('appointment_datetime', '>=', $start)
+            ->whereDate('appointment_datetime', '<=', $end)
+            ->with(['type', 'requester', 'counselor', 'students.user']);
+
+        // Optional: filter by specific counselor if requested
+        if ($request->has('counselor_id') && $request->counselor_id != 'all') {
+            $query->where('counselor_id', $request->counselor_id);
+        }
+
+        $appointments = $query->get()->map(function ($a) {
+            return [
+                'appointment_id' => $a->appointment_id,
+                'title' => $a->type->type_name ?? 'Appointment',
+                'start' => $a->appointment_datetime ? $a->appointment_datetime->toIso8601String() : null,
+                'end' => $a->appointment_datetime ? $a->appointment_datetime->copy()->addHour()->toIso8601String() : null,
+                'allDay' => false,
+                'extendedProps' => [
+                    'status' => $a->status,
+                    'requester' => $a->requester->name ?? 'N/A',
+                    'counselor' => $a->counselor ? $a->counselor->first_name . ' ' . $a->counselor->last_name : 'N/A',
+                    'student' => $a->students->map(fn($s) => $s->user->first_name . ' ' . $s->user->last_name)->join(', '),
+                ]
+            ];
+        });
 
         return response()->json($appointments);
     }
+
 
     public function approve($id)
     {
@@ -172,7 +178,7 @@ class HeadAppointmentController extends Controller
         // Conflict check: any selected student has appointment at same time
         $studentConflict = Appointments::where('appointment_datetime', $manilaDate)
             ->whereIn('status', ['Pending', 'Approved'])
-            ->whereHas('students', function($q) use ($request) {
+            ->whereHas('students', function ($q) use ($request) {
                 $q->whereIn('student_user_id', $request->student_id);
             })->exists();
 
@@ -241,7 +247,7 @@ class HeadAppointmentController extends Controller
         $studentConflict = Appointments::where('appointment_datetime', $manilaDate)
             ->whereIn('status', ['Pending', 'Approved'])
             ->where('appointment_id', '!=', $appointment->appointment_id)
-            ->whereHas('students', function($q) use ($request) {
+            ->whereHas('students', function ($q) use ($request) {
                 $q->whereIn('student_user_id', $request->student_id);
             })->exists();
 

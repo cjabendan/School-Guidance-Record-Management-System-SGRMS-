@@ -144,13 +144,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 const archiveModalInstance = bootstrap.Modal.getInstance(archiveModalEl);
                 archiveModalInstance.hide();
                 if (data.success) {
-                    location.reload();
+                    createToast('success', 'Parent archived successfully!');
+                    setTimeout(() => { refreshParentTable(); }, 800);
                 } else {
-                    alert(data.message || 'Failed to archive parent.');
+                    createToast('error', data.message || 'Failed to archive parent.');
                 }
             })
             .catch(() => {
-                alert('An error occurred while archiving.');
+                createToast('error', 'An error occurred while archiving.');
             });
         });
     }
@@ -202,23 +203,23 @@ if (parentForm) {
         })
         .then(response => response.json())
         .then(data => {
-            if (data.success) {
-                // Hide modal and reset form after successful add/edit
-                const modalInstance = bootstrap.Modal.getInstance(document.getElementById('parentModal'));
-                modalInstance.hide();
-                parentForm.reset();
-                document.querySelectorAll('#password, #confirmPassword').forEach(function(el) {
-                    el.parentElement.style.display = '';
-                });
-                parentForm.removeAttribute('data-mode');
-                parentForm.removeAttribute('data-parent-id');
-                location.reload();
-            } else {
-                alert(data.message || 'Failed to save parent.');
+            const modalInstance = bootstrap.Modal.getInstance(document.getElementById('parentModal'));
+                if (data.success) {
+                    modalInstance.hide();
+                    parentForm.reset();
+                    document.querySelectorAll('#password, #confirmPassword').forEach(function(el) {
+                        el.parentElement.style.display = '';
+                    });
+                    parentForm.removeAttribute('data-mode');
+                    parentForm.removeAttribute('data-parent-id');
+                    createToast('success', mode === 'edit' ? 'Parent updated successfully!' : 'Parent added successfully!');
+                    setTimeout(() => { refreshParentTable(); }, 800);
+                } else {
+                createToast('error', data.message || 'Failed to save parent.');
             }
         })
         .catch(() => {
-            alert('An error occurred.');
+            createToast('error', 'An error occurred.');
         });
     });
 }
@@ -255,4 +256,24 @@ if (parentModal) {
             bootstrap.Modal.getInstance(parentModal).hide();
         }
     });
+}
+
+// Refresh parent table via AJAX and replace #parent-list content
+function refreshParentTable() {
+    const container = document.getElementById('parent-list');
+    if (!container) return;
+    const url = new URL(window.location.origin + '/Head/parents');
+    // Preserve current search param if present
+    const searchInput = document.getElementById('parent-search-input');
+    if (searchInput && searchInput.value) url.searchParams.set('search', searchInput.value);
+
+    fetch(url.toString(), { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+        .then(res => res.text())
+        .then(html => {
+            // When the controller returns the partial, it renders the table HTML.
+            container.innerHTML = html;
+        })
+        .catch(err => {
+            console.error('Failed to refresh parent table:', err);
+        });
 }

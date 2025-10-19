@@ -12,7 +12,6 @@ use Illuminate\Support\Facades\Storage;
 
 class HeadCounselorController extends Controller
 {
-
     // Activate counselor (set user status to active)
     public function activate(Request $request, $c_id)
     {
@@ -89,7 +88,7 @@ class HeadCounselorController extends Controller
             $imageData = $request->input('cropped_image_data');
             $image = str_replace('data:image/png;base64,', '', $imageData);
             $image = str_replace(' ', '+', $image);
-            $imageName = uniqid() . '_counselor.png';
+            $imageName = uniqid().'_counselor.png';
             Storage::disk('public')->put('images/user/' . $imageName, base64_decode($image));
             $profileImageName = $imageName;
         } elseif ($request->hasFile('profile_image')) {
@@ -123,9 +122,15 @@ class HeadCounselorController extends Controller
             ]);
 
             DB::commit();
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json(['success' => true, 'message' => 'Counselor and user account created successfully.']);
+            }
             return redirect()->back()->with('success', 'Counselor and user account created successfully.');
         } catch (\Exception $e) {
             DB::rollBack();
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json(['success' => false, 'message' => 'Failed to add counselor: ' . $e->getMessage()]);
+            }
             return redirect()->back()->with('error', 'Failed to add counselor: ' . $e->getMessage());
         }
     }
@@ -166,7 +171,7 @@ class HeadCounselorController extends Controller
             $imageData = $request->input('cropped_image_data');
             $image = str_replace('data:image/png;base64,', '', $imageData);
             $image = str_replace(' ', '+', $image);
-            $imageName = uniqid() . '_counselor.png';
+            $imageName = uniqid().'_counselor.png';
             Storage::disk('public')->put('images/user/' . $imageName, base64_decode($image));
             $user->profile_image = $imageName;
         } elseif ($request->hasFile('profile_image')) {
@@ -178,7 +183,9 @@ class HeadCounselorController extends Controller
 
 
         $user->save();
-
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json(['success' => true, 'message' => 'Counselor updated successfully!']);
+        }
         return redirect()->back()->with('success', 'Counselor updated successfully!');
     }
 

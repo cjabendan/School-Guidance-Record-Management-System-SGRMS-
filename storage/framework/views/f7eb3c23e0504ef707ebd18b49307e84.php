@@ -13,7 +13,6 @@
                 <!-- ACTIVITIES -->
                 <section class="side-container">
                     <div class="flex-side">
-                        <?php echo $__env->make('Head.dashboard-sections.events', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
                         <?php echo $__env->make('Head.dashboard-sections.messages', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
                     </div>
                 </section>

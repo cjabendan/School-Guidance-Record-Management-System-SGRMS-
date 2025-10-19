@@ -337,18 +337,13 @@ window.openAddEditModal = function openAddEditModal(mode, studentData = null) {
             if (data.success || data.message) {
                 window.closeAddModal();
                 refreshStudentTable();
-                Swal.fire({
-                    icon: 'success',
-                    title: mode === 'add' ? 'Student Added' : 'Student Updated',
-                    timer: 1200,
-                    showConfirmButton: false
-                });
+                createToast('success', mode === 'add' ? 'Student Added Successfully!' : 'Student Updated Successfully!');
             } else {
-                Swal.fire('Error', 'Save failed.', 'error');
+                createToast('error', 'Save failed.');
             }
         })
         .catch(() => {
-            Swal.fire('Error', 'An error occurred while saving.', 'error');
+            createToast('error', 'An error occurred while saving.');
         });
     };
 };
@@ -554,16 +549,9 @@ window.archiveStudentOnly = function archiveStudentOnly() {
                 updateStudentStatusCell(window.currentArchiveSId, status);
                 closeArchiveModal();
                 refreshStudentTable();
-
-                Swal.fire({
-                    icon: "success",
-                    title: "Status Updated",
-                    text: "Student status updated successfully!",
-                    timer: 1200,
-                    showConfirmButton: false,
-                });
+                createToast('success', 'Student status updated successfully!');
             } else {
-                Swal.fire("Error", data.error || "Failed to update student status.", "error");
+                createToast('error', data.error || 'Failed to update student status.');
             }
         })
         .catch((err) => {
@@ -602,21 +590,14 @@ window.archiveStudentAndDisable = function archiveStudentAndDisable() {
                 updateStudentStatusCell(window.currentArchiveSId, status);
                 closeArchiveModal();
                 refreshStudentTable();
-
-                Swal.fire({
-                    icon: "success",
-                    title: "Updated & Disabled",
-                    text: "Student status updated and account disabled!",
-                    timer: 1200,
-                    showConfirmButton: false,
-                });
+                createToast('success', 'Student status updated and account disabled!');
             } else {
-                Swal.fire("Error", data.error || "Failed to update student status.", "error");
+                createToast('error', data.error || 'Failed to update student status.');
             }
         })
         .catch((err) => {
             console.error("Fetch error:", err);
-            Swal.fire("Error", "An unexpected error occurred.", "error");
+            createToast('error', 'An unexpected error occurred.');
         });
 };
 
@@ -816,12 +797,29 @@ function downloadExport(format) {
         const status = new URL(statusTab.href).searchParams.get('status');
         if (status) url.searchParams.set('status', status);
     }
-    // Use anchor to force download
-    const a = document.createElement('a');
-    a.href = url.toString();
-    a.setAttribute('download', 'students_export.' + (format === 'pdf' ? 'pdf' : 'xlsx'));
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
+    // Use fetch to check if export is successful before download
+    fetch(url.toString(), { method: 'GET' })
+        .then(async (res) => {
+            if (res.ok) {
+                // Download file
+                const a = document.createElement('a');
+                a.href = url.toString();
+                a.setAttribute('download', 'students_export.' + (format === 'pdf' ? 'pdf' : 'xlsx'));
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                createToast('success', 'Export successful!');
+            } else {
+                let errorMsg = 'Export failed.';
+                try {
+                    const data = await res.json();
+                    errorMsg = data.error || errorMsg;
+                } catch {}
+                createToast('error', errorMsg);
+            }
+        })
+        .catch(() => {
+            createToast('error', 'Export failed.');
+        });
 }
 

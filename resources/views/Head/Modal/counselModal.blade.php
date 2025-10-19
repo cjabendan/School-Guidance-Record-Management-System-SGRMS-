@@ -4,26 +4,7 @@
         <span class="counselor-close">&times;</span>
         <h2 class="counselor-modal-title">Add Counselor</h2>
 
-        <!-- Display success and error messages -->
-        @if (session('success'))
-            <div class="alert alert-success">
-                {{ session('success') }}
-            </div>
-        @endif
-        @if (session('error'))
-            <div class="alert alert-danger">
-                {{ session('error') }}
-            </div>
-        @endif
-        @if ($errors->any())
-            <div class="alert alert-danger">
-                <ul>
-                    @foreach ($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
-            </div>
-        @endif
+    <!-- session flash messages are handled globally via toast notifications -->
 
         <form id="counselorForm" method="POST" action="{{ url('Head/counselors') }}" enctype="multipart/form-data">
             @csrf

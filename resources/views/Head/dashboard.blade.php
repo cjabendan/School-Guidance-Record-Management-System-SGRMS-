@@ -14,7 +14,6 @@
                 <!-- ACTIVITIES -->
                 <section class="side-container">
                     <div class="flex-side">
-                        @include('Head.dashboard-sections.events')
                         @include('Head.dashboard-sections.messages')
                     </div>
                 </section>

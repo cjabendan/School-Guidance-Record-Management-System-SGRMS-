@@ -51,7 +51,7 @@
                 </div>
 
                 <!-- Table view -->
-                <div class="table-list" id="announcements-list" style="margin-bottom:0;">
+                <div class="table-list" id="announcements-list">
                     <div class="table-header">
                         <div class="table-col title">Title</div>
                         <div class="table-col category">Category</div>
@@ -360,6 +360,37 @@
     let events = @json($events);
     console.log("Events from backend:", events);
 </script>
+
+    <script>
+        // Show server-side flash messages as toasts if the global createToast is available
+        document.addEventListener('DOMContentLoaded', function () {
+            function safeToast(type, msg) {
+                if (!msg) return;
+                if (typeof createToast === 'function') {
+                    createToast(type, msg);
+                } else {
+                    console.log('[toast]', type, msg);
+                }
+            }
+
+            @if(session('success'))
+                safeToast('success', {!! json_encode(session('success')) !!});
+            @endif
+
+            @if(session('error'))
+                safeToast('error', {!! json_encode(session('error')) !!});
+            @endif
+
+            @if(session('warning'))
+                safeToast('warning', {!! json_encode(session('warning')) !!});
+            @endif
+
+            @if($errors->any())
+                // Show first validation error as a toast
+                safeToast('error', {!! json_encode($errors->first()) !!});
+            @endif
+        });
+    </script>
 
 @push('scripts')
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>

@@ -21,7 +21,12 @@ class Settings extends Component
     public function mount()
     {
         $this->role = Auth::user()->role;
+
+        if ($this->tab === 'system') {
+            $this->dispatch('refreshState');
+        }
     }
+
 
     public function switchTab($newTab, $newSubtab = null)
     {
@@ -30,19 +35,24 @@ class Settings extends Component
         if (in_array($newTab, $sensitiveTabs)) {
             $timeout = config('auth.password_timeout', 900);
 
-            if (!Session::has('auth.password_confirmed_at') ||
-                time() - Session::get('auth.password_confirmed_at') > $timeout) {
+            if (
+                !Session::has('auth.password_confirmed_at') ||
+                time() - Session::get('auth.password_confirmed_at') > $timeout
+            ) {
                 Session::put('url.intended', route('settings', ['tab' => $newTab]));
                 return redirect()->route('confirm-password');
             }
         }
 
         $this->tab = $newTab;
-
+        $this->dispatch('refreshState');
+        $this->dispatch('tabChanged', tab: $newTab);
+        
         if ($newSubtab) {
             $this->subtab = $newSubtab;
         }
     }
+
 
     public function render()
     {

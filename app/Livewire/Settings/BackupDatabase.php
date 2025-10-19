@@ -3,12 +3,10 @@
 namespace App\Livewire\Settings;
 
 use Livewire\Component;
-use Livewire\Livewire;
 use App\Models\SystemSetting;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 use Livewire\Attributes\On;
-
 
 class BackupDatabase extends Component
 {
@@ -18,21 +16,59 @@ class BackupDatabase extends Component
     public $nextBackup = null;
     public $backupStatus = null;
 
+    // 👇 Add event listener for refreshing when the tab changes or page loads
+    protected $listeners = [
+        'refreshState' => 'refreshState',
+        'tabChanged' => 'onTabChanged',
+    ];
+
     public function mount()
     {
-        $this->frequency = SystemSetting::firstOrCreate(
+        $this->initializeSettings();
+    }
+
+    /** Load or initialize system settings */
+    private function initializeSettings()
+    {
+        $setting = SystemSetting::firstOrCreate(
             ['key' => 'backup_frequency'],
             ['value' => 'weekly']
-        )->value;
+        );
+
+        $this->frequency = $setting->value;
+
+        // Ensure DB consistency
+        SystemSetting::updateOrCreate(
+            ['key' => 'backup_frequency'],
+            ['value' => $this->frequency]
+        );
 
         $this->calculateNextBackup();
     }
 
+    /** Refresh component state dynamically */
+    public function refreshState()
+    {
+        $this->initializeSettings();
 
+        // Reset UI state to avoid stale info
+        $this->downloadPath = null;
+        $this->backupStatus = null;
+        $this->message = '';
+    }
 
+    /** When parent sends tab change event */
+    #[On('tabChanged')]
+    public function onTabChanged($tab)
+    {
+        if ($tab === 'system') {
+            $this->refreshState();
+        }
+    }
+
+    /** When user updates backup frequency */
     public function updatedFrequency($value)
     {
-        // Save to database
         SystemSetting::updateOrCreate(
             ['key' => 'backup_frequency'],
             ['value' => $value]
@@ -42,6 +78,7 @@ class BackupDatabase extends Component
         $this->calculateNextBackup();
     }
 
+    /** Calculate when next backup should run */
     public function calculateNextBackup()
     {
         $now = now();
@@ -57,16 +94,16 @@ class BackupDatabase extends Component
         $this->nextBackup = $next ? $next->timestamp : null;
     }
 
+    /** Manual backup handler */
     public function backup()
     {
+        clearstatcache();
+
         $this->backupStatus = 'running';
         $this->message = 'Creating database backup...';
         $this->downloadPath = null;
 
-        // Always manual when the button is clicked
         $frequency = 'manual';
-
-        // Clean, readable timestamp: 10-16-25_12-37AM
         $formattedDate = now()->format('m-d-y_h-ia');
         $filename = "{$frequency}_backup_{$formattedDate}.sql";
 
@@ -83,7 +120,6 @@ class BackupDatabase extends Component
         $dbName = env('DB_DATABASE');
 
         $command = "\"$mysqldump\" --host=$dbHost --port=$dbPort --user=$dbUser --password=$dbPass $dbName > \"$path\"";
-
         exec($command, $output, $returnVar);
 
         if ($returnVar !== 0) {
@@ -98,6 +134,7 @@ class BackupDatabase extends Component
         $this->calculateNextBackup();
     }
 
+    /** Automatically run backup (used by scheduler or startup) */
     public static function autoBackup()
     {
         $instance = new self();
@@ -121,7 +158,6 @@ class BackupDatabase extends Component
         $dbName = env('DB_DATABASE');
 
         $command = "\"$mysqldump\" --host=$dbHost --port=$dbPort --user=$dbUser --password=$dbPass $dbName > \"$path\"";
-
         exec($command, $output, $returnVar);
 
         if ($returnVar !== 0) {
@@ -131,6 +167,7 @@ class BackupDatabase extends Component
         }
     }
 
+    /** Reset UI state after download */
     public function resetBackup()
     {
         $this->downloadPath = null;
@@ -141,16 +178,8 @@ class BackupDatabase extends Component
     public function afterDownload($path)
     {
         $this->dispatch('download-file', url: $path);
-        $this->resetBackup();   
-    }
-
-
-    #[On('resetBackupNow')]
-    public function resetBackupNow()
-    {
         $this->resetBackup();
     }
-
 
     public function render()
     {

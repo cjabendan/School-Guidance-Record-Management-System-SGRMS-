@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Cloudstudio\Ollama\Facades\Ollama;
 use App\Services\RagService;
-use App\Models\ChatbotSession;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
@@ -13,48 +12,43 @@ class ChatbotController extends Controller
 {
     /**
      * Generate a response for the chatbot using RAG and Ollama.
-     *
-     * Steps:
-     * 1. Violent/Harm detection and redaction
-     * 2. Greeting / small talk handling
-     * 3. Retrieve context from RAG (Pinecone)
-     * 4. Hybrid topic filtering (RAG-driven)
-     * 5. Violent topic sorting
-     * 6. Combine context + recent conversation
-     * 7. Generate chatbot response
+     * This function now handles only the current request/response cycle,
+     * with no persistence of chat history.
      */
+    
     public function generateResponse(Request $request, RagService $rag)
     {
+        set_time_limit(90);
         $request->validate(['prompt' => 'required|string']);
-        $userPrompt = $request->input('prompt');
+        $userPrompt = $request->json('prompt');
         $userId = Auth::id();
         $sessionId = $request->session()->getId();
 
         // -------------------------------
-        // Get or create chat session
+        // Session / History Removal
+        // Since no history is stored, these are simplified:
         // -------------------------------
-        $chatSession = ChatbotSession::firstOrCreate(
-            ['user_id' => $userId, 'session_id' => $sessionId],
-            ['messages' => []]
-        );
-        $messages = $chatSession->messages ?? [];
-        $lastBotMessage = end($messages)['content'] ?? '';
-        $waitingForOverviewConfirmation = str_contains($lastBotMessage, 'Would you like me to explain what’s generally covered instead?');
+        $redactedPrompt = $userPrompt;
+        $isViolentQuestion = false;
+        $isExpressingIntent = false;
+        $waitingForOverviewConfirmation = false; // Always false as no history is tracked
+
+        // We still check if the user is expressing violent intent before logging the prompt.
 
         // -------------------------------
         // 1. Violent / Harm Detection
         // -------------------------------
         $violentPattern = '/\b(punch|hit|stab|beat|hurt|kill|attack|harm|smash|fight)\b/i';
-        $intentPattern  = '/\b(i will|i\'ll|i am going to|i might|i want to (hurt|punch|kill|attack|harm))\b/i';
+        $intentPattern     = '/\b(i will|i\'ll|i am going to|i might|i want to (hurt|punch|kill|attack|harm))\b/i';
         $isViolentQuestion = preg_match($violentPattern, $userPrompt);
         $isExpressingIntent = preg_match($intentPattern, $userPrompt);
 
-        // Redact any violent intent before logging or storing
+        // Redact any violent intent before logging
         $redactedPrompt = $isExpressingIntent
             ? preg_replace($intentPattern, '[REDACTED INTENT]', $userPrompt)
             : $userPrompt;
 
-        $messages[] = ['role' => 'user', 'content' => $redactedPrompt];
+        // No messages array is persisted, so we don't need to add the user message here.
 
         if ($isExpressingIntent) {
             $botReply = "If you or someone else is in immediate danger, please contact local emergency services now.\n\n"
@@ -67,8 +61,6 @@ class ChatbotController extends Controller
                 'prompt' => $userPrompt
             ]);
 
-            $messages[] = ['role' => 'assistant', 'content' => $botReply];
-            $chatSession->update(['messages' => $messages, 'last_activity' => now()]);
             return response($botReply, 200);
         }
 
@@ -93,8 +85,6 @@ SYS;
                 $botReply = preg_replace('/^(ASSISTANT:|AI:|GABBY:)\s*/i', '', $botReply);
                 $botReply = str_replace('**', '', $botReply);
 
-                $messages[] = ['role' => 'assistant', 'content' => $botReply];
-                $chatSession->update(['messages' => $messages, 'last_activity' => now()]);
                 return response($botReply, 200);
             } catch (\Exception $e) {
                 Log::error('Greeting handling failed', ['error' => $e->getMessage()]);
@@ -105,39 +95,59 @@ SYS;
         // -------------------------------
         // 3. RAG Retrieval with Pinecone
         // -------------------------------
-        $allowedTopics = ['policy', 'discipline', 'bullying', 'guidance', 'attendance', 'suspension', 'counseling', 'school rules'];
+        // ChatbotController.php line ~117
+        $allowedTopics = [
+            'policy',
+            'discipline',
+            'bullying',
+            'guidance',
+            'attendance',
+            'suspension',
+            'counseling',
+            'school rules',
+            // New Academic/Learning topics:
+            'academic',
+            'cheating',
+            'plagiarism',
+            'grading',
+            'examinations'
+        ];
 
         try {
-            $docs = $rag->retrieve($userPrompt, 10, $allowedTopics);
+            $docs = $rag->retrieve($userPrompt, 4, $allowedTopics);
         } catch (\Exception $e) {
             Log::error('RAG retrieval failed', ['error' => $e->getMessage()]);
             $docs = [];
         }
 
         // -------------------------------
-        // 4. Hybrid Topic Filter (RAG-driven)
+        // 4. Relevance Check (Simplified)
         // -------------------------------
-        $isRelevant = false;
+        // If no documents were retrieved, check if the query is totally irrelevant to policies.
+        if (empty($docs) && !$waitingForOverviewConfirmation) {
+            $isTotallyIrrelevant = true;
+            $allowedKeywords = array_map('strtolower', $allowedTopics); // Use the topics as keywords
 
-        // 4a. If RAG returned chunks, consider the query relevant
-        if (!empty($docs)) {
-            $isRelevant = true;
-        } else {
-            // 4b. Fallback: check if user prompt contains any allowed topic keywords
-            foreach ($allowedTopics as $topic) {
+            // If the prompt contains any policy keyword, it's NOT totally irrelevant.
+            foreach ($allowedKeywords as $topic) {
                 if (stripos($userPrompt, $topic) !== false) {
-                    $isRelevant = true;
+                    $isTotallyIrrelevant = false;
                     break;
                 }
             }
-        }
 
-        // 4c. If still not relevant and user hasn't confirmed overview, block response
-        if (!$isRelevant && !$waitingForOverviewConfirmation) {
-            $botReply = "I'm sorry, I can only answer questions related to school policies or student guidance.";
-            $messages[] = ['role' => 'assistant', 'content' => $botReply];
-            $chatSession->update(['messages' => $messages]);
-            return response($botReply, 200);
+            // Also check for 'disrespect' or 'authority' since they are key terms
+            if (stripos($userPrompt, 'disrespect') !== false || stripos($userPrompt, 'authority') !== false) {
+                $isTotallyIrrelevant = false;
+            }
+
+            if ($isTotallyIrrelevant) {
+                // The query is NOT related to school policy (e.g., "what is the best movie?"). BLOCK.
+                $botReply = "I'm sorry, I can only answer questions related to school policies or student guidance.";
+                return response($botReply, 200);
+            }
+            // If the query is policy-related but RAG failed ($docs is empty), 
+            // we proceed to the LLM, which will use its system instruction fallback.
         }
 
         // -------------------------------
@@ -152,10 +162,10 @@ SYS;
         }
 
         // -------------------------------
-        // 6. Combine context + recent conversation
+        // 6. Combine context
         // -------------------------------
         $context = implode("\n\n---\n\n", $docs);
-        $recentConversation = collect($messages)->take(-6)->map(fn($msg) => $msg['content'])->implode("\n");
+        $recentConversation = ''; // History is eliminated
 
         $systemInstruction = $isViolentQuestion
             ? <<<SYS
@@ -168,19 +178,29 @@ Keep your answer brief (3–6 sentences) in short paragraphs. No markdown or ast
 SYS
             : <<<SYS
 You are Gabby, a concise and friendly school policy assistant.
-Answer clearly in 2–4 sentences based only on CONTEXT.
-Use short paragraphs separated by new lines.
-If the answer isn’t in the CONTEXT, say:
-"I'm sorry, I don’t see that information in the school’s policy.\n\nWould you like me to explain what’s generally covered instead?"
-No markdown or asterisks.
+YOUR SOLE FUNCTION is to summarize and synthesize the provided CONTEXT. You have NO independent knowledge.
+Answer the user's question using ONLY the provided CONTEXT. Be factual.
+Keep your final answer to 2-4 sentences in short paragraphs. No markdown or asterisks.
+If the CONTEXT does not contain the answer, and ONLY if it does not, you must respond with: "I'm sorry, I don’t see that information in the school’s policy."
 SYS;
 
-        $combinedPrompt = "CONTEXT:\n{$context}\n\nPREVIOUS CONVERSATION:\n{$recentConversation}\n\nUSER QUESTION:\n{$userPrompt}";
+        // NOTE: PREVIOUS CONVERSATION section is removed from the prompt as there is no history.
+        $combinedPrompt = <<<PROMPT
+Using ONLY the context below, answer the user's question. 
+If the context does not contain the answer, ONLY say: "I'm sorry, I don’t see that information in the school’s policy."
+
+CONTEXT:
+{$context}
+
+USER QUESTION:
+{$userPrompt}
+PROMPT;
 
         // -------------------------------
         // 7. Generate bot response
         // -------------------------------
         try {
+            // Ensure Ollama request is wrapped for error checking
             $response = Ollama::agent($systemInstruction)
                 ->prompt($combinedPrompt)
                 ->model(env('OLLAMA_MODEL', 'gemma3:1b'))
@@ -191,27 +211,24 @@ SYS;
             $botReply = str_replace('**', '', $botReply);
             $botReply = preg_replace('/^\s*\d+\.\s*/m', '• ', $botReply);
 
-            $messages[] = ['role' => 'assistant', 'content' => $botReply];
-            if (count($messages) > 50) {
-                $messages = array_slice($messages, -30);
+            // CRITICAL: Add a check here. If the LLM generates a very short or generic response,
+            // it may have failed to process the context.
+            if (str_contains(strtolower($botReply), "sorry") || str_contains(strtolower($botReply), "could not") || strlen($botReply) < 10) {
+                 Log::warning('LLM generated a fallback response despite RAG content.', [
+                     'prompt' => $userPrompt,
+                     'context_len' => strlen($context),
+                     'llm_output' => $botReply
+                 ]);
+                 // Re-throw or use a better error message if necessary, but we will rely on the next fix.
             }
 
-            $chatSession->update(['messages' => $messages, 'last_activity' => now()]);
             return response($botReply, 200);
         } catch (\Exception $e) {
-            Log::error('Chatbot error', ['error' => $e->getMessage()]);
-            return response('Oops! Something went wrong on the server.', 500);
+            // If the error is an Ollama timeout or connection issue
+            Log::error('Chatbot error during LLM generation.', ['error' => $e->getMessage()]);
+            // Ensure we return the 500 status so the front-end shows the "Oops!" error, 
+            // confirming a server/LLM failure, not a RAG failure.
+            return response('Oops! Something went wrong on the server.', 500); 
         }
-    }
-
-    /**
-     * Clear the current chat session memory.
-     * Deletes all messages for the current session.
-     */
-    public function clearSession(Request $request)
-    {
-        $sessionId = $request->session()->getId();
-        ChatbotSession::where('session_id', $sessionId)->delete();
-        return response()->json(['message' => 'Chat memory cleared.']);
     }
 }

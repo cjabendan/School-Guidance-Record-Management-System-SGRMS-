@@ -32,8 +32,56 @@ function setCounselorFormMode(mode, data = null) {
     // Use correct form ID for add/edit modal
     const form = document.getElementById('counselorForm');
     let methodInput = document.getElementById('_method_patch');
+        // If switching to add mode, set action to store, remove any leftover PATCH/_method input and clear fields
+    if (mode === 'add') {
+            if (form) form.action = '/Head/counselors';
+        // remove spoofed method input if present
+        if (methodInput && methodInput.parentNode) {
+            methodInput.parentNode.removeChild(methodInput);
+            methodInput = null;
+        }
+        // Clear common input variants used in add/edit (some templates use different IDs)
+        const idsToClear = [
+            'counselor_id_display', 'counselor_id', 'counselor_lname', 'counselor_fname', 'counselor_mname',
+            'counselor_email', 'counselor_contact_num', 'counselor_password',
+            'lname', 'fname', 'mname', 'email', 'contact_num', 'password'
+        ];
+        idsToClear.forEach(id => {
+            const el = document.getElementById(id);
+            if (!el) return;
+            if ('value' in el) el.value = '';
+            else el.textContent = '';
+        });
+        // Clear sex radio buttons (both naming variants)
+        const sexRadios = document.querySelectorAll('input[name="sex"], input[name="counselor_sex"]');
+        sexRadios.forEach(r => r.checked = false);
+        const sexMale = document.getElementById('counselor_sex_male');
+        const sexFemale = document.getElementById('counselor_sex_female');
+        if (sexMale) sexMale.checked = false;
+        if (sexFemale) sexFemale.checked = false;
+
+        // Reset image preview, file inputs and hidden crop data
+        const imgPreview = document.getElementById('counselorImage') || document.querySelector('.counselor-image-box');
+        if (imgPreview && imgPreview.getAttribute && imgPreview.getAttribute('data-default')) {
+            imgPreview.src = imgPreview.getAttribute('data-default');
+        }
+        const fileInput = document.getElementById('counselor_profile_image');
+        if (fileInput) fileInput.value = '';
+        const hiddenInput = document.getElementById('counselorCroppedImageData');
+        if (hiddenInput) hiddenInput.value = '';
+        const fileChosen = document.getElementById('counselor-file-chosen');
+        if (fileChosen) fileChosen.textContent = 'No file chosen';
+        const deleteBtn = document.getElementById('remove-counselor-image');
+        if (deleteBtn) deleteBtn.style.display = 'none';
+
+        // Hide activate button when adding
+        const activateBtn = document.getElementById('activateCounselorBtn');
+        if (activateBtn) activateBtn.style.display = 'none';
+    }
     if (mode === 'edit' && data) {
-        form.action = `/Head/counselors/update`;
+    // Set action to the update route for this counselor id (PUT)
+    const cId = data.c_id || data.id || '';
+    if (form) form.action = `/Head/counselors/${cId}`;
         if (!methodInput) {
             const input = document.createElement('input');
             input.type = 'hidden';
@@ -79,7 +127,7 @@ function setCounselorFormMode(mode, data = null) {
             var c_id_input = document.getElementById('counselor_id');
             var c_id = c_id_input ? c_id_input.value : '';
             if (!c_id) {
-                alert('Counselor ID not found.');
+                createToast('error', 'Counselor ID not found.');
                 return;
             }
             fetch(`/Head/counselors/${c_id}/activate`, {
@@ -94,13 +142,14 @@ function setCounselorFormMode(mode, data = null) {
             .then(data => {
                 if (data.success) {
                     window.closeFormModal();
-                    location.reload();
+                    createToast('success', 'Counselor activated successfully!');
+                    setTimeout(() => { refreshCounselorUI(); }, 800);
                 } else {
-                    alert(data.error || 'Failed to activate counselor.');
+                    createToast('error', data.error || 'Failed to activate counselor.');
                 }
             })
             .catch(() => {
-                alert('Failed to activate counselor.');
+                createToast('error', 'Failed to activate counselor.');
             });
         }
     }
@@ -146,7 +195,7 @@ window.editCounselorFromView = function(c_id) {
         .then(response => response.json())
         .then(data => {
             if (data.error) {
-                alert('Counselor not found!');
+                createToast('error', 'Counselor not found!');
                 return;
             }
             if (fromPastTable) data._fromPastTable = true;
@@ -267,6 +316,53 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
+// Intercept counselor form submit to use AJAX and show toasts
+function attachCounselorFormHandler() {
+    const counselorForm = document.getElementById('counselorForm');
+    if (!counselorForm) return;
+    if (counselorForm._ajaxAttached) return; // idempotent
+
+    counselorForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const form = this;
+        const action = form.getAttribute('action') || window.location.href;
+        const formData = new FormData(form);
+
+        fetch(action, {
+            method: 'POST',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            },
+            body: formData
+        })
+        .then((res) => res.json().catch(() => ({ success: false, message: 'Unexpected server response' })))
+        .then((data) => {
+            if (data && data.success) {
+                createToast('success', data.message || 'Counselor saved successfully!');
+                // hide modal and refresh UI after short delay to allow toast to show
+                window.closeFormModal();
+                setTimeout(() => { refreshCounselorUI(); }, 800);
+            } else {
+                const msg = (data && data.message) ? data.message : 'Failed to save counselor.';
+                createToast('error', msg);
+            }
+        })
+        .catch((err) => {
+            console.error('Counselor form submit error:', err);
+            createToast('error', 'An unexpected error occurred.');
+        });
+    });
+
+    counselorForm._ajaxAttached = true;
+}
+
+// Attach immediately and also on DOMContentLoaded in case script runs early/late.
+attachCounselorFormHandler();
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', attachCounselorFormHandler);
+}
+
 window.openFormModal = function () {
     setCounselorFormMode('add');
     // Clear all fields explicitly to prevent leftover data
@@ -346,7 +442,7 @@ window.openViewCounselModal = function(c_id, readonly = false) {
         .then(response => response.json())
         .then(data => {
             if (data.error) {
-                alert('Counselor not found!');
+                createToast('error', 'Counselor not found!');
                 return;
             }
             document.getElementById('view_c_id_display').textContent = data.c_id || '';
@@ -444,17 +540,21 @@ window.confirmArchiveCounselor = function() {
     })
         .then(response => response.json())
         .then(data => {
-            if (data.success) {
-                window.closeArchiveConfirmModal();
-                window.closeViewCounselorModal();
-                location.reload();
-            } else {
+                if (data.success) {
+                    window.closeArchiveConfirmModal();
+                    window.closeViewCounselorModal();
+                    createToast('success', 'Counselor deactivated successfully!');
+                    setTimeout(() => { refreshCounselorUI(); }, 800);
+                } else {
                 let msg = data.error || 'Failed to archive counselor.';
                 showArchiveError(msg);
+                createToast('error', msg);
             }
         })
         .catch(() => {
-            showArchiveError('Failed to archive counselor.');
+            const msg = 'Failed to archive counselor.';
+            showArchiveError(msg);
+            createToast('error', msg);
         });
 };
 
@@ -568,3 +668,27 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 });
+
+// Refresh counselor cards and past-counselor table via AJAX
+function refreshCounselorUI() {
+    const url = new URL(window.location.origin + '/Head/counselors');
+    // Preserve search query for past counselors if present
+    const searchInput = document.getElementById('counselor-search-input');
+    if (searchInput && searchInput.value) url.searchParams.set('search', searchInput.value);
+
+    fetch(url.toString(), { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+        .then(res => res.text())
+        .then(html => {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            // Replace profiles container (cards)
+            const newProfiles = doc.querySelector('.profiles-container');
+            const profilesContainer = document.querySelector('.profiles-container');
+            if (newProfiles && profilesContainer) profilesContainer.innerHTML = newProfiles.innerHTML;
+            // Replace past counselors table container
+            const newTableContainer = doc.querySelector('.past-counselor-table-container');
+            const oldTableContainer = document.querySelector('.past-counselor-table-container');
+            if (newTableContainer && oldTableContainer) oldTableContainer.innerHTML = newTableContainer.innerHTML;
+        })
+        .catch(err => console.error('Failed to refresh counselors UI:', err));
+}

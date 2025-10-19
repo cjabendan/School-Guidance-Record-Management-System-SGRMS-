@@ -15,15 +15,12 @@
         <link href="{{ asset('css/font-awesome.min.css') }}" rel="stylesheet" />
         <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
         <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;700&display=swap" rel="stylesheet">
-        <link rel='stylesheet'
-            href='https://cdn-uicons.flaticon.com/3.0.0/uicons-bold-rounded/css/uicons-bold-rounded.css'>
+        <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/3.0.0/uicons-bold-rounded/css/uicons-bold-rounded.css'>
         <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet" />
-        <link rel='stylesheet'
-            href='https://cdn-uicons.flaticon.com/3.0.0/uicons-solid-rounded/css/uicons-solid-rounded.css'>
-        <link rel='stylesheet'
-            href='https://cdn-uicons.flaticon.com/3.0.0/uicons-regular-rounded/css/uicons-regular-rounded.css'>
-        <link rel='stylesheet'
-            href='https://cdn-uicons.flaticon.com/3.0.0/uicons-regular-straight/css/uicons-regular-straight.css'>
+        <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/3.0.0/uicons-solid-rounded/css/uicons-solid-rounded.css'>
+        <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/3.0.0/uicons-regular-rounded/css/uicons-regular-rounded.css'>
+        <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/3.0.0/uicons-regular-straight/css/uicons-regular-straight.css'>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
         <link rel="stylesheet" href="{{ asset('css/style.css') }}">
         <link rel="stylesheet" href="{{ asset('css/bar.css') }}">
@@ -41,8 +38,9 @@
         <link rel="stylesheet" href="{{ asset('css/notify.css') }}">
         <link rel="stylesheet" href="{{ asset('css/settings.css') }}">
         <link href="{{ asset('css/cropper.min.css') }}" rel="stylesheet">
+        <link rel="stylesheet" href="{{ asset('css/toast.css') }}">
         @yield('head')
-
+       
         @livewireStyles
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
@@ -58,11 +56,14 @@
             {{ $slot }}
         @endisset
 
+        <!-- Toast Notification HTML -->
+        <ul class="notifications"></ul>
+
         @livewireScripts
-
-        @stack('scripts')
     </body>
-
+  
+    @stack('scripts')
+    <script src="{{ asset('js/toast.js') }}"></script>
     <script src="{{ asset('js/cropper.min.js') }}"></script>
     <script src="{{ asset('js/head.js') }}"></script>
     <script src="{{ asset('js/dashboard.js') }}"></script>

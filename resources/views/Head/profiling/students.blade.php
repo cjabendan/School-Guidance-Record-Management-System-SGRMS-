@@ -8,24 +8,19 @@
 
 <section id="content">
 
-    @if (session('error'))
-        <div class="alert alert-danger" style="margin: 16px 0; padding: 12px; background: #fee2e2; color: #b91c1c; border-radius: 6px; border: 1px solid #fca5a5;">
-            {!! nl2br(e(session('error'))) !!}
-        </div>
-    @endif
-    @if (session('import_errors'))
-        <div class="alert alert-danger" style="margin: 16px 0; padding: 12px; background: #fee2e2; color: #b91c1c; border-radius: 6px; border: 1px solid #fca5a5;">
-            <strong>Import Errors:</strong>
-            <ul style="margin: 8px 0 0 18px;">
-                @foreach (session('import_errors') as $err)
-                    <li>{{ $err }}</li>
-                @endforeach
-            </ul>
-        </div>
-    @endif
-    @if (session('success'))
-        <div class="alert alert-success" style="margin: 16px 0; padding: 12px; background: #dcfce7; color: #166534; border-radius: 6px; border: 1px solid #86efac;">{{ session('success') }}</div>
-    @endif
+        <script>
+        window.addEventListener('DOMContentLoaded', function() {
+            @if(session('success'))
+                createToast('success', "{{ session('success') }}");
+            @endif
+            @if(session('import_errors'))
+                createToast('error', `{!! is_array(session('import_errors')) ? implode('<br>', session('import_errors')) : session('import_errors') !!}`);
+            @endif
+            @if(session('error'))
+                createToast('error', "{{ session('error') }}");
+            @endif
+        });
+        </script>
 
     @include('partials.navbar')
     <div class="wrapper">

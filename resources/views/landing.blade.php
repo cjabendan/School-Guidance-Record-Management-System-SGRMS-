@@ -18,10 +18,17 @@
     {{-- FAQ Section --}}
     @include('landing-sections.faq')
 
-    <script>
-        document.addEventListener("DOMContentLoaded", () => {
-            fetch('/sanctum/csrf-cookie').catch(() => {});
-        });
-    </script>
+   <script>
+    document.addEventListener("DOMContentLoaded", async () => {
+        try {
+            await fetch('/sanctum/csrf-cookie', {
+                credentials: 'same-origin',
+            });
+        } catch (error) {
+            console.error('CSRF refresh failed:', error);
+        }
+    });
+</script>
+
     
 @endsection

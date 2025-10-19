@@ -16,9 +16,6 @@ class ProcessDocument implements ShouldQueue
     protected $id;
     protected $text;
 
-    /**
-     * Create a new job instance.
-     */
     public function __construct(string $id, string $text)
     {
         $this->id   = $id;
@@ -27,9 +24,38 @@ class ProcessDocument implements ShouldQueue
 
     /**
      * Execute the job.
+     * This is where policy topics are defined and passed for indexing.
      */
     public function handle(RagService $rag)
     {
-        $rag->addDocument($this->id, $this->text);
+        // Define a comprehensive list of tags for the entire school policy document.
+        $topics = [
+            'policy', 
+            'discipline', 
+            'school rules',
+            'guidance', 
+            'counseling', 
+            'attendance', 
+            'uniform', 
+            'dress code', 
+            'behavior', 
+            'bullying', 
+            'assault',
+            'fighting',
+            'cheating',
+            'academic dishonesty',
+            'vandalism',
+            'technology',
+            'cyberbullying',
+            'suspension', 
+            'expulsion',
+            'safety',
+            'health',
+            'legal',
+            'authority' // Important for queries like 'disrespect to authority'
+        ];
+        
+        // Pass the topics array to the RAG service to be stored as vector metadata
+        $rag->addDocument($this->id, $this->text, $topics);
     }
 }

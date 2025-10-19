@@ -11,18 +11,31 @@ use App\Models\User;
 use App\Models\ParentModel;
 
 class HeadParentController extends Controller
-
 {
-
-    // Display the list of parents //
-    public function index()
+    public function partialTable()
     {
-        $parents = ParentModel::with('user')->orderBy('p_id', 'desc')->paginate(10);
+        $parents = ParentModel::with('user')->paginate(10);
+        return view('Head.partials.parent_table', compact('parents'));
+    }
 
+    public function index(Request $request)
+    {
+        $search = $request->query('search');
+        $query = ParentModel::with('user');
+        if ($search) {
+            $query->whereHas('user', function ($q) use ($search) {
+                $q->where('first_name', 'like', "%$search%")
+                  ->orWhere('last_name', 'like', "%$search%")
+                  ->orWhere('email', 'like', "%$search%");
+            });
+        }
+        $parents = $query->paginate(10);
+        if ($request->ajax()) {
+            return view('Head.partials.parent_table', compact('parents'))->render();
+        }
         return view('Head.profiling.parents', compact('parents'));
     }
 
-    // Store a newly created parent
     public function store(Request $request)
     {
         $request->validate([
@@ -34,12 +47,10 @@ class HeadParentController extends Controller
             'email' => 'required|email|unique:users,email',
             'password' => 'required|string|min:6',
             'confirm_password' => 'required|string|same:password',
-
         ]);
 
         DB::beginTransaction();
         try {
-            // Create user
             $user = User::create([
                 'first_name' => $request->first_name,
                 'middle_name' => $request->middle_name,
@@ -48,29 +59,25 @@ class HeadParentController extends Controller
                 'sex' => $request->sex,
                 'email' => $request->email,
                 'password' => bcrypt($request->password),
-                'status' => 'active', // Set status to active
-                'role' => 'parent', // Set role to parent
+                'status' => 'active',
+                'role' => 'parent',
             ]);
 
-            // Create parent
-            $parent = ParentModel::create([
+            ParentModel::create([
                 'user_id' => $user->id,
             ]);
 
             DB::commit();
 
-            // Send success email
             Mail::to($user->email)->send(new SuccessEmail($user));
 
-            return response()->json(['success' => true, 'message' => 'Parent account created and email sent.']);
+            return response()->json(['success' => true, 'message' => 'Parent added successfully!']);
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json(['success' => false, 'message' => $e->getMessage()]);
         }
     }
 
-
-    // Get parent data for edit modal (AJAX)
     public function get($id)
     {
         $parent = DB::table('parents')
@@ -86,14 +93,13 @@ class HeadParentController extends Controller
             )
             ->where('parents.p_id', $id)
             ->first();
+
         if ($parent) {
             return response()->json(['success' => true, 'parent' => $parent]);
-        } else {
-            return response()->json(['success' => false, 'message' => 'Parent not found.']);
         }
+        return response()->json(['success' => false, 'message' => 'Parent not found.']);
     }
 
-    // Update parent data (AJAX)
     public function update(Request $request, $id)
     {
         $request->validate([
@@ -109,33 +115,39 @@ class HeadParentController extends Controller
         if (!$parent) {
             return response()->json(['success' => false, 'message' => 'Parent not found.']);
         }
+
         $user = User::find($parent->user_id);
         if (!$user) {
             return response()->json(['success' => false, 'message' => 'User not found.']);
         }
-        $user->first_name = $request->first_name;
-        $user->middle_name = $request->middle_name;
-        $user->last_name = $request->last_name;
-        $user->sex = $request->sex;
-        $user->contact_num = $request->contact_num;
-        $user->email = $request->email;
-        $user->save();
+
+        $user->update([
+            'first_name' => $request->first_name,
+            'middle_name' => $request->middle_name,
+            'last_name' => $request->last_name,
+            'sex' => $request->sex,
+            'contact_num' => $request->contact_num,
+            'email' => $request->email,
+        ]);
+
         return response()->json(['success' => true, 'message' => 'Parent updated successfully.']);
     }
 
-    // Archive (set parent account to inactive)
     public function archive(Request $request, $id)
     {
         $parent = ParentModel::find($id);
         if (!$parent) {
             return response()->json(['success' => false, 'message' => 'Parent not found.']);
         }
+
         $user = $parent->user;
-        if ($user) {
-            $user->status = 'inactive';
-            $user->save();
-            return response()->json(['success' => true, 'message' => 'Parent account archived (set to inactive).']);
+        if (!$user) {
+            return response()->json(['success' => false, 'message' => 'User not found.']);
         }
-        return response()->json(['success' => false, 'message' => 'User not found for parent.']);
+
+        $user->status = 'inactive';
+        $user->save();
+
+        return response()->json(['success' => true, 'message' => 'Parent archived successfully.']);
     }
 }

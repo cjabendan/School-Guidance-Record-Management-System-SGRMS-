@@ -15,15 +15,12 @@
         <link href="<?php echo e(asset('css/font-awesome.min.css')); ?>" rel="stylesheet" />
         <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
         <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;700&display=swap" rel="stylesheet">
-        <link rel='stylesheet'
-            href='https://cdn-uicons.flaticon.com/3.0.0/uicons-bold-rounded/css/uicons-bold-rounded.css'>
+        <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/3.0.0/uicons-bold-rounded/css/uicons-bold-rounded.css'>
         <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet" />
-        <link rel='stylesheet'
-            href='https://cdn-uicons.flaticon.com/3.0.0/uicons-solid-rounded/css/uicons-solid-rounded.css'>
-        <link rel='stylesheet'
-            href='https://cdn-uicons.flaticon.com/3.0.0/uicons-regular-rounded/css/uicons-regular-rounded.css'>
-        <link rel='stylesheet'
-            href='https://cdn-uicons.flaticon.com/3.0.0/uicons-regular-straight/css/uicons-regular-straight.css'>
+        <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/3.0.0/uicons-solid-rounded/css/uicons-solid-rounded.css'>
+        <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/3.0.0/uicons-regular-rounded/css/uicons-regular-rounded.css'>
+        <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/3.0.0/uicons-regular-straight/css/uicons-regular-straight.css'>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
         <link rel="stylesheet" href="<?php echo e(asset('css/style.css')); ?>">
         <link rel="stylesheet" href="<?php echo e(asset('css/bar.css')); ?>">
@@ -41,8 +38,9 @@
         <link rel="stylesheet" href="<?php echo e(asset('css/notify.css')); ?>">
         <link rel="stylesheet" href="<?php echo e(asset('css/settings.css')); ?>">
         <link href="<?php echo e(asset('css/cropper.min.css')); ?>" rel="stylesheet">
+        <link rel="stylesheet" href="<?php echo e(asset('css/toast.css')); ?>">
         <?php echo $__env->yieldContent('head'); ?>
-
+       
         <?php echo \Livewire\Mechanisms\FrontendAssets\FrontendAssets::styles(); ?>
 
         <?php echo app('Illuminate\Foundation\Vite')(['resources/css/app.css', 'resources/js/app.js']); ?>
@@ -60,12 +58,15 @@
 
         <?php endif; ?>
 
+        <!-- Toast Notification HTML -->
+        <ul class="notifications"></ul>
+
         <?php echo \Livewire\Mechanisms\FrontendAssets\FrontendAssets::scripts(); ?>
 
-
-        <?php echo $__env->yieldPushContent('scripts'); ?>
     </body>
-
+  
+    <?php echo $__env->yieldPushContent('scripts'); ?>
+    <script src="<?php echo e(asset('js/toast.js')); ?>"></script>
     <script src="<?php echo e(asset('js/cropper.min.js')); ?>"></script>
     <script src="<?php echo e(asset('js/head.js')); ?>"></script>
     <script src="<?php echo e(asset('js/dashboard.js')); ?>"></script>

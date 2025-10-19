@@ -18,7 +18,7 @@
     display: grid;
     grid-template-columns: 2fr 1fr;
     grid-template-rows: auto 1fr;
-    gap: 8px;
+    gap: 15px;
     height: 100%;
     padding: 1px 1px;
 }
@@ -145,73 +145,16 @@
     height: 100%;
 }
 
-.events-box {
-    height: 40%;
-    padding: 20px;
-}
-
-.events-box h1,
 .messages-box h1 {
     font-size: 1.3rem;
     font-weight: 600;
     color: #003060;
-}
-
-.events-lists {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    margin-top: 15px;
-        height: 100%; /* Take full height of parent */
-    max-height: 450px; /* Set a max height for scrolling, adjust as needed */
-    overflow-y: auto;
-}
-
-.event-item {
-    display: flex;
-    align-items: center;
-    flex-direction: row;
-    justify-content: space-between;
-    padding: 15px 20px;
-    border-radius: 5px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-    cursor: pointer;
-    transition: background-color 0.2s;
-}
-
-.event-item:nth-child(1) {
-    background-color: #1ea7ff; /* Gold */
-}
-
-.event-item:nth-child(2) {
-    background-color: #0083d7; /* GreenYellow */
-}
-
-.event-item:nth-child(3) {
-    background-color: #003060; /* Tomato */
-}
-
-.event-item:nth-child(4) {
-    background-color: #c72800; /* DodgerBlue */
-}
-
-.event-item i {
-    color: #ffffff;
-    font-size: 18px;
-    font-weight: 600;
-    align-items: center;
-}
-
-.event-item .event-title {
-    color: #ffffff;
-    font-size: 17px;
-    font-weight: 500;
+    margin-bottom: 5px;
 }
 
 .messages-box {
-    height: 59%;
-    padding: 0 20px 20px 20px;
-    margin: 5px 0;
+    height: 100%;
+    padding: 20px;
 }
 
 .messages-lists {

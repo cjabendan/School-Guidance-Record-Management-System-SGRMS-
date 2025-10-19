@@ -7,6 +7,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
     // Get the dynamic Laravel route URL and CSRF token
     const chatEndpoint = document.querySelector(".chatbot-popup").dataset.chatUrl;
+    // CRITICAL: Ensure this meta tag is in your HTML layout for Laravel's security
     const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
 
@@ -22,25 +23,28 @@ document.addEventListener("DOMContentLoaded", function() {
         const messageElement = incomingMessageDiv.querySelector(".message-text");
 
         try {
-            // *** UPDATED: Use the Laravel route and include CSRF token ***
+            // FIX 1: Change Content-Type to application/json
             const response = await fetch(chatEndpoint, {
                 method: "POST",
                 headers: { 
-                    "Content-Type": "application/x-www-form-urlencoded",
-                    "X-CSRF-TOKEN": csrfToken // Include the CSRF token
+                    "Content-Type": "application/json",
+                    "X-CSRF-TOKEN": csrfToken // Essential for Laravel
                 },
-                body: `prompt=${encodeURIComponent(userMessage)}`
+                // FIX 2: Send the prompt as a JSON string
+                body: JSON.stringify({ prompt: userMessage })
             });
 
             if (!response.ok) {
-                // If the response is not 200 OK, throw an error
+                // If the response is not 200 OK (e.g., 500 from the PHP try-catch block)
                 throw new Error(`Server returned status: ${response.status}`);
             }
 
+            // Since the PHP controller returns a simple string, use response.text()
             const data = await response.text();
 
             messageElement.innerText = data;
         } catch (error) {
+            // Use the generic error message for the user, log the detailed error
             messageElement.innerText = "Oops! Something went wrong on the server.";
             console.error("Bot response error:", error);
         }
@@ -97,5 +101,4 @@ document.addEventListener("DOMContentLoaded", function() {
 
     chatbotToggler.addEventListener("click", () => document.body.classList.toggle("show-chatbot"));
     closeChatBot.addEventListener("click", () => document.body.classList.remove("show-chatbot"));
-
-    });
+});

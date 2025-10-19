@@ -72,6 +72,7 @@
 .settings-form-heading {
     font-size: 1.25rem;
     font-weight: 500;
+    color: #003060;
     padding-bottom: 5px;
 }
 
@@ -106,7 +107,7 @@
     border: 1px solid #cccccc;
     border-radius: 7px;
     background-color: #ffffff;
-    color: #000000;
+    color: #003060;
 }
 
 .settings-form-input:focus {
@@ -126,7 +127,7 @@
 
 .settings-form-button.secondary {
     background-color: #f0f0f0;
-    color: #000000;
+    color: #003060;
 }
 
 .settings-profile-img-wrapper {
@@ -336,7 +337,6 @@
 .qr-icon {
     width: 28px;
     height: 28px;
-    color: #1ea7ff;
 }
 
 .qr-code-container {

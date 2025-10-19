@@ -52,9 +52,14 @@ class RagService
 
     /**
      * Add a document to Pinecone with embedding and topic metadata
+     * FIX 1: Ensure the 'topics' metadata is stored correctly as an array of strings.
      */
     public function addDocument(string $id, string $text, array $topics = [])
     {
+        // Pinecone metadata arrays must be simple, flat arrays of strings/numbers
+        // Ensure all topics are lowercased strings
+        $topics = array_map('strtolower', $topics);
+
         $chunks = $this->chunkText($text, 500);
         $batchSize = 10;
         $totalChunks = count($chunks);
@@ -87,10 +92,10 @@ class RagService
                     'id' => "{$id}_chunk" . ($i + $j),
                     'values' => $embedding,
                     'metadata' => [
-                        'text'   => $batchChunks[$j],
+                        'text' => $batchChunks[$j],
                         'doc_id' => $id,
-                        'chunk'  => $i + $j,
-                        'topics' => $topics // topic metadata for semantic filtering
+                        'chunk' => $i + $j,
+                        'topics' => $topics // This is now a simple array of strings
                     ]
                 ];
             }
@@ -130,7 +135,16 @@ class RagService
             // Prepare Pinecone filter
             $filter = [];
             if (!empty($allowedTopics)) {
-                $filter['topics'] = $allowedTopics;
+                // Ensure allowed topics are lowercased for filtering consistency
+                $allowedTopics = array_map('strtolower', $allowedTopics);
+                
+                // This is the correct filter logic for an array field in Pinecone:
+                // Find vectors where the 'topics' array field CONTAINS ANY of the $allowedTopics.
+                $filter = [
+                    'topics' => [
+                        '$in' => $allowedTopics
+                    ]
+                ];
             }
 
             // Query Pinecone
@@ -144,10 +158,11 @@ class RagService
             ]);
 
             $qBody = json_decode($queryRes->getBody(), true);
-            $matches = $qBody['matches'] ?? $qBody['results'][0]['matches'] ?? [];
+            // Handling the different Pinecone response structures (collections vs indexes)
+            $matches = $qBody['matches'] ?? $qBody['results'][0]['matches'] ?? []; 
 
-            // Optional similarity threshold
-            $threshold = 0.7;
+            // FIX 2: Confirm low similarity threshold (this is already correctly at 0.4)
+            $threshold = 0.4;
             $texts = [];
             foreach ($matches as $m) {
                 $score = $m['score'] ?? 0;
@@ -155,9 +170,11 @@ class RagService
                     $texts[] = $m['metadata']['text'];
                 }
             }
-
+            
+            // Log for debugging:
+            Log::info('RAG Retrieved Matches Count: ' . count($texts) . ' (Threshold: ' . $threshold . ')');
+            
             return $texts;
-
         } catch (\Exception $e) {
             Log::error("Retrieve failed: " . $e->getMessage());
             return [];

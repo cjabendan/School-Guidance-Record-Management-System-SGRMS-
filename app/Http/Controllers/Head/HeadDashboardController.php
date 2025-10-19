@@ -27,7 +27,7 @@ class HeadDashboardController extends Controller
         // Appointments (unchanged)
         $userId = Auth::id();
         $filter = $request->input('filter', 'today');
-        $query = Appointments::with(['student', 'counselor', 'requester', 'type'])
+        $query = Appointments::with(['students', 'counselor', 'requester', 'type'])
             ->where('counselor_id', $userId)
             ->where('status', 'approved')
             ->where('appointment_datetime', '>', now());

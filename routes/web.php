@@ -53,6 +53,7 @@ use App\Http\Controllers\Parents\ParentMessageController;
 
 // Student Controllers
 use App\Http\Controllers\Student\StudentDashboardController;
+use App\Http\Controllers\Student\StudentMessageController;
 
 /*
 |--------------------------------------------------------------------------
@@ -90,12 +91,6 @@ Route::post('/rag/docs', [RagController::class, 'store']) ->name('rag.store');
 Route::post('/chatbot/generate', [ChatbotController::class, 'generateResponse'])
 ->middleware('normalize.chat')
 ->name('chatbot.generate');
-
-Route::post('/chatbot/clear', function () {
-    $sessionId = session()->getId();
-    ChatbotSession::where('session_id', $sessionId)->delete();
-    return response()->json(['message' => 'Chat memory cleared.']);
-});
 
 
 /*
@@ -197,6 +192,7 @@ Route::prefix('Head')->name('Head.')->middleware(['auth', 'role.head'])->group(f
         Route::post('/add', [HeadParentController::class, 'store'])->name('add');
         Route::get('/{id}/get', [HeadParentController::class, 'get'])->name('get');
         Route::post('/{id}/update', [HeadParentController::class, 'update'])->name('update');
+        Route::get('/parents/table', [HeadParentController::class, 'partialTable']);
     });
 
     // Cases
@@ -308,5 +304,9 @@ Route::prefix('Parent')->name('Parent.')->middleware(['auth', 'role.parent', 'sy
 */
 
 Route::prefix('Student')->name('Student.')->middleware(['auth', 'role.student', 'system.access'])->group(function () {
-    // Future student-specific routes can be added here
+    
+
+    Route::get('/messages/{user?}', [StudentMessageController::class, 'index'])
+    ->middleware('feature:chat')
+    ->name('messages');
 });

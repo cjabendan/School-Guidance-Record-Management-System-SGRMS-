@@ -271,3 +271,19 @@ body.show-chatbot .chatbot-popup {
 .chatbot-form .chat-controls button:hover {
     background: #dce5f8;
 }
+
+.chat-suggestion {
+    display: inline-block;
+   
+    color: #333;
+    padding: 6px 12px;
+    margin: 4px 2px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: background 0.2s;
+}
+.chat-suggestion:hover {
+    background: #d0d0d0;
+}
+

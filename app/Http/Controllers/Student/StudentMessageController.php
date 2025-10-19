@@ -1,19 +1,20 @@
 <?php
 
-namespace App\Http\Controllers\Parents;
+namespace App\Http\Controllers\Student;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 
-class ParentMessageController extends Controller
+class StudentMessageController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        return view('Parent.messages');
+        return view('Student.messages');
     }
+    
 }

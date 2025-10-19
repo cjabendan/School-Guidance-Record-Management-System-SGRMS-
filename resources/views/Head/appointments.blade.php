@@ -42,6 +42,14 @@
                         <i class="fi fi-rr-table-layout" id="toggle-icon"></i>
                         <span id="toggle-label"></span>
                     </button>
+                    <label for="counselor-filter">Filter by Counselor:</label>
+            <select id="counselor-filter">
+                <option value="all">All Counselors</option>
+                @foreach ($counselors as $c)
+                    <option value="{{ $c->id }}">{{ $c->first_name }} {{ $c->last_name }}</option>
+                @endforeach
+            </select>
+
                 </div>
             </div>
             <div class="table-list" id="appointments-list">
@@ -58,7 +66,7 @@
                     @include('Head.partials.appointment-list', ['appointments' => $appointments])
                 </div>
             </div>
-
+            
             <!-- Calendar view -->
             <div id="calendar-view" style="display:none; width:100%; margin-bottom:0;">
                 <div id="calendar"></div>
@@ -70,134 +78,152 @@
         </div>
         </div>
     </section>
-    @include('Head.modal.requestApppointmentModal', ['counselors' => $counselors, 
-             'types' => $types, 'children' => $children])
+    @include('Head.modal.requestApppointmentModal', [
+        'counselors' => $counselors,
+        'types' => $types,
+        'children' => $children,
+    ])
     @include('Head.Modal.reviewModal')
 @endsection
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-                const searchInput = document.getElementById('appointment-search-input');
-                const appointmentList = document.getElementById('appointments-list'); // table wrapper
-                const calendarView = document.getElementById('calendar-view');
-                const toggleBtn = document.getElementById('toggle-view-btn');
-                const toggleIcon = document.getElementById('toggle-icon');
-                const toggleLabel = document.getElementById('toggle-label');
-                // filters container may not exist on all pages
-                const filtersContainer = document.querySelector('.table-filter .filters');
-                let timeout = null;
-                let currentStatus = '{{ strtolower(request('status') ?? 'all') }}';
-                let calendar = null;
-                let isTableView = true;
+        const searchInput = document.getElementById('appointment-search-input');
+        const appointmentList = document.getElementById('appointments-list'); // table wrapper
+        const calendarView = document.getElementById('calendar-view');
+        const toggleBtn = document.getElementById('toggle-view-btn');
+        const toggleIcon = document.getElementById('toggle-icon');
+        const toggleLabel = document.getElementById('toggle-label');
+        // filters container may not exist on all pages
+        const filtersContainer = document.querySelector('.table-filter .filters');
+        let timeout = null;
+        let currentStatus = '{{ strtolower(request('status') ?? 'all') }}';
+        let calendar = null;
+        let isTableView = true;
+        const counselorFilter = document.getElementById('counselor-filter');
 
-                function setView(table) {
-                    isTableView = table;
-                    if (table) {
-                        appointmentList.style.display = 'block';
-                        if (calendarView) calendarView.style.display = 'none';
-                        if (filtersContainer) filtersContainer.style.display = 'flex';
-                        if (toggleIcon) toggleIcon.className = 'fi fi-rr-table-layout';
-                        // Refresh table when returning from calendar view
-                        fetchAppointments(currentStatus, searchInput.value);
-                    } else {
-                        appointmentList.style.display = 'none';
-                        if (calendarView) calendarView.style.display = 'block';
-                        if (filtersContainer) filtersContainer.style.display = 'none';
-                        if (toggleIcon) toggleIcon.className = 'fi fi-rr-calendar-day';
-                        // Render calendar after a tick to ensure container is visible
-                        setTimeout(renderCalendar, 0);
-                    }
-                }
-                setView(true);
+        counselorFilter.addEventListener('change', function() {
+            fetchCalendarAppointments(this.value);
+        });
 
-                // Only attach toggle handler if the toggle button exists
-                if (toggleBtn) {
-                    toggleBtn.addEventListener('click', function(e) {
-                        e.preventDefault();
-                        setView(!isTableView);
-                    });
-                }
-
-                // AJAX search
-                if (searchInput) {
-                    searchInput.addEventListener('input', function() {
-                        clearTimeout(timeout);
-                        timeout = setTimeout(function() {
-                            fetchAppointments(currentStatus, searchInput.value);
-                        }, 400);
-                    });
-                }
-
-                // AJAX filters
-                filtersContainer.querySelectorAll('a').forEach(link => {
-                    link.addEventListener('click', function(e) {
-                        if (!isTableView) return;
-                        e.preventDefault();
-                        filtersContainer.querySelectorAll('a').forEach(l => l.classList.remove(
-                            'active'));
-                        this.classList.add('active');
-                        currentStatus = this.dataset.filter; // uses data-filter from Blade
-                        fetchAppointments(currentStatus, searchInput.value);
-                    });
+        function fetchCalendarAppointments(counselorId = 'all') {
+            fetch(
+                    `/Head/appointments/getAppointments?start=${calendar.view.currentStart.toISOString()}&end=${calendar.view.currentEnd.toISOString()}&counselor_id=${counselorId}`)
+                .then(res => res.json())
+                .then(data => {
+                    calendar.removeAllEvents();
+                    calendar.addEventSource(data);
                 });
+        }
+        
 
-                function fetchAppointments(status = 'all', search = '') {
-                    let params = new URLSearchParams();
-                    if (status && status !== 'all') params.append('status', status);
-                    if (search && search.trim() !== '') params.append('search', search.trim());
-                    let url = `{{ route('Head.appointments.index') }}?` + params.toString();
+        function setView(table) {
+            isTableView = table;
+            if (table) {
+                appointmentList.style.display = 'block';
+                if (calendarView) calendarView.style.display = 'none';
+                if (filtersContainer) filtersContainer.style.display = 'flex';
+                if (toggleIcon) toggleIcon.className = 'fi fi-rr-table-layout';
+                // Refresh table when returning from calendar view
+                fetchAppointments(currentStatus, searchInput.value);
+            } else {
+                appointmentList.style.display = 'none';
+                if (calendarView) calendarView.style.display = 'block';
+                if (filtersContainer) filtersContainer.style.display = 'none';
+                if (toggleIcon) toggleIcon.className = 'fi fi-rr-calendar-day';
+                // Render calendar after a tick to ensure container is visible
+                setTimeout(renderCalendar, 0);
+            }
+        }
+        setView(true);
 
-                    fetch(url)
-                        .then(response => response.text())
-                        .then(html => {
-                            const parser = new DOMParser();
-                            const doc = parser.parseFromString(html, 'text/html');
-                            const newList = doc.querySelector('.table');
-                            const currentList = appointmentList.querySelector('.table');
-                            if (newList && currentList) {
-                                currentList.innerHTML = newList.innerHTML;
-                            }
-                        });
-                }
+        // Only attach toggle handler if the toggle button exists
+        if (toggleBtn) {
+            toggleBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                setView(!isTableView);
+            });
+        }
 
-                function renderCalendar() {
-                    const calendarEl = document.getElementById('calendar');
-                    if (!calendarEl) return;
-                    if (calendar) calendar.destroy();
+        // AJAX search
+        if (searchInput) {
+            searchInput.addEventListener('input', function() {
+                clearTimeout(timeout);
+                timeout = setTimeout(function() {
+                    fetchAppointments(currentStatus, searchInput.value);
+                }, 400);
+            });
+        }
 
-                    let rawAppointments = @json($appointments);
+        // AJAX filters
+        filtersContainer.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', function(e) {
+                if (!isTableView) return;
+                e.preventDefault();
+                filtersContainer.querySelectorAll('a').forEach(l => l.classList.remove(
+                    'active'));
+                this.classList.add('active');
+                currentStatus = this.dataset.filter; // uses data-filter from Blade
+                fetchAppointments(currentStatus, searchInput.value);
+            });
+        });
 
-                    let formattedAppointments = rawAppointments.map(item => ({
-                        id: item.appointment_id, // Ensure event has correct id
-                        title: item.type?.type_name ?? "Appointment",
-                        start: item.appointment_datetime ? new Date(item.appointment_datetime) : null,
-                        allDay: false,
-                        type: item.type?.type_name ?? "N/A",
-                        requester: item.requester ?
-                            `${item.requester.first_name} ${item.requester.last_name}` : "N/A",
-                        student: item.students && item.students.length > 0
-                            ? item.students.map(s => `${s.user?.first_name ?? ''} ${s.user?.last_name ?? ''}`).join(', ')
-                            : "N/A",
-                        counselor: item.counselor ?
-                            `${item.counselor.first_name} ${item.counselor.last_name}` : "N/A",
-                        status: item.status ?? "N/A",
-                        color: item.status?.toLowerCase() === 'approved' ? '#10b981' :
-                            item.status?.toLowerCase() === 'pending' ? '#f59e0b' :
-                            item.status?.toLowerCase() === 'declined' ? '#ef4444' :
-                            '#6b7280'
-                    }));
+        function fetchAppointments(status = 'all', search = '') {
+            let params = new URLSearchParams();
+            if (status && status !== 'all') params.append('status', status);
+            if (search && search.trim() !== '') params.append('search', search.trim());
+            let url = `{{ route('Head.appointments.index') }}?` + params.toString();
 
-                    calendar = new FullCalendar.Calendar(calendarEl, {
-                        initialView: 'dayGridMonth',
-                        headerToolbar: {
-                            left: 'prev,next',
-                            center: 'title',
-                            right: 'dayGridMonth,timeGridWeek,timeGridDay,listMonth'
-                        },
-                        events: formattedAppointments,
-                        eventContent: function(arg) {
-                            return {
-                                html: `<div style="
+            fetch(url)
+                .then(response => response.text())
+                .then(html => {
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(html, 'text/html');
+                    const newList = doc.querySelector('.table');
+                    const currentList = appointmentList.querySelector('.table');
+                    if (newList && currentList) {
+                        currentList.innerHTML = newList.innerHTML;
+                    }
+                });
+        }
+
+        function renderCalendar() {
+            const calendarEl = document.getElementById('calendar');
+            if (!calendarEl) return;
+            if (calendar) calendar.destroy();
+
+            let rawAppointments = @json($appointments);
+
+            let formattedAppointments = rawAppointments.map(item => ({
+                id: item.appointment_id, // Ensure event has correct id
+                title: item.type?.type_name ?? "Appointment",
+                start: item.appointment_datetime ? new Date(item.appointment_datetime) : null,
+                allDay: false,
+                type: item.type?.type_name ?? "N/A",
+                requester: item.requester ?
+                    `${item.requester.first_name} ${item.requester.last_name}` : "N/A",
+                student: item.students && item.students.length > 0 ?
+                    item.students.map(s => `${s.user?.first_name ?? ''} ${s.user?.last_name ?? ''}`)
+                    .join(', ') : "N/A",
+                counselor: item.counselor ?
+                    `${item.counselor.first_name} ${item.counselor.last_name}` : "N/A",
+                status: item.status ?? "N/A",
+                color: item.status?.toLowerCase() === 'approved' ? '#10b981' : item.status
+                    ?.toLowerCase() === 'pending' ? '#f59e0b' : item.status?.toLowerCase() ===
+                    'declined' ? '#ef4444' : '#6b7280'
+            }));
+
+            calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
+                headerToolbar: {
+                    left: 'prev,next',
+                    center: 'title',
+                    right: 'dayGridMonth,timeGridWeek,timeGridDay,listMonth'
+                },
+                events: formattedAppointments,
+                eventContent: function(arg) {
+                    return {
+                        html: `<div style="
                                     background: ${arg.event.backgroundColor}; 
                                     color: #fff; padding: 6px 10px; 
                                     border-radius: 6px; font-size: 0.9rem; 
@@ -205,76 +231,77 @@
                                     overflow: hidden; text-overflow: ellipsis;">
                                     ${arg.event.title}
                                 </div>`
-                            };
-                        },
-                        selectable: true,
-                        editable: true, // Enable drag and drop
-                        slotMinTime: "06:00:00",
-                        slotMaxTime: "20:00:00",
-                        allDaySlot: false,
-                        nowIndicator: true,
-                        dateClick: function(info) {
-                            openModal();
-                            var dtInput = document.getElementById('appointment_datetime');
-                            if (dtInput) {
-                                // default time 08:00 like Counselor calendar
-                                dtInput.value = info.dateStr + 'T08:00';
-                            }
-                        },
+                    };
+                },
+                selectable: true,
+                editable: true, // Enable drag and drop
+                slotMinTime: "06:00:00",
+                slotMaxTime: "20:00:00",
+                allDaySlot: false,
+                nowIndicator: true,
+                dateClick: function(info) {
+                    openModal();
+                    var dtInput = document.getElementById('appointment_datetime');
+                    if (dtInput) {
+                        // default time 08:00 like Counselor calendar
+                        dtInput.value = info.dateStr + 'T08:00';
+                    }
+                },
 
-                        eventClick: function(info) {
-                            let props = info.event.extendedProps;
-                            alert(
-                                "Type: " + props.type + "\n" +
-                                "Requester: " + props.requester + "\n" +
-                                "Student: " + props.student + "\n" +
-                                "Counselor: " + props.counselor + "\n" +
-                                "Status: " + props.status
-                            );
-                        },
-                        eventDrop: function(info) {
-                            fetch('/Head/appointments/' + info.event.id + '/move', {
-                                method: 'POST',
-                                headers: {
-                                    'Content-Type': 'application/json',
-                                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                                },
-                                body: JSON.stringify({
-                                    appointment_datetime: info.event.start.toISOString()
-                                })
+                eventClick: function(info) {
+                    let props = info.event.extendedProps;
+                    alert(
+                        "Type: " + props.type + "\n" +
+                        "Requester: " + props.requester + "\n" +
+                        "Student: " + props.student + "\n" +
+                        "Counselor: " + props.counselor + "\n" +
+                        "Status: " + props.status
+                    );
+                },
+                eventDrop: function(info) {
+                    fetch('/Head/appointments/' + info.event.id + '/move', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                            },
+                            body: JSON.stringify({
+                                appointment_datetime: info.event.start.toISOString()
                             })
-                            .then(response => response.json())
-                            .then(data => {
-                                if (!data.success) {
-                                    alert('Failed to update appointment!');
-                                    info.revert();
-                                }
-                            })
-                            .catch(() => {
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (!data.success) {
                                 alert('Failed to update appointment!');
                                 info.revert();
-                            });
-                        }
-                    });
-                    calendar.render();
+                            }
+                        })
+                        .catch(() => {
+                            alert('Failed to update appointment!');
+                            info.revert();
+                        });
                 }
             });
+            calendar.render();
+        }
+    });
 </script>
 <script>
-function openModal() {
-    document.getElementById('requestAppointmentModal').style.display = 'flex';
-}
-function closeModal() {
-    document.getElementById('requestAppointmentModal').style.display = 'none';
-}
-
-// Optional: Close modal when clicking outside content
-document.addEventListener('click', function(e) {
-    const modal = document.getElementById('requestAppointmentModal');
-    if (modal.style.display === 'flex' && e.target === modal) {
-        closeModal();
+    function openModal() {
+        document.getElementById('requestAppointmentModal').style.display = 'flex';
     }
-});
+
+    function closeModal() {
+        document.getElementById('requestAppointmentModal').style.display = 'none';
+    }
+
+    // Optional: Close modal when clicking outside content
+    document.addEventListener('click', function(e) {
+        const modal = document.getElementById('requestAppointmentModal');
+        if (modal.style.display === 'flex' && e.target === modal) {
+            closeModal();
+        }
+    });
 </script>
 @push('scripts')
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>

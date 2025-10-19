@@ -189,10 +189,6 @@
     align-items: flex-start;
 }
 
-.table-list {
-    flex: 1 1 auto;
-    min-width: 0; /* allow flex children to shrink properly */
-}
 
 #calendar-view {
     flex: 0 0 420px; /* fixed sidebar-like calendar */
