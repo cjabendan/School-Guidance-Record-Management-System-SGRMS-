@@ -5,7 +5,7 @@
     <section id="content">
         @include('partials.navbar')
 
-        @livewire('chat')
+        @livewire('chat', ['selectedUserId' => $selectedUserId ?? null])
      
     </section>
 @endsection

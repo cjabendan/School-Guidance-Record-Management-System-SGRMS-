@@ -1,0 +1,39 @@
+.todo-list {
+    overflow-y: auto;       /* vertical scroll only */
+    overflow-x: hidden;     /* no horizontal scroll */
+    flex: 1;
+    scrollbar-width: thin;
+    scrollbar-color: transparent transparent; /* fully hidden by default */
+    scroll-behavior: smooth;
+    transition: scrollbar-color 0.4s ease;
+}
+
+/* WebKit browsers */
+.todo-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.todo-list::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.todo-list::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.3);
+    border-radius: 3px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+/* Show scrollbar when hovered or scrolling */
+.todo-list:hover::-webkit-scrollbar-thumb,
+.todo-list.scrolling::-webkit-scrollbar-thumb {
+    opacity: 1;
+}
+
+/* Firefox smooth appearance */
+.todo-list:hover {
+    scrollbar-color: rgba(255, 255, 255, 0.4) transparent;
+}
+.todo-list.scrolling {
+    scrollbar-color: rgba(255, 255, 255, 0.4) transparent;
+}

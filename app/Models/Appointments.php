@@ -36,7 +36,19 @@ class Appointments extends Model
     // Relationships
     public function students()
     {
-        return $this->belongsToMany(Student::class, 'appointment_students', 'appointment_id', 'student_user_id');
+        // appointment_students table: appointment_id, student_user_id
+        // pivot.student_user_id references students.user_id (not students.s_id), so we must tell Eloquent
+        // the related model's key is 'user_id' instead of the Student primary key.
+        return $this->belongsToMany(
+            Student::class,
+            'appointment_students',
+            'appointment_id',    // this model's pivot key (appointment_students.appointment_id)
+            'student_user_id',   // related model pivot key (appointment_students.student_user_id)
+            'appointment_id',    // local key on Appointments model
+            's_id'               // related key on Student model (students.s_id) — pivot stores s_id
+        )
+        ->using(\App\Models\AppointmentStudent::class)
+        ->withPivot('student_user_id');
     }
 
 
@@ -58,6 +70,12 @@ class Appointments extends Model
     public function notes()
     {
         return $this->hasMany(CounselingNotes::class, 'appointment_id');
+    }
+
+    public function reschedules()
+    {
+        return $this->hasMany(\App\Models\AppointmentReschedule::class, 'appointment_id', 'appointment_id')
+                    ->orderByDesc('created_at');
     }
 
     // Accessor for requester's full name

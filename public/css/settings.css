@@ -357,6 +357,27 @@
     transition: background 0.2s ease;
 }
 
+/* Modal-specific button styling to match student modal appearance */
+.modal-content .settings-form-button {
+    background: #2563eb;
+    color: #fff;
+    padding: 10px 22px;
+    border-radius: 6px;
+    font-size: 1rem;
+    font-weight: 500;
+    transition: background 0.2s;
+}
+.modal-content .settings-form-button:hover {
+    background: #1e40af;
+}
+.modal-content .settings-form-button.delete {
+    background: #e5e7eb;
+    color: #222;
+}
+.modal-content .settings-form-button.delete:hover {
+    background: #d1d5db;
+}
+
 .separator {
     display: flex;
     align-items: center;
@@ -411,6 +432,38 @@
         opacity: 1;
         transform: scale(1);
     }
+}
+
+/* Specific override for the edit photo modal used in settings to match student modal look */
+#editPhotoModal {
+    display: none; /* controlled by JS */
+    position: fixed;
+    z-index: 2000;
+    left: 0;
+    top: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0,0,0,0.6);
+    align-items: center;
+    justify-content: center;
+    overflow-y: auto;
+}
+
+#editPhotoModal .modal-content {
+    max-width: 900px;
+    padding: 28px;
+    border-radius: 10px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+}
+
+/* Cropper preview box used in profile component */
+.cropper-preview {
+    width: 100%;
+    height: 100%;
+    background-size: cover !important;
+    background-position: center !important;
+    background-repeat: no-repeat !important;
+    display: block;
 }
 
 /* Phone num css */ 

@@ -54,14 +54,34 @@ use App\Http\Controllers\Parents\ParentMessageController;
 // Student Controllers
 use App\Http\Controllers\Student\StudentDashboardController;
 use App\Http\Controllers\Student\StudentMessageController;
-
+use App\Http\Controllers\Student\StudentAppoinmentController;
 /*
 |--------------------------------------------------------------------------
 | Public Routes
 |--------------------------------------------------------------------------
 */
 
-Route::get('/', [StaffController::class, 'index'])->name('landing');
+// Authentication
+Route::middleware(['web'])->group(function () {
+    Route::get('/', [StaffController::class, 'index'])->name('landing');
+
+    // Authentication
+    Route::controller(LoginController::class)->group(function () {
+        Route::get('login', 'showLoginForm')->name('login');
+        Route::post('login', 'login');
+    });
+
+    Route::controller(RegisterController::class)->group(function () {
+        Route::get('register', 'showForm')->name('register');
+        Route::post('register', 'register');
+        Route::get('/activate/{token}', 'activate')->name('activate');
+        Route::get('/verify-email', 'showVerificationEmail')->name('verify');
+        Route::get('/success-verification', 'showSuccessEmail')->name('success');
+        Route::post('/verification/resend', 'resendActivationLink')->name('verification.resend');
+    });
+
+    Route::post('/logout', [LogoutController::class, 'logout'])->name('logout');
+});
 
 // Announcements
 Route::prefix('announcements')->name('announcements.')->group(function () {
@@ -69,22 +89,6 @@ Route::prefix('announcements')->name('announcements.')->group(function () {
     Route::get('/view/{id}', [AnnouncementsController::class, 'view'])->name('view');
 });
 
-// Authentication
-Route::controller(LoginController::class)->group(function () {
-    Route::get('login', 'showLoginForm')->name('login');
-    Route::post('login', 'login');
-});
-
-Route::controller(RegisterController::class)->group(function () {
-    Route::get('register', 'showForm')->name('register');
-    Route::post('register', 'register');
-    Route::get('/activate/{token}', 'activate')->name('activate');
-    Route::get('/verify-email', 'showVerificationEmail')->name('verify');
-    Route::get('/success-verification', 'showSuccessEmail')->name('success');
-    Route::post('/verification/resend', 'resendActivationLink')->name('verification.resend');
-});
-
-Route::post('/logout', [LogoutController::class, 'logout'])->name('logout');
 
 // Chatbot and RAG
 Route::post('/rag/docs', [RagController::class, 'store']) ->name('rag.store');
@@ -155,9 +159,6 @@ Route::middleware(['auth', 'system.access'])->group(function () {
 
 Route::prefix('Head')->name('Head.')->middleware(['auth', 'role.head'])->group(function () {
 
-    // Dashboard
-
-
     // Counselors
     Route::prefix('counselors')->name('counselors.')->group(function () {
         Route::get('/', [HeadCounselorController::class, 'index'])->name('index');
@@ -225,7 +226,10 @@ Route::prefix('Head')->name('Head.')->middleware(['auth', 'role.head'])->group(f
     Route::post('/appointments/{id}/move', [HeadAppointmentController::class, 'move'])->name('appointments.move');
     Route::post('/appointments/{id}/approve', [HeadAppointmentController::class, 'approve'])->name('appointments.approve');
     Route::post('/appointments/{id}/decline', [HeadAppointmentController::class, 'decline'])->name('appointments.decline');
+    Route::post('/appointments/{id}/cancel', [HeadAppointmentController::class, 'cancel'])->name('appointments.cancel');
     Route::post('/appointments/store', [HeadAppointmentController::class, 'store'])->name('appointments.store');
+    Route::post('/appointments/{id}/start', [HeadAppointmentController::class, 'startSession'])->name('appointments.start');
+    Route::post('/appointments/{id}/end', [HeadAppointmentController::class, 'endSession'])->name('appointments.end');
       // Update appointment (reschedule/edit)
     Route::put('/appointments/{id}', [HeadAppointmentController::class, 'update'])->name('appointments.update');
     Route::get('/appointments/{id}/json', [HeadAppointmentController::class, 'json'])->name('appointments.json');
@@ -262,6 +266,9 @@ Route::prefix('Counselor')->name('Counselor.')->middleware(['auth', 'role.counse
     Route::post('/appointments', [CounselorAppointmentController::class, 'store'])->name('appointments.store');
     Route::post('/appointments/{id}/approve', [CounselorDashboardController::class, 'approve'])->name('appointments.approve');
     Route::post('/appointments/{id}/decline', [CounselorDashboardController::class, 'decline'])->name('appointments.decline');
+     Route::post('/appointments/{id}/cancel', [\App\Http\Controllers\Counselor\CounselorAppointmentController::class, 'cancel'])->name('appointments.cancel');
+    Route::post('/appointments/{id}/start', [\App\Http\Controllers\Counselor\CounselorAppointmentController::class, 'startSession'])->name('appointments.start');
+    Route::post('/appointments/{id}/end', [\App\Http\Controllers\Counselor\CounselorAppointmentController::class, 'endSession'])->name('appointments.end');
     Route::post('/appointments', [\App\Http\Controllers\Counselor\CounselorAppointmentController::class, 'store'])->name('appointments.store');
     Route::get('/appointments/{id}/json', [\App\Http\Controllers\Counselor\CounselorAppointmentController::class, 'json'])->name('appointments.json');
     Route::put('/appointments/{id}', [\App\Http\Controllers\Counselor\CounselorAppointmentController::class, 'update'])->name('appointments.update');
@@ -288,12 +295,22 @@ Route::prefix('Parent')->name('Parent.')->middleware(['auth', 'role.parent', 'sy
 
     // Requests
     Route::get('/requests', [ParentRequestController::class, 'index'])
-    ->middleware('feature:request')
-    ->name('requests.index');
+        ->middleware('feature:request')
+        ->name('requests.index');
+
+    // Add POST route to create a request
+    Route::post('/requests', [ParentRequestController::class, 'store'])
+        ->middleware('feature:request')
+        ->name('requests.store');
 
     //Appointments
     Route::get('/appointments', [ParentAppointmentController::class, 'index'])->name('appointments.index');
     Route::post('/appointments', [ParentAppointmentController::class, 'store'])->name('appointments.store');
+     // Reschedule requests
+    Route::post('/appointments/{id}/reschedule', [\App\Http\Controllers\AppointmentRescheduleController::class, 'store'])->name('appointments.reschedule.store');
+    Route::post('/appointments/{id}/cancel', [\App\Http\Controllers\Parents\ParentAppointmentController::class, 'cancel'])->name('appointments.cancel');
+    Route::post('/appointments/{id}/start', [\App\Http\Controllers\Parents\ParentAppointmentController::class, 'startSession'])->name('appointments.start');
+    Route::post('/appointments/{id}/end', [\App\Http\Controllers\Parents\ParentAppointmentController::class, 'endSession'])->name('appointments.end');
 });
 
 
@@ -309,4 +326,13 @@ Route::prefix('Student')->name('Student.')->middleware(['auth', 'role.student', 
     Route::get('/messages/{user?}', [StudentMessageController::class, 'index'])
     ->middleware('feature:chat')
     ->name('messages');
+      // Student Appointments
+    Route::get('/appointments', [\App\Http\Controllers\Student\StudentAppointmentController::class, 'index'])->name('appointments.index');
+    Route::post('/appointments', [\App\Http\Controllers\Student\StudentAppointmentController::class, 'store'])->name('appointments.store');
+    Route::get('/appointments/{id}', [\App\Http\Controllers\Student\StudentAppointmentController::class, 'show'])->name('appointments.show')->whereNumber('id');
+    // Reschedule requests
+    Route::post('/appointments/{id}/reschedule', [\App\Http\Controllers\AppointmentRescheduleController::class, 'store'])->name('appointments.reschedule.store');
+    Route::post('/appointments/{id}/cancel', [\App\Http\Controllers\Student\StudentAppointmentController::class, 'cancel'])->name('appointments.cancel');
+    Route::post('/appointments/{id}/start', [\App\Http\Controllers\Student\StudentAppointmentController::class, 'startSession'])->name('appointments.start');
+    Route::post('/appointments/{id}/end', [\App\Http\Controllers\Student\StudentAppointmentController::class, 'endSession'])->name('appointments.end');
 });

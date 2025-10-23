@@ -23,6 +23,7 @@
     <link rel="stylesheet" href="{{ asset('css/settings.css') }}">
     <link rel="stylesheet" href="{{ asset('css/notify.css') }}">
     <link rel="stylesheet" href="{{ asset('css/table.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/scrollbar.css') }}">
     
     <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet" />
     @yield('head')

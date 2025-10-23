@@ -20,16 +20,7 @@
                             </div>
                             <button class="add-btn" data-bs-toggle="modal" data-bs-target="#addCaseModal"><i
                                     class="fi fi-br-plus"></i>Add case</button>
-                            <form action="{{ route('Head.cases.import') }}" method="POST" enctype="multipart/form-data"
-                                style="display:inline;">
-                                @csrf
-                                <input type="file" name="import_file" accept=".csv" style="display:none;"
-                                    id="import-file-input">
-                                <button type="button" class="pro-add-import" id="import-btn">Import</button>
-                            </form>
-                            <a href="{{ route('Head.cases.export') }}" class="pro-add-export">
-                                Export
-                            </a>
+
                         </div>
                     </div>
                     <div class="search-bar">
@@ -87,11 +78,11 @@
                                 <div class="table-col date">{{ $case->filed_date }}</div>
                                 <div class="table-col actions" style="display:flex; gap:8px;">
                                     <button type="button" class="view-btn" data-bs-toggle="modal"
-                                        data-bs-target="#viewCaseModal{{ $case->case_id }}"></button>
+                                        data-bs-target="#viewCaseModal{{ $case->case_id }}"><i class='bx bx-show'></i></button>
                                     <button type="button" class="edit-btn" data-bs-toggle="modal"
-                                        data-bs-target="#editCaseModal{{ $case->case_id }}"></button>
+                                        data-bs-target="#editCaseModal{{ $case->case_id }}"><i class='bx bx-edit'></i></button>
                                     <button type="button" class="archive-btn"
-                                        onclick="if(confirm('Archive this case?')) { document.getElementById('archive-form-{{ $case->case_id }}').submit(); }"></button>
+                                        onclick="if(confirm('Archive this case?')) { document.getElementById('archive-form-{{ $case->case_id }}').submit(); }"><i class='bx bx-archive'></i></button>
                                     <form id="archive-form-{{ $case->case_id }}"
                                         action="{{ route('Head.cases.archive', $case->case_id) }}" method="POST"
                                         style="display:none;">

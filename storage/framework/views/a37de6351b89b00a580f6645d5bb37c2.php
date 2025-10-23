@@ -37,6 +37,7 @@
         <link rel="stylesheet" href="<?php echo e(asset('css/messages.css')); ?>">
         <link rel="stylesheet" href="<?php echo e(asset('css/notify.css')); ?>">
         <link rel="stylesheet" href="<?php echo e(asset('css/settings.css')); ?>">
+        <link rel="stylesheet" href="<?php echo e(asset('css/scrollbar.css')); ?>">
         <link href="<?php echo e(asset('css/cropper.min.css')); ?>" rel="stylesheet">
         <link rel="stylesheet" href="<?php echo e(asset('css/toast.css')); ?>">
         <?php echo $__env->yieldContent('head'); ?>

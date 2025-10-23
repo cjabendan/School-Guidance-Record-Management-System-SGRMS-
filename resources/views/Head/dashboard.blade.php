@@ -8,7 +8,8 @@
         <div class="wrapper">
             <div class="box-page">
                 <section class="analytics">
-                      @include('Head.dashboard-sections.stats')
+                    @include('Head.dashboard-sections.stats')
+                    @include('Head.dashboard-sections.todo')
                 </section>
 
                 <!-- ACTIVITIES -->

@@ -17,9 +17,13 @@ return Application::configure(basePath: dirname(__DIR__))
             'feature' => \App\Http\Middleware\CheckFeature::class,
             'normalize.chat' => \App\Http\Middleware\NormalizeChatQuery::class,
         ]);
+
+        $middleware->web(append: [
+            \App\Http\Middleware\RefreshCsrfOnExpire::class,
+        ]);
     })
     ->withProviders([
-        App\Providers\FortifyServiceProvider::class,
+       
     ])
     ->withExceptions(function (Exceptions $exceptions) {
         //

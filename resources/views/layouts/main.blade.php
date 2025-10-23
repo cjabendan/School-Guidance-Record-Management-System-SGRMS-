@@ -37,6 +37,7 @@
         <link rel="stylesheet" href="{{ asset('css/messages.css') }}">
         <link rel="stylesheet" href="{{ asset('css/notify.css') }}">
         <link rel="stylesheet" href="{{ asset('css/settings.css') }}">
+        <link rel="stylesheet" href="{{ asset('css/scrollbar.css') }}">
         <link href="{{ asset('css/cropper.min.css') }}" rel="stylesheet">
         <link rel="stylesheet" href="{{ asset('css/toast.css') }}">
         @yield('head')

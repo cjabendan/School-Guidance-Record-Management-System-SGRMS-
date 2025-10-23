@@ -25,22 +25,35 @@ class HeadDashboardController extends Controller
         $totalCases = CaseModel::count();
 
         // Appointments (unchanged)
-        $userId = Auth::id();
         $filter = $request->input('filter', 'today');
-        $query = Appointments::with(['students', 'counselor', 'requester', 'type'])
-            ->where('counselor_id', $userId)
-            ->where('status', 'approved')
+
+        // Head should see upcoming appointments across counselors, not only those assigned to the head user.
+        // Eager-load the correct relation name 'students' and other relations used in views.
+        // Build two queries:
+        // 1) Pending/Approved appointments filtered by date (used for normal upcoming list)
+        // 2) Ongoing appointments (always included regardless of date)
+
+        $baseQuery = Appointments::with(['students', 'counselor', 'requester', 'type'])
+            ->whereIn('status', ['Pending', 'Approved'])
             ->where('appointment_datetime', '>', now());
 
         if ($filter === 'today') {
-            $query->whereDate('appointment_datetime', now()->toDateString());
+            $baseQuery->whereDate('appointment_datetime', now()->toDateString());
         } elseif ($filter === 'tomorrow') {
-            $query->whereDate('appointment_datetime', now()->addDay()->toDateString());
+            $baseQuery->whereDate('appointment_datetime', now()->addDay()->toDateString());
         } elseif ($filter === 'week') {
-            $query->whereBetween('appointment_datetime', [now()->startOfWeek(), now()->endOfWeek()]);
+            $baseQuery->whereBetween('appointment_datetime', [now()->startOfWeek(), now()->endOfWeek()]);
         }
 
-        $upcomingAppointments = $query->orderBy('appointment_datetime', 'asc')->limit(5)->get();
+        $pendingApproved = $baseQuery->orderBy('appointment_datetime', 'asc')->get();
+
+        $ongoing = Appointments::with(['students', 'counselor', 'requester', 'type'])
+            ->where('status', 'Ongoing')
+            ->get();
+
+        // Merge, de-duplicate by appointment_id, and sort by appointment_datetime ascending
+        $merged = $pendingApproved->merge($ongoing)->keyBy('appointment_id')->values();
+        $upcomingAppointments = $merged->sortBy('appointment_datetime')->values()->take(5);
 
         return view('Head.dashboard', compact(
             'totalStudents',

@@ -22,13 +22,6 @@
       0 => 'Cloudstudio\\Ollama\\OllamaServiceProvider',
     ),
   ),
-  'laravel/fortify' => 
-  array (
-    'providers' => 
-    array (
-      0 => 'Laravel\\Fortify\\FortifyServiceProvider',
-    ),
-  ),
   'laravel/pail' => 
   array (
     'providers' => 
@@ -48,17 +41,6 @@
     'providers' => 
     array (
       0 => 'Laravel\\Tinker\\TinkerServiceProvider',
-    ),
-  ),
-  'livewire/flux' => 
-  array (
-    'aliases' => 
-    array (
-      'Flux' => 'Flux\\Flux',
-    ),
-    'providers' => 
-    array (
-      0 => 'Flux\\FluxServiceProvider',
     ),
   ),
   'livewire/livewire' => 

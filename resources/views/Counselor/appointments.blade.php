@@ -20,6 +20,10 @@
                                 data-filter="approved">Approved</a>
                             <a href="#" class="a-nav {{ request('status') == 'declined' ? 'active' : '' }}"
                                 data-filter="declined">Declined</a>
+                            <a href="#" class="a-nav {{ request('status') == 'cancelled' ? 'active' : '' }}"
+                                data-filter="cancelled">Cancelled</a>
+                            <a href="#" class="a-nav {{ request('status') == 'completed' ? 'active' : '' }}"
+                                data-filter="completed">Complete</a>
                         </li>
                     </div>
                     <a href="#" class="add-btn" onclick="openModal(); return false;">
@@ -175,6 +179,15 @@
                             : "N/A",
                         counselor: item.counselor ?
                             `${item.counselor.first_name} ${item.counselor.last_name}` : "N/A",
+                        // counselor avatar (if available)
+                        counselorAvatar: (function(){
+                            if (!item.counselor) return null;
+                            if (item.counselor.profile_image) return `{{ asset('images/user') }}/${item.counselor.profile_image}`;
+                            if (item.counselor.profile_photo_path) return item.counselor.profile_photo_path;
+                            if (item.counselor.user && item.counselor.user.profile_image) return `{{ asset('images/user') }}/${item.counselor.user.profile_image}`;
+                            return null;
+                        })(),
+                        requesterAvatar: null,
                         status: item.status ?? "N/A",
                         color: item.status?.toLowerCase() === 'approved' ? '#10b981' :
                             item.status?.toLowerCase() === 'pending' ? '#f59e0b' :
@@ -191,16 +204,41 @@
                         },
                         events: formattedAppointments,
                         eventContent: function(arg) {
-                            return {
-                                html: `<div style="
-                                    background: ${arg.event.backgroundColor}; 
-                                    color: #fff; padding: 6px 10px; 
-                                    border-radius: 6px; font-size: 0.9rem; 
-                                    font-weight: 600; white-space: nowrap; 
-                                    overflow: hidden; text-overflow: ellipsis;">
-                                    ${arg.event.title}
-                                </div>`
-                            };
+                            // Build a custom DOM node with avatar + title (Head-style)
+                            const container = document.createElement('div');
+                            container.className = 'fc-event-custom';
+
+                            const bg = arg.event.backgroundColor || '#6b7280';
+                            container.style.background = bg;
+                            container.style.color = '#fff';
+                            container.style.padding = '6px 8px';
+                            container.style.borderRadius = '6px';
+
+                            const avatarUrl = arg.event.extendedProps.counselorAvatar || arg.event.extendedProps.requesterAvatar || null;
+                            if (avatarUrl) {
+                                const img = document.createElement('img');
+                                img.src = avatarUrl;
+                                img.alt = arg.event.extendedProps.counselor || 'avatar';
+                                img.className = 'fc-event-avatar';
+                                container.appendChild(img);
+                            }
+
+                            const titleWrap = document.createElement('div');
+                            titleWrap.className = 'fc-event-title-wrap';
+
+                            const title = document.createElement('div');
+                            title.className = 'fc-event-title-text';
+                            title.textContent = arg.event.title || '';
+                            titleWrap.appendChild(title);
+
+                            const sub = document.createElement('div');
+                            sub.className = 'fc-event-sub';
+                            sub.textContent = arg.event.extendedProps.counselor || '';
+                            titleWrap.appendChild(sub);
+
+                            container.appendChild(titleWrap);
+
+                            return { domNodes: [container] };
                         },
                         selectable: true,
                         editable: true, // Enable drag and drop
@@ -273,3 +311,12 @@ document.addEventListener('click', function(e) {
 @push('scripts')
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
 @endpush
+
+<style>
+/* Calendar event avatar styles (match Head layout) */
+.fc-event-custom { display:flex; align-items:center; gap:8px; }
+.fc-event-avatar { width:28px; height:28px; border-radius:50%; object-fit:cover; border:1px solid rgba(255,255,255,0.12); flex:0 0 28px; }
+.fc-event-title-wrap { display:flex; flex-direction:column; line-height:1; }
+.fc-event-title-text { font-weight:600; font-size:0.9rem; color:inherit; }
+.fc-event-sub { font-size:0.75rem; color:rgba(255,255,255,0.9); }
+</style>

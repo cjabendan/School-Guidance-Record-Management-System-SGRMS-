@@ -61,12 +61,30 @@ class CounselorDashboardController extends Controller
         $appointment->save();
         return response()->json(['success' => true]);
     }
-    public function dashboard()
+    public function dashboard(Request $request)
     {
         $user = auth()->user();
         $counselor = $user->counselor;
         $name = $user->first_name . ' ' . $user->last_name;
-        return view('Counselor.dashboard', compact('name'));
+
+        $filter = $request->input('filter', 'today');
+
+        $query = \App\Models\Appointments::with(['students', 'counselor', 'requester', 'type'])
+            ->where('counselor_id', $user->id)
+            ->where('status', 'approved')
+            ->where('appointment_datetime', '>', now());
+
+        if ($filter === 'today') {
+            $query->whereDate('appointment_datetime', now()->toDateString());
+        } elseif ($filter === 'tomorrow') {
+            $query->whereDate('appointment_datetime', now()->addDay()->toDateString());
+        } elseif ($filter === 'week') {
+            $query->whereBetween('appointment_datetime', [now()->startOfWeek(), now()->endOfWeek()]);
+        }
+
+        $upcomingAppointments = $query->orderBy('appointment_datetime', 'asc')->limit(5)->get();
+
+        return view('Counselor.dashboard', compact('name', 'upcomingAppointments'));
     }
 
     public function appointments()

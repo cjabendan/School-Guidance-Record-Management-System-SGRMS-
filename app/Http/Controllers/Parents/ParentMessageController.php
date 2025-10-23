@@ -12,8 +12,8 @@ class ParentMessageController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request, $user = null)
     {
-        return view('Parent.messages');
+        return view('Parent.messages', ['selectedUserId' => $user]);
     }
 }

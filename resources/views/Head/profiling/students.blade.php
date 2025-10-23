@@ -74,7 +74,7 @@
                 <div class="table-col actions">Actions</div>
             </div>
             <div id="student-list">
-                @include('partials.student_table')
+                @include('Head.partials.student_table')
             </div>
 
         </div>

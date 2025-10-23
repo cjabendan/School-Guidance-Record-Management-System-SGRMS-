@@ -9,6 +9,18 @@
       <!-- Appointment details will be loaded here via JS -->
     </div>
     <div class="modal-footer">
+      <form id="startSessionForm" method="POST" style="display:none; margin-right:8px;">
+        @csrf
+        <button type="submit" class="btn btn-primary" id="startSessionBtn">Start Session</button>
+      </form>
+      <form id="endSessionForm" method="POST" style="display:none; margin-right:8px;">
+        @csrf
+        <button type="submit" class="btn btn-danger" id="endSessionBtn">Complete</button>
+      </form>
+      <form id="cancelForm" method="POST" style="display:none; margin-right:8px;">
+        @csrf
+        <button type="submit" class="btn btn-secondary" id="cancelBtn">Cancel</button>
+      </form>
       <form id="approveForm" method="POST" style="display:inline;">
         @csrf
         <button type="submit" class="btn btn-success" id="approveBtn">Approve</button>
@@ -25,32 +37,169 @@
   </div>
 </div>
 <script>
-function openReviewModal(appointmentId, detailsHtml, approveUrl, declineUrl, status) {
-  document.getElementById('review-modal-body').innerHTML = detailsHtml;
+function openReviewModal(appointmentId, detailsHtml, approveUrl, declineUrl, cancelUrl, status, startUrl, el) {
+  var body = document.getElementById('review-modal-body');
+  body.innerHTML = detailsHtml;
+  // If the caller passed an element with reschedule data, append it only when request status is Pending
+  try {
+    if (el && el.dataset) {
+      var resStatus = (el.dataset.rescheduleStatus || '').toLowerCase();
+      var prev = el.dataset.prev || '';
+      var req = el.dataset.req || '';
+      if (resStatus === 'pending') {
+        var extra = '';
+        if (prev) extra += '<div style="font-size:0.95em; margin-top:6px;"><strong>Previous:</strong> ' + prev + '</div>';
+  if (req) extra += '<div style="font-size:0.95em;"><strong>Preferred date to reschedule:</strong> ' + req + '</div>';
+        if (extra) body.innerHTML = body.innerHTML + extra;
+      }
+    }
+  } catch (e) {}
   document.getElementById('reviewAppointmentModal').style.display = 'flex';
-  document.getElementById('approveForm').action = approveUrl;
-  document.getElementById('declineForm').action = declineUrl;
+  // set form actions
+  var approveForm = document.getElementById('approveForm');
+  var declineForm = document.getElementById('declineForm');
+  var cancelForm = document.getElementById('cancelForm');
+  if (approveForm) approveForm.action = approveUrl || '';
+  if (declineForm) declineForm.action = declineUrl || '';
+  if (cancelForm) {
+    cancelForm.action = cancelUrl || '';
+    // hidden by default; will be shown only for pending status
+    cancelForm.style.display = 'none';
+  }
   window.currentAppointmentId = appointmentId;
   status = (status || '').toLowerCase();
-  document.getElementById('decline_reason').style.display = 'none';
-  document.getElementById('submitDeclineBtn').style.display = 'none';
-  document.getElementById('declineBtn').style.display = 'inline-block';
+  // Remove any existing status badges from previous modal opens
+  var oldIn = document.getElementById('inSessionBadge');
+  if (oldIn && oldIn.parentNode) oldIn.parentNode.removeChild(oldIn);
+  var oldComp = document.getElementById('completedBadge');
+  if (oldComp && oldComp.parentNode) oldComp.parentNode.removeChild(oldComp);
+  var oldCancelled = document.getElementById('cancelledBadge');
+  if (oldCancelled && oldCancelled.parentNode) oldCancelled.parentNode.removeChild(oldCancelled);
+    // Reset decline inputs/buttons
+    if (document.getElementById('decline_reason')) document.getElementById('decline_reason').style.display = 'none';
+    if (document.getElementById('submitDeclineBtn')) document.getElementById('submitDeclineBtn').style.display = 'none';
+    if (document.getElementById('declineBtn')) document.getElementById('declineBtn').style.display = 'inline-block';
+    // Always reset start session form visibility/action on open
+    if (document.getElementById('startSessionForm')) {
+      document.getElementById('startSessionForm').style.display = 'none';
+      document.getElementById('startSessionForm').action = '';
+    }
+    // Always reset end session form visibility/action on open
+    if (document.getElementById('endSessionForm')) {
+      document.getElementById('endSessionForm').style.display = 'none';
+      document.getElementById('endSessionForm').action = '';
+    }
+    // Safely hide reschedule/close if they don't exist
+    var rescheduleEl = document.getElementById('rescheduleBtn');
+    var closeEl = document.getElementById('closeReviewBtn');
   // Hide Close and show Reschedule if declined, else show Close and hide Reschedule
   if (status === 'declined') {
-    document.getElementById('approveForm').style.display = 'none';
-    document.getElementById('declineForm').style.display = 'none';
-    document.getElementById('rescheduleBtn').style.display = 'inline-block';
-    document.getElementById('closeReviewBtn').style.display = 'none';
+    if (document.getElementById('approveForm')) document.getElementById('approveForm').style.display = 'none';
+    if (document.getElementById('declineForm')) document.getElementById('declineForm').style.display = 'none';
+    if (rescheduleEl) rescheduleEl.style.display = 'inline-block';
+    if (closeEl) closeEl.style.display = 'none';
   } else if (status === 'approved') {
-    document.getElementById('approveForm').style.display = 'none';
-    document.getElementById('declineForm').style.display = 'none';
-    document.getElementById('rescheduleBtn').style.display = 'inline-block';
-    document.getElementById('closeReviewBtn').style.display = 'inline-block';
+    if (document.getElementById('approveForm')) document.getElementById('approveForm').style.display = 'none';
+    if (document.getElementById('declineForm')) document.getElementById('declineForm').style.display = 'none';
+    if (rescheduleEl) rescheduleEl.style.display = 'inline-block';
+    if (closeEl) closeEl.style.display = 'inline-block';
+    // ensure End/Complete is hidden unless ongoing
+    if (document.getElementById('endSessionForm')) document.getElementById('endSessionForm').style.display = 'none';
+    // show Start Session button only if startUrl provided
+    if (typeof startUrl !== 'undefined' && startUrl) {
+      if (document.getElementById('startSessionForm')) {
+        document.getElementById('startSessionForm').action = startUrl;
+        document.getElementById('startSessionForm').style.display = 'inline-block';
+      }
+    } else {
+      if (document.getElementById('startSessionForm')) document.getElementById('startSessionForm').style.display = 'none';
+    }
   } else {
-    document.getElementById('approveForm').style.display = 'inline';
-    document.getElementById('declineForm').style.display = 'inline';
-    document.getElementById('rescheduleBtn').style.display = 'none';
-    document.getElementById('closeReviewBtn').style.display = 'inline-block';
+    if (document.getElementById('approveForm')) document.getElementById('approveForm').style.display = 'inline';
+    if (document.getElementById('declineForm')) document.getElementById('declineForm').style.display = 'inline';
+    if (document.getElementById('endSessionForm')) document.getElementById('endSessionForm').style.display = 'none';
+    if (rescheduleEl) rescheduleEl.style.display = 'none';
+    if (closeEl) closeEl.style.display = 'inline-block';
+  }
+  // If appointment is already ongoing, ensure approve/decline/start are hidden and show In Session badge
+  if (status === 'ongoing') {
+    if (document.getElementById('approveForm')) document.getElementById('approveForm').style.display = 'none';
+    if (document.getElementById('declineForm')) document.getElementById('declineForm').style.display = 'none';
+    if (document.getElementById('startSessionForm')) document.getElementById('startSessionForm').style.display = 'none';
+    // Set end form action - derive from startUrl if available, fallback to RESTful path
+    var endForm = document.getElementById('endSessionForm');
+    if (endForm) {
+      var endAction = '';
+      if (typeof startUrl !== 'undefined' && startUrl) {
+        try {
+          endAction = startUrl.replace(/\/start(\/?$)/, '/end');
+        } catch(e) { endAction = ''; }
+      }
+      if (!endAction) endAction = '/Head/appointments/' + appointmentId + '/end';
+      endForm.action = endAction;
+      endForm.style.display = 'inline-block';
+    }
+    var footer = document.querySelector('#reviewAppointmentModal .modal-footer');
+    if (footer && !document.getElementById('inSessionBadge')) {
+      var badge = document.createElement('span');
+      badge.className = 'badge badge-warning';
+      badge.id = 'inSessionBadge';
+      badge.style.marginRight = '8px';
+      badge.innerText = 'In Session';
+      footer.insertBefore(badge, footer.firstChild);
+    }
+  }
+  // If appointment is already completed, hide action buttons and show Completed badge
+  if (status === 'completed') {
+    if (document.getElementById('approveForm')) document.getElementById('approveForm').style.display = 'none';
+    if (document.getElementById('declineForm')) document.getElementById('declineForm').style.display = 'none';
+    if (document.getElementById('cancelForm')) document.getElementById('cancelForm').style.display = 'none';
+    if (document.getElementById('startSessionForm')) document.getElementById('startSessionForm').style.display = 'none';
+    if (document.getElementById('endSessionForm')) document.getElementById('endSessionForm').style.display = 'none';
+    var footer = document.querySelector('#reviewAppointmentModal .modal-footer');
+  // remove in-session badge if present
+  var inBadge = document.getElementById('inSessionBadge');
+  if (inBadge && inBadge.parentNode) inBadge.parentNode.removeChild(inBadge);
+  // remove cancelled badge if present (ensure Completed does not also show Cancelled)
+  var cancelledBadge = document.getElementById('cancelledBadge');
+  if (cancelledBadge && cancelledBadge.parentNode) cancelledBadge.parentNode.removeChild(cancelledBadge);
+    if (footer && !document.getElementById('completedBadge')) {
+      var cbadge = document.createElement('span');
+      cbadge.className = 'badge badge-success';
+      cbadge.id = 'completedBadge';
+      cbadge.style.marginRight = '8px';
+      cbadge.innerText = 'Complete';
+      footer.insertBefore(cbadge, footer.firstChild);
+    }
+  }
+  // Show cancel only when appointment is pending
+  if (document.getElementById('cancelForm')) {
+    // show cancel only for pending
+    if (status === 'pending') {
+      document.getElementById('cancelForm').style.display = 'inline-block';
+    } else {
+      document.getElementById('cancelForm').style.display = 'none';
+    }
+  }
+  // If appointment is cancelled, hide all action buttons and show a Cancelled badge
+  if (status === 'cancelled') {
+    if (document.getElementById('approveForm')) document.getElementById('approveForm').style.display = 'none';
+    if (document.getElementById('declineForm')) document.getElementById('declineForm').style.display = 'none';
+    if (document.getElementById('startSessionForm')) document.getElementById('startSessionForm').style.display = 'none';
+    if (document.getElementById('endSessionForm')) document.getElementById('endSessionForm').style.display = 'none';
+    if (document.getElementById('cancelForm')) document.getElementById('cancelForm').style.display = 'none';
+    if (rescheduleEl) rescheduleEl.style.display = 'none';
+    if (closeEl) closeEl.style.display = 'inline-block';
+
+    var footer = document.querySelector('#reviewAppointmentModal .modal-footer');
+    if (footer && !document.getElementById('cancelledBadge')) {
+      var badge = document.createElement('span');
+      badge.className = 'badge badge-danger';
+      badge.id = 'cancelledBadge';
+      badge.style.marginRight = '8px';
+      badge.innerText = 'Cancelled';
+      footer.insertBefore(badge, footer.firstChild);
+    }
   }
 }
 
@@ -76,3 +225,145 @@ function closeReviewModal() {
 
 // Reschedule function removed
 </script>
+<script>
+// Attach submit handler to Start Session form to perform AJAX POST
+document.addEventListener('DOMContentLoaded', function () {
+  var startForm = document.getElementById('startSessionForm');
+  if (!startForm) return;
+
+  startForm.addEventListener('submit', function (e) {
+    e.preventDefault();
+    var action = startForm.action;
+    if (!action) return;
+
+    // Gather CSRF token from form
+    var tokenInput = startForm.querySelector('input[name="_token"]');
+    var token = tokenInput ? tokenInput.value : '';
+    // Also try to read Laravel XSRF-TOKEN cookie (some setups use this)
+    function getCookie(name) {
+      var v = document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)');
+      return v ? v.pop() : '';
+    }
+    var xsrf = getCookie('XSRF-TOKEN');
+
+    // Disable button to prevent double submits
+    var btn = document.getElementById('startSessionBtn');
+    if (btn) { btn.disabled = true; btn.innerText = 'Starting...'; }
+
+    fetch(action, {
+      method: 'POST',
+      credentials: 'same-origin', // ensure cookies (session) are sent
+      headers: (function(){
+        var h = {
+          'Content-Type': 'application/json',
+          'X-CSRF-TOKEN': token,
+          'X-Requested-With': 'XMLHttpRequest'
+        };
+        if (xsrf) {
+          try { h['X-XSRF-TOKEN'] = decodeURIComponent(xsrf); } catch(e){ h['X-XSRF-TOKEN'] = xsrf; }
+        }
+        return h;
+      })(),
+      body: JSON.stringify({})
+    }).then(function (res) {
+      if (!res.ok) {
+        // try to read response body for debugging
+        return res.text().then(function (text) {
+          throw new Error('Server returned ' + res.status + ': ' + text);
+        });
+      }
+      return res.json().catch(function () { return { success: true }; });
+    }).then(function (data) {
+      // On success, update modal UI to show 'In Session' and hide approve/decline
+      if (document.getElementById('approveForm')) document.getElementById('approveForm').style.display = 'none';
+      if (document.getElementById('declineForm')) document.getElementById('declineForm').style.display = 'none';
+      if (startForm) startForm.style.display = 'none';
+
+      // Insert an In Session badge into modal footer
+      var footer = document.querySelector('#reviewAppointmentModal .modal-footer');
+      if (footer) {
+        // remove any cancelled badge left over
+        var cb = document.getElementById('cancelledBadge');
+        if (cb && cb.parentNode) cb.parentNode.removeChild(cb);
+        var badge = document.createElement('span');
+        badge.className = 'badge badge-warning';
+        badge.id = 'inSessionBadge';
+        badge.style.marginRight = '8px';
+        badge.innerText = 'In Session';
+        footer.insertBefore(badge, footer.firstChild);
+      }
+
+      // Try to update in-page appointment status cell if present
+      if (window.currentAppointmentId) {
+        var statusEl = document.querySelector('[data-appointment-status="' + window.currentAppointmentId + '"]');
+        if (statusEl) statusEl.innerText = 'In Session';
+      }
+
+      // Optionally show a notification or keep modal open
+    }).catch(function (err) {
+      console.error('Start session failed', err);
+      var msg = err && err.message ? err.message : 'Failed to start session. Refresh the page and try again.';
+      alert(msg);
+    }).finally(function () {
+      if (btn) { btn.disabled = false; btn.innerText = 'Start Session'; }
+    });
+  });
+});
+</script>
+    <script>
+    // Attach submit handler to End Session form to perform AJAX POST (Mark as Done)
+    document.addEventListener('DOMContentLoaded', function () {
+      var endForm = document.getElementById('endSessionForm');
+      if (!endForm) return;
+
+      endForm.addEventListener('submit', function (e) {
+        e.preventDefault();
+        var action = endForm.action;
+        if (!action) return;
+
+        var tokenInput = endForm.querySelector('input[name="_token"]');
+        var token = tokenInput ? tokenInput.value : '';
+
+  var btn = document.getElementById('endSessionBtn');
+  if (btn) { btn.disabled = true; btn.innerText = 'Completing...'; }
+
+        fetch(action, {
+          method: 'POST',
+          credentials: 'same-origin',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': token,
+            'X-Requested-With': 'XMLHttpRequest'
+          },
+          body: JSON.stringify({})
+        }).then(function (res) {
+          if (!res.ok) return res.text().then(function (text) { throw new Error('Server returned ' + res.status + ': ' + text); });
+          return res.json().catch(function () { return { success: true }; });
+        }).then(function (data) {
+          // Update modal UI to show Completed state
+          var footer = document.querySelector('#reviewAppointmentModal .modal-footer');
+          if (footer) {
+            // remove any cancelled badge left over
+            var cb = document.getElementById('cancelledBadge');
+            if (cb && cb.parentNode) cb.parentNode.removeChild(cb);
+            var badge = document.getElementById('inSessionBadge');
+            if (badge) { badge.innerText = 'Completed'; badge.className = 'badge badge-success'; }
+            // hide end form
+            if (endForm) endForm.style.display = 'none';
+          }
+
+          // Update in-page status cell if present
+          if (window.currentAppointmentId) {
+            var statusEl = document.querySelector('[data-appointment-status="' + window.currentAppointmentId + '"]');
+            if (statusEl) statusEl.innerText = 'Complete';
+          }
+
+        }).catch(function (err) {
+          console.error('End session failed', err);
+          alert(err && err.message ? err.message : 'Failed to mark session as done.');
+        }).finally(function () {
+          if (btn) { btn.disabled = false; btn.innerText = 'Complete'; }
+        });
+      });
+    });
+    </script>

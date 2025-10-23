@@ -45,7 +45,7 @@
                     'Student.settings.index' => 'Settings',
                 ];
 
-                $page = $pages[Route::currentRouteName()] ?? 'Welcome';
+                $page = $pages[Route::currentRouteName()] ?? '';
             ?>
             <?php echo e($page); ?>
 

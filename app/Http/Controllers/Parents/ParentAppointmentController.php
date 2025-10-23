@@ -7,16 +7,22 @@ use App\Models\Appointments;
 use Illuminate\Http\Request;
 use App\Models\Student;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 class ParentAppointmentController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Appointments::with(['students', 'counselor', 'requester', 'type']);
+        $query = Appointments::with(['students', 'counselor', 'requester', 'type', 'reschedules']);
         $query->where('requester_id', auth()->id());
 
         if ($request->has('status') && $request->status != 'all') {
-            $query->where('status', $request->status);
+            $status = $request->status;
+            if (strtolower($status) === 'pending') {
+                $query->whereIn('status', ['Pending', 'Rescheduled']);
+            } else {
+                $query->whereRaw('LOWER(status) = ?', [strtolower($status)]);
+            }
         }
         if ($request->has('search') && $request->search != '') {
             $search = $request->search;
@@ -96,6 +102,61 @@ class ParentAppointmentController extends Controller
         $appointment->students()->attach($request->student_id);
 
         return redirect()->route('Parent.appointments.index')->with('success', 'Appointment requested successfully!');
+    }
+
+    public function startSession(Request $request, $id)
+    {
+        $appointment = Appointments::findOrFail($id);
+        $appointment->status = 'Ongoing';
+        if (Schema::hasColumn($appointment->getTable(), 'started_at')) {
+            $appointment->started_at = now();
+        }
+        $appointment->save();
+
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json(['success' => true, 'status' => 'Ongoing']);
+        }
+
+        return redirect()->back()->with('success', 'Session started.');
+    }
+
+    public function endSession(Request $request, $id)
+    {
+        $appointment = Appointments::findOrFail($id);
+        $appointment->status = 'Completed';
+        if (Schema::hasColumn($appointment->getTable(), 'ended_at')) {
+            $appointment->ended_at = now();
+        }
+        $appointment->save();
+
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json(['success' => true, 'status' => 'Completed']);
+        }
+
+        return redirect()->back()->with('success', 'Session ended.');
+    }
+
+    public function cancel(Request $request, $id)
+    {
+        $appointment = Appointments::findOrFail($id);
+        if (strtolower($appointment->status) !== 'pending') {
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json(['success' => false, 'message' => 'Only pending appointments can be cancelled.'], 400);
+            }
+            return redirect()->back()->withErrors(['status' => 'Only pending appointments can be cancelled.']);
+        }
+
+        $appointment->status = 'Cancelled';
+        if (Schema::hasColumn($appointment->getTable(), 'cancelled_at')) {
+            $appointment->cancelled_at = now();
+        }
+        $appointment->save();
+
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json(['success' => true, 'status' => 'Cancelled']);
+        }
+
+        return redirect()->back()->with('success', 'Appointment cancelled successfully.');
     }
 }
 

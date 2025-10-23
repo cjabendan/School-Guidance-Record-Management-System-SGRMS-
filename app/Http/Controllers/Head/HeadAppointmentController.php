@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Head;
 
 use App\Http\Controllers\Controller;
 use App\Models\Appointments;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\Request;
 
 class HeadAppointmentController extends Controller
@@ -22,42 +24,87 @@ class HeadAppointmentController extends Controller
     }
     public function move(Request $request, $id)
     {
-        $appointment = Appointments::findOrFail($id);
-        // Convert UTC to Asia/Manila timezone
-        $utcDate = $request->input('appointment_datetime');
-        $manilaDate = \Carbon\Carbon::parse($utcDate)->setTimezone('Asia/Manila');
-        $appointment->appointment_datetime = $manilaDate;
-        $appointment->save();
-        return response()->json(['success' => true]);
+    $appointment = Appointments::findOrFail($id);
+    // Convert UTC to Asia/Manila timezone
+    $utcDate = $request->input('appointment_datetime');
+    $manilaDate = \Carbon\Carbon::parse($utcDate)->setTimezone('Asia/Manila');
+    $appointment->appointment_datetime = $manilaDate;
+    $appointment->save();
+    return response()->json(['success' => true]);
     }
     public function index(Request $request)
     {
 
-        $query = Appointments::with(['students', 'counselor', 'requester', 'type']);
+        $query = Appointments::with(['students', 'counselor', 'requester', 'type', 'reschedules']);
 
-        // Apply filters if any
-        if ($request->has('status') && $request->status != 'all') {
-            $query->where('status', $request->status);
+        // Apply filters if any (case-insensitive)
+        $statusFilter = $request->has('status') ? strtolower($request->status) : null;
+        if ($statusFilter && $statusFilter !== 'all') {
+            // When filtering for pending, include 'Rescheduled' since they're awaiting approval
+            if ($statusFilter === 'pending') {
+                $query->whereIn('status', ['Pending', 'Rescheduled']);
+            } else {
+                // Use a case-insensitive WHERE to match ENUM values like 'Approved', 'Completed', etc.
+                $query->whereRaw('LOWER(`status`) = ?', [$statusFilter]);
+            }
+
+            // If filtering completed, optionally restrict by end_datetime if that column exists
+            if ($statusFilter === 'completed' && Schema::hasColumn((new Appointments)->getTable(), 'end_datetime')) {
+                $query->where('end_datetime', '>=', now());
+            }
         }
 
         if ($request->has('search') && $request->search != '') {
             $search = $request->search;
             $query->where(function ($q) use ($search) {
                 $q->where('appointment_id', 'like', '%' . $search . '%')
-                    ->orWhereHas('type', function ($typeQuery) use ($search) {
-                        $typeQuery->where('type_name', 'like', '%' . $search . '%');
-                    });
+                  ->orWhereHas('type', function ($typeQuery) use ($search) {
+                      $typeQuery->where('type_name', 'like', '%' . $search . '%');
+                  });
             });
         }
 
-        // Exclude past events automatically if filtering by events
-        $query->when($request->status === 'completed', function ($q) {
-            $q->where('end_datetime', '>=', now());
-        });
+        // NOTE: completed filtering and end_datetime handling is done above when normalizing status
 
         $appointments = $query->orderBy('appointment_datetime', 'desc')->get();
 
-        $counselors = \App\Models\User::whereIn('role', ['Counselor', 'Head', 'admin'])->get();
+        // Attach avatar URLs for counselor and requester to simplify client rendering
+        $appointments->transform(function ($a) {
+            
+            // counselor avatar
+            $a->counselor_avatar = null;
+            if ($a->counselor) {
+                // Check the 'profile_image' column on the User model
+                if (!empty($a->counselor->profile_image)) {
+                    // ✅ CORRECTED: Use asset() with the specified base path and 'profile_image' column
+                    // This assumes files are stored in public/images/user/
+                    $a->counselor_avatar = asset('images/user/' . $a->counselor->profile_image);
+                } else {
+                    $a->counselor_avatar = asset('images/default-avatar.png');
+                }
+            } else {
+                $a->counselor_avatar = asset('images/default-avatar.png');
+            }
+
+            // requester avatar (who created the appointment)
+            $a->requester_avatar = null;
+            if ($a->requester) {
+                // ⚠️ NOTE: The original requester logic used 'profile_photo_path' 
+                // I'm updating it here to use 'profile_image' for consistency 
+                // based on your last comment, but check your 'requester' model's column.
+                if (!empty($a->requester->profile_image)) { 
+                    $a->requester_avatar = asset('images/user/' . $a->requester->profile_image);
+                } else {
+                    $a->requester_avatar = asset('images/default-avatar.png');
+                }
+            } else {
+                $a->requester_avatar = asset('images/default-avatar.png');
+            }
+
+            return $a;
+        });
+
+    $counselors = \App\Models\User::whereIn('role', ['Counselor', 'Head', 'admin'])->get();
         $types = \App\Models\AppointmentType::all();
         $children = \App\Models\Student::with('user')->get();
 
@@ -82,36 +129,30 @@ class HeadAppointmentController extends Controller
         $start = $request->query('start');
         $end = $request->query('end');
 
-        $query = Appointments::where('status', 'Approved')
-            ->whereNotNull('appointment_datetime')
-            ->whereDate('appointment_datetime', '>=', $start)
-            ->whereDate('appointment_datetime', '<=', $end)
-            ->with(['type', 'requester', 'counselor', 'students.user']);
-
-        // Optional: filter by specific counselor if requested
-        if ($request->has('counselor_id') && $request->counselor_id != 'all') {
-            $query->where('counselor_id', $request->counselor_id);
-        }
-
-        $appointments = $query->get()->map(function ($a) {
-            return [
-                'appointment_id' => $a->appointment_id,
-                'title' => $a->type->type_name ?? 'Appointment',
-                'start' => $a->appointment_datetime ? $a->appointment_datetime->toIso8601String() : null,
-                'end' => $a->appointment_datetime ? $a->appointment_datetime->copy()->addHour()->toIso8601String() : null,
-                'allDay' => false,
-                'extendedProps' => [
-                    'status' => $a->status,
-                    'requester' => $a->requester->name ?? 'N/A',
-                    'counselor' => $a->counselor ? $a->counselor->first_name . ' ' . $a->counselor->last_name : 'N/A',
-                    'student' => $a->students->map(fn($s) => $s->user->first_name . ' ' . $s->user->last_name)->join(', '),
-                ]
-            ];
-        });
+        $appointments = Appointments::where('status', 'Approved')
+            ->where(function ($query) use ($start, $end) {
+                $query->where(function ($q) use ($start, $end) {
+                    $q->whereNotNull('appointment_datetime')
+                        ->whereDate('appointment_datetime', '>=', $start)
+                        ->whereDate('appointment_datetime', '<=', $end);
+                });
+            })
+            ->get()
+            ->map(function ($a) {
+                return [
+                    'Type' => $a->type,
+                    'start' => \Carbon\Carbon::parse($a->appointment_datetime)->toIso8601String(),
+                    'end'   => \Carbon\Carbon::parse($a->appointment_datetime)->addHours(1)->toIso8601String(),
+                    'allDay' => false,
+                    'extendedProps' => [
+                        'status' => $a->status,
+                        'requested' => $a->requester->name,
+                    ]
+                ];
+            });
 
         return response()->json($appointments);
     }
-
 
     public function approve($id)
     {
@@ -133,6 +174,69 @@ class HeadAppointmentController extends Controller
         $appointment->save();
 
         return redirect()->back()->with('success', 'Appointment declined successfully.');
+    }
+    
+    public function startSession(Request $request, $id)
+    {
+        $appointment = Appointments::findOrFail($id);
+        $appointment->status = 'Ongoing';
+        // if started_at column exists in the table, set it
+        if (Schema::hasColumn($appointment->getTable(), 'started_at')) {
+            $appointment->started_at = now();
+        }
+        $appointment->save();
+
+        // Return JSON for AJAX requests, otherwise redirect back
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json(['success' => true, 'status' => 'Ongoing']);
+        }
+
+        return redirect()->back()->with('success', 'Session started.');
+    }
+
+    public function endSession(Request $request, $id)
+    {
+        $appointment = Appointments::findOrFail($id);
+        $appointment->status = 'Completed';
+        // if ended_at column exists in the table, set it
+        if (Schema::hasColumn($appointment->getTable(), 'ended_at')) {
+            $appointment->ended_at = now();
+        }
+        $appointment->save();
+
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json(['success' => true, 'status' => 'Completed']);
+        }
+
+        return redirect()->back()->with('success', 'Session ended.');
+    }
+    
+    /**
+     * Cancel an appointment (Head)
+     */
+    public function cancel(Request $request, $id)
+    {
+        $appointment = Appointments::findOrFail($id);
+        // Only allow cancelling if appointment is currently pending
+        if (strtolower($appointment->status) !== 'pending') {
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json(['success' => false, 'message' => 'Only pending appointments can be cancelled.'], 400);
+            }
+            return redirect()->back()->withErrors(['status' => 'Only pending appointments can be cancelled.']);
+        }
+
+        $appointment->status = 'Cancelled';
+        // optional timestamp if column exists
+        if (Schema::hasColumn($appointment->getTable(), 'cancelled_at')) {
+            $appointment->cancelled_at = now();
+        }
+        $appointment->save();
+
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json(['success' => true, 'status' => 'Cancelled']);
+        }
+
+        return redirect()->back()->with('success', 'Appointment cancelled successfully.');
     }
     public function store(Request $request)
     {
@@ -178,7 +282,7 @@ class HeadAppointmentController extends Controller
         // Conflict check: any selected student has appointment at same time
         $studentConflict = Appointments::where('appointment_datetime', $manilaDate)
             ->whereIn('status', ['Pending', 'Approved'])
-            ->whereHas('students', function ($q) use ($request) {
+            ->whereHas('students', function($q) use ($request) {
                 $q->whereIn('student_user_id', $request->student_id);
             })->exists();
 
@@ -247,7 +351,7 @@ class HeadAppointmentController extends Controller
         $studentConflict = Appointments::where('appointment_datetime', $manilaDate)
             ->whereIn('status', ['Pending', 'Approved'])
             ->where('appointment_id', '!=', $appointment->appointment_id)
-            ->whereHas('students', function ($q) use ($request) {
+            ->whereHas('students', function($q) use ($request) {
                 $q->whereIn('student_user_id', $request->student_id);
             })->exists();
 

@@ -12,9 +12,9 @@ class StudentMessageController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request, $user = null)
     {
-        return view('Student.messages');
+        return view('Student.messages', ['selectedUserId' => $user]);
     }
     
 }

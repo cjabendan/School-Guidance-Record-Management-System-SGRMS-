@@ -111,23 +111,204 @@
     font-size: 28px;
 }
 
-.quick-actions {
+/* ===========================
+   To-Do Section 
+   =========================== */
+.todo {
+    width: 60%;
+    height: 250px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    border-radius: 10px;
+    padding: 20px 18px;
+    background: linear-gradient(135deg, #2395ff, #0073e6);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+    overflow: hidden;
+}
+
+/* Header styling */
+.todo-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+}
+
+.todo-header h3 {
+    margin: 0;
+    color: #ffffff;
+    font-size: 1.3rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+/* Form styling */
+.todo-form {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.todo-form input[type="text"] {
+    flex: 1;
+    padding: 10px 12px;
+    border-radius: 6px;
+    border: none;
+    outline: none;
+    background: #f8f9fb;
+    color: #333;
+    font-size: 0.95rem;
+    transition: box-shadow 0.2s ease;
+}
+
+.todo-form input[type="text"]:focus {
+    box-shadow: 0 0 0 2px rgba(35, 149, 255, 0.4);
+}
+
+.todo-form button {
+    background: #004a9f;
+    color: #fff;
+    border: none;
+    padding: 10px 18px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 500;
+    font-size: 0.95rem;
+    transition: background 0.25s ease;
+}
+
+.todo-form button:hover {
+    background: #006be6;
+}
+
+/* ===========================
+   Scroll Styling (Auto-Hide)
+   =========================== */
+.todo-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+/* ===========================
+   Task Item Design
+   =========================== */
+.todo-item {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-radius: 10px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 8px;
+    padding: 10px 12px;
+    margin-bottom: 8px;
+    transition: background 0.2s ease, transform 0.2s ease;
+    animation: fadeIn 0.3s ease;
+}
+
+/* Normal hover only when not editing */
+.todo-item:not(.editing):hover {
+    background: rgba(255, 255, 255, 0.15);
+    transform: translateX(3px);
+}
+
+/* While editing or pressing */
+.todo-item.editing {
+    background: rgba(255, 255, 255, 0.1);
+    transform: none;
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.25);
+}
+
+/* Editable text visual feedback */
+.todo-text[contenteditable="true"] {
+    outline: none;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 3px 5px;
+    border-radius: 4px;
+}
+
+
+/* Better focus and edit styles */
+.todo-text:focus {
+    outline: 2px dashed rgba(255,255,255,0.25);
+    background: rgba(255,255,255,0.03);
+    padding: 2px 4px;
+    border-radius: 4px;
+}
+
+.todo-delete {
+    background: rgba(255,255,255,0.06);
+    border: 0;
+    width: 30px;
+    height: 30px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+}
+
+.todo-delete:hover { background: rgba(255,255,255,0.12); color: #ff6b6b; }
+
+/* subtle empty-state */
+.todo-list:empty::before {
+    content: 'No tasks — add something to get started.';
+    color: rgba(255,255,255,0.85);
+    display: block;
+    text-align: center;
+    padding: 20px 8px;
+    font-size: 0.95rem;
+}
+
+.todo-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
     width: 100%;
 }
 
-.quick-actions .quick-box {
-    width: 100%;
-    height: 100%;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+.todo-text {
+    color: #ffffff;
+    font-size: 0.95rem;
+    outline: none;
+    flex: 1;
+    word-wrap: break-word;
+}
+
+.todo-actions {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.todo-actions .todo-delete {
+    background: transparent;
+    border: none;
+    color: #fff;
+    cursor: pointer;
+    font-size: 1.1rem;
+    transition: transform 0.2s ease, color 0.2s ease;
+}
+
+.todo-actions .todo-delete:hover {
+    color: #ff6961;
+    transform: scale(1.2);
+}
+
+/* Checkbox styling */
+.todo-check {
+    width: 16px;
+    height: 16px;
+    accent-color: #ffffff;
+    cursor: pointer;
+}
+
+/* Subtle animation */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(5px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
 /* Side Container */
-
 .side-container {
     grid-column: 2;
     grid-row: 1 / span 2;

@@ -7,7 +7,8 @@
         <div class="wrapper">
             <div class="box-page">
                 <section class="analytics">
-                      <?php echo $__env->make('Head.dashboard-sections.stats', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
+                    <?php echo $__env->make('Head.dashboard-sections.stats', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
+                    <?php echo $__env->make('Head.dashboard-sections.todo', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
                 </section>
 
                 <!-- ACTIVITIES -->

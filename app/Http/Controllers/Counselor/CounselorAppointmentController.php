@@ -4,18 +4,30 @@ namespace App\Http\Controllers\Counselor;
 
 use App\Http\Controllers\Controller;
 use App\Models\Appointments;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\Request;
 
 class CounselorAppointmentController extends Controller
 {
     public function index(Request $request)
     {
+        $query = Appointments::with(['students', 'counselor', 'requester', 'type', 'reschedules']);
 
-        $query = Appointments::with(['student', 'counselor', 'requester', 'type']);
+        // Apply filters if any (case-insensitive)
+        $statusFilter = $request->has('status') ? strtolower($request->status) : null;
+        if ($statusFilter && $statusFilter !== 'all') {
+            // When filtering for pending, include 'Rescheduled' since they're awaiting approval
+            if ($statusFilter === 'pending') {
+                $query->whereIn('status', ['Pending', 'Rescheduled']);
+            } else {
+                $query->whereRaw('LOWER(`status`) = ?', [$statusFilter]);
+            }
 
-        // Apply filters if any
-        if ($request->has('status') && $request->status != 'all') {
-            $query->where('status', $request->status);
+            // If filtering completed, optionally restrict by end_datetime if that column exists
+            if ($statusFilter === 'completed' && Schema::hasColumn((new Appointments)->getTable(), 'end_datetime')) {
+                $query->where('end_datetime', '>=', now());
+            }
         }
 
         if ($request->has('search') && $request->search != '') {
@@ -28,14 +40,42 @@ class CounselorAppointmentController extends Controller
             });
         }
 
-        // Exclude past events automatically if filtering by events
-        $query->when($request->status === 'completed', function ($q) {
-            $q->where('end_datetime', '>=', now());
-        });
-
         $appointments = $query->orderBy('appointment_datetime', 'desc')->get();
 
-    return view('Counselor.appointments', compact('appointments'));
+        // Attach avatar URLs for counselor and requester to simplify client rendering
+        $appointments->transform(function ($a) {
+            // counselor avatar
+            $a->counselor_avatar = null;
+            if ($a->counselor) {
+                if (!empty($a->counselor->profile_image)) {
+                    $a->counselor_avatar = asset('images/user/' . $a->counselor->profile_image);
+                } else {
+                    $a->counselor_avatar = asset('images/default-avatar.png');
+                }
+            } else {
+                $a->counselor_avatar = asset('images/default-avatar.png');
+            }
+
+            // requester avatar
+            $a->requester_avatar = null;
+            if ($a->requester) {
+                if (!empty($a->requester->profile_image)) {
+                    $a->requester_avatar = asset('images/user/' . $a->requester->profile_image);
+                } else {
+                    $a->requester_avatar = asset('images/default-avatar.png');
+                }
+            } else {
+                $a->requester_avatar = asset('images/default-avatar.png');
+            }
+
+            return $a;
+        });
+
+        $counselors = \App\Models\User::whereIn('role', ['Counselor', 'Head', 'admin'])->get();
+        $types = \App\Models\AppointmentType::all();
+        $children = \App\Models\Student::with('user')->get();
+
+        return view('Counselor.appointments', compact('appointments', 'counselors', 'types', 'children'));
     }
 
     public function reschedule(Request $request, $id)
@@ -160,6 +200,64 @@ class CounselorAppointmentController extends Controller
             'reason' => $appointment->reason,
             'appointment_datetime' => $appointment->appointment_datetime ? $appointment->appointment_datetime->format('Y-m-d\TH:i') : null,
         ]);
+    }
+
+    public function startSession(Request $request, $id)
+    {
+        $appointment = Appointments::findOrFail($id);
+        $appointment->status = 'Ongoing';
+        if (Schema::hasColumn($appointment->getTable(), 'started_at')) {
+            $appointment->started_at = now();
+        }
+        $appointment->save();
+
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json(['success' => true, 'status' => 'Ongoing']);
+        }
+
+        return redirect()->back()->with('success', 'Session started.');
+    }
+
+    public function endSession(Request $request, $id)
+    {
+        $appointment = Appointments::findOrFail($id);
+        $appointment->status = 'Completed';
+        if (Schema::hasColumn($appointment->getTable(), 'ended_at')) {
+            $appointment->ended_at = now();
+        }
+        $appointment->save();
+
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json(['success' => true, 'status' => 'Completed']);
+        }
+
+        return redirect()->back()->with('success', 'Session ended.');
+    }
+
+    /**
+     * Cancel an appointment (Counselor)
+     */
+    public function cancel(Request $request, $id)
+    {
+        $appointment = Appointments::findOrFail($id);
+        if (strtolower($appointment->status) !== 'pending') {
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json(['success' => false, 'message' => 'Only pending appointments can be cancelled.'], 400);
+            }
+            return redirect()->back()->withErrors(['status' => 'Only pending appointments can be cancelled.']);
+        }
+
+        $appointment->status = 'Cancelled';
+        if (Schema::hasColumn($appointment->getTable(), 'cancelled_at')) {
+            $appointment->cancelled_at = now();
+        }
+        $appointment->save();
+
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json(['success' => true, 'status' => 'Cancelled']);
+        }
+
+        return redirect()->back()->with('success', 'Appointment cancelled successfully.');
     }
 
     public function store(Request $request)

@@ -9,13 +9,7 @@
                 <div class="table-management">
                     <div class="table-nav">
                         <div class="table-filter">
-                            <div class="filters">
-                                <li>
-                                    <a href="#" class="active" data-type="all">All</a>
-                                    <a href="#" data-type="link">Child Link</a>
-                                    <a href="#" data-type="document">Documents</a>
-                                </li>
-                            </div>
+                          
                         </div>
                     </div>
                     <button class="toggle-btn" id="toggle-view-btn">

@@ -35,11 +35,23 @@
 <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
 
 <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const firstInput = document.querySelector('input[type="text"]');
+        if (firstInput) firstInput.focus();
+    });
+
     function moveNext(el) {
         if (el.value.length === 1) {
             const next = el.nextElementSibling;
-            if (next) next.focus();
+            if (next && next.tagName === 'INPUT') next.focus();
         }
     }
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Backspace' && e.target.tagName === 'INPUT' && e.target.value === '') {
+            const prev = e.target.previousElementSibling;
+            if (prev && prev.tagName === 'INPUT') prev.focus();
+        }
+    });
 </script>
 <?php /**PATH C:\Users\Administrator\School-Guidance-Record-Management-System-SGRMS\resources\views/livewire/modals/auth-modal.blade.php ENDPATH**/ ?>

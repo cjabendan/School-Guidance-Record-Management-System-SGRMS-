@@ -27,8 +27,3 @@
      </div>
 
  </div>
- <div class="quick-actions">
-     <div class="quick-box">
-
-     </div>
- </div>

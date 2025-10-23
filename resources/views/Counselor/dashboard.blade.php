@@ -7,18 +7,24 @@
         @include('partials.navbar')
         <div class="wrapper">
             <div class="dashboard-content">
-                <div class="welcome-box">
+                <section class="welcome-box">
                     @include('Counselor.dashboard-sections.welcome-stats')
                     @include('Counselor.dashboard-sections.todo')
-                </div>
+                </section>
 
-            {{-- <div class="appointment-container">
-                    <div class="flex-bottom">
-                        <div class="appointments-box">
-                           @include('Counselor.dashboard-sections.appointments') 
-                        </div>
+                <!-- RIGHT COLUMN: Messages (spans both rows) -->
+                <section class="side-container">
+                    <div class="flex-side">
+                        @include('Counselor.dashboard-sections.messages')
                     </div>
-                </div> --}}
+                </section>
+
+                <!-- LEFT BOTTOM: Appointments -->
+                <section class="bottom-container">
+                    <div class="flex-bottom">
+                        @include('Counselor.dashboard-sections.appointments')
+                    </div>
+                </section>
             </div>
         </div>
 

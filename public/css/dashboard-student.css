@@ -23,3 +23,416 @@
     display: flex;
     flex-direction: column;
 }
+
+.welcome-box {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+}
+
+/* ===========================
+   Welcome Section
+   =========================== */
+.welcome {
+    width: 100%;
+    height: 250px;
+    display: flex;
+    padding: 15px;
+    margin: 1px;
+    flex-direction: column;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.welcome .Student-name {
+    font-size: 1.8rem;
+    font-weight: 600;
+    color: #1ea7ff;
+    margin-bottom: 8px;
+}
+
+.welcome-note {
+    font-size: 1.25rem;
+    color: #747373;
+    margin-left: 2px;
+    margin-bottom: 8px;
+}
+
+.box-page {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    grid-template-rows: auto 1fr;
+    gap: 15px;
+    height: 100%;
+    padding: 1px 1px;
+}
+
+.analytics {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    grid-column: 1;
+    grid-row: 1;
+    border-radius: 10px;
+    gap: 15px;
+}
+
+/* Side Container */
+
+.side-container {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    min-height: 0;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    height: 100%;
+    width: 100%;
+    overflow: auto;
+}
+
+.flex-side {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.messages-box h1 {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: #003060;
+    margin-bottom: 5px;
+}
+
+.messages-box {
+    height: 100%;
+    padding: 20px;
+}
+
+.messages-lists {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 10px;
+    height: 100%; /* Take full height of parent */
+    max-height: 450px; /* Set a max height for scrolling, adjust as needed */
+    overflow-y: auto;
+}
+
+.message-item {
+    display: flex;
+    align-items: center;
+    flex-direction: row;
+    justify-content: space-between;
+    padding: 10px 5px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.message-item:hover {
+    background-color: #f5f5f5;
+}
+
+.message-item .user-photo {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+}
+
+.message-content {
+    display: flex;
+    flex-direction: column;
+}
+
+.message-sender, .request-sender {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #003060;
+    letter-spacing: 0.8px;
+}
+
+.message-preview, .request-preview {
+    font-size: 1rem;
+    color: #848688;
+    max-width: 240px; /* Limit width */
+    white-space: nowrap; /* Prevent line breaks */
+    overflow: hidden; /* Hide overflow text */
+    text-overflow: ellipsis; /* Add ellipsis (...) */
+}
+
+/* Bottom Container */
+
+.bottom-container {
+    grid-column: 1;
+    grid-row: 2;
+    height: 100%;
+    min-height: 0;
+}
+
+.flex-bottom {
+    display: flex;
+    flex-direction: row;
+    gap: 8px;
+    height: 100%;
+}
+
+.appointments-box {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.appointments-header,
+.requests-header {
+    border-bottom: 1px solid #e0e6ed;
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    height: 90px;
+    padding: 0 30px;
+}
+
+.appointments-header h2,
+.requests-header h2 {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: #003060;
+}
+
+.appointments-header .dropdown {
+    width: 130px;
+      line-height: 1.2;
+    box-sizing: border-box;
+    border: none;
+    background-color: #1ea7ff;
+    font-size: 1rem;
+    border-radius: 7px;
+    color: #ffffff;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 500;
+    justify-content: center;
+    align-self: center;
+    padding: 10px 32px 10px 15px; /* Add right padding for icon */
+    appearance: none; /* Remove default arrow */
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg width='16' height='16' fill='white' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M4 6l4 4 4-4' stroke='white' stroke-width='2' fill='none'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 16px 16px;
+    outline: none;
+    box-shadow: none;
+}
+
+.appointments-table {
+    position: relative;
+    height: 100%;
+}
+
+.appointments-table table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.appointment-card {
+    height: 120px;
+}
+
+.appointments-table tr,
+.appointments-table td {
+    background: #fff !important;
+}
+
+.appointment-time-col {
+    text-align: center !important;
+    width: 140px;
+    color: #848688;
+    font-weight: 500;
+    font-size: 1.1rem;
+    vertical-align: middle;
+}
+
+.appointment-details-col {
+    text-align: left !important;
+    vertical-align: middle;
+}
+
+.appointment-details-flex {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding-left: 10px;
+}
+
+.appointment-type {
+    font-size: 1.2em;
+    font-weight: 500;
+    color: #003060;
+    letter-spacing: 1px;
+}
+
+.appointment-actions-col {
+    text-align: left !important;
+    width: 180px;
+    vertical-align: middle;
+}
+
+.appointment-date {
+    font-size: 1em;
+    color: #003060;
+    margin-bottom: 6px;
+}
+
+.appointment-action .appointment-link {
+    color: #1ea7ff;
+    border-radius: 5px;
+    padding: 6px 0;
+    text-decoration: none;
+    font-size: 0.95em;
+    transition: background 0.2s;
+    background: none;
+    border: none;
+}
+
+.appointment-action .appointment-link:hover {
+    color: #0080ff;
+}
+
+/* Remove conflicting rules */
+.appointments-table th,
+.appointments-table td {
+    /* Remove text-align: left; if present */
+    padding: 12px 8px;
+}
+
+.no-appointments-cell {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3em;
+    color: #848688;
+    background: #fff;
+    z-index: 2;
+    border-radius: 10px;
+    padding: 0;
+}
+
+.requests-box {
+    display: flex;
+    width: 350px;
+    flex-direction: column;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.requests-table {
+    position: relative;
+    height: 100%;
+}
+
+.requests-item {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: background-color 0.2s;
+    height: 120px;
+    align-items: left;
+    padding: 5px 30px;
+}
+
+.request-content {
+    display: flex;
+    align-items: center;
+    padding: 10px 5px;
+    gap: 15px;
+}
+
+.requests-item .user-photo {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+}
+
+.request-actions {
+    display: flex;
+    flex-direction: row;
+    gap: 8px;
+    justify-content: center;
+    align-content: center;
+}
+
+.review-btn {
+    background-color: #1ea7ff;
+    color: #ffffff;
+    border: none;
+    border-radius: 7px;
+    padding: 6px 40px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background-color 0.2s;
+}
+
+.review-btn:hover {
+    background-color: #0080ff;
+}
+
+.reject-btn {
+    background-color: #ffffff;
+    color: #4a4a4a;
+    border: .5px solid #0000004f;
+    border-radius: 7px;
+    padding: 6px 40px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background-color 0.2s;
+}
+
+.reject-btn:hover {
+    background-color: #ff4d4d;
+    border: .5px solid #ffffff;
+    color: #ffffff;
+}
+
+/* Counselor cards */
+.dashboard-cards {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    margin: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.card {
+    flex: 1 1 250px; /* allows flex-grow and shrink, min 250px */
+    background-color: #fff;
+    padding: 1.2rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    text-align: center;
+    min-width: 250px;
+}
+
+.card h4 {
+    margin-bottom: 0.5rem;
+    font-size: 1.1rem;
+    color: #444;
+}
+
+.card p {
+    font-size: 1.8rem;
+    font-weight: bold;
+    color: #007bff;
+}
+
+/* Appointments Table Column Alignment */

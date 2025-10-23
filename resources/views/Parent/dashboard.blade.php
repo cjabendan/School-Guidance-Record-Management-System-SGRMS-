@@ -71,7 +71,7 @@
 
                         </div>
                         <div class="notifications-container">
-
+                            @include('Parent.dashboard-sections.messages')
                         </div>
                     </div>
 
@@ -79,36 +79,37 @@
 
             </div>
         </div>
-        @push('scripts')
-            <script>
-                document.addEventListener('DOMContentLoaded', function() {
-                    let current = 0;
-                    const slides = document.querySelectorAll('#announcement-slideshow .slide');
-                    const dots = document.querySelectorAll('.announcement-dots .dot');
-                    if (!slides.length) return;
+    </section>
+    @push('scripts')
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                let current = 0;
+                const slides = document.querySelectorAll('#announcement-slideshow .slide');
+                const dots = document.querySelectorAll('.announcement-dots .dot');
+                if (!slides.length) return;
 
-                    function showSlide(idx) {
-                        slides.forEach((s, i) => {
-                            s.classList.toggle('active', i === idx);
-                        });
-                        dots.forEach((d, i) => {
-                            d.classList.toggle('active', i === idx);
-                        });
-                    }
-
-                    dots.forEach((dot, i) => {
-                        dot.addEventListener('click', function() {
-                            current = i;
-                            showSlide(current);
-                        });
+                function showSlide(idx) {
+                    slides.forEach((s, i) => {
+                        s.classList.toggle('active', i === idx);
                     });
+                    dots.forEach((d, i) => {
+                        d.classList.toggle('active', i === idx);
+                    });
+                }
 
-                    setInterval(function() {
-                        current = (current + 1) % slides.length;
+                dots.forEach((dot, i) => {
+                    dot.addEventListener('click', function() {
+                        current = i;
                         showSlide(current);
-                    }, 7000);
+                    });
                 });
-            </script>
-        @endpush
 
-    @endsection
+                setInterval(function() {
+                    current = (current + 1) % slides.length;
+                    showSlide(current);
+                }, 7000);
+            });
+        </script>
+    @endpush
+
+@endsection

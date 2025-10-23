@@ -13,29 +13,10 @@ class CounselorMessageController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request, $user = null)
     {
-        return view('Counselor.messages');
+        return view('Counselor.messages', ['selectedUserId' => $user]);
     }
 
-
-    /**
-     * Search users for new conversation
-     */
-    public function searchUsers(Request $request)
-    {
-        $query = $request->input('query');
-        $user = Auth::user();
-
-        $users = User::whereIn('role', ['counselor', 'parent'])
-            ->where('status', 'active')
-            ->where(function ($q) use ($query) {
-                $q->where('first_name', 'like', "%$query%")
-                    ->orWhere('last_name', 'like', "%$query%");
-            })
-            ->limit(5)
-            ->get();
-
-        return response()->json($users);
-    }
+   
 }

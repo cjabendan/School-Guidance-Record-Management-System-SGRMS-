@@ -70,7 +70,13 @@
             {{-- Decline reason removed from table, only shown in modal --}}
         </div>
         <div class="table-col actions">
-            <a href="#" title="View" class="view-btn"
+            @php
+                $latestReq = $appointment->reschedules()->first();
+                $resStatus = $latestReq ? $latestReq->status : '';
+                $prevText = $appointment->last_rescheduled_at ? $appointment->last_rescheduled_at->setTimezone('Asia/Manila')->format('M d, Y h:i A') : '';
+                $reqText = ($latestReq && !empty($latestReq->proposed_datetime)) ? \Carbon\Carbon::parse($latestReq->proposed_datetime)->setTimezone('Asia/Manila')->format('M d, Y h:i A') : '';
+            @endphp
+            <a href="#" title="View" class="view-btn" data-reschedule-status="{{ $resStatus }}" data-prev="{{ $prevText }}" data-req="{{ $reqText }}"
                 onclick="openReviewModal(
                     {{ $appointment->appointment_id }},
                     `<div><strong>Type:</strong> {{ $appointment->type ? $appointment->type->type_name : 'N/A' }}<br>
@@ -95,15 +101,24 @@
                     </div>`,
                     '{{ route('Counselor.appointments.approve', $appointment->appointment_id) }}',
                     '{{ route('Counselor.appointments.decline', $appointment->appointment_id) }}',
-                    '{{ strtolower($appointment->status) }}'
+                    '{{ route('Counselor.appointments.cancel', $appointment->appointment_id) }}',
+                    '{{ strtolower($appointment->status) }}',
+                    '{{ route('Counselor.appointments.start', $appointment->appointment_id) }}', this
                 )">
                 <i class='bx bx-show'></i>
             </a>
-            {{-- Edit/Reschedule (match Head style) --}}
-            <a href="#" title="Edit/Reschedule" class="edit-btn"
-                onclick="openRescheduleModal({{ $appointment->appointment_id }}); return false;">
-                <i class='bx bx-edit'></i>
-            </a>
+            @php $st = strtolower($appointment->status ?? ''); @endphp
+            @if(in_array($st, ['cancelled', 'completed', 'declined', 'ongoing']))
+                {{-- Make edit non-interactive for final/locked statuses --}}
+                <a href="#" title="This appointment cannot be edited" class="edit-btn edit-disabled" onclick="return false;" aria-disabled="true" tabindex="-1" style="cursor:not-allowed; color:#fdfdfd;">
+                    <i class='bx bx-edit'></i>
+                </a>
+            @else
+                {{-- Edit/Reschedule (match Head style) --}}
+                <a href="#" title="Edit/Reschedule" class="edit-btn" onclick="openRescheduleModal({{ $appointment->appointment_id }}); return false;">
+                    <i class='bx bx-edit'></i>
+                </a>
+            @endif
         </div>
     </div>
 @empty

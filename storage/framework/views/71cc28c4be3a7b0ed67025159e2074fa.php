@@ -75,7 +75,7 @@
 
                         </div>
                         <div class="notifications-container">
-
+                            <?php echo $__env->make('Parent.dashboard-sections.messages', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
                         </div>
                     </div>
 
@@ -83,38 +83,39 @@
 
             </div>
         </div>
-        <?php $__env->startPush('scripts'); ?>
-            <script>
-                document.addEventListener('DOMContentLoaded', function() {
-                    let current = 0;
-                    const slides = document.querySelectorAll('#announcement-slideshow .slide');
-                    const dots = document.querySelectorAll('.announcement-dots .dot');
-                    if (!slides.length) return;
+    </section>
+    <?php $__env->startPush('scripts'); ?>
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                let current = 0;
+                const slides = document.querySelectorAll('#announcement-slideshow .slide');
+                const dots = document.querySelectorAll('.announcement-dots .dot');
+                if (!slides.length) return;
 
-                    function showSlide(idx) {
-                        slides.forEach((s, i) => {
-                            s.classList.toggle('active', i === idx);
-                        });
-                        dots.forEach((d, i) => {
-                            d.classList.toggle('active', i === idx);
-                        });
-                    }
-
-                    dots.forEach((dot, i) => {
-                        dot.addEventListener('click', function() {
-                            current = i;
-                            showSlide(current);
-                        });
+                function showSlide(idx) {
+                    slides.forEach((s, i) => {
+                        s.classList.toggle('active', i === idx);
                     });
+                    dots.forEach((d, i) => {
+                        d.classList.toggle('active', i === idx);
+                    });
+                }
 
-                    setInterval(function() {
-                        current = (current + 1) % slides.length;
+                dots.forEach((dot, i) => {
+                    dot.addEventListener('click', function() {
+                        current = i;
                         showSlide(current);
-                    }, 7000);
+                    });
                 });
-            </script>
-        <?php $__env->stopPush(); ?>
 
-    <?php $__env->stopSection(); ?>
+                setInterval(function() {
+                    current = (current + 1) % slides.length;
+                    showSlide(current);
+                }, 7000);
+            });
+        </script>
+    <?php $__env->stopPush(); ?>
+
+<?php $__env->stopSection(); ?>
 
 <?php echo $__env->make('layouts.parent', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\Administrator\School-Guidance-Record-Management-System-SGRMS\resources\views/Parent/dashboard.blade.php ENDPATH**/ ?>

@@ -16,7 +16,7 @@ class BackupDatabase extends Component
     public $nextBackup = null;
     public $backupStatus = null;
 
-    // 👇 Add event listener for refreshing when the tab changes or page loads
+    // Llistener for refreshing when the tab changes or page loads
     protected $listeners = [
         'refreshState' => 'refreshState',
         'tabChanged' => 'onTabChanged',
@@ -97,8 +97,7 @@ class BackupDatabase extends Component
     /** Manual backup handler */
     public function backup()
     {
-        clearstatcache();
-
+    
         $this->backupStatus = 'running';
         $this->message = 'Creating database backup...';
         $this->downloadPath = null;

@@ -16,17 +16,6 @@
     
     <?php echo $__env->make('landing-sections.faq', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
 
-   <script>
-    document.addEventListener("DOMContentLoaded", async () => {
-        try {
-            await fetch('/sanctum/csrf-cookie', {
-                credentials: 'same-origin',
-            });
-        } catch (error) {
-            console.error('CSRF refresh failed:', error);
-        }
-    });
-</script>
 
     
 <?php $__env->stopSection(); ?>

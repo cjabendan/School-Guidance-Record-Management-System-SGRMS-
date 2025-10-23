@@ -2,21 +2,22 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\Pivot;
 
-class AppointmentStudent extends Model
+class AppointmentStudent extends Pivot
 {
-    use HasFactory;
+    // pivot table doesn't have an auto-incrementing PK
+    public $incrementing = false;
+    public $timestamps = false;
 
     protected $table = 'appointment_students';
 
-    protected $fillable = [
+    protected $fillable = [     
         'appointment_id',
         'student_user_id',
     ];
 
-    // Relationships
+    // Relationships (optional helpers)
     public function appointment()
     {
         return $this->belongsTo(Appointments::class, 'appointment_id');

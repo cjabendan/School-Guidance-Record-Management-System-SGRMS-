@@ -18,7 +18,7 @@ class HeadStudentController extends Controller
     public function partialTable()
     {
         $students = Student::paginate(10);
-        return view('partials.student_table', compact('students'));
+    return view('Head.partials.student_table', compact('students'));
     }
 
     public function index(Request $request)

@@ -27,9 +27,4 @@
      </div>
 
  </div>
- <div class="quick-actions">
-     <div class="quick-box">
-
-     </div>
- </div>
 <?php /**PATH C:\Users\Administrator\School-Guidance-Record-Management-System-SGRMS\resources\views/Head/dashboard-sections/stats.blade.php ENDPATH**/ ?>

@@ -14,6 +14,21 @@
             @php
                 $studentCount = $appointment->students->count();
                 $firstStudent = $appointment->students->first();
+
+                // Fallback: if relation did not resolve (e.g. mixed pivot values), try resolving via pivot table
+                if (!$firstStudent) {
+                    $pivot = \App\Models\AppointmentStudent::where('appointment_id', $appointment->appointment_id)->first();
+                    if ($pivot) {
+                        // Try s_id first
+                        $fallback = \App\Models\Student::where('s_id', $pivot->student_user_id)->with('user')->first();
+                        if (! $fallback) {
+                            // Then try matching by user_id
+                            $fallback = \App\Models\Student::where('user_id', $pivot->student_user_id)->with('user')->first();
+                        }
+                        $firstStudent = $fallback;
+                        $studentCount = $firstStudent ? 1 : 0;
+                    }
+                }
             @endphp
             @if($studentCount === 1)
                 {{ $firstStudent->user->first_name ?? '' }} {{ $firstStudent->user->last_name ?? '' }}
@@ -59,9 +74,10 @@
                     default => 'status-label',
                 };
             @endphp
-            <span class="{{ $labelClass }}">
-                <span class="{{ $dotClass }}"></span>
-                {{ ucfirst($appointment->status) }}
+                <span class="{{ $labelClass }}">
+                    <span class="{{ $dotClass }}"></span>
+                    {{ ucfirst($appointment->status) }}
+                    <span data-appointment-status="{{ $appointment->appointment_id }}"></span>
             </span>
             @if ($appointment->rescheduled_count > 0)
                 <span class="badge badge-warning">

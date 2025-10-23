@@ -13,9 +13,14 @@ class Profile extends Component
     public $last_name = '';
     public $email = '';
     public $num = '';
+    public $cropped_image_data = null;
+    public $toastPayload = null;
 
     public function mount()
     {
+    // clear any transient toast payload on mount
+    $this->toastPayload = null;
+
         $user = Auth::user();
         $this->name = $user->first_name;
         $this->middle_name = $user->middle_name;
@@ -80,8 +85,42 @@ class Profile extends Component
         $user->contact_num = $fullNum;
         $user->save();
 
-        session()->flash('success', 'Profile updated successfully.');
-        $this->mount();
+        // handle cropped image upload if provided
+        if ($this->cropped_image_data) {
+            // expected format: data:image/png;base64,....
+            try {
+                $data = $this->cropped_image_data;
+                if (preg_match('/^data:\w+\/\w+;base64,/', $data)) {
+                    $parts = explode(',', $data);
+                    $imageData = base64_decode($parts[1]);
+                    $ext = 'png';
+                    if (strpos($parts[0], 'jpeg') !== false || strpos($parts[0], 'jpg') !== false) {
+                        $ext = 'jpg';
+                    }
+                    $filename = 'profile_' . $user->id . '_' . time() . '.' . $ext;
+                    $dir = public_path('images/user');
+                    if (!is_dir($dir)) {
+                        mkdir($dir, 0755, true);
+                    }
+                    $path = $dir . DIRECTORY_SEPARATOR . $filename;
+                    file_put_contents($path, $imageData);
+                    // update DB
+                    $user->profile_image = $filename;
+                    $user->save();
+                    // clear the temporary cropped data so UI shows stored image on mount
+                    $this->cropped_image_data = null;
+                }
+            } catch (\Exception $e) {
+                // swallow error but log it
+                \Log::error('Failed to save cropped profile image', ['err' => $e->getMessage()]);
+            }
+        }
+
+    // Refresh mount data first
+    $this->mount();
+    // Set a payload property that the Blade will render as a small inline script to show a toast.
+    // This avoids calling Livewire methods that may be missing in this environment.
+    $this->toastPayload = ['type' => 'success', 'message' => 'Profile updated successfully.'];
     }
 
     public function render()

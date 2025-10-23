@@ -62,7 +62,18 @@ class Student extends Model
     // ✅ Appointments (many-to-many)
     public function appointments()
     {
-        return $this->belongsToMany(Appointments::class, 'appointment_students', 'student_user_id', 'appointment_id');
+        // appointment_students table stores appointment_id and student_user_id (which is users.id)
+        // We must map the student's user_id (students.user_id) to the pivot.student_user_id.
+        return $this->belongsToMany(
+            Appointments::class,
+            'appointment_students',
+            'student_user_id',   // this model's pivot key (appointment_students.student_user_id)
+            'appointment_id',    // related pivot key (appointment_students.appointment_id)
+            's_id',              // local key on students table that maps to student_user_id (students.s_id)
+            'appointment_id'     // related key on appointments table
+        )
+        ->using(\App\Models\AppointmentStudent::class)
+        ->withPivot('student_user_id');
     }
 
     // ✅ Cases (reverse of ParentModel->cases, assuming you have CaseModel)

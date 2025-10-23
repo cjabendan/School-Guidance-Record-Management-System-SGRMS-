@@ -1,7 +1,35 @@
 <div id="chatList" class="chat-list" wire:poll.3s="loadChatList">
+    @php
+        // Map user role values to route name prefixes. Update if your app stores roles differently.
+        $roleToPrefix = [
+            'admin' => 'Head',
+            'counselor' => 'Counselor',
+            'parent' => 'Parent',
+            'student' => 'Student',
+        ];
+
+        $rolePrefix = 'Head';
+        if (auth()->check()) {
+            $roleValue = strtolower(auth()->user()->role ?? '');
+            if (isset($roleToPrefix[$roleValue])) {
+                $candidate = $roleToPrefix[$roleValue];
+                $candidateRoute = $candidate . '.messages';
+                if (\Illuminate\Support\Facades\Route::has($candidateRoute)) {
+                    $rolePrefix = $candidate;
+                } elseif (\Illuminate\Support\Facades\Route::has('Head.messages')) {
+                    // fallback to Head if candidate route is not defined
+                    $rolePrefix = 'Head';
+                }
+            } else {
+                // unknown role: fallback to Head if available
+                if (\Illuminate\Support\Facades\Route::has('Head.messages')) {
+                    $rolePrefix = 'Head';
+                }
+            }
+        }
+    @endphp
     @foreach ($users as $user)
-        <a href="{{ route('Head.messages', ['user' => $user->id]) }}"
-            class="chat-item">
+        <a href="{{ route($rolePrefix . '.messages', ['user' => $user->id]) }}" class="chat-item">
             <img src="{{ asset('images/user/' . $user->profile_image) }}" class="user-img" alt="User">
             <div class="chat-item-info">
                 <h3 class="chat-item-username">
