@@ -1,11 +1,11 @@
 <div class="user-chat-profile-info {{ $showUserProfile ? 'active' : '' }}" id="userChatProfileInfo"
-    data-user-id="{{ $selectedUser->id }}">
+    data-user-id="{{ $selectedUser->id }}" x-data="{
+        showPrivacy: false,
+        searchMode: false
+    }">
     <div class="user-chat-profile-container">
 
-        @if (!$searchModeInProfile)
-            <div class="user-profile-header" style="position: absolute; top: 10px; right: 10px;">
-
-            </div>
+        <div x-show="!searchMode" x-transition>
             <div class="user-profile-img-wrapper">
                 <img src="{{ asset('images/user/' . $selectedUser->profile_image) }}" class="user-profile-img"
                     alt="User">
@@ -32,67 +32,58 @@
                         </a>
                         <p>Contact</p>
                     </li>
-                    <li class="user-chat-icon" wire:click="toggleSearchMode" style="cursor: pointer;">
-                        <a href="#">
-                            <i class="fi fi-br-search"></i>
-                        </a>
 
+                    <li class="user-chat-icon" @click="searchMode = true" style="cursor: pointer;">
+                        <a href="#"><i class="fi fi-br-search"></i></a>
                         <p>Search</p>
                     </li>
                 </ul>
             </div>
             <div class="user-chat-privacy">
-                <div class="privacy-header" wire:click="togglePrivacyDropdown">
-                    <div>
-                        <h3>Privacy & support</h3>
+                @if (in_array($selectedUser->role, ['parent', 'student']))
+                    <div class="privacy-header" @click="showPrivacy = !showPrivacy" style="cursor: pointer;">
+                        <div>
+                            <h3>Privacy & support</h3>
+                        </div>
+                        <div>
+                            {{-- ✅ CHANGE #2: Use an Alpine class binding for the arrow icon --}}
+                            <i :class="showPrivacy ? 'fi fi-br-angle-small-up' : 'fi fi-br-angle-small-down'"></i>
+                        </div>
                     </div>
-                    <div>
-                        <i class="fi fi-br-angle-small-{{ $showPrivacyDropdown ? 'up' : 'down' }}"></i>
-                    </div>
-                </div>
-                <div class="privacy-dropdown{{ $showPrivacyDropdown ? ' active' : '' }}">
-                    <ul>
-                        <li>
-                            <i class="fi fi-sr-minus-circle"></i>
-                            <a href="#" wire:click.prevent="toggleBlockUser">
-                                {{ $hasBlocked ? 'Unblock User' : 'Block User' }}
-                            </a>
-                        </li>
-                        <li>
-                            <i class="fi fi-sr-trash"></i>
-                            <a href="#">Delete chat</a>
-                        </li>
-                        @if ($isBlocked)
-                            <li style="color: #dc3545; font-size: 12px; padding: 5px 15px;">
-                                <i class="fi fi-sr-lock"></i>
-                                You are blocked by this user.
+
+                    <div class="privacy-dropdown" x-show="showPrivacy" x-transition :class="{ 'active': showPrivacy }">
+                        <ul>
+                            <li wire:click.prevent="toggleBlockUser" style="cursor: pointer;">
+                                <i class="fi fi-sr-minus-circle"></i>
+                                <a href="#">{{ $hasBlocked ? 'Unblock' : 'Block' }}</a>
                             </li>
-                        @endif
-                    </ul>
-                </div>
+                            <li style="cursor: pointer;">
+                                <i class="fi fi-sr-trash"></i>
+                                <a href="#">Delete chat</a>
+                            </li>
+                        </ul>
+                    </div>
+                @endif
             </div>
-        @else
-            {{-- CONVERSATION SEARCH MODE --}}
+        </div>
+
+        {{-- This container shows the search view --}}
+        <div x-show="searchMode" x-transition style="display: none;">
             <div class="search-mode-header" style="display: flex; align-items: center; padding: 10px;">
-                <a href="#" wire:click.prevent="toggleSearchMode" style="margin-right: 10px;">
+                {{-- ✅ CHANGE #3: The back arrow now uses @click and resets the search using $wire --}}
+                <a href="#"
+                    @click.prevent="searchMode = false; $wire.set('profileSearchQuery', ''); $wire.set('profileSearchResults', [])"
+                    style="margin-right: 10px;">
                     <i class="fi fi-br-angle-left"></i>
                 </a>
-                <form wire:submit.prevent="searchInConversation" style="flex-grow: 1; display: flex;">
-
+                <form wire:submit.prevent="searchInConversation" style="flex-grow: 1;">
                     <input type="text" wire:model="profileSearchQuery"
                         wire:keydown.enter.prevent="searchInConversation" placeholder="Search in conversation..."
                         class="search-input">
-                    <svg class="search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                    </svg>
-
-                    <button type="submit" style="background: transparent; border: none; ">
-
-                    </button>
                 </form>
             </div>
 
+            {{-- Search results code is fine and remains the same --}}
             <div class="search-results-list" style="padding: 10px; overflow-y: auto;">
                 @forelse($profileSearchResults as $message)
                     @php
@@ -108,7 +99,6 @@
 
                         $senderImage = asset('images/user/' . $sender->profile_image);
                     @endphp
-
 
                     <div wire:click="goToMessage({{ $message->id }})"
                         style="padding: 10px; border-bottom: 1px dashed #eee; cursor: pointer; border-radius: 4px; transition: background-color 0.2s;"
@@ -149,6 +139,6 @@
                     @endif
                 @endforelse
             </div>
-        @endif
+        </div>
     </div>
 </div>

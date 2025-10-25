@@ -42,15 +42,12 @@ function openReviewModal(appointmentId, detailsHtml, approveUrl, declineUrl, can
   body.innerHTML = detailsHtml;
   try {
     if (el && el.dataset) {
-      var resStatus = (el.dataset.rescheduleStatus || '').toLowerCase();
       var prev = el.dataset.prev || '';
       var req = el.dataset.req || '';
-      if (resStatus === 'pending') {
-        var extra = '';
-        if (prev) extra += '<div style="font-size:0.95em; margin-top:6px;"><strong>Previous:</strong> ' + prev + '</div>';
-    if (req) extra += '<div style="font-size:0.95em;"><strong>Preferred date to reschedule:</strong> ' + req + '</div>';
-        if (extra) body.innerHTML = body.innerHTML + extra;
-      }
+      var extra = '';
+      if (prev) extra += '<div style="font-size:0.95em; margin-top:6px;"><strong>Previous:</strong> ' + prev + '</div>';
+      if (req) extra += '<div style="font-size:0.95em;"><strong>Preferred date to reschedule:</strong> ' + req + '</div>';
+      if (extra) body.innerHTML = body.innerHTML + extra;
     }
   } catch(e) {}
   document.getElementById('reviewAppointmentModal').style.display = 'flex';

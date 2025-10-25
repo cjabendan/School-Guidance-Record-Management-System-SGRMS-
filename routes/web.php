@@ -226,6 +226,7 @@ Route::prefix('Head')->name('Head.')->middleware(['auth', 'role.head'])->group(f
     Route::post('/appointments/{id}/move', [HeadAppointmentController::class, 'move'])->name('appointments.move');
     Route::post('/appointments/{id}/approve', [HeadAppointmentController::class, 'approve'])->name('appointments.approve');
     Route::post('/appointments/{id}/decline', [HeadAppointmentController::class, 'decline'])->name('appointments.decline');
+     Route::post('/appointments/{id}/missed', [HeadAppointmentController::class, 'markMissed'])->name('appointments.missed');
     Route::post('/appointments/{id}/cancel', [HeadAppointmentController::class, 'cancel'])->name('appointments.cancel');
     Route::post('/appointments/store', [HeadAppointmentController::class, 'store'])->name('appointments.store');
     Route::post('/appointments/{id}/start', [HeadAppointmentController::class, 'startSession'])->name('appointments.start');

@@ -51,26 +51,31 @@
                         <form id="importForm" action="<?php echo e(route('Head.students.import')); ?>" method="POST" enctype="multipart/form-data" style="display:inline;">
                             <?php echo csrf_field(); ?>
                             <input type="file" id="importFileInput" name="students_file" accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" style="display:none" required>
-                            <button type="button" class="toggle-btn" id="importBtn"><i class="fi fi-rr-document-circle-arrow-up"></i></button>
+                            <button type="button" class="toggle-btn import-btn" id="importBtn">
+                                <i class="fi fi-rr-document-circle-arrow-up"></i>
+                            </button>
+
                         </form>
-                    <div class="dropdown" style="display:inline-block;position:relative;">
-                        <button class="toggle-btn" id="exportDropdownBtn" style="padding:8px 12px;border-radius:6px;background:#2563eb;color:#fff;border:none;box-shadow:0 1px 4px rgba(0,0,0,0.05);"><i class="fi fi-rr-file-download"></i></button>
-                        <div id="exportDropdownMenu" class="dropdown-menu" style="display:none;position:absolute;right:0;top:110%;z-index:1000;background:#fff;border-radius:8px;border:1px solid #e5e7eb;padding:4px 0;min-width:180px;box-shadow:0 4px 16px rgba(0,0,0,0.08);">
-                            <a href="#" class="dropdown-item" onclick="downloadExport('pdf')" style="display:block;padding:10px 18px;color:#222;text-decoration:none;font-size:15px;transition:background 0.2s;border:none;background:none;cursor:pointer;">Export as PDF</a>
-                            <a href="#" class="dropdown-item" onclick="downloadExport('xlsx')" style="display:block;padding:10px 18px;color:#222;text-decoration:none;font-size:15px;transition:background 0.2s;border:none;background:none;cursor:pointer;">Export as Excel (.xlsx)</a>
-                            <a href="#" class="dropdown-item" onclick="downloadExport('xls')" style="display:block;padding:10px 18px;color:#222;text-decoration:none;font-size:15px;transition:background 0.2s;border:none;background:none;cursor:pointer;">Export as Excel (.xls)</a>
-                            <a href="#" class="dropdown-item" onclick="downloadExport('csv')" style="display:block;padding:10px 18px;color:#222;text-decoration:none;font-size:15px;transition:background 0.2s;border:none;background:none;cursor:pointer;">Export as CSV</a>
+                    <div class="dropdown">
+                        <button class="export-btn toggle-btn" id="exportDropdownBtn">
+                            <i class="fi fi-rr-file-download"></i>
+                        </button>
+
+                        <div id="exportDropdownMenu" class="dropdown-menu">
+                            <a href="#" class="dropdown-item" onclick="downloadExport('pdf')">Export as PDF</a>
+                            <a href="#" class="dropdown-item" onclick="downloadExport('xlsx')">Export as Excel (.xlsx)</a>
+                            <a href="#" class="dropdown-item" onclick="downloadExport('xls')">Export as Excel (.xls)</a>
+                            <a href="#" class="dropdown-item" onclick="downloadExport('csv')">Export as CSV</a>
                         </div>
                     </div>
                 </div>
             </div>
             <div class="table-header">
                 <div class="table-col title">Student ID</div>
-                <div class="table-col">Name</div>
-                <div class="table-col">Sex</div>
+                <div class="table-col">Student Name</div>
                 <div class="table-col">Educational Level</div>
                 <div class="table-col">Year Level</div>
-                <div class="table-col">Enrollment Status</div>
+                <div class="table-col">Status</div>
                 <div class="table-col actions">Actions</div>
             </div>
             <div id="student-list">

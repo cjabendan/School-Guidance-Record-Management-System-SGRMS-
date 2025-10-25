@@ -24,6 +24,7 @@ class RefreshCsrfOnExpire
             }
 
             return $response;
+            
         } catch (TokenMismatchException $e) {
             Session::flush();
             Session::regenerate(true);

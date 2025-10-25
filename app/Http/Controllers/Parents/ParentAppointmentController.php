@@ -13,7 +13,11 @@ class ParentAppointmentController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Appointments::with(['students', 'counselor', 'requester', 'type', 'reschedules']);
+        $relations = ['students', 'counselor', 'requester', 'type'];
+        if (Schema::hasTable('appointment_reschedules')) {
+            $relations[] = 'reschedules';
+        }
+        $query = Appointments::with($relations);
         $query->where('requester_id', auth()->id());
 
         if ($request->has('status') && $request->status != 'all') {
@@ -73,20 +77,28 @@ class ParentAppointmentController extends Controller
             $type_id = $request->type_id === 'general' ? null : $request->type_id;
         }
 
-        // Conflict check: any appointment at the same time
-        $globalConflict = \App\Models\Appointments::where('appointment_datetime', $request->appointment_datetime)
-            ->whereIn('status', ['Pending', 'Approved'])
+        // Conflict check: prevent booking if there is an already 'approved' appointment within a 1-hour window
+        $requested = \Carbon\Carbon::parse($request->appointment_datetime);
+        $startWindow = $requested->copy()->subHour();
+        $endWindow = $requested->copy()->addHour();
+
+        // For the given counselor, check approved appointments in the 1-hour window (same day)
+        $globalConflict = \App\Models\Appointments::where('counselor_id', $request->counselor_id)
+            ->whereDate('appointment_datetime', $requested->toDateString())
+            ->whereBetween('appointment_datetime', [$startWindow, $endWindow])
+            ->whereRaw('LOWER(status) = ?', ['approved'])
             ->exists();
 
-        // Conflict check: any selected student has appointment at same time
-        $studentConflict = \App\Models\Appointments::where('appointment_datetime', $request->appointment_datetime)
-            ->whereIn('status', ['Pending', 'Approved'])
+        // If any of the selected students already have an approved appointment in that window (any counselor)
+        $studentConflict = \App\Models\Appointments::whereDate('appointment_datetime', $requested->toDateString())
+            ->whereBetween('appointment_datetime', [$startWindow, $endWindow])
+            ->whereRaw('LOWER(status) = ?', ['approved'])
             ->whereHas('students', function($q) use ($request) {
                 $q->whereIn('student_user_id', $request->student_id);
             })->exists();
 
         if ($globalConflict || $studentConflict) {
-            return back()->withErrors(['appointment_datetime' => 'Appointment cannot be booked. A schedule already exists'])->withInput();
+            return back()->withErrors(['appointment_datetime' => 'this time is already taken by someone'])->withInput();
         }
 
         $appointment = Appointments::create([

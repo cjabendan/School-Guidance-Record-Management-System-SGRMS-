@@ -17,6 +17,10 @@
         <?php echo csrf_field(); ?>
         <button type="submit" class="btn btn-danger" id="endSessionBtn">Complete</button>
       </form>
+      <form id="cancelForm" method="POST" style="display:none; margin-right:8px;">
+        <?php echo csrf_field(); ?>
+        <button type="submit" class="btn btn-secondary" id="cancelBtn">Cancel</button>
+      </form>
       <form id="approveForm" method="POST" style="display:inline;">
         <?php echo csrf_field(); ?>
         <button type="submit" class="btn btn-success" id="approveBtn">Approve</button>
@@ -33,18 +37,52 @@
   </div>
 </div>
 <script>
-function openReviewModal(appointmentId, detailsHtml, approveUrl, declineUrl, status, startUrl) {
-  document.getElementById('review-modal-body').innerHTML = detailsHtml;
+function openReviewModal(appointmentId, detailsHtml, approveUrl, declineUrl, cancelUrl, status, startUrl, el) {
+  var body = document.getElementById('review-modal-body');
+  body.innerHTML = detailsHtml;
+
+  // Show previous and preferred times only for rescheduled appointments
+  if (el && el.dataset && status === 'rescheduled') {
+    var prev = el.dataset.prev || '';
+    var req = el.dataset.req || '';
+    var extra = '';
+    
+    // Show previous time if available
+    if (prev) {
+      extra += '<div style="font-size:0.95em; margin-top:6px;"><strong>Previous:</strong> ' + prev + '</div>';
+    }
+    
+    // Show preferred time if available
+    if (req) {
+      extra += '<div style="font-size:0.95em; margin-top:6px; color:#2563eb;"><strong>Preferred date to reschedule:</strong> ' + req + '</div>';
+    }
+    
+    if (extra) {
+      body.innerHTML += extra;
+    }
+  }
+
   document.getElementById('reviewAppointmentModal').style.display = 'flex';
-  document.getElementById('approveForm').action = approveUrl;
-  document.getElementById('declineForm').action = declineUrl;
+  // set form actions
+  var approveForm = document.getElementById('approveForm');
+  var declineForm = document.getElementById('declineForm');
+  var cancelForm = document.getElementById('cancelForm');
+  if (approveForm) approveForm.action = approveUrl || '';
+  if (declineForm) declineForm.action = declineUrl || '';
+  if (cancelForm) {
+    cancelForm.action = cancelUrl || '';
+    // hidden by default; will be shown only for pending status
+    cancelForm.style.display = 'none';
+  }
   window.currentAppointmentId = appointmentId;
   status = (status || '').toLowerCase();
-    // Remove any existing status badges from previous modal opens
-    var oldIn = document.getElementById('inSessionBadge');
-    if (oldIn && oldIn.parentNode) oldIn.parentNode.removeChild(oldIn);
-    var oldComp = document.getElementById('completedBadge');
-    if (oldComp && oldComp.parentNode) oldComp.parentNode.removeChild(oldComp);
+  // Remove any existing status badges from previous modal opens
+  var oldIn = document.getElementById('inSessionBadge');
+  if (oldIn && oldIn.parentNode) oldIn.parentNode.removeChild(oldIn);
+  var oldComp = document.getElementById('completedBadge');
+  if (oldComp && oldComp.parentNode) oldComp.parentNode.removeChild(oldComp);
+  var oldCancelled = document.getElementById('cancelledBadge');
+  if (oldCancelled && oldCancelled.parentNode) oldCancelled.parentNode.removeChild(oldCancelled);
     // Reset decline inputs/buttons
     if (document.getElementById('decline_reason')) document.getElementById('decline_reason').style.display = 'none';
     if (document.getElementById('submitDeclineBtn')) document.getElementById('submitDeclineBtn').style.display = 'none';
@@ -123,12 +161,16 @@ function openReviewModal(appointmentId, detailsHtml, approveUrl, declineUrl, sta
   if (status === 'completed') {
     if (document.getElementById('approveForm')) document.getElementById('approveForm').style.display = 'none';
     if (document.getElementById('declineForm')) document.getElementById('declineForm').style.display = 'none';
+    if (document.getElementById('cancelForm')) document.getElementById('cancelForm').style.display = 'none';
     if (document.getElementById('startSessionForm')) document.getElementById('startSessionForm').style.display = 'none';
     if (document.getElementById('endSessionForm')) document.getElementById('endSessionForm').style.display = 'none';
     var footer = document.querySelector('#reviewAppointmentModal .modal-footer');
-    // remove in-session badge if present
-    var inBadge = document.getElementById('inSessionBadge');
-    if (inBadge && inBadge.parentNode) inBadge.parentNode.removeChild(inBadge);
+  // remove in-session badge if present
+  var inBadge = document.getElementById('inSessionBadge');
+  if (inBadge && inBadge.parentNode) inBadge.parentNode.removeChild(inBadge);
+  // remove cancelled badge if present (ensure Completed does not also show Cancelled)
+  var cancelledBadge = document.getElementById('cancelledBadge');
+  if (cancelledBadge && cancelledBadge.parentNode) cancelledBadge.parentNode.removeChild(cancelledBadge);
     if (footer && !document.getElementById('completedBadge')) {
       var cbadge = document.createElement('span');
       cbadge.className = 'badge badge-success';
@@ -136,6 +178,35 @@ function openReviewModal(appointmentId, detailsHtml, approveUrl, declineUrl, sta
       cbadge.style.marginRight = '8px';
       cbadge.innerText = 'Complete';
       footer.insertBefore(cbadge, footer.firstChild);
+    }
+  }
+  // Show cancel only when appointment is pending
+  if (document.getElementById('cancelForm')) {
+    // show cancel only for pending
+    if (status === 'pending') {
+      document.getElementById('cancelForm').style.display = 'inline-block';
+    } else {
+      document.getElementById('cancelForm').style.display = 'none';
+    }
+  }
+  // If appointment is cancelled, hide all action buttons and show a Cancelled badge
+  if (status === 'cancelled') {
+    if (document.getElementById('approveForm')) document.getElementById('approveForm').style.display = 'none';
+    if (document.getElementById('declineForm')) document.getElementById('declineForm').style.display = 'none';
+    if (document.getElementById('startSessionForm')) document.getElementById('startSessionForm').style.display = 'none';
+    if (document.getElementById('endSessionForm')) document.getElementById('endSessionForm').style.display = 'none';
+    if (document.getElementById('cancelForm')) document.getElementById('cancelForm').style.display = 'none';
+    if (rescheduleEl) rescheduleEl.style.display = 'none';
+    if (closeEl) closeEl.style.display = 'inline-block';
+
+    var footer = document.querySelector('#reviewAppointmentModal .modal-footer');
+    if (footer && !document.getElementById('cancelledBadge')) {
+      var badge = document.createElement('span');
+      badge.className = 'badge badge-danger';
+      badge.id = 'cancelledBadge';
+      badge.style.marginRight = '8px';
+      badge.innerText = 'Cancelled';
+      footer.insertBefore(badge, footer.firstChild);
     }
   }
 }
@@ -219,6 +290,9 @@ document.addEventListener('DOMContentLoaded', function () {
       // Insert an In Session badge into modal footer
       var footer = document.querySelector('#reviewAppointmentModal .modal-footer');
       if (footer) {
+        // remove any cancelled badge left over
+        var cb = document.getElementById('cancelledBadge');
+        if (cb && cb.parentNode) cb.parentNode.removeChild(cb);
         var badge = document.createElement('span');
         badge.className = 'badge badge-warning';
         badge.id = 'inSessionBadge';
@@ -277,6 +351,9 @@ document.addEventListener('DOMContentLoaded', function () {
           // Update modal UI to show Completed state
           var footer = document.querySelector('#reviewAppointmentModal .modal-footer');
           if (footer) {
+            // remove any cancelled badge left over
+            var cb = document.getElementById('cancelledBadge');
+            if (cb && cb.parentNode) cb.parentNode.removeChild(cb);
             var badge = document.getElementById('inSessionBadge');
             if (badge) { badge.innerText = 'Completed'; badge.className = 'badge badge-success'; }
             // hide end form

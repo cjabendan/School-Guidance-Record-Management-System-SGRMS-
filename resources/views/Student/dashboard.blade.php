@@ -6,27 +6,54 @@
     <section id="content">
         @include('partials.navbar')
         <div class="wrapper">
-            <div class="box-page">
-                <section class="analytics">
+            <div class="dashboard-content">
+                <div class="welcome-box">
                     @include('Student.dashboard-sections.welcome-stats')
-                </section>
+                    @include('Student.dashboard-sections.announcements')
+                </div>
 
-                <!-- RIGHT COLUMN: Messages (spans both rows) -->
-                <section class="side-container">
-                    <div class="flex-side">
-                        @include('Student.dashboard-sections.messages')
-                    </div>
-                </section>
-
-                <!-- LEFT BOTTOM: Appointments -->
-                <section class="bottom-container">
+                <div class="appointment-container">
                     <div class="flex-bottom">
                         @include('Student.dashboard-sections.appointments')
+                        <div class="notifications-container">
+                            @include('Student.dashboard-sections.messages')  
+                        </div>      
                     </div>
-                </section>
+                </div>
             </div>
         </div>
-
     </section>
+
+    @push('scripts')
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                let current = 0;
+                const slides = document.querySelectorAll('#announcement-slideshow .slide');
+                const dots = document.querySelectorAll('.announcement-dots .dot');
+                if (!slides.length) return;
+
+                function showSlide(idx) {
+                    slides.forEach((s, i) => {
+                        s.classList.toggle('active', i === idx);
+                    });
+                    dots.forEach((d, i) => {
+                        d.classList.toggle('active', i === idx);
+                    });
+                }
+
+                dots.forEach((dot, i) => {
+                    dot.addEventListener('click', function() {
+                        current = i;
+                        showSlide(current);
+                    });
+                });
+
+                setInterval(function() {
+                    current = (current + 1) % slides.length;
+                    showSlide(current);
+                }, 7000);
+            });
+        </script>
+    @endpush
 
 @endsection

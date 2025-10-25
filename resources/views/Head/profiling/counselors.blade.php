@@ -7,7 +7,6 @@
         @include('partials.navbar')
         <!-- COUNSELORS MANAGEMENT -->
         <main class="wrapper">
-            <h2>Manage Counselors</h2>
             <div class="profiles-container">
                 <!-- Add new profile box -->
                 <div class="profile-box add-box" onclick="openAddCounselorModal()">

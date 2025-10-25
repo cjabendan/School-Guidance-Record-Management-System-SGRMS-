@@ -1,5 +1,8 @@
+<?php
+  $modalDisplay = (old('form_origin') === 'create_appointment') ? 'flex' : 'none';
+?>
 
-<div id="requestAppointmentModal" class="custom-modal" style="display:none;">
+<div id="requestAppointmentModal" class="custom-modal" style="display:<?php echo e($modalDisplay); ?>;">
   <div class="custom-modal-content">
   <!-- Select2 CSS -->
   <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
@@ -22,7 +25,8 @@
     }
   </style>
   <form method="POST" action="<?php echo e(route('Student.appointments.store')); ?>">
-      <?php echo csrf_field(); ?>
+    <?php echo csrf_field(); ?>
+    <input type="hidden" name="form_origin" value="create_appointment">
       <div class="modal-header">
         <h5 class="modal-title">Request Appointment</h5>
         <button type="button" class="close-modal-btn" onclick="closeModal()">×</button>
@@ -113,5 +117,29 @@
     </form>
   </div>
 
-  
+  <!-- Error-only modal (small) - shows when there are validation errors not originating from create form -->
+  <?php $showErrorModal = $errors->any() && old('form_origin') !== 'create_appointment'; ?>
+  <div id="appointmentErrorModal" class="custom-modal" style="display:<?php echo e($showErrorModal ? 'flex' : 'none'); ?>;">
+    <div class="custom-modal-content" style="max-width:420px;">
+      <div class="modal-header">
+        <span class="modal-title"><i class="fi fi-rr-exclamation"></i> Error</span>
+        <button type="button" class="close-modal-btn" onclick="closeErrorModal()">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="alert alert-danger" style="margin-bottom:0; border-radius:6px; border:1px solid #fca5a5; background:#fff0f0; color:#b91c1c; font-weight:600; font-size:1.05em; padding:12px 16px; display:flex; align-items:center; gap:8px;">
+          <i class="fi fi-rr-exclamation" style="color:#b91c1c; font-size:1.3em;"></i>
+          <div style="line-height:1.2;"><?php echo e($errors->first()); ?></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" onclick="closeErrorModal()">Close</button>
+      </div>
+    </div>
+  </div>
+  <script>
+    function closeErrorModal() {
+      document.getElementById('appointmentErrorModal').style.display = 'none';
+    }
+  </script>
+
 </div><?php /**PATH C:\Users\Administrator\School-Guidance-Record-Management-System-SGRMS\resources\views/Student/modal/requestApppointmentModal.blade.php ENDPATH**/ ?>

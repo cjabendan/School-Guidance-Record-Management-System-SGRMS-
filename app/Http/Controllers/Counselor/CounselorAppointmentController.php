@@ -12,7 +12,11 @@ class CounselorAppointmentController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Appointments::with(['students', 'counselor', 'requester', 'type', 'reschedules']);
+        $relations = ['students', 'counselor', 'requester', 'type'];
+        if (Schema::hasTable('appointment_reschedules')) {
+            $relations[] = 'reschedules';
+        }
+        $query = Appointments::with($relations);
 
         // Apply filters if any (case-insensitive)
         $statusFilter = $request->has('status') ? strtolower($request->status) : null;
@@ -127,23 +131,30 @@ class CounselorAppointmentController extends Controller
         }
 
         // Convert submitted datetime (local Manila) to ISO string
-        $manilaDate = \Carbon\Carbon::createFromFormat('Y-m-d\TH:i', $request->appointment_datetime)->toIso8601String();
+    $manilaDate = \Carbon\Carbon::createFromFormat('Y-m-d\TH:i', $request->appointment_datetime)->toDateTimeString();
 
-        // Conflict checks excluding the current appointment
-        $globalConflict = Appointments::where('appointment_datetime', $manilaDate)
-            ->whereIn('status', ['Pending', 'Approved'])
+        // Conflict checks excluding the current appointment: check for APPROVED appointments within 1 hour (same day)
+        $requested = \Carbon\Carbon::parse($manilaDate);
+        $startWindow = $requested->copy()->subHour();
+        $endWindow = $requested->copy()->addHour();
+
+        $globalConflict = Appointments::where('counselor_id', $request->counselor_id)
+            ->whereDate('appointment_datetime', $requested->toDateString())
+            ->whereBetween('appointment_datetime', [$startWindow, $endWindow])
+            ->whereRaw('LOWER(status) = ?', ['approved'])
             ->where('appointment_id', '!=', $appointment->appointment_id)
             ->exists();
 
-        $studentConflict = Appointments::where('appointment_datetime', $manilaDate)
-            ->whereIn('status', ['Pending', 'Approved'])
+        $studentConflict = Appointments::whereDate('appointment_datetime', $requested->toDateString())
+            ->whereBetween('appointment_datetime', [$startWindow, $endWindow])
+            ->whereRaw('LOWER(status) = ?', ['approved'])
             ->where('appointment_id', '!=', $appointment->appointment_id)
             ->whereHas('students', function($q) use ($request) {
                 $q->whereIn('student_user_id', $request->student_id);
             })->exists();
 
         if ($globalConflict || $studentConflict) {
-            return back()->withErrors(['appointment_datetime' => 'Appointment cannot be booked. A schedule already exists'])->withInput();
+            return back()->withErrors(['appointment_datetime' => 'this time is already taken by someone'])->withInput();
         }
 
         // Update fields
@@ -285,7 +296,7 @@ class CounselorAppointmentController extends Controller
         }
 
         // Treat submitted time as Asia/Manila local time
-        $manilaDate = \Carbon\Carbon::createFromFormat('Y-m-d\TH:i', $request->appointment_datetime)->toIso8601String();
+    $manilaDate = \Carbon\Carbon::createFromFormat('Y-m-d\TH:i', $request->appointment_datetime)->toDateTimeString();
 
         // Conflict check: any appointment at the same time
         $globalConflict = Appointments::where('appointment_datetime', $manilaDate)

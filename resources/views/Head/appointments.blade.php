@@ -7,6 +7,11 @@
         @include('partials.navbar')
 
         <div class="wrapper">
+            @if(session('error'))
+                <div class="alert alert-danger" style="margin:12px 0; padding:10px; border-radius:6px; border:1px solid #fca5a5; background:#fff0f0; color:#b91c1c; font-weight:600;">
+                    {{ session('error') }}
+                </div>
+            @endif
             <div class="table-management">
                 <div class="table-filter">
                     <div class="filters">

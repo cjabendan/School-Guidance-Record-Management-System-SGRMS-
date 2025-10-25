@@ -307,7 +307,7 @@
 .message-row {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 12px;
 }
 
 .message-row.sent {
@@ -335,6 +335,14 @@
     align-self: flex-start;
 }
 
+.message-row .message-data.sent.highlight-message,
+.message-row .message-data.received.highlight-message {
+   
+    box-shadow: 
+        0 0 0 4px white,       
+        0 0 0 6px #181818; 
+}
+
 .seen-status {
     width: 100%;
     display: flex;
@@ -354,7 +362,6 @@
 .sender-info {
     display: flex;
     gap: 8px;
-    
 }
 
 .sender-data {
@@ -368,7 +375,6 @@
     height: 40px;
     border-radius: 50%;
     border: 1px solid #cccccc;
-   
 }
 
 /* Bold for unread last message in chat list */
@@ -677,7 +683,7 @@
     font-size: 1.2rem;
     background-color: #ebebeb;
     padding: 12px 15px 10px 15px;
-    color: black;
+    color: #1e1e1f;
     border-radius: 50%;
     cursor: pointer;
     transition: color 0.2s ease;
@@ -765,16 +771,38 @@
 }
 
 .blocked-status-message {
-    background-color: #eeeeee;
-    padding: 12px 16px;
-    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    gap: 0.3rem;
+    padding: 0.4rem .8rem;
     text-align: center;
+    
+}
+
+.block-message {
     font-weight: 500;
     font-size: 1rem;
 }
 
+.block-reason {
+    color: #6b7280;
+    font-size: 0.8rem;
+}
+
 .blocked-user-name {
     font-weight: 600;
+    text-align: center;
+}
+
+.block-btn {
+    flex: 1;
+    background-color: #eeeeee;
+    padding: 12px 0;
+    margin-top: 8px;
+    border-radius: 8px;
+    color: #000000;
+    font-weight: 520;
 }
 
 .search-convo-result-item {
@@ -816,6 +844,16 @@
 .highlight-word {
     color: #000000;
     font-weight: bold;
+}
+
+.highlight-result-word {
+    background-color: #fcdb70; 
+    color: #000000;
+    font-weight: bold;
+    padding: 4px 6px; 
+    border-radius: 4px;
+    white-space: pre-wrap;
+    display: inline;
 }
 
 /* Badge for verified users */

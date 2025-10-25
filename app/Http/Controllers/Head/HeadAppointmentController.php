@@ -35,7 +35,11 @@ class HeadAppointmentController extends Controller
     public function index(Request $request)
     {
 
-        $query = Appointments::with(['students', 'counselor', 'requester', 'type', 'reschedules']);
+        $relations = ['students', 'counselor', 'requester', 'type'];
+        if (Schema::hasTable('appointment_reschedules')) {
+            $relations[] = 'reschedules';
+        }
+        $query = Appointments::with($relations);
 
         // Apply filters if any (case-insensitive)
         $statusFilter = $request->has('status') ? strtolower($request->status) : null;
@@ -115,13 +119,63 @@ class HeadAppointmentController extends Controller
     {
         $appointment = Appointments::findOrFail($id);
 
+        // Parse the requested new datetime
+        $requested = \Carbon\Carbon::parse($request->new_datetime);
+
+        // Check if the new schedule is the same as the current schedule
+        if ($appointment->appointment_datetime && $appointment->appointment_datetime->eq($requested)) {
+            $prev = $appointment->appointment_datetime->format('M d, Y h:i A');
+            $new = $requested->format('M d, Y h:i A');
+            $errorMsg = "Cannot reschedule: previous schedule is $prev, new schedule is $new. Please choose a different time.";
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json(['error' => $errorMsg], 422);
+            }
+            return redirect()->back()->with('error', $errorMsg);
+        }
+
+        // Ensure reschedule doesn't conflict with OTHER approved appointments for same counselor
+        $startWindow = $requested->copy()->subHour();
+        $endWindow = $requested->copy()->addHour();
+
+        $conflict = Appointments::where('counselor_id', $appointment->counselor_id)
+            ->whereDate('appointment_datetime', $requested->toDateString())
+            ->whereBetween('appointment_datetime', [$startWindow, $endWindow])
+            ->whereRaw('LOWER(status) = ?', ['approved'])
+            ->where('appointment_id', '!=', $appointment->appointment_id)
+            ->exists();
+
+        if ($conflict) {
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json(['error' => 'this time is already taken by someone'], 422);
+            }
+            return redirect()->back()->with('error', 'this time is already taken by someone');
+        }
+
+        // Preserve previous schedule (formatted) so we can show both old and new to the user
+        $prev = $appointment->appointment_datetime ? $appointment->appointment_datetime->format('M d, Y h:i A') : null;
+        $new = $requested->format('M d, Y h:i A');
+
         $appointment->update([
             'appointment_datetime' => $request->new_datetime,
             'rescheduled_count' => $appointment->rescheduled_count + 1,
             'last_rescheduled_at' => now(),
         ]);
 
-        return redirect()->back()->with('success', 'Appointment rescheduled successfully.');
+        // Return both previous and new schedule values for AJAX or normal redirect flows
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Appointment rescheduled successfully.',
+                'previous_schedule' => $prev,
+                'new_schedule' => $new,
+            ]);
+        }
+
+        return redirect()->back()->with([
+            'success' => 'Appointment rescheduled successfully.',
+            'previous_schedule' => $prev,
+            'new_schedule' => $new,
+        ]);
     }
 
     public function getAppointments(Request $request)
@@ -157,8 +211,38 @@ class HeadAppointmentController extends Controller
     public function approve($id)
     {
         $appointment = Appointments::findOrFail($id);
+        // Before approving, ensure no conflicting approved appointment exists in the 1-hour window
+        if ($appointment->appointment_datetime) {
+            $requested = \Carbon\Carbon::parse($appointment->appointment_datetime);
+            $startWindow = $requested->copy()->subHour();
+            $endWindow = $requested->copy()->addHour();
+
+            $conflict = Appointments::where('counselor_id', $appointment->counselor_id)
+                ->whereDate('appointment_datetime', $requested->toDateString())
+                ->whereBetween('appointment_datetime', [$startWindow, $endWindow])
+                ->whereRaw('LOWER(status) = ?', ['approved'])
+                ->where('appointment_id', '!=', $appointment->appointment_id)
+                ->exists();
+
+            if ($conflict) {
+                if (request()->ajax() || request()->wantsJson()) {
+                    return response()->json(['error' => 'this time is already taken by someone'], 422);
+                }
+                return redirect()->back()->with('error', 'this time is already taken by someone');
+            }
+        }
+
         $appointment->status = 'Approved';
-        $appointment->save();
+        try {
+            $appointment->save();
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            // Surface the conflict as a table-level error message (not the create modal)
+            $message = $e->validator->errors()->first('appointment_datetime') ?? 'this time is already taken by someone';
+            if (request()->ajax() || request()->wantsJson()) {
+                return response()->json(['error' => $message], 422);
+            }
+            return redirect()->back()->with('error', $message);
+        }
 
         return redirect()->back()->with('success', 'Appointment approved successfully.');
     }
@@ -272,7 +356,7 @@ class HeadAppointmentController extends Controller
         }
 
         // Treat submitted time as Asia/Manila local time
-        $manilaDate = \Carbon\Carbon::createFromFormat('Y-m-d\TH:i', $request->appointment_datetime)->toIso8601String();
+    $manilaDate = \Carbon\Carbon::createFromFormat('Y-m-d\TH:i', $request->appointment_datetime)->toDateTimeString();
 
         // Conflict check: any appointment at the same time
         $globalConflict = Appointments::where('appointment_datetime', $manilaDate)
@@ -340,7 +424,7 @@ class HeadAppointmentController extends Controller
         }
 
         // Convert submitted datetime (local Manila) to ISO string
-        $manilaDate = \Carbon\Carbon::createFromFormat('Y-m-d\TH:i', $request->appointment_datetime)->toIso8601String();
+    $manilaDate = \Carbon\Carbon::createFromFormat('Y-m-d\TH:i', $request->appointment_datetime)->toDateTimeString();
 
         // Conflict checks excluding the current appointment
         $globalConflict = Appointments::where('appointment_datetime', $manilaDate)

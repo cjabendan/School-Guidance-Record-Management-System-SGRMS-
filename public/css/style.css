@@ -419,19 +419,6 @@ select:focus {
     color: #ffffff;
 }
 
-.toggle-btn {
-    display: flex;
-    align-items: center;
-    background: #ffffff;
-    border: 1px solid #8f8f8f65;
-    border-radius: 5px;
-    color: #5757578f;
-    padding: 9px 10px;
-    font-size: 1rem;
-    font-weight: 200;
-    justify-content: center;
-}
-
 /* Student tag input flex container */
 .student-tag-input {
     display: flex;
@@ -512,4 +499,11 @@ select:focus {
     background: #f5faff;
     border-color: #bcd6f7;
     cursor: not-allowed;
+}
+
+/* NO APPOINTMENT IMAGE */
+
+.no-appointments-img {
+    width: 220px;
+    margin-bottom: -20px;
 }

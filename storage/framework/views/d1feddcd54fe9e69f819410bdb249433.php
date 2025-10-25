@@ -55,8 +55,10 @@
                 <?php echo e($row->s_id); ?>
 
             </div>
-            <div class="table-col"><?php echo e($name); ?></div>
-            <div class="table-col"><?php echo e($row->sex); ?></div>
+            <div class="table-col tittle">
+                <img src="<?php echo e(asset ('images/user/'. $row->profile_image )); ?>" alt="student-pfp" class="profile-thumb">
+                <?php echo e($name); ?></div>
+          <!--  <div class="table-col"><?php echo e($row->sex); ?></div> -->
             <div class="table-col"><?php echo e($row->educ_level); ?></div>
             <div class="table-col"><?php echo e($row->year_level); ?></div>
             <div class="table-col">

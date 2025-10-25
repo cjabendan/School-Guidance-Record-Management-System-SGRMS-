@@ -65,7 +65,7 @@
                    <li class="<?php echo e(Request::is('Head/counseling*') ? 'active' : ''); ?>">
                     <a href="<?php echo e(url('Head/counseling')); ?>">
                         <i class="fi fi-sr-journal-alt"></i>
-                        <span class="text">Counseling</span>
+                        <span class="text">Counseling Notes</span>
                     </a>
                 </li>
                 <li class="<?php echo e(Request::is('Head/messages*') ? 'active' : ''); ?>">
@@ -77,8 +77,8 @@
              
                 <li class="<?php echo e(Request::is('Head/requests*') ? 'active' : ''); ?>">
                     <a href="<?php echo e(url('Head/requests')); ?>">
-                        <i class="fi fi-sr-inbox"></i>
-                        <span class="text">Requests</span>
+                       <i class="fi fi-sr-user-link"></i>
+                        <span class="text">Child Links</span>
                     </a>
                 </li>
                 <li class="<?php echo e(Request::is('Head/appointments*') ? 'active' : ''); ?>">

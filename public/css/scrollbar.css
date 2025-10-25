@@ -1,23 +1,38 @@
-.todo-list {
-    overflow-y: auto;       /* vertical scroll only */
-    overflow-x: hidden;     /* no horizontal scroll */
+.todo-list,
+.chat-list,
+.side-container,
+.appointments-table {
+    overflow-y: auto;
+    overflow-x: hidden;
     flex: 1;
     scrollbar-width: thin;
-    scrollbar-color: transparent transparent; /* fully hidden by default */
+    scrollbar-color: transparent transparent;
     scroll-behavior: smooth;
     transition: scrollbar-color 0.4s ease;
+    padding-right: 8px;     
+    box-sizing: border-box; 
 }
 
-/* WebKit browsers */
-.todo-list::-webkit-scrollbar {
+.todo-list::-webkit-scrollbar,
+.chat-list::-webkit-scrollbar,
+.side-container::-webkit-scrollbar,
+.appointments-table::-webkit-scrollbar {
     width: 6px;
+    margin-left: 4px; 
 }
 
-.todo-list::-webkit-scrollbar-track {
+.todo-list::-webkit-scrollbar-track,
+.chat-list::-webkit-scrollbar-track,
+.side-container::-webkit-scrollbar-track,
+.appointments-table::-webkit-scrollbar-track {
     background: transparent;
+    margin: 5px 0; 
 }
 
-.todo-list::-webkit-scrollbar-thumb {
+.todo-list::-webkit-scrollbar-thumb,
+.chat-list::-webkit-scrollbar-thumb,
+.side-container::-webkit-scrollbar-thumb,
+.appointments-table::-webkit-scrollbar-thumb {
     background-color: rgba(255, 255, 255, 0.3);
     border-radius: 3px;
     opacity: 0;
@@ -26,14 +41,26 @@
 
 /* Show scrollbar when hovered or scrolling */
 .todo-list:hover::-webkit-scrollbar-thumb,
-.todo-list.scrolling::-webkit-scrollbar-thumb {
+.todo-list.scrolling::-webkit-scrollbar-thumb,
+.chat-list:hover::-webkit-scrollbar-thumb,
+.chat-list.scrolling::-webkit-scrollbar-thumb,
+.side-container:hover::-webkit-scrollbar-thumb,
+.side-container.scrolling::-webkit-scrollbar-thumb,
+.appointments-table:hover::-webkit-scrollbar-thumb,
+.appointments-table.scrolling::-webkit-scrollbar-thumb {
     opacity: 1;
 }
 
-/* Firefox smooth appearance */
-.todo-list:hover {
-    scrollbar-color: rgba(255, 255, 255, 0.4) transparent;
+/* Firefox scrollbar appearance */
+.todo-list:hover,
+.chat-list:hover,
+.side-container:hover,
+.appointments-table:hover {
+    scrollbar-color: rgba(0, 0, 0, 0.4) transparent;
 }
-.todo-list.scrolling {
-    scrollbar-color: rgba(255, 255, 255, 0.4) transparent;
+.todo-list.scrolling,
+.chat-list.scrolling,
+.side-container.scrolling,
+.appointments-table.scrolling {
+    scrollbar-color: rgba(0, 0, 0, 0.4) transparent;
 }

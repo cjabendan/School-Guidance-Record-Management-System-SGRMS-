@@ -110,9 +110,6 @@
         </div>
     @endif
 
-    <!-- Toast will be shown via browser event -->
-    <!-- Toast styles and script (reference implementation) -->
-    <link rel="stylesheet" href="{{ asset('css/toast.css') }}">
     <script src="{{ asset('js/toast.js') }}"></script>
     <script>
         // Listen for Livewire emitted toast events (works across Livewire versions)
@@ -235,81 +232,95 @@
     <input type="file" id="profileImageFileInput" accept="image/*" style="display:none;">
 
     <!-- Include Cropper assets -->
-    <link rel="stylesheet" href="{{ asset('css/cropper.min.css') }}">
     <script src="{{ asset('js/cropper.min.js') }}"></script>
 
     <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const openBtn = document.getElementById('openEditPhotoBtn');
-        const fileInput = document.getElementById('profileImageFileInput');
-        const modal = document.getElementById('editPhotoModal');
-    const cropperImage = document.getElementById('cropperImage');
-    const previewEl = document.getElementById('cropperPreview');
-        const applyBtn = document.getElementById('applyCropBtn');
-        const cancelBtn = document.getElementById('cancelCropBtn');
-        const hiddenInput = document.getElementById('cropped_image_data_input');
-        let cropper = null;
+    (function(){
+        // Encapsulate logic so we can re-init after Livewire updates
+        function initCropModal() {
+            const openBtn = document.getElementById('openEditPhotoBtn');
+            const fileInput = document.getElementById('profileImageFileInput');
+            const modal = document.getElementById('editPhotoModal');
+            const cropperImage = document.getElementById('cropperImage');
+            const previewEl = document.getElementById('cropperPreview');
+            const applyBtn = document.getElementById('applyCropBtn');
+            const cancelBtn = document.getElementById('cancelCropBtn');
+            const hiddenInput = document.getElementById('cropped_image_data_input');
+            let cropper = null;
 
-        if (!openBtn || !fileInput) return;
+            // safety: ensure elements exist
+            if (!openBtn || !fileInput || !modal || !cropperImage || !applyBtn || !cancelBtn) return;
 
-        openBtn.addEventListener('click', function(e) {
-            e.preventDefault();
-            fileInput.click();
-        });
-
-        fileInput.addEventListener('change', function(e) {
-            const file = e.target.files && e.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = function(evt) {
-                cropperImage.src = evt.target.result;
-                // set preview div background as fallback
-                if (previewEl) previewEl.style.backgroundImage = `url('${evt.target.result}')`;
-                // show modal
-                modal.style.display = 'block';
-
-                // destroy previous cropper if any
-                if (cropper) {
-                    cropper.destroy();
-                    cropper = null;
-                }
-
-                cropper = new Cropper(cropperImage, {
-                    aspectRatio: 1,
-                    viewMode: 1,
-                    preview: '#cropperPreview',
-                });
-            };
-            reader.readAsDataURL(file);
-        });
-
-        applyBtn.addEventListener('click', function(e) {
-            e.preventDefault();
-            if (!cropper) return;
-            const canvas = cropper.getCroppedCanvas({ width: 400, height: 400, imageSmoothingQuality: 'high' });
-            const dataUrl = canvas.toDataURL('image/png');
-
-            // set hidden input and Livewire property
-            if (hiddenInput) hiddenInput.value = dataUrl;
-            // dispatch input event for Livewire
-            hiddenInput.dispatchEvent(new Event('input', { bubbles: true }));
-
-            // also update visible profile image immediately as a preview
-            const visibleImg = document.getElementById('visibleProfileImage');
-            if (visibleImg) visibleImg.src = dataUrl;
-
-            // close modal
-            modal.style.display = 'none';
-        });
-
-        cancelBtn.addEventListener('click', function(e) {
-            e.preventDefault();
-            if (cropper) {
-                cropper.destroy();
-                cropper = null;
+            // helper to show/hide modal via class
+            function showModal() {
+                modal.classList.add('visible');
+                modal.style.display = 'flex';
             }
-            modal.style.display = 'none';
-        });
-    });
+            function hideModal() {
+                modal.classList.remove('visible');
+                modal.style.display = 'none';
+            }
+
+            openBtn.removeEventListener('click', openBtn._cropOpenHandler);
+            openBtn._cropOpenHandler = function(e){ e.preventDefault(); fileInput.click(); };
+            openBtn.addEventListener('click', openBtn._cropOpenHandler);
+
+            fileInput.removeEventListener('change', fileInput._cropChangeHandler);
+            fileInput._cropChangeHandler = function(e) {
+                const file = e.target.files && e.target.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = function(evt) {
+                    cropperImage.src = evt.target.result;
+                    if (previewEl) previewEl.style.backgroundImage = `url('${evt.target.result}')`;
+                    showModal();
+
+                    if (cropper) {
+                        cropper.destroy();
+                        cropper = null;
+                    }
+
+                    cropper = new Cropper(cropperImage, {
+                        aspectRatio: 1,
+                        viewMode: 1,
+                        preview: '#cropperPreview',
+                    });
+                };
+                reader.readAsDataURL(file);
+            };
+            fileInput.addEventListener('change', fileInput._cropChangeHandler);
+
+            applyBtn.removeEventListener('click', applyBtn._cropApplyHandler);
+            applyBtn._cropApplyHandler = function(e){
+                e.preventDefault();
+                if (!cropper) return;
+                const canvas = cropper.getCroppedCanvas({ width: 400, height: 400, imageSmoothingQuality: 'high' });
+                const dataUrl = canvas.toDataURL('image/png');
+                if (hiddenInput) hiddenInput.value = dataUrl;
+                hiddenInput.dispatchEvent(new Event('input', { bubbles: true }));
+                const visibleImg = document.getElementById('visibleProfileImage');
+                if (visibleImg) visibleImg.src = dataUrl;
+                hideModal();
+            };
+            applyBtn.addEventListener('click', applyBtn._cropApplyHandler);
+
+            cancelBtn.removeEventListener('click', cancelBtn._cropCancelHandler);
+            cancelBtn._cropCancelHandler = function(e){
+                e.preventDefault();
+                if (cropper) { cropper.destroy(); cropper = null; }
+                hideModal();
+            };
+            cancelBtn.addEventListener('click', cancelBtn._cropCancelHandler);
+        }
+
+        // Init on Livewire load and after every Livewire update
+        if (window.Livewire) {
+            document.addEventListener('livewire:load', function(){ initCropModal(); });
+            Livewire.hook('message.processed', (message, component) => { initCropModal(); });
+        } else {
+            // fallback
+            document.addEventListener('DOMContentLoaded', initCropModal);
+        }
+    })();
     </script>
 </div>

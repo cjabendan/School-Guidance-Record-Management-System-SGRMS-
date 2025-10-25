@@ -6,6 +6,12 @@
         <?php echo $__env->make('partials.navbar', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
 
         <div class="wrapper">
+            <?php if(session('error')): ?>
+                <div class="alert alert-danger" style="margin:12px 0; padding:10px; border-radius:6px; border:1px solid #fca5a5; background:#fff0f0; color:#b91c1c; font-weight:600;">
+                    <?php echo e(session('error')); ?>
+
+                </div>
+            <?php endif; ?>
             <div class="table-management">
                 <div class="table-filter">
                     <div class="filters">

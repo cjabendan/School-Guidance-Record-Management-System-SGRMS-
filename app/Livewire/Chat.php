@@ -2,104 +2,53 @@
 
 namespace App\Livewire;
 
-use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Session;
+use Illuminate\Database\Eloquent\Builder;
 use App\Models\User;
 use App\Models\ChatMessage;
 use App\Events\MessageSent;
-use Illuminate\Support\Facades\Session;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Database\Eloquent\Builder;
+use App\Events\UserBlockedStatus;
 
 class Chat extends Component
 {
+    // === Public Properties ===
     public $users;
-    public $newMessage;
     public $messages;
-    public $authId;
+    public $newMessage;
     public $loginID;
+    public $authId;
+    public $authRole;
+    public $selectedUser = null;
+    public $selectedUserId = null;
+    public $scrollToMessageId = null;
+    public $messageIdToHighlight = null;
+    // UI States
     public $newChatMode = false;
     public $filter = 'recent';
     public $conversationSearch = '';
     public $searchQuery = '';
     public $conversationSearchResults = [];
     public $newChatSearchResults = [];
-    public $selectedUser = null;
-    public $selectedUserId = null;
     public $showUserProfile = false;
-    public $authRole;
-    public $isBlocked = false;
-    public $hasBlocked = false;
     public $showInactiveUserMessage = false;
-    public $showPrivacyDropdown = false;
-    public $searchModeInProfile = false;
+
+
+
+    // Profile Search
     public $profileSearchQuery = '';
     public $profileSearchResults = [];
 
+    // Block States
+    public $isBlocked = false;
+    public $hasBlocked = false;
+
+    // === Constants ===
     private const ACTIVE_CONVO_SESSION_KEY = 'active_chat_user_id';
     public const USER_PROFILE_STATE_KEY = 'sgrms_user_profile_visible_';
 
-
-
-    public function mount($selectedUserId = null)
-    {
-        $this->loginID = Auth::id();
-        $this->authId = $this->loginID;
-        $this->authRole = Auth::user()->role;
-
-        $this->loadChatList(); // Load sidebar users
-
-        $user = null;
-
-        // 1️⃣ Priority: route parameter
-        if ($selectedUserId) {
-            $user = $this->users->firstWhere('id', $selectedUserId);
-        }
-
-        // 2️⃣ Fallback: session
-        if (!$user) {
-            $activeUserId = Session::get(self::ACTIVE_CONVO_SESSION_KEY);
-            $user = $activeUserId ? $this->users->firstWhere('id', $activeUserId) : null;
-        }
-
-        // 3️⃣ Fallback: first user in list
-        $user = $user ?? $this->users->first();
-
-        if ($user) {
-            $this->setActiveConversation($user);
-        } else {
-            Session::forget(self::ACTIVE_CONVO_SESSION_KEY);
-        }
-    }
-
-
-    private function setActiveConversation(User $user)
-    {
-        $this->selectedUser = $user;
-
-        // Update session
-        Session::put(self::ACTIVE_CONVO_SESSION_KEY, $user->id);
-
-        // Load conversation state
-        $this->loadMessages();
-        $this->markMessagesAsRead();
-        $this->loadBlockStatus();
-        $this->loadChatList();
-
-        // Dispatch Livewire events
-        $this->dispatch('chat:selected');
-        $this->dispatch('requestProfilePaneState', [
-            'localStorageKey' => self::USER_PROFILE_STATE_KEY . $user->id,
-        ]);
-    }
-
-    public function setFilter($filter)
-    {
-        $this->filter = $filter;
-        $this->loadChatList();
-        $this->conversationSearch = '';
-        $this->conversationSearchResults = [];
-    }
+    // Chat time
 
     private function formatTimeShort($timestamp)
     {
@@ -107,20 +56,16 @@ class Chat extends Component
             return null;
         }
 
-        // 1. Calculate the difference in seconds from the current time
         $diffInSeconds = $timestamp->diffInSeconds(\Illuminate\Support\Carbon::now());
 
-        // 2. Apply the custom rule: if less than 60 seconds, force it to '1m'
         if ($diffInSeconds < 60) {
             return '1 m';
         }
 
-        // 3. For 60 seconds (1 minute) and above, use Carbon's diffForHumans
-        //    and then apply the standard abbreviations.
         $diff = $timestamp->diffForHumans([
             'syntax' => \Carbon\CarbonInterface::DIFF_ABSOLUTE,
             'options' => \Carbon\Carbon::JUST_NOW | \Carbon\Carbon::ONE_DAY_WORDS,
-            'parts' => 1, // Only show the largest unit (e.g., 5 minutes, not 5 minutes 30 seconds)
+            'parts' => 1,
         ]);
 
         // Simple mapping to shorten the output string
@@ -137,147 +82,84 @@ class Chat extends Component
             'hour' => 'hr',
             'minutes' => 'm',
             'minute' => 'm',
-            // Note: 'second(s)' are handled by the rule above, but included for completeness
             'seconds' => 's',
             'second' => 's',
         ];
 
-        // Replace the full words with the abbreviations and remove 'ago' if present
+
         return str_replace(
             array_keys($replacements),
             array_values($replacements),
             str_replace(' ago', '', $diff)
         );
     }
-    /**
-     * Loads the block status for the selected user relative to the authenticated user.
-     */
-    public function loadBlockStatus()
+
+    // Conversation Filter
+    public function setFilter($filter)
     {
-        if (!$this->selectedUser) {
-            $this->isBlocked = false;
-            $this->hasBlocked = false;
-            return;
+        $this->filter = $filter;
+
+        if ($filter === 'staff') {
+            $this->users = User::whereIn('role', ['counselor', 'admin'])->get();
         }
-
-        $authBlockerIds = Auth::user()->blockedBy()->pluck('blocker_id');
-        $authBlockedIds = Auth::user()->blocks()->pluck('blocked_id');
-
-        $this->isBlocked = $authBlockerIds->contains($this->selectedUser->id);
-        $this->hasBlocked = $authBlockedIds->contains($this->selectedUser->id);
+        $this->loadChatList();
+        $this->conversationSearch = '';
+        $this->conversationSearchResults = [];
     }
 
-    /**
-     * Toggles the block status of the selected user.
-     * 
-     */
-    public function toggleBlockUser()
+
+    // === Lifecycle ===
+    public function mount($selectedUserId = null)
     {
-        if (!$this->selectedUser) return;
+        $this->loginID = Auth::id();
+        $this->authId = $this->loginID;
+        $this->authRole = Auth::user()->role;
 
-        if (!in_array($this->authRole, ['admin', 'counselor'])) {
-            return;
-        }
+        $this->loadChatList();
 
-        if ($this->hasBlocked && !in_array($this->selectedUser->role, ['parent', 'student'])) {
-        } elseif (!$this->hasBlocked && $this->selectedUser->role !== 'parent') {
-            return;
-        }
+        $user = $this->resolveInitialUser($selectedUserId);
 
-        $blocker = Auth::user();
-        $blockedId = $this->selectedUser->id;
-
-        if ($this->hasBlocked) {
-            // Unblock
-            $blocker->blocks()->detach($blockedId);
+        if ($user) {
+            $this->setActiveConversation($user);
         } else {
-            // Block
-            $blocker->blocks()->attach($blockedId);
+            Session::forget(self::ACTIVE_CONVO_SESSION_KEY);
+        }
+    }
+
+    private function resolveInitialUser($selectedUserId)
+    {
+        // 1. Route parameter
+        if ($selectedUserId) {
+            $user = $this->users->firstWhere('id', $selectedUserId);
+            if ($user) return $user;
         }
 
-        $this->showPrivacyDropdown = false;
+        // 2. Session
+        $activeUserId = Session::get(self::ACTIVE_CONVO_SESSION_KEY);
+        if ($activeUserId) {
+            $user = $this->users->firstWhere('id', $activeUserId);
+            if ($user) return $user;
+        }
 
+        // 3. Fallback
+        return $this->users->first();
+    }
+
+    // === Conversation Management ===
+    private function setActiveConversation(User $user)
+    {
+        $this->selectedUser = $user;
+        Session::put(self::ACTIVE_CONVO_SESSION_KEY, $user->id);
+
+        $this->loadMessages();
+        $this->markMessagesAsRead();
         $this->loadBlockStatus();
         $this->loadChatList();
-        $this->dispatch('chat:updated');
-    }
 
-    /**
-     * Toggles the visibility of the privacy dropdown in the chat header.
-     */
-    public function togglePrivacyDropdown()
-    {
-        $this->showPrivacyDropdown = !$this->showPrivacyDropdown;
-    }
-
-
-    private function loadChatList()
-    {
-
-        $blockedUserIds = Auth::user()->blocks()->pluck('blocked_id');
-        $blockedByMeUserIds = Auth::user()->blockedBy()->pluck('blocker_id');
-        $allBlockedIds = $blockedUserIds->merge($blockedByMeUserIds)->unique();
-
-        $chatPartners = ChatMessage::query()
-            ->where(function ($q) {
-                $q->where('sender_id', $this->authId)
-                    ->orWhere('receiver_id', $this->authId);
-            })
-            ->selectRaw('
-            CASE WHEN sender_id = ? THEN receiver_id ELSE sender_id END as user_id,
-            MAX(created_at) as last_message_at
-        ', [$this->authId])
-            ->groupBy('user_id')
-            ->orderByDesc('last_message_at')
-            ->pluck('user_id');
-
-        $userQuery = User::whereIn('id', $chatPartners)
-            ->where('status', 'active');
-
-        // This removes users who have blocked me.
-        $userQuery->whereNotIn('id', Auth::user()->blockedBy()->pluck('blocker_id'));
-
-
-        if ($this->filter === 'counselor') {
-            $userQuery->where('role', 'counselor');
-        } elseif ($this->filter === 'unread') {
-
-            $userQuery->whereIn('id', function ($query) {
-                $query->select('sender_id')
-                    ->from('chat_messages')
-                    ->where('receiver_id', $this->authId)
-                    ->where('is_read', false);
-            });
-        }
-
-        $this->users = $userQuery->get()
-            ->map(function ($user) {
-                $user->lastMessage = ChatMessage::where(function ($q) use ($user) {
-                    $q->where('sender_id', $this->authId)
-                        ->where('receiver_id', $user->id);
-                })
-                    ->orWhere(function ($q) use ($user) {
-                        $q->where('sender_id', $user->id)
-                            ->where('receiver_id', $this->authId);
-                    })
-                    ->latest()
-                    ->first();
-
-                return $user;
-            })
-            ->sortByDesc(fn($u) => optional($u->lastMessage)->created_at)
-            ->values()
-            ->take(20);
-    }
-
-    private function markMessagesAsRead()
-    {
-        if ($this->selectedUser) {
-            ChatMessage::where('sender_id', $this->selectedUser->id)
-                ->where('receiver_id', $this->authId)
-                ->where('is_read', false)
-                ->update(['is_read' => true]);
-        }
+        $this->dispatch('chat:selected');
+        $this->dispatch('requestProfilePaneState', [
+            'localStorageKey' => self::USER_PROFILE_STATE_KEY . $user->id,
+        ]);
     }
 
     public function selectUser($id)
@@ -285,9 +167,7 @@ class Chat extends Component
         $this->newChatMode = false;
         $this->showInactiveUserMessage = false;
 
-        $user = User::where('id', $id)
-            ->where('status', 'active')
-            ->first();
+        $user = User::where('id', $id)->where('status', 'active')->first();
 
         if (!$user) {
             $this->showInactiveUserMessage = true;
@@ -303,9 +183,7 @@ class Chat extends Component
         $this->setActiveConversation($user);
     }
 
-
-
-    public function loadMessages()
+    private function loadMessages()
     {
         if (!$this->selectedUser) return;
 
@@ -323,50 +201,99 @@ class Chat extends Component
             ->get();
     }
 
-
-    public function startNewChat()
+    private function markMessagesAsRead()
     {
-        $this->newChatMode = true;
-        $this->selectedUser = null;
-        $this->messages = collect();
-        $this->showUserProfile = false;
+        if (!$this->selectedUser) return;
 
-        // Clear session
-        Session::forget(self::ACTIVE_CONVO_SESSION_KEY);
-
-        // Reset search & filters
-        $this->searchQuery = '';
-        $this->conversationSearch = '';
-        $this->newChatSearchResults = [];
-        $this->conversationSearchResults = [];
-        $this->filter = 'recent';
+        ChatMessage::where('sender_id', $this->selectedUser->id)
+            ->where('receiver_id', $this->authId)
+            ->where('is_read', false)
+            ->update(['is_read' => true]);
     }
 
+    // === Chat List ===
+    private function loadChatList()
+    {
+        $authId = $this->authId;
 
+        $blockedIds = Auth::user()->blocks()->pluck('blocked_id');
+        $blockedByIds = Auth::user()->blockedBy()->pluck('blocker_id');
+        $allBlocked = $blockedIds->merge($blockedByIds)->unique();
+
+        // step 1: collect all chat partners and their last message id
+        $chatPartnerData = ChatMessage::query()
+            ->selectRaw("CASE WHEN sender_id = {$authId} THEN receiver_id ELSE sender_id END as user_id, MAX(id) as last_message_id")
+            ->where(function ($q) use ($authId) {
+                $q->where('sender_id', $authId)
+                    ->orWhere('receiver_id', $authId);
+            })
+            ->groupBy('user_id')
+            ->get();
+
+        $partnerIds = $chatPartnerData->pluck('user_id');
+        $lastMessageIds = $chatPartnerData->pluck('last_message_id');
+
+        // step 2: load users
+        $query = User::whereIn('id', $partnerIds)
+            ->where('status', 'active');
+
+
+        if ($this->filter === 'staff') {
+            $query->where('role', 'counselor');
+        } elseif ($this->filter === 'unread') {
+            $query->whereIn('id', function ($q) use ($authId) {
+                $q->select('sender_id')
+                    ->from('chat_messages')
+                    ->where('receiver_id', $authId)
+                    ->where('is_read', false);
+            });
+        }
+
+        // step 3: preload last messages
+        $lastMessages = ChatMessage::whereIn('id', $lastMessageIds)
+            ->get()
+            ->keyBy(function ($msg) use ($authId) {
+                return $msg->sender_id == $authId
+                    ? $msg->receiver_id
+                    : $msg->sender_id;
+            });
+
+        // step 4: combine and sort
+        $this->users = $query->get()
+            ->map(function ($user) use ($lastMessages) {
+                $user->lastMessage = $lastMessages->get($user->id);
+                return $user;
+            })
+            ->sortByDesc(fn($u) => optional($u->lastMessage)->created_at)
+            ->values()
+            ->take(20);
+    }
+
+    // === Search ===
     public function updatedSearchQuery()
     {
-        if ($this->newChatMode && strlen($this->searchQuery) > 1) {
-            $query = trim($this->searchQuery);
-            $userQuery = User::where(function ($q) use ($query) {
-                $q->where('first_name', 'like', "%{$query}%")
-                    ->orWhere('last_name', 'like', "%{$query}%");
-            })
-                ->where('status', 'active')
-                ->where('id', '!=', $this->authId);
-
-            if (in_array($this->authRole, ['parent', 'student'])) {
-                $userQuery->whereIn('role', ['admin', 'counselor']);
-            } elseif (in_array($this->authRole, ['admin', 'counselor'])) {
-                $userQuery->whereIn('role', ['admin', 'counselor', 'parent', 'student']);
-            } else {
-                $userQuery->whereRaw('1 = 0');
-            }
-
-
-            $this->newChatSearchResults = $userQuery->take(10)->get();
-        } else {
+        if (!$this->newChatMode || strlen($this->searchQuery) <= 1) {
             $this->newChatSearchResults = [];
+            return;
         }
+
+        $query = trim($this->searchQuery);
+        $userQuery = User::where(function ($q) use ($query) {
+            $q->where('first_name', 'like', "%{$query}%")
+                ->orWhere('last_name', 'like', "%{$query}%");
+        })
+            ->where('status', 'active')
+            ->where('id', '!=', $this->authId);
+
+        if (in_array($this->authRole, ['parent', 'student'])) {
+            $userQuery->whereIn('role', ['admin', 'counselor']);
+        } elseif (in_array($this->authRole, ['admin', 'counselor'])) {
+            $userQuery->whereIn('role', ['admin', 'counselor', 'parent', 'student']);
+        } else {
+            $userQuery->whereRaw('1=0');
+        }
+
+        $this->newChatSearchResults = $userQuery->take(10)->get();
     }
 
     public function updatedConversationSearch()
@@ -396,14 +323,14 @@ class Chat extends Component
                     ->orWhere('last_name', 'like', "%{$query}%");
             });
 
-        // ⭐ NEW: Parents can only search in conversations with Admin/Counselor
-        if ($this->authRole === 'parent') {
+        if (in_array($this->authRole, ['parent', 'student'])) {
             $userQuery->whereIn('role', ['admin', 'counselor']);
         }
 
         $this->conversationSearchResults = $userQuery->take(20)->get();
     }
 
+    // Select User with existing conversation:
     public function selectNewChatUser($userId)
     {
         $this->newChatMode = false;
@@ -435,22 +362,82 @@ class Chat extends Component
     }
 
 
+    // === START NEW CONVERSATION ===
+
+    public function startNewChat()
+    {
+        $this->newChatMode = true;
+        $this->selectedUser = null;
+        $this->messages = collect();
+        $this->showUserProfile = false;
+
+        // Clear session
+        Session::forget(self::ACTIVE_CONVO_SESSION_KEY);
+
+        // Reset search & filters
+        $this->searchQuery = '';
+        $this->conversationSearch = '';
+        $this->newChatSearchResults = [];
+        $this->conversationSearchResults = [];
+        $this->filter = 'recent';
+    }
+
+
+    // === Blocking ===
+    public function loadBlockStatus()
+    {
+        if (!$this->selectedUser) {
+            $this->isBlocked = false;
+            $this->hasBlocked = false;
+            return;
+        }
+
+        $authBlockerIds = Auth::user()->blockedBy()->pluck('blocker_id');
+        $authBlockedIds = Auth::user()->blocks()->pluck('blocked_id');
+
+        $this->isBlocked = $authBlockerIds->contains($this->selectedUser->id);
+        $this->hasBlocked = $authBlockedIds->contains($this->selectedUser->id);
+    }
+
+    public function toggleBlockUser()
+    {
+        if (!$this->selectedUser) return;
+        if (!in_array($this->authRole, ['admin', 'counselor'])) return;
+        if (!$this->hasBlocked && !in_array($this->selectedUser->role, ['parent', 'student'])) return;
+
+        $blocker = Auth::user();
+        $blockedId = $this->selectedUser->id;
+        $isNowBlocked = false;
+
+        if ($this->hasBlocked) {
+            $blocker->blocks()->detach($blockedId);
+        } else {
+            $blocker->blocks()->attach($blockedId);
+            $isNowBlocked = true;
+        }
+
+        $this->loadBlockStatus();
+        $this->loadChatList();
+        $this->dispatch('chat:updated');
+
+        broadcast(new UserBlockedStatus($blockedId, $this->authId, $isNowBlocked));
+    }
+
+    // === Message Sending ===
     public function submit()
     {
         if (
-            in_array($this->authRole, ['parent', 'student'])
-            && !in_array($this->selectedUser->role, ['admin', 'counselor'])
-        ) {
-            return;
-        }
+            in_array($this->authRole, ['parent', 'student']) &&
+            !in_array($this->selectedUser->role, ['admin', 'counselor'])
+        ) return;
 
         if (!$this->newMessage || !$this->selectedUser || $this->isBlocked || $this->hasBlocked) return;
 
         $message = ChatMessage::create([
-            'sender_id'     => $this->authId,
-            'receiver_id'   => $this->selectedUser->id,
-            'message'       => $this->newMessage,
-            'is_read'       => false,
+            'sender_id' => $this->authId,
+            'receiver_id' => $this->selectedUser->id,
+            'message' => $this->newMessage,
+            'is_read' => false,
         ]);
 
         $this->messages->prepend($message);
@@ -465,93 +452,20 @@ class Chat extends Component
             ->values();
 
         Session::put(self::ACTIVE_CONVO_SESSION_KEY, $this->selectedUser->id);
-
         $this->loadChatList();
         $this->newMessage = '';
+
         broadcast(new MessageSent($message));
     }
 
-
-    public function updatedNewMessage($value)
-    {
-        $user = Auth::user();
-        $this->dispatch(
-            "userTyping",
-            userID: $this->loginID,
-            profileImage: $user->profile_image,
-            selectedUserID: $this->selectedUser->id
-        );
-    }
-
-
-    public function getListeners()
-    {
-        return [
-            "echo-private:chat.{$this->loginID},MessageSent" => 'newChatMessageNotification',
-        ];
-    }
-
-
-    public function newChatMessageNotification($message)
-    {
-        $messageObj = ChatMessage::find($message['id']);
-
-        // Check if the sender is blocked by me (I am 'receiver_id'). If so, ignore the message.
-        if (Auth::user()->blocks()->where('blocked_id', $messageObj->sender_id)->exists()) {
-            // If I have blocked the sender, ignore the notification/message
-            return;
-        }
-
-        $this->loadChatList();
-
-        if ($message['sender_id'] == $this->selectedUser->id) {
-            $this->messages->prepend($messageObj);
-            $this->dispatch('chat:messageSent');
-        }
-
-        if (!$this->selectedUser && $this->users->isNotEmpty()) {
-            $this->selectedUser = $this->users->first();
-            Session::put(self::ACTIVE_CONVO_SESSION_KEY, $this->selectedUser->id);
-            $this->loadMessages();
-            $this->markMessagesAsRead();
-            $this->loadBlockStatus();
-            $this->dispatch('chat:selected');
-        }
-    }
-
-
+    // === UI Toggles ===
     public function toggleUserProfile()
     {
         $this->showUserProfile = !$this->showUserProfile;
         $this->dispatch('saveProfilePaneState', [
             'isVisible' => $this->showUserProfile,
-            'localStorageKey' => self::USER_PROFILE_STATE_KEY . ($this->selectedUser ? $this->selectedUser->id : ''),
+            'localStorageKey' => self::USER_PROFILE_STATE_KEY . ($this->selectedUser->id ?? ''),
         ]);
-    }
-
-    public function updatedSelectedUser()
-    {
-        if ($this->selectedUser) {
-            $this->setActiveConversation($this->selectedUser);
-        }
-    }
-
-    public function toggleSearchMode()
-    {
-        // Toggles the view between user profile and conversation search
-        $this->searchModeInProfile = !$this->searchModeInProfile;
-
-        // Reset search results/query when exiting search mode
-        if (!$this->searchModeInProfile) {
-            $this->profileSearchQuery = '';
-            $this->profileSearchResults = [];
-        }
-    }
-
-
-    public function setUserProfileState($isVisible)
-    {
-        $this->showUserProfile = $isVisible;
     }
 
     public function searchInConversation()
@@ -565,7 +479,6 @@ class Chat extends Component
         $authId = $this->authId;
         $selectedUserId = $this->selectedUser->id;
 
-        // Use REGEXP for exact word match, case-insensitive
         $regexp = '[[:<:]]' . preg_quote($query, '/') . '[[:>:]]';
 
         $this->profileSearchResults = ChatMessage::query()
@@ -587,13 +500,82 @@ class Chat extends Component
         $this->dispatch('profileSearchCompleted');
     }
 
+    // Load Messages of selected chat
+
+    public function loadAllMessages()
+    {
+        if (!$this->selectedUser) return;
+
+        $this->messages = ChatMessage::query()
+            ->where(function ($q) {
+                $q->where('sender_id', $this->authId)
+                    ->where('receiver_id', $this->selectedUser->id);
+            })
+            ->orWhere(function ($q) {
+                $q->where('sender_id', $this->selectedUser->id)
+                    ->where('receiver_id', $this->authId);
+            })
+            ->latest()
+            ->get(); // Load all messages
+    }
+
 
     public function goToMessage($messageId)
     {
 
-        $this->dispatch('scrollToMessage', messageId: $messageId);
+        $this->loadAllMessages();
+
+        $this->messageIdToHighlight = $messageId;
+
+    //  $this->profileSearchQuery = '';
+    //  $this->profileSearchResults = [];
+
+        $this->scrollToMessageId = $messageId;
+
+        $this->dispatch('exitSearchMode');
     }
 
+    // === Realtime Events ===
+    public function getListeners()
+    {
+        return [
+            "echo-private:chat.{$this->loginID},MessageSent" => 'newChatMessageNotification',
+            "echo-private:chat.{$this->loginID},UserBlockedStatus" => 'handleRealtimeBlock',
+        ];
+    }
+
+    public function newChatMessageNotification($message)
+    {
+        $messageObj = ChatMessage::find($message['id']);
+        if (Auth::user()->blocks()->where('blocked_id', $messageObj->sender_id)->exists()) return;
+
+        $this->loadChatList();
+
+        if ($message['sender_id'] == $this->selectedUser->id) {
+            $this->messages->prepend($messageObj);
+            $this->dispatch('chat:messageSent');
+        }
+
+        if (!$this->selectedUser && $this->users->isNotEmpty()) {
+            $this->selectedUser = $this->users->first();
+            Session::put(self::ACTIVE_CONVO_SESSION_KEY, $this->selectedUser->id);
+            $this->loadMessages();
+            $this->markMessagesAsRead();
+            $this->loadBlockStatus();
+            $this->dispatch('chat:selected');
+        }
+    }
+
+    public function handleRealtimeBlock(array $event)
+    {
+        if ($this->selectedUser && $this->selectedUser->id == $event['blockerId']) {
+            $this->loadBlockStatus();
+            $this->loadChatList();
+            $this->dispatch('chat:messageSent');
+        }
+    }
+
+    // === Render ===
     public function render()
     {
         return view('livewire.chat');

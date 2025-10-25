@@ -40,20 +40,28 @@
 function openReviewModal(appointmentId, detailsHtml, approveUrl, declineUrl, cancelUrl, status, startUrl, el) {
   var body = document.getElementById('review-modal-body');
   body.innerHTML = detailsHtml;
-  // If the caller passed an element with reschedule data, append it only when request status is Pending
-  try {
-    if (el && el.dataset) {
-      var resStatus = (el.dataset.rescheduleStatus || '').toLowerCase();
-      var prev = el.dataset.prev || '';
-      var req = el.dataset.req || '';
-      if (resStatus === 'pending') {
-        var extra = '';
-        if (prev) extra += '<div style="font-size:0.95em; margin-top:6px;"><strong>Previous:</strong> ' + prev + '</div>';
-  if (req) extra += '<div style="font-size:0.95em;"><strong>Preferred date to reschedule:</strong> ' + req + '</div>';
-        if (extra) body.innerHTML = body.innerHTML + extra;
-      }
+
+  // Show previous and preferred times only for rescheduled appointments
+  if (el && el.dataset && status === 'rescheduled') {
+    var prev = el.dataset.prev || '';
+    var req = el.dataset.req || '';
+    var extra = '';
+    
+    // Show previous time if available
+    if (prev) {
+      extra += '<div style="font-size:0.95em; margin-top:6px;"><strong>Previous:</strong> ' + prev + '</div>';
     }
-  } catch (e) {}
+    
+    // Show preferred time if available
+    if (req) {
+      extra += '<div style="font-size:0.95em; margin-top:6px; color:#2563eb;"><strong>Preferred date to reschedule:</strong> ' + req + '</div>';
+    }
+    
+    if (extra) {
+      body.innerHTML += extra;
+    }
+  }
+
   document.getElementById('reviewAppointmentModal').style.display = 'flex';
   // set form actions
   var approveForm = document.getElementById('approveForm');

@@ -20,7 +20,6 @@
     padding: 1px;
     gap: 15px;
     overflow: hidden;
-    /* Use grid so we can place welcome-box above and the two sections below */
     display: grid;
     grid-template-columns: 2fr 1fr;
     grid-template-rows: auto 1fr;
@@ -263,19 +262,6 @@
     to { opacity: 1; transform: translateY(0); }
 }
 
-/* ===========================
-   Scroll Only Vertical – no bottom scroll
-   =========================== */
-#content,
-.dashboard-content,
-.side-container {
-    overflow-x: hidden;
-    overflow-y: auto;
-    scroll-behavior: smooth;
-}
-
-
-
 /* Side Container */
 .side-container {
     grid-column: 2;
@@ -517,6 +503,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    flex-direction: column;
     font-size: 1.3em;
     color: #848688;
     background: #fff;

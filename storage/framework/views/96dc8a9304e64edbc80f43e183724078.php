@@ -1,3 +1,10 @@
+<?php if(session('error')): ?>
+    <div class="alert alert-danger" style="margin:8px 12px; padding:10px; border-radius:6px; border:1px solid #fca5a5; background:#fff0f0; color:#b91c1c; font-weight:600;">
+        <?php echo e(session('error')); ?>
+
+    </div>
+<?php endif; ?>
+
 <?php $__empty_1 = true; $__currentLoopData = $appointments; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $appointment): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
     <div class="table-card">
         <div class="table-col type">
@@ -81,16 +88,27 @@
                     <span class="<?php echo e($dotClass); ?>"></span>
                     <span data-appointment-status="<?php echo e($appointment->appointment_id); ?>"><?php echo e(ucfirst($appointment->status)); ?></span>
                 </span>
-            <?php if($appointment->rescheduled_count > 0): ?>
-                <span class="badge badge-warning">
-                    Rescheduled (<?php echo e($appointment->rescheduled_count); ?>x)
-                </span>
-            <?php endif; ?>
             
         </div>
         <div class="table-col actions">
-            <a href="#" title="View" class="view-btn"
-                onclick="openParentReviewModal(`
+            <?php
+                $status = strtolower($appointment->status);
+                $latestReq = $appointment->reschedules()->first();
+                $prevText = '';
+                $reqText = '';
+                
+                // Only show previous and preferred times for rescheduled appointments
+                if ($status === 'rescheduled') {
+                    $prevText = $appointment->appointment_datetime ? $appointment->appointment_datetime->setTimezone('Asia/Manila')->format('M d, Y h:i A') : '';
+                    if ($appointment->reschedule_proposed_datetime) {
+                        $reqText = $appointment->reschedule_proposed_datetime->setTimezone('Asia/Manila')->format('M d, Y h:i A');
+                    } elseif ($latestReq && !empty($latestReq->proposed_datetime)) {
+                        $reqText = \Carbon\Carbon::parse($latestReq->proposed_datetime)->setTimezone('Asia/Manila')->format('M d, Y h:i A');
+                    }
+                }
+            ?>
+            <a href="#" title="View" class="view-btn" data-prev="<?php echo e($prevText); ?>" data-req="<?php echo e($reqText); ?>"
+                onclick="openStudentReviewModal(<?php echo e($appointment->appointment_id); ?>, `
                     <div><strong>Type:</strong> <?php echo e($appointment->type ? $appointment->type->type_name : 'N/A'); ?><br>
                     <strong>Requester:</strong> <?php echo e($appointment->requester ? $appointment->requester->first_name . ' ' . $appointment->requester->last_name : 'N/A'); ?><br>
                     <strong>Student:</strong> <?php $studentCount = $appointment->students->count(); ?>
@@ -103,19 +121,18 @@
                     <?php else: ?>
                         N/A
                     <?php endif; ?><br>
-                    <strong>Date & Time:</strong> <?php echo e($appointment->appointment_datetime ? $appointment->appointment_datetime->format('M d, Y h:i A') : 'N/A'); ?><br>
+                    <strong>Date & Time:</strong> <?php echo e($appointment->appointment_datetime ? $appointment->appointment_datetime->setTimezone('Asia/Manila')->format('M d, Y h:i A') : 'N/A'); ?><br>
                     <strong>Counselor:</strong> <?php echo e($appointment->counselor ? $appointment->counselor->first_name . ' ' . $appointment->counselor->last_name : 'N/A'); ?><br>
                     <strong>Status:</strong> <?php echo e(ucfirst($appointment->status)); ?><br>
-                    <?php if($appointment->rescheduled_count > 0): ?>
-                        <span class='badge badge-warning'>Rescheduled (<?php echo e($appointment->rescheduled_count); ?>x)</span><br>
-                    <?php endif; ?>
+                            
                     <?php if(strtolower($appointment->status) === 'declined' && !empty($appointment->decline_reason)): ?>
                         <div class='alert alert-danger mt-2' style='padding:4px 8px; font-size:0.95em;'><strong>Decline Reason:</strong> <?php echo e($appointment->decline_reason); ?></div>
                     <?php endif; ?>
                     </div>
-                `)">
+                `, '<?php echo e(route('Student.appointments.cancel', $appointment->appointment_id)); ?>', '<?php echo e(strtolower($appointment->status)); ?>', '<?php echo e(route('Student.appointments.start', $appointment->appointment_id)); ?>', this)">
                 <i class='bx bx-show'></i>
             </a>
+            
         </div>
     </div>
 <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>

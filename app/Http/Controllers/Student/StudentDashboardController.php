@@ -6,13 +6,17 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Appointments;
+use App\Models\Announcements;
 
 class StudentDashboardController extends Controller
 {
-    // ...existing methods...
 
     public function dashboard(Request $request)
     {
+
+        // Fetch latest announcements
+        $announcements = Announcements::orderByDesc('date_posted')->take(5)->get();
+
         $userId = Auth::id();
         $filter = $request->input('filter', 'today');
 
@@ -34,6 +38,6 @@ class StudentDashboardController extends Controller
 
         $upcomingAppointments = $query->orderBy('appointment_datetime', 'asc')->limit(5)->get();
 
-        return view('Student.dashboard', compact('upcomingAppointments'));
+        return view('Student.dashboard', compact('upcomingAppointments' , 'announcements'));
     }
 }

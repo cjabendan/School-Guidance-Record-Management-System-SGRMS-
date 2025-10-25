@@ -1,3 +1,10 @@
+<?php if(session('error')): ?>
+    <div class="alert alert-danger" style="margin:8px 12px; padding:10px; border-radius:6px; border:1px solid #fca5a5; background:#fff0f0; color:#b91c1c; font-weight:600;">
+        <?php echo e(session('error')); ?>
+
+    </div>
+<?php endif; ?>
+
 <?php $__empty_1 = true; $__currentLoopData = $appointments; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $appointment): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
     <div class="table-card">
         <div class="table-col type">
@@ -28,8 +35,13 @@
             <?php endif; ?>
         </div>
         <div class="table-col datetime">
-            <?php echo e($appointment->appointment_datetime ? $appointment->appointment_datetime->format('M d, Y h:i A') : 'N/A'); ?>
+            <?php if($appointment->status === 'Rescheduled' && $appointment->reschedule_proposed_datetime): ?>
+                <?php echo e($appointment->reschedule_proposed_datetime->format('M d, Y h:i A')); ?>
 
+            <?php else: ?>
+                <?php echo e($appointment->appointment_datetime ? $appointment->appointment_datetime->format('M d, Y h:i A') : 'N/A'); ?>
+
+            <?php endif; ?>
         </div>
         <div class="table-col counselor">
             <?php if($appointment->counselor): ?>
@@ -66,43 +78,74 @@
                 <?php echo e(ucfirst($appointment->status)); ?>
 
             </span>
-            <?php if($appointment->rescheduled_count > 0): ?>
-                <span class="badge badge-warning">
-                    Rescheduled (<?php echo e($appointment->rescheduled_count); ?>x)
-                </span>
-            <?php endif; ?>
+            
         </div>
         <div class="table-col actions">
-            <a href="#" title="View" class="view-btn"
-                onclick="openReviewModal(<?php echo e($appointment->appointment_id); ?>,
-                    `<div><strong>Type:</strong> <?php echo e($appointment->type ? $appointment->type->type_name : 'N/A'); ?><br>
-                    <strong>Requester:</strong> <?php echo e($appointment->requester ? $appointment->requester->first_name . ' ' . $appointment->requester->last_name : 'N/A'); ?><br>
-                    <strong>Student:</strong> <?php $studentCount = $appointment->students->count(); ?>
-                    <?php if($studentCount === 1): ?>
-                        <?php echo e($appointment->students->first()->user->first_name ?? ''); ?> <?php echo e($appointment->students->first()->user->last_name ?? ''); ?>
+            <?php
+                $latestReq = $appointment->reschedules()->first();
+                $resStatus = $latestReq ? $latestReq->status : '';
+                $status = strtolower($appointment->status);
+                
+                // Initialize times
+                $prevText = '';
+                $reqText = '';
+                
+                // Only set previous and preferred times if status is rescheduled
+                if ($status === 'rescheduled') {
+                    // Original appointment time becomes the "previous" time
+                    $prevText = $appointment->appointment_datetime 
+                        ? $appointment->appointment_datetime->setTimezone('Asia/Manila')->format('M d, Y h:i A') 
+                        : '';
+                    
+                    // Get preferred time from reschedule_proposed_datetime
+                    $reqText = $appointment->reschedule_proposed_datetime 
+                        ? $appointment->reschedule_proposed_datetime->setTimezone('Asia/Manila')->format('M d, Y h:i A') 
+                        : '';
 
-                    <?php elseif($studentCount > 1): ?>
-                        <?php echo $appointment->students->map(fn($s) => e(($s->user->first_name ?? '') . ' ' . ($s->user->last_name ?? '')))->implode('<br>'); ?>
+                    // Log times for debugging
+                    \Illuminate\Support\Facades\Log::info('Displaying rescheduled appointment times', [
+                        'appointment_id' => $appointment->appointment_id,
+                        'status' => $status,
+                        'previous' => $prevText,
+                        'preferred' => $reqText,
+                        'has_proposed_datetime' => isset($appointment->reschedule_proposed_datetime)
+                    ]);
+                }
+            ?>
+            <a href="#" title="View" class="view-btn" 
+              data-reschedule-status="<?php echo e($resStatus); ?>"
+              data-prev="<?php echo e($prevText); ?>"
+              data-req="<?php echo e($reqText); ?>"
+              onclick="openReviewModal(
+                <?php echo e($appointment->appointment_id); ?>, 
+                `<div><strong>Type:</strong> <?php echo e($appointment->type ? $appointment->type->type_name : 'N/A'); ?><br>
+                <strong>Requester:</strong> <?php echo e($appointment->requester ? $appointment->requester->first_name . ' ' . $appointment->requester->last_name : 'N/A'); ?><br>
+                <strong>Student:</strong> <?php $studentCount = $appointment->students->count(); ?>
+                <?php if($studentCount === 1): ?>
+                    <?php echo e($appointment->students->first()->user->first_name ?? ''); ?> <?php echo e($appointment->students->first()->user->last_name ?? ''); ?>
 
-                    <?php else: ?>
-                        N/A
-                    <?php endif; ?><br>
-                    <strong>Date & Time:</strong> <?php echo e($appointment->appointment_datetime ? $appointment->appointment_datetime->format('M d, Y h:i A') : 'N/A'); ?><br>
-                    <strong>Counselor:</strong> <?php echo e($appointment->counselor ? $appointment->counselor->first_name . ' ' . $appointment->counselor->last_name : 'N/A'); ?><br>
-                    <strong>Status:</strong> <?php echo e(ucfirst($appointment->status)); ?><br>
-                    <?php if($appointment->rescheduled_count > 0): ?>
-                        <span class='badge badge-warning'>Rescheduled (<?php echo e($appointment->rescheduled_count); ?>x)</span><br>
-                    <?php endif; ?>
-                    <?php if(strtolower($appointment->status) === 'declined' && !empty($appointment->decline_reason)): ?>
-                        <div class='alert alert-danger mt-2' style='padding:4px 8px; font-size:0.95em;'><strong>Decline Reason:</strong> <?php echo e($appointment->decline_reason); ?></div>
-                    <?php endif; ?>
-                    </div>`,
-                    '<?php echo e(route('Head.appointments.approve', $appointment->appointment_id)); ?>',
-                    '<?php echo e(route('Head.appointments.decline', $appointment->appointment_id)); ?>',
-                    '<?php echo e(strtolower($appointment->status)); ?>',
-                    '<?php echo e(route('Head.appointments.start', $appointment->appointment_id)); ?>'
-                )">
-                <i class='bx bx-show'></i>
+                <?php elseif($studentCount > 1): ?>
+                    <?php echo $appointment->students->map(fn($s) => e(($s->user->first_name ?? '') . ' ' . ($s->user->last_name ?? '')))->implode('<br>'); ?>
+
+                <?php else: ?>
+                    N/A
+                <?php endif; ?><br>
+                <strong>Date & Time:</strong> <?php if($appointment->status === 'Rescheduled' && $appointment->reschedule_proposed_datetime): ?><?php echo e($appointment->reschedule_proposed_datetime->setTimezone('Asia/Manila')->format('M d, Y h:i A')); ?><?php else: ?><?php echo e($appointment->appointment_datetime ? $appointment->appointment_datetime->setTimezone('Asia/Manila')->format('M d, Y h:i A') : 'N/A'); ?><?php endif; ?><br>
+                <strong>Counselor:</strong> <?php echo e($appointment->counselor ? $appointment->counselor->first_name . ' ' . $appointment->counselor->last_name : 'N/A'); ?><br>
+                <strong>Status:</strong> <?php echo e(ucfirst($appointment->status)); ?><br>
+                
+                <?php if(strtolower($appointment->status) === 'declined' && !empty($appointment->decline_reason)): ?>
+                    <div class='alert alert-danger mt-2' style='padding:4px 8px; font-size:0.95em;'><strong>Decline Reason:</strong> <?php echo e($appointment->decline_reason); ?></div>
+                <?php endif; ?>
+                </div>`,
+                '<?php echo e(route('Head.appointments.approve', $appointment->appointment_id)); ?>',
+                '<?php echo e(route('Head.appointments.decline', $appointment->appointment_id)); ?>',
+                '<?php echo e(route('Head.appointments.cancel', $appointment->appointment_id)); ?>',
+                '<?php echo e(strtolower($appointment->status)); ?>',
+                '<?php echo e(route('Head.appointments.start', $appointment->appointment_id)); ?>',
+                this
+              )">
+              <i class='bx bx-show'></i>
             </a>
             <?php $st = strtolower($appointment->status ?? ''); ?>
             <?php if(in_array($st, ['cancelled', 'completed', 'declined'])): ?>

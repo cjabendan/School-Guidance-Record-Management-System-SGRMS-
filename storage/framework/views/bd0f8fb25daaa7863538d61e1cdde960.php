@@ -44,9 +44,9 @@
                                 class="chat-nav <?php echo e($filter == 'unread' ? 'active' : ''); ?>" data-filter="unread">Unread</a>
                         </li>
                         <li>
-                            <a href="#" wire:click.prevent="setFilter('counselor')"
-                                class="chat-nav <?php echo e($filter == 'counselor' ? 'active' : ''); ?>"
-                                data-filter="counselor">Counselors</a>
+                          <a href="#" wire:click.prevent="setFilter('staff')"
+   class="chat-nav <?php echo e(in_array($filter, ['counselor', 'admin']) ? 'active' : ''); ?>"
+   data-filter="staff">Counselors</a>
                         </li>
                     </ul>
                 </div>

@@ -121,9 +121,9 @@ class HeadStudentController extends Controller
         }
         return view('Head.profiling.students', compact('students', 'filter'));
 
-
-
     }
+
+    
     public function getNextStudentId()
     {
         $currentYear = date('y');

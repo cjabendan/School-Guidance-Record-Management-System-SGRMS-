@@ -434,26 +434,45 @@
     }
 }
 
-/* Specific override for the edit photo modal used in settings to match student modal look */
-#editPhotoModal {
-    display: none; /* controlled by JS */
-    position: fixed;
-    z-index: 2000;
-    left: 0;
-    top: 0;
-    width: 100vw;
-    height: 100vh;
-    background-color: rgba(0,0,0,0.6);
-    align-items: center;
-    justify-content: center;
-    overflow-y: auto;
+#editPhotoModal,
+.modal#editPhotoModal,
+body #editPhotoModal {
+    display: none; 
+    position: fixed !important;
+    z-index: 9999 !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    background-color: rgba(0,0,0,0.6) !important;
+    align-items: center !important;
+    justify-content: center !important;
 }
 
-#editPhotoModal .modal-content {
-    max-width: 900px;
-    padding: 28px;
-    border-radius: 10px;
-    box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+#editPhotoModal .modal-content,
+.modal#editPhotoModal .modal-content,
+body #editPhotoModal .modal-content {
+    max-width: 900px !important;
+    padding: 28px !important;
+    border-radius: 10px !important;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.2) !important;
+    background: #fff !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    gap: 16px !important;
+}
+
+#editPhotoModal .modal-content h3 {
+    margin: 0 !important;
+    font-size: 1.25rem !important;
+    color: #003060 !important;
+    font-weight: 600 !important;
+    text-align: center !important;
+}
+
+#editPhotoModal .modal-content > div[style] {
+    width: 100% !important;
 }
 
 /* Cropper preview box used in profile component */

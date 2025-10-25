@@ -1,7 +1,7 @@
 <!-- filepath: c:\Users\Rhylyn\School-Guidance-Record-Management-System-SGRMS-\resources\views\Parent\modal\requestApppointmentModal.blade.php -->
 @php
-  // Keep modal open when there are validation errors or when old input exists
-  $modalDisplay = ($errors->any() || old('appointment_datetime')) ? 'flex' : 'none';
+  // Only auto-open the create modal when its own form was submitted.
+  $modalDisplay = (old('form_origin') === 'create_appointment') ? 'flex' : 'none';
 @endphp
 <div id="requestAppointmentModal" class="custom-modal" style="display:{{ $modalDisplay }};">
   <!-- Select2 CSS -->
@@ -9,6 +9,7 @@
   <div class="custom-modal-content">
     <form method="POST" action="{{ route('Counselor.appointments.store') }}">
       @csrf
+      <input type="hidden" name="form_origin" value="create_appointment">
       <div class="modal-header">
         <h5 class="modal-title">Request Appointment</h5>
         <button type="button" class="close-modal-btn" onclick="closeModal()">×</button>
@@ -117,5 +118,30 @@
         $('#student_id').val(oldStudents).trigger('change');
       }
     });               
+  </script>
+
+  <!-- Error-only modal (small) - shows when there are validation errors not originating from create form -->
+  @php $showErrorModal = $errors->any() && old('form_origin') !== 'create_appointment'; @endphp
+  <div id="appointmentErrorModal" class="custom-modal" style="display:{{ $showErrorModal ? 'flex' : 'none' }};">
+    <div class="custom-modal-content" style="max-width:420px;">
+      <div class="modal-header">
+        <span class="modal-title"><i class="fi fi-rr-exclamation"></i> Error</span>
+        <button type="button" class="close-modal-btn" onclick="closeErrorModal()">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="alert alert-danger" style="margin-bottom:0; border-radius:6px; border:1px solid #fca5a5; background:#fff0f0; color:#b91c1c; font-weight:600; font-size:1.05em; padding:12px 16px; display:flex; align-items:center; gap:8px;">
+          <i class="fi fi-rr-exclamation" style="color:#b91c1c; font-size:1.3em;"></i>
+          <div style="line-height:1.2;">{{ $errors->first() }}</div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" onclick="closeErrorModal()">Close</button>
+      </div>
+    </div>
+  </div>
+  <script>
+    function closeErrorModal() {
+      document.getElementById('appointmentErrorModal').style.display = 'none';
+    }
   </script>
 </div>

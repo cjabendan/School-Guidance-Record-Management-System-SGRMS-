@@ -168,6 +168,7 @@
                     let defaultAvatar = "<?php echo e(asset('images/default-avatar.png')); ?>";
 
                     let formattedAppointments = rawAppointments.map(item => ({
+                        id: item.appointment_id,
                         title: item.type?.type_name ?? "Appointment",
                         start: item.appointment_datetime ? new Date(item.appointment_datetime) : null,
                         allDay: false,
@@ -180,16 +181,14 @@
                         counselor: item.counselor ?
                             `${item.counselor.first_name} ${item.counselor.last_name}` : "N/A",
                         // counselor image path (supports several shapes: counselor.profile_image OR counselor.profile_photo_path OR counselor.user.profile_image)
-                        counselor_img: (function(){
-                            if (!item.counselor) return defaultAvatar;
-                            // direct profile image on counselor
+                        counselorAvatar: (function(){
+                            if (!item.counselor) return null;
                             if (item.counselor.profile_image) return `${userImgBase}/${item.counselor.profile_image}`;
-                            // alternate stored path field
                             if (item.counselor.profile_photo_path) return item.counselor.profile_photo_path;
-                            // nested user object pattern
                             if (item.counselor.user && item.counselor.user.profile_image) return `${userImgBase}/${item.counselor.user.profile_image}`;
-                            return defaultAvatar;
+                            return null;
                         })(),
+                        requesterAvatar: null,
                         status: item.status ?? "N/A",
                         color: item.status?.toLowerCase() === 'approved' ? '#10b981' :
                             item.status?.toLowerCase() === 'pending' ? '#f59e0b' :
@@ -207,17 +206,43 @@
                             events: formattedAppointments,
 
                             eventContent: function(arg) {
-                                // Render avatar inside the colored event box so it sits on the background
-                                const img = arg.event.extendedProps.counselor_img || defaultAvatar;
-                                const title = arg.event.title || '';
-                                return {
-                                    html: `<div style="background: ${arg.event.backgroundColor}; color: #fff; padding:6px 8px; border-radius:6px; font-size:0.9rem; font-weight:600; display:flex; align-items:center; gap:8px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
-                                                <img src="${img}" alt="counselor" style="width:28px;height:28px;border-radius:50%;object-fit:cover;border:1px solid rgba(0,0,0,0.08)">
-                                                <div style="display:flex;flex-direction:column;overflow:hidden;">
-                                                    <div style="font-weight:600;">${title}</div>
-                                                </div>
-                                            </div>`
-                                };
+                                // Build a custom DOM node with avatar + title (match Head layout)
+                                const container = document.createElement('div');
+                                container.className = 'fc-event-custom';
+
+                                const bg = arg.event.backgroundColor || '#6b7280';
+                                container.style.background = bg;
+                                container.style.color = '#fff';
+                                container.style.padding = '6px 8px';
+                                container.style.borderRadius = '6px';
+
+                                // Avatar (counselor first)
+                                const avatarUrl = arg.event.extendedProps.counselorAvatar || arg.event.extendedProps.requesterAvatar || null;
+                                if (avatarUrl) {
+                                    const img = document.createElement('img');
+                                    img.src = avatarUrl;
+                                    img.alt = arg.event.extendedProps.counselor || 'avatar';
+                                    img.className = 'fc-event-avatar';
+                                    container.appendChild(img);
+                                }
+
+                                // Title and optional subtext
+                                const titleWrap = document.createElement('div');
+                                titleWrap.className = 'fc-event-title-wrap';
+
+                                const title = document.createElement('div');
+                                title.className = 'fc-event-title-text';
+                                title.textContent = arg.event.title || '';
+                                titleWrap.appendChild(title);
+
+                                const sub = document.createElement('div');
+                                sub.className = 'fc-event-sub';
+                                sub.textContent = arg.event.extendedProps.counselor || '';
+                                titleWrap.appendChild(sub);
+
+                                container.appendChild(titleWrap);
+
+                                return { domNodes: [container] };
                             },
 
                                 selectable: true,
@@ -271,5 +296,14 @@ document.addEventListener('click', function(e) {
 <?php $__env->startPush('scripts'); ?>
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
 <?php $__env->stopPush(); ?>
+
+<style>
+/* Calendar event avatar styles (match Head layout) */
+.fc-event-custom { display:flex; align-items:center; gap:8px; }
+.fc-event-avatar { width:28px; height:28px; border-radius:50%; object-fit:cover; border:1px solid rgba(255,255,255,0.12); flex:0 0 28px; }
+.fc-event-title-wrap { display:flex; flex-direction:column; line-height:1; }
+.fc-event-title-text { font-weight:600; font-size:0.9rem; color:inherit; }
+.fc-event-sub { font-size:0.75rem; color:rgba(255,255,255,0.9); }
+</style>
 
 <?php echo $__env->make('layouts.student', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\Administrator\School-Guidance-Record-Management-System-SGRMS\resources\views/Student/appointments.blade.php ENDPATH**/ ?>

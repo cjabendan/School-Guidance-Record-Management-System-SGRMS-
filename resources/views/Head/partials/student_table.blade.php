@@ -54,8 +54,10 @@
                 <span class="status-circle" style="background: {{ $severityColor }}; vertical-align: middle; margin-right: 6px; border-radius:50%; width:12px; height:12px; display:inline-block;"></span>
                 {{ $row->s_id }}
             </div>
-            <div class="table-col">{{ $name }}</div>
-            <div class="table-col">{{ $row->sex }}</div>
+            <div class="table-col tittle">
+                <img src="{{ asset ('images/user/'. $row->profile_image )}}" alt="student-pfp" class="profile-thumb">
+                {{ $name }}</div>
+          <!--  <div class="table-col">{{ $row->sex }}</div> -->
             <div class="table-col">{{ $row->educ_level }}</div>
             <div class="table-col">{{ $row->year_level }}</div>
             <div class="table-col">

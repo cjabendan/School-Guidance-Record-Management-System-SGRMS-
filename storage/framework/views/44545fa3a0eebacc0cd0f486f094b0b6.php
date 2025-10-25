@@ -1,64 +1,70 @@
 <!DOCTYPE html>
 <html lang="en">
 
-<head>
-    <meta charset="utf-8" />
-    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-    <title><?php echo $__env->yieldContent('title', 'SGRMS - School Guidance Records Management System'); ?></title>
+    <head>
+        <meta charset="utf-8" />
+        <meta name="csrf-token" content="<?php echo e(csrf_token()); ?>">
+        <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+        <title><?php echo $__env->yieldContent('title', 'SGRMS - School Guidance Records Management System'); ?></title>
 
-    
-    <link rel="icon" type="image/svg+xml" href="<?php echo e(asset('1.png')); ?>">
-    <link rel="stylesheet" href="<?php echo e(asset('css/tailwind.css')); ?>">
-    <link href="<?php echo e(asset('css/font-awesome.min.css')); ?>" rel="stylesheet" />
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;700&display=swap" rel="stylesheet">
-    <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/3.0.0/uicons-bold-rounded/css/uicons-bold-rounded.css'>
-    <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/3.0.0/uicons-solid-rounded/css/uicons-solid-rounded.css'>
-    <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/3.0.0/uicons-regular-straight/css/uicons-regular-straight.css'>
+        
+        <link rel="icon" type="image/svg+xml" href="<?php echo e(asset('1.png')); ?>">
+        <link rel="stylesheet" href="<?php echo e(asset('css/tailwind.css')); ?>">
+        <link href="<?php echo e(asset('css/font-awesome.min.css')); ?>" rel="stylesheet" />
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;700&display=swap" rel="stylesheet">
+        <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/3.0.0/uicons-bold-rounded/css/uicons-bold-rounded.css'>
+        <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet" />
+        <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/3.0.0/uicons-solid-rounded/css/uicons-solid-rounded.css'>
+        <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/3.0.0/uicons-regular-rounded/css/uicons-regular-rounded.css'>
+        <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/3.0.0/uicons-regular-straight/css/uicons-regular-straight.css'>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-    <link rel="stylesheet" href="<?php echo e(asset('css/style.css')); ?>">
-    <link rel="stylesheet" href="<?php echo e(asset('css/bar.css')); ?>">
-    <link rel="stylesheet" href="<?php echo e(asset('css/guidance.css')); ?>">
-    <link rel="stylesheet" href="<?php echo e(asset('css/messages.css')); ?>">
-    <link rel="stylesheet" href="<?php echo e(asset('css/settings.css')); ?>">
-    <link rel="stylesheet" href="<?php echo e(asset('css/notify.css')); ?>">
-    <link rel="stylesheet" href="<?php echo e(asset('css/table.css')); ?>">
-    <link rel="stylesheet" href="<?php echo e(asset('css/scrollbar.css')); ?>">
-    
-    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet" />
-    <?php echo $__env->yieldContent('head'); ?>
+        <link rel="stylesheet" href="<?php echo e(asset('css/style.css')); ?>">
+        <link rel="stylesheet" href="<?php echo e(asset('css/bar.css')); ?>">
+        <link rel="stylesheet" href="<?php echo e(asset('css/guidance.css')); ?>">
+        <link rel="stylesheet" href="<?php echo e(asset('css/messages.css')); ?>">
+        <link rel="stylesheet" href="<?php echo e(asset('css/settings.css')); ?>">
+        <link rel="stylesheet" href="<?php echo e(asset('css/notify.css')); ?>">
+        <link rel="stylesheet" href="<?php echo e(asset('css/table.css')); ?>">
+        <link rel="stylesheet" href="<?php echo e(asset('css/scrollbar.css')); ?>">
+        
+        <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet" />
+        <link href="<?php echo e(asset('css/cropper.min.css')); ?>" rel="stylesheet">
+        <link rel="stylesheet" href="<?php echo e(asset('css/toast.css')); ?>">
+        <?php echo $__env->yieldContent('head'); ?>
 
-    <?php echo \Livewire\Mechanisms\FrontendAssets\FrontendAssets::styles(); ?>
+        <?php echo \Livewire\Mechanisms\FrontendAssets\FrontendAssets::styles(); ?>
 
-    <?php echo app('Illuminate\Foundation\Vite')(['resources/css/app.css', 'resources/js/app.js']); ?>
-</head>
+        <?php echo app('Illuminate\Foundation\Vite')(['resources/css/app.css', 'resources/js/app.js']); ?>
+    </head>
 
-<body>
+    <body>
 
-    <!-- SIDEBAR -->
+        <!-- SIDEBAR -->
 
-    <?php echo $__env->make('partials.counselor-sidebar', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
-    <?php echo $__env->yieldContent('content'); ?>
+        <?php echo $__env->make('partials.counselor-sidebar', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
+        <?php echo $__env->yieldContent('content'); ?>
 
-    <?php if(isset($slot)): ?>
-        <?php echo e($slot); ?>
+        <?php if(isset($slot)): ?>
+            <?php echo e($slot); ?>
 
-    <?php endif; ?>
+        <?php endif; ?>
 
-    <script>
-        window.userId = <?php echo e(Auth::id() ?? 'null'); ?>;
-        window.userRole = "<?php echo e(Auth::user()->role ?? ''); ?>";
-    </script>
+        <script>
+            window.userId = <?php echo e(Auth::id() ?? 'null'); ?>;
+            window.userRole = "<?php echo e(Auth::user()->role ?? ''); ?>";
+        </script>
 
-    <?php echo \Livewire\Mechanisms\FrontendAssets\FrontendAssets::scripts(); ?>
+        <?php echo \Livewire\Mechanisms\FrontendAssets\FrontendAssets::scripts(); ?>
 
 
 
-</body>
+    </body>
 
-<?php echo $__env->yieldPushContent('scripts'); ?>
-<script src="<?php echo e(asset('js/head.js')); ?>"></script>
-<script src="<?php echo e(asset('js/dashboard.js')); ?>"></script>
+    <?php echo $__env->yieldPushContent('scripts'); ?>
+    <script src="<?php echo e(asset('js/head.js')); ?>"></script>
+    <script src="<?php echo e(asset('js/dashboard.js')); ?>"></script>
 
 </html>
 <?php /**PATH C:\Users\Administrator\School-Guidance-Record-Management-System-SGRMS\resources\views/layouts/counselor.blade.php ENDPATH**/ ?>

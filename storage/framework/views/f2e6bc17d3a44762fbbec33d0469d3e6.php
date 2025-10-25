@@ -19,7 +19,6 @@
                             </div>
                             <button class="add-btn" data-bs-toggle="modal" data-bs-target="#addCaseModal"><i
                                     class="fi fi-br-plus"></i>Add case</button>
-
                         </div>
                     </div>
                     <div class="search-bar">
@@ -49,6 +48,9 @@
                                 <button class="level-option" data-level="kinder" type="button">Kinder</button>
                             </div>
                         </div>
+                        <a href="<?php echo e(route('Head.cases.export')); ?>" class="export-btn toggle-btn" id="exportDropdownBtn">
+                            <i class="fi fi-rr-file-download"></i>
+                        </a>
                     </div>
                 </div>
 

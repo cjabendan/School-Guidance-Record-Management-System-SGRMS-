@@ -47,7 +47,8 @@
                 <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                     <tr>
                         <td colspan="3" class="no-appointments-cell">
-                            No upcoming appointments.
+                              <img src="<?php echo e(asset ('images/icons/appointments.png')); ?>" alt="no-appointments" class="no-appointments-img">
+                            You have no upcoming appointments.
                         </td>
                     </tr>
                 <?php endif; ?>

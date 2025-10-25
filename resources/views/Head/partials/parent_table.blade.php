@@ -7,7 +7,7 @@
         @endphp
         <div class="table-card" data-id="{{ $parent->p_id }}">
             <div class="table-col title">
-                <img src="{{ asset('images/user/' . ($parent->user->profile_image ?? 'default.jpg')) }}" style="width:32px;height:32px;border-radius:50%;margin-right:8px;">
+                <img src="{{ asset('images/user/' . ($parent->user->profile_image ?? 'default.jpg')) }}" class="profile-thumb">
                 {{ $parent->user->first_name ?? '' }} {{ $parent->user->last_name ?? '' }}
             </div>
             <div class="table-col">{{ $parent->user->contact_num ?? 'N/A' }}</div>

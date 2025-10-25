@@ -5,28 +5,55 @@
     <section id="content">
         <?php echo $__env->make('partials.navbar', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
         <div class="wrapper">
-            <div class="box-page">
-                <section class="analytics">
+            <div class="dashboard-content">
+                <div class="welcome-box">
                     <?php echo $__env->make('Student.dashboard-sections.welcome-stats', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
-                </section>
+                    <?php echo $__env->make('Student.dashboard-sections.announcements', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
+                </div>
 
-                <!-- RIGHT COLUMN: Messages (spans both rows) -->
-                <section class="side-container">
-                    <div class="flex-side">
-                        <?php echo $__env->make('Student.dashboard-sections.messages', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
-                    </div>
-                </section>
-
-                <!-- LEFT BOTTOM: Appointments -->
-                <section class="bottom-container">
+                <div class="appointment-container">
                     <div class="flex-bottom">
                         <?php echo $__env->make('Student.dashboard-sections.appointments', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
+                        <div class="notifications-container">
+                            <?php echo $__env->make('Student.dashboard-sections.messages', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>  
+                        </div>      
                     </div>
-                </section>
+                </div>
             </div>
         </div>
-
     </section>
+
+    <?php $__env->startPush('scripts'); ?>
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                let current = 0;
+                const slides = document.querySelectorAll('#announcement-slideshow .slide');
+                const dots = document.querySelectorAll('.announcement-dots .dot');
+                if (!slides.length) return;
+
+                function showSlide(idx) {
+                    slides.forEach((s, i) => {
+                        s.classList.toggle('active', i === idx);
+                    });
+                    dots.forEach((d, i) => {
+                        d.classList.toggle('active', i === idx);
+                    });
+                }
+
+                dots.forEach((dot, i) => {
+                    dot.addEventListener('click', function() {
+                        current = i;
+                        showSlide(current);
+                    });
+                });
+
+                setInterval(function() {
+                    current = (current + 1) % slides.length;
+                    showSlide(current);
+                }, 7000);
+            });
+        </script>
+    <?php $__env->stopPush(); ?>
 
 <?php $__env->stopSection(); ?>
 

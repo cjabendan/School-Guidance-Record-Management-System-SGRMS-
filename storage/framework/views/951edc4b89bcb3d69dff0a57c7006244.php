@@ -12,8 +12,8 @@
 </div>
 
 <script>
-    // Livewire and scroll-related JavaScript listeners remain here
     document.addEventListener('livewire:initialized', () => {
+        // ... (Existing listeners for requestProfilePaneState and saveProfilePaneState) ...
         Livewire.on('requestProfilePaneState', ({
             localStorageKey
         }) => {
@@ -28,8 +28,6 @@
             localStorage.setItem(localStorageKey, isVisible ? 'true' : 'false');
         });
 
-     
     });
-    
-
-</script><?php /**PATH C:\Users\Administrator\School-Guidance-Record-Management-System-SGRMS\resources\views/livewire/chat.blade.php ENDPATH**/ ?>
+</script>
+<?php /**PATH C:\Users\Administrator\School-Guidance-Record-Management-System-SGRMS\resources\views/livewire/chat.blade.php ENDPATH**/ ?>

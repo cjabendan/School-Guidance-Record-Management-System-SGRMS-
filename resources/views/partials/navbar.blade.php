@@ -18,15 +18,15 @@
                     'Head.parents.index' => 'Parents',
                     'Head.cases.index' => 'Case Reports',
                     'Head.messages.index' => 'Messages',
-                    'Head.counseling.index' => 'Counseling',
-                    'Head.requests.index' => 'Requests',
+                    'Head.counseling.index' => 'Counseling Notes',
+                    'Head.requests.index' => 'Child Links',
                     'Head.appointments.index' => 'Appointments',
                     'Head.announcements.index' => 'Announcements',
                     'Head.settings.index' => 'Settings',
 
                     // Counselor
                     'Counselor.dashboard' => 'Dashboard',
-                    'Counselor.counseling.index' => 'Counseling',
+                    'Counselor.counseling.index' => 'Counseling Notes',
                     'Counselor.message.index' => 'Messages',
                     'Counselor.appointment.index' => 'Appointments',
                     'Counselor.settings.index' => 'Settings',

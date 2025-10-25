@@ -1,3 +1,9 @@
+@if(session('error'))
+    <div class="alert alert-danger" style="margin:8px 12px; padding:10px; border-radius:6px; border:1px solid #fca5a5; background:#fff0f0; color:#b91c1c; font-weight:600;">
+        {{ session('error') }}
+    </div>
+@endif
+
 @forelse($appointments as $appointment)
     <div class="table-card">
         <div class="table-col type">
@@ -71,10 +77,21 @@
         </div>
         <div class="table-col actions">
             @php
+                $status = strtolower($appointment->status);
                 $latestReq = $appointment->reschedules()->first();
                 $resStatus = $latestReq ? $latestReq->status : '';
-                $prevText = $appointment->last_rescheduled_at ? $appointment->last_rescheduled_at->setTimezone('Asia/Manila')->format('M d, Y h:i A') : '';
-                $reqText = ($latestReq && !empty($latestReq->proposed_datetime)) ? \Carbon\Carbon::parse($latestReq->proposed_datetime)->setTimezone('Asia/Manila')->format('M d, Y h:i A') : '';
+                
+                // Only show previous and preferred times for rescheduled appointments
+                $prevText = '';
+                $reqText = '';
+                if ($status === 'rescheduled') {
+                    $prevText = $appointment->appointment_datetime ? $appointment->appointment_datetime->setTimezone('Asia/Manila')->format('M d, Y h:i A') : '';
+                    if ($appointment->reschedule_proposed_datetime) {
+                        $reqText = $appointment->reschedule_proposed_datetime->setTimezone('Asia/Manila')->format('M d, Y h:i A');
+                    } elseif ($latestReq && !empty($latestReq->proposed_datetime)) {
+                        $reqText = \Carbon\Carbon::parse($latestReq->proposed_datetime)->setTimezone('Asia/Manila')->format('M d, Y h:i A');
+                    }
+                }
             @endphp
             <a href="#" title="View" class="view-btn" data-reschedule-status="{{ $resStatus }}" data-prev="{{ $prevText }}" data-req="{{ $reqText }}"
                 onclick="openReviewModal(
@@ -89,7 +106,7 @@
                     @else
                         N/A
                     @endif<br>
-                    <strong>Date & Time:</strong> {{ $appointment->appointment_datetime ? $appointment->appointment_datetime->format('M d, Y h:i A') : 'N/A' }}<br>
+                    <strong>Date & Time:</strong> {{ $appointment->appointment_datetime ? $appointment->appointment_datetime->setTimezone('Asia/Manila')->format('M d, Y h:i A') : 'N/A' }}<br>
                     <strong>Counselor:</strong> {{ $appointment->counselor ? $appointment->counselor->first_name . ' ' . $appointment->counselor->last_name : 'N/A' }}<br>
                     <strong>Status:</strong> {{ ucfirst($appointment->status) }}<br>
                     @if ($appointment->rescheduled_count > 0)
