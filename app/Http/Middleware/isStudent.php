@@ -7,6 +7,9 @@ use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Support\Facades\Auth;
 
+
+// done rename
+
 class IsStudent
 {
     public function handle(Request $request, Closure $next): Response
@@ -30,6 +33,7 @@ class IsStudent
 
             return redirect()->route("{$routePrefix}.dashboard")->with('error', 'You do not have permission to view that page.');
         }
+
 
         return redirect('/')->with('error', 'Please log in.');
     }
