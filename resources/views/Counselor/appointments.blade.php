@@ -268,11 +268,36 @@
                                 "Status: " + props.status
                             );
                         },
+                        eventOverlap: false, // Prevent events from overlapping
                         eventDrop: function(info) {
                             // safety: prevent moving completed/cancelled/declined/ongoing even if client tried
                             let st = (info.event.extendedProps.status || '').toLowerCase();
                             if (['completed','cancelled','declined','ongoing'].includes(st)) {
                                 showError('This appointment cannot be moved.');
+                                info.revert();
+                                return;
+                            }
+                            
+                            // Check for overlaps with existing approved appointments
+                            let draggedStart = info.event.start;
+                            let draggedEnd = info.event.end || new Date(draggedStart.getTime() + (60 * 60 * 1000)); // 1 hour default duration
+                            
+                            let overlap = calendar.getEvents().some(existingEvent => {
+                                // Skip the event being dragged and non-approved events
+                                if (existingEvent === info.event || 
+                                    (existingEvent.extendedProps.status || '').toLowerCase() !== 'approved') {
+                                    return false;
+                                }
+                                
+                                let eventStart = existingEvent.start;
+                                let eventEnd = existingEvent.end || new Date(eventStart.getTime() + (60 * 60 * 1000));
+                                
+                                // Check if the events overlap
+                                return (draggedStart < eventEnd && draggedEnd > eventStart);
+                            });
+                            
+                            if (overlap) {
+                                showError('This Appointment is already taken. Please choose another available date or time.');
                                 info.revert();
                                 return;
                             }
@@ -311,8 +336,30 @@
                             openModal();
                             var dtInput = document.getElementById('appointment_datetime');
                             if (dtInput) {
-                                let dateStr = info.dateStr;
-                                dtInput.value = dateStr + 'T08:00';
+                                // Get the clicked date
+                                let date = info.date;
+                                
+                                // If it's day or week view, use the exact time clicked
+                                // For month view, default to 9:00 AM of the clicked date
+                                let hours = info.view.type === 'dayGridMonth' ? 9 : date.getHours();
+                                let minutes = info.view.type === 'dayGridMonth' ? 0 : date.getMinutes();
+                                
+                                // Round minutes to nearest 30
+                                minutes = Math.round(minutes / 30) * 30;
+                                if (minutes === 60) {
+                                    hours += 1;
+                                    minutes = 0;
+                                }
+                                
+                                // Format date and time to match datetime-local input format
+                                let year = date.getFullYear();
+                                let month = String(date.getMonth() + 1).padStart(2, '0');
+                                let day = String(date.getDate()).padStart(2, '0');
+                                hours = String(hours).padStart(2, '0');
+                                minutes = String(minutes).padStart(2, '0');
+                                
+                                // Set the datetime input value
+                                dtInput.value = `${year}-${month}-${day}T${hours}:${minutes}`;
                             }
                         }
                     });
@@ -348,6 +395,40 @@ document.addEventListener('click', function(e) {
         </div>
     </div>
 </div>
+
+<script>
+function showError(msg) {
+    const modal = document.getElementById('sgrms-error-modal');
+    const msgEl = document.getElementById('sgrms-error-message');
+    if (!modal || !msgEl) {
+        alert(msg);
+        return;
+    }
+    msgEl.textContent = msg;
+    // use flex so the modal centers via align-items/justify-content
+    modal.style.display = 'flex';
+}
+function hideError() { const modal = document.getElementById('sgrms-error-modal'); if (modal) modal.style.display = 'none'; }
+document.addEventListener('click', function(e) {
+    const modal = document.getElementById('sgrms-error-modal');
+    // modal may be shown using 'flex' display; only proceed when it's visible
+    if (!modal || modal.style.display === 'none') return;
+    if (e.target === modal.querySelector('.sgrms-error-overlay') || e.target.classList.contains('sgrms-error-close') || e.target.id === 'sgrms-error-ok') {
+        hideError();
+    }
+});
+
+// Also attach direct listeners to the modal buttons/overlay to ensure they respond
+(function attachModalListeners() {
+    const modal = document.getElementById('sgrms-error-modal');
+    if (!modal) return;
+    const ok = modal.querySelector('#sgrms-error-ok');
+    const close = modal.querySelector('.sgrms-error-close');
+    const overlay = modal.querySelector('.sgrms-error-overlay');
+    if (ok) ok.addEventListener('click', hideError);
+    if (close) close.addEventListener('click', hideError);
+    if (overlay) overlay.addEventListener('click', hideError);
+})();
 
 <script>
 // Show a centered styled error modal. Reusable across the calendar pages.

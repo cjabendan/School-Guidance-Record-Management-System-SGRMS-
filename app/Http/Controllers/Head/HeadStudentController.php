@@ -208,19 +208,39 @@ class HeadStudentController extends Controller
             'updated_at' => now(),
         ]);
 
-        // Handle cropped image (if available)
+        // Handle cropped image (if available) or uploaded file; preserve original filename when possible
         $imagePath = 'default.jpg';
         if ($request->filled('cropped_image_data')) {
             $imageData = $request->input('cropped_image_data');
             $imageData = str_replace('data:image/png;base64,', '', $imageData);
             $imageData = str_replace(' ', '+', $imageData);
-            $imageName = 'student_' . time() . '.png';
+            // Use provided original name if available
+            $origName = $request->input('cropped_image_name');
+            if ($origName) {
+                // sanitize and ensure .png extension
+                $safeBase = preg_replace('/[^A-Za-z0-9_\-\.]/', '_', pathinfo($origName, PATHINFO_FILENAME));
+                $imageName = $safeBase . '.png';
+                $target = public_path('images/user/' . $imageName);
+                if (file_exists($target)) {
+                    $imageName = $safeBase . '_' . time() . '.png';
+                }
+            } else {
+                $imageName = 'student_' . time() . '.png';
+            }
             Storage::disk('public')->put('images/user/' . $imageName, base64_decode($imageData));
             $imagePath = $imageName;
         } elseif ($request->hasFile('profile_image')) {
             $image = $request->file('profile_image');
-            $originalName = time() . '_' . $image->getClientOriginalName();
-            $safeName = preg_replace('/[\#\s]+/', '_', $originalName);
+            // Prefer original filename
+            $orig = $image->getClientOriginalName();
+            $safeBase = preg_replace('/[^A-Za-z0-9_\-\.]/', '_', pathinfo($orig, PATHINFO_FILENAME));
+            $ext = $image->getClientOriginalExtension() ?: 'jpg';
+            $safeName = $safeBase . '.' . $ext;
+            $target = public_path('images/user/' . $safeName);
+            if (file_exists($target)) {
+                // avoid overwriting: append timestamp
+                $safeName = $safeBase . '_' . time() . '.' . $ext;
+            }
             $image->move(public_path('images/user'), $safeName);
             $imagePath = $safeName;
         }
@@ -400,19 +420,34 @@ class HeadStudentController extends Controller
             'updated_at' => now(),
         ]);
 
-        // Handle cropped image first
+        // Handle cropped image first (preserve original name if provided) or uploaded file
         if ($request->filled('cropped_image_data')) {
             $imageData = $request->input('cropped_image_data');
             $imageData = str_replace('data:image/png;base64,', '', $imageData);
             $imageData = str_replace(' ', '+', $imageData);
-            $imageName = 'student_' . time() . '.png';
+            $origName = $request->input('cropped_image_name');
+            if ($origName) {
+                $safeBase = preg_replace('/[^A-Za-z0-9_\-\.]/', '_', pathinfo($origName, PATHINFO_FILENAME));
+                $imageName = $safeBase . '.png';
+                $target = public_path('images/user/' . $imageName);
+                if (file_exists($target)) {
+                    $imageName = $safeBase . '_' . time() . '.png';
+                }
+            } else {
+                $imageName = 'student_' . time() . '.png';
+            }
             Storage::disk('public')->put('images/user/' . $imageName, base64_decode($imageData));
             $user->profile_image = $imageName;
         } elseif ($request->hasFile('profile_image')) {
             $image = $request->file('profile_image');
-            $originalName = time() . '_' . $image->getClientOriginalName();
-            // Sanitize filename: replace # and spaces with underscores
-            $safeName = preg_replace('/[\#\s]+/', '_', $originalName);
+            $orig = $image->getClientOriginalName();
+            $safeBase = preg_replace('/[^A-Za-z0-9_\-\.]/', '_', pathinfo($orig, PATHINFO_FILENAME));
+            $ext = $image->getClientOriginalExtension() ?: 'jpg';
+            $safeName = $safeBase . '.' . $ext;
+            $target = public_path('images/user/' . $safeName);
+            if (file_exists($target)) {
+                $safeName = $safeBase . '_' . time() . '.' . $ext;
+            }
             $image->move(public_path('images/user'), $safeName);
             $user->profile_image = $safeName;
         }

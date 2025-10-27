@@ -65,15 +65,16 @@
                 </div>
 
                 <!-- Table view -->
-                <div class="table-list" id="cases-list" style="margin-bottom:0;">
-                    <div class="table-header">
-                        <div class="table-col title">Case ID</div>
-                        <div class="table-col category">Type</div>
-                        <div class="table-col">Severity</div>
-                        <div class="table-col status">Status</div>
-                        <div class="table-col date">Filed Date</div>
-                        <div class="table-col actions">Actions</div>
-                    </div>
+                <div class="table-header">
+                    <div class="table-col title">Case ID</div>
+                    <div class="table-col category">Type</div>
+                    <div class="table-col">Severity</div>
+                    <div class="table-col status">Status</div>
+                    <div class="table-col date">Filed Date</div>
+                    <div class="table-col actions">Actions</div>
+                </div>
+
+                <div id="cases-list">
                     <div class="table">
                         @forelse($cases as $case)
                             <div class="table-card">
@@ -99,12 +100,13 @@
                             <div class="no-table-cell">No cases found.</div>
                         @endforelse
                     </div>
-                </div>
-                {{-- Pagination links (will show when cases > per-page) --}}
-                <div id="cases-pagination" style="padding:12px 18px;">
-                    @if(method_exists($cases, 'links'))
-                        @include('components.parent-pagination', ['paginator' => $cases])
-                    @endif
+
+                    {{-- Pagination links (will show when cases > per-page) --}}
+                    <div id="cases-pagination" style="padding:12px 18px;">
+                        @if(method_exists($cases, 'links'))
+                            @include('components.parent-pagination', ['paginator' => $cases])
+                        @endif
+                    </div>
                 </div>
             </div>
         </div>

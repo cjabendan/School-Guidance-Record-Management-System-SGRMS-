@@ -71,12 +71,12 @@
                 </div>
             </div>
             <div class="table-header">
-                <div class="table-col title">Student ID</div>
+                <div class="table-col">Student ID</div>
                 <div class="table-col">Student Name</div>
                 <div class="table-col">Educational Level</div>
                 <div class="table-col">Year Level</div>
                 <div class="table-col">Status</div>
-                <div class="table-col actions">Actions</div>
+                <div class="table-col">Actions</div>
             </div>
             <div id="student-list">
                 @include('Head.partials.student_table')

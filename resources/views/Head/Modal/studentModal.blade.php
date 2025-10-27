@@ -7,6 +7,7 @@
 
             <form id="addStudentForm" method="POST" action="{{ url('Head/students') }}" enctype="multipart/form-data">
                 @csrf
+                <input type="hidden" id="delete_profile_image" name="delete_photo" value="0">
                 <div class="form-row image-name-row">
                     <div class="image-col">
                         <div class="form-group">
@@ -391,3 +392,5 @@
 
 <!-- Hidden input for cropped image -->
 <input type="hidden" id="cropped_image_data" name="cropped_image_data">
+<!-- Original filename of the selected file (used when cropping) -->
+<input type="hidden" id="cropped_image_name" name="cropped_image_name">

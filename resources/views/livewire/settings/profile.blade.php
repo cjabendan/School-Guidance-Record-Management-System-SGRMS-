@@ -18,6 +18,8 @@
             </svg>
             <!-- Hidden input to receive cropped image data for Livewire -->
             <input type="hidden" id="cropped_image_data_input" wire:model="cropped_image_data">
+            <!-- Hidden input to send original filename to Livewire -->
+            <input type="hidden" id="cropped_image_name_input" wire:model="cropped_image_name">
         </div>
     </div>
 
@@ -91,6 +93,8 @@
     <div>
         <button id="profileSaveBtn" wire:click="save" class="settings-form-button">Save</button>
     </div>
+
+
 
     <script src="{{ asset('js/toast.js') }}"></script>
     <script>
@@ -251,6 +255,12 @@
             fileInput._cropChangeHandler = function(e) {
                 const file = e.target.files && e.target.files[0];
                 if (!file) return;
+                // store original filename for Livewire and notify Livewire via input event
+                const nameInput = document.getElementById('cropped_image_name_input');
+                if (nameInput) {
+                    nameInput.value = file.name;
+                    nameInput.dispatchEvent(new Event('input', { bubbles: true }));
+                }
                 const reader = new FileReader();
                 reader.onload = function(evt) {
                     cropperImage.src = evt.target.result;
@@ -282,6 +292,7 @@
                 hiddenInput.dispatchEvent(new Event('input', { bubbles: true }));
                 const visibleImg = document.getElementById('visibleProfileImage');
                 if (visibleImg) visibleImg.src = dataUrl;
+                // keep the name input so Livewire.save() can use it when user clicks Save
                 hideModal();
             };
             applyBtn.addEventListener('click', applyBtn._cropApplyHandler);
@@ -290,6 +301,12 @@
             cancelBtn._cropCancelHandler = function(e){
                 e.preventDefault();
                 if (cropper) { cropper.destroy(); cropper = null; }
+                // clear the name input when canceling
+                const nameInputCancel = document.getElementById('cropped_image_name_input');
+                if (nameInputCancel) {
+                    nameInputCancel.value = '';
+                    nameInputCancel.dispatchEvent(new Event('input', { bubbles: true }));
+                }
                 hideModal();
             };
             cancelBtn.addEventListener('click', cancelBtn._cropCancelHandler);

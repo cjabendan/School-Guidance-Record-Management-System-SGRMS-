@@ -115,6 +115,9 @@ document.addEventListener('DOMContentLoaded', function() {
             imageInput.value = '';
             if (fileChosen) fileChosen.textContent = 'No file chosen';
             if (deleteField) deleteField.value = '1';
+            // clear any cropped image data so saving won't re-add it
+            const croppedEl = document.getElementById('cropped_image_data');
+            if (croppedEl) croppedEl.value = '';
             removeBtn.style.display = 'none';
         });
     }
@@ -150,6 +153,15 @@ window.openAddEditModal = function openAddEditModal(mode, studentData = null) {
     const fileChosen = document.getElementById('file-chosen');
 
     form.reset();
+    // reset delete flag and cropped data on modal open/reset
+    try {
+        const deleteFieldOnOpen = document.getElementById('delete_profile_image');
+        if (deleteFieldOnOpen) deleteFieldOnOpen.value = '0';
+        const croppedOnOpen = document.getElementById('cropped_image_data');
+        if (croppedOnOpen) croppedOnOpen.value = '';
+    } catch (e) {
+        // ignore
+    }
     if (fileChosen) fileChosen.textContent = 'No file chosen';
     if (imageInput) imageInput.value = "";
 
@@ -165,6 +177,9 @@ window.openAddEditModal = function openAddEditModal(mode, studentData = null) {
         imageInput.onchange = function(event) {
             const [file] = event.target.files;
             if (file) {
+                // store original filename for server
+                const croppedNameEl = document.getElementById('cropped_image_name');
+                if (croppedNameEl) croppedNameEl.value = file.name;
                 const reader = new FileReader();
                 reader.onload = function(e) {
                     const cropperModal = document.getElementById('cropImageModal');
@@ -200,6 +215,12 @@ window.openAddEditModal = function openAddEditModal(mode, studentData = null) {
                         }
                         if (imageInput) imageInput.value = "";
                         if (fileChosen) fileChosen.textContent = "No file chosen";
+                        // clear cropped data when user cancels
+                        const croppedElCancel = document.getElementById('cropped_image_data');
+                        if (croppedElCancel) croppedElCancel.value = '';
+                        // clear name
+                        const croppedNameElCancel = document.getElementById('cropped_image_name');
+                        if (croppedNameElCancel) croppedNameElCancel.value = '';
                         if (form && form.getAttribute("data-mode") === "add") {
                             imgPreview.src = "/images/user/default.png";
                         }
@@ -212,6 +233,8 @@ window.openAddEditModal = function openAddEditModal(mode, studentData = null) {
                 imgPreview.src = '';
                 if (fileChosen) fileChosen.textContent = 'No file chosen';
                 if (removeBtn) removeBtn.style.display = "none";
+                const croppedNameEl = document.getElementById('cropped_image_name');
+                if (croppedNameEl) croppedNameEl.value = '';
             }
             imgPreview.style.display = 'block';
         };
@@ -324,6 +347,11 @@ window.openAddEditModal = function openAddEditModal(mode, studentData = null) {
             method = 'POST';
             formData.append('_method', 'PUT');
         }
+    // Ensure cropped original filename and delete flag are present in FormData
+    const croppedNameEl = document.getElementById('cropped_image_name');
+    if (croppedNameEl && croppedNameEl.value) formData.set('cropped_image_name', croppedNameEl.value);
+    const deleteFlagEl = document.getElementById('delete_profile_image');
+    if (deleteFlagEl) formData.set('delete_photo', deleteFlagEl.value || '0');
         fetch(url, {
             method: method,
             headers: {
@@ -335,6 +363,49 @@ window.openAddEditModal = function openAddEditModal(mode, studentData = null) {
         .then(response => response.json())
         .then(data => {
             if (data.success || data.message) {
+                // Determine student id (s_id)
+                let sid = null;
+                if (data.student && (data.student.s_id || data.student.id_num)) {
+                    sid = data.student.s_id || data.student.id_num;
+                } else if (studentData && (studentData.s_id || studentData.id_num)) {
+                    sid = studentData.s_id || studentData.id_num;
+                } else if (form && form.querySelector('#s_id')) {
+                    sid = form.querySelector('#s_id').value;
+                }
+
+                // 1) If server returned the new filename, use it
+                if (data.student && (data.student.profile_image || data.student.profile_image_name)) {
+                    const imgFile = data.student.profile_image || data.student.profile_image_name;
+                    if (sid && imgFile) updateStudentImageInDOM(sid, imgFile);
+                } else {
+                    // If the form indicated deletion, immediately set the table image to default
+                    const deleteFlagEl = form.querySelector('#delete_profile_image');
+                    const isDeleted = deleteFlagEl && (deleteFlagEl.value === '1' || deleteFlagEl.value === 1);
+                    if (sid && isDeleted) {
+                        // Set table image to default with cache-busting
+                        const imgEl = document.querySelector(`#student-list img.profile-thumb[data-sid='${sid}']`);
+                        if (imgEl) imgEl.src = window.location.origin + '/images/user/default.jpg?v=' + Date.now();
+                    }
+                    // 2) Fallback: if the modal has cropped image data, use that data URL to update the table image instantly
+                    const croppedDataEl = form.querySelector('#cropped_image_data');
+                    if (sid && croppedDataEl && croppedDataEl.value) {
+                        const imgEl = document.querySelector(`#student-list img.profile-thumb[data-sid='${sid}']`);
+                        if (imgEl) imgEl.src = croppedDataEl.value;
+                    } else {
+                        // 3) Fallback: if the file input has a selected file, read it locally and set data URL
+                        const fileInputEl = form.querySelector('#profile_image');
+                        if (sid && fileInputEl && fileInputEl.files && fileInputEl.files[0]) {
+                            const file = fileInputEl.files[0];
+                            const reader = new FileReader();
+                            reader.onload = function(e) {
+                                const imgEl = document.querySelector(`#student-list img.profile-thumb[data-sid='${sid}']`);
+                                if (imgEl) imgEl.src = e.target.result;
+                            };
+                            reader.readAsDataURL(file);
+                        }
+                    }
+                }
+
                 window.closeAddModal();
                 refreshStudentTable();
                 createToast('success', mode === 'add' ? 'Student Added Successfully!' : 'Student Updated Successfully!');
@@ -680,6 +751,20 @@ function refreshStudentTable() {
             }
         })
         .catch((err) => console.error("Error refreshing table:", err));
+}
+
+// Update a single student's profile image in the DOM with cache-busting
+function updateStudentImageInDOM(s_id, imageFileName) {
+    try {
+        const img = document.querySelector(`#student-list img.profile-thumb[data-sid='${s_id}']`);
+        if (!img) return;
+        const base = window.location.origin + '/images/user/';
+        const timestamp = Date.now();
+        img.src = base + encodeURIComponent(imageFileName) + '?v=' + timestamp;
+        img.setAttribute('data-img', imageFileName);
+    } catch (e) {
+        console.error('Failed to update student image in DOM', e);
+    }
 }
 
 // ================================

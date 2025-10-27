@@ -6,6 +6,6 @@
         @include('partials.navbar')
 
         @livewire('chat', ['selectedUserId' => $selectedUserId ?? null])
-
+        
     </section>
 @endsection

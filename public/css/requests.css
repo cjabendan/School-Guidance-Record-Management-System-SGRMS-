@@ -23,13 +23,13 @@
     box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
     padding: 32px;
     width: 100%;
-    max-width: 720px;
+    max-width: 920px;
     margin: 2rem auto;
     position: relative;
     animation: fadeInModal 0.3s ease-in-out;
     display: flex;
     flex-direction: column;
-    gap: 18px;
+    gap: 22px;
 }
 
 @keyframes fadeInModal {
@@ -44,22 +44,18 @@
 }
 
 .request-modal-content h2 {
-    margin: 0 0 10px 0;
     font-size: 1.35rem;
     color: #003060;
     font-weight: 700;
     letter-spacing: 1px;
     display: flex;
     align-items: center;
-    gap: 8px;
-    padding-bottom: 8px;
 }
 
 .request-modal-content strong {
     color: #003060;
     font-weight: 600;
     font-size: 0.98rem;
-    margin-bottom: 2px;
     letter-spacing: 0.5px;
 }
 
@@ -138,9 +134,9 @@
 }
 
 .students-table th {
-    padding: 6px;
+    padding: 10px;
     text-align: left;
-     border: 0.5px solid #003060;
+    border: 0.5px solid #003060;
 }
 
 .students-table td {
@@ -149,8 +145,82 @@
     text-align: left;
 }
 
+.students-table td:nth-child(3),
+.students-table td:nth-child(5) {
+    text-align: center;
+    font-weight: 500;
+}
+
 .students-table-head {
     background-color: #003060;
     color: #ffffff;
-    font-weight: 600;
+    font-weight: 520;
+}
+
+.request-parent {
+    font-size: 1.2rem;
+    color: #003060;
+    font-weight: 520;
+}
+
+.requester-role {
+    font-size: 1rem;
+    color: #666666;
+    font-weight: 500;
+}
+
+
+
+.request-info {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.request-left {
+    display: flex;
+    align-items: center;
+    flex: 1 1 auto;
+}
+
+.request-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+}
+
+.request-contact,
+.request-email {
+    font-size: 0.95rem;
+    color: #1e6fbf;
+}
+
+
+.request-user-section ul {
+    display: flex;
+    flex: 1;
+    gap: 12px;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+
+.request-user-section ul .user-chat-icon {
+    display: flex;
+  
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.request-user-section ul .user-chat-icon i {
+    font-size: 1.2rem;
+    background-color: #ebebeb;
+    padding: 12px 15px 10px 15px;
+    color: #003060;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: color 0.2s ease;
 }

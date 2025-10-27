@@ -14,13 +14,13 @@
                 <div class="modal-body case-modal-body">
                     <!-- Student Search Input -->
                     <div class="form-row">
-                        <div class="add-field-col" style="flex:1; position: relative;">
+                        <div class="add-field-col" style="flex:1;">
                             <label for="student_search" class="add-label">Search Student</label>
                             <div id="student-tag-input" class="student-tag-input">
                                 <input type="text" id="student_search" class="add-input student-search-input" placeholder="Type name or ID" autocomplete="off">
                             </div>
-                            <div id="student_search_results" class="list-group" style="display: none;"></div>
                             <input type="hidden" name="involved_students" id="involved_students">
+                            <div id="student_search_results" class="list-group" style="display: none;"></div>
                         </div>
                     </div>
 
@@ -123,8 +123,10 @@
                         </div>
                     </div>
                 </div>
-          
-                <button type="submit" class="pro-add-save">Add Case</button>
+
+                <div class="modal-footer pro-add-buttons case-modal-footer">
+                    <button type="submit" class="pro-add-save">Add Case</button>
+                </div>
             </div>
         </form>
     </div>
@@ -208,13 +210,13 @@
                         <div class="modal-body case-modal-body">
                             <!-- Student Search Input -->
                             <div class="form-row">
-                                <div class="add-field-col" style="flex:1; position: relative;">
+                                <div class="add-field-col" style="flex:1;">
                                     <label for="edit_student_search{{ $case->case_id }}" class="add-label">Search Student</label>
                                     <div id="edit-student-tag-input{{ $case->case_id }}" class="student-tag-input">
                                         <input type="text" id="edit_student_search{{ $case->case_id }}" class="add-input student-search-input" placeholder="Type name or ID" autocomplete="off">
                                     </div>
-                                    <div id="edit_student_search_results{{ $case->case_id }}" class="list-group" style="display: none;"></div>
                                     <input type="hidden" name="involved_students" id="edit_involved_students{{ $case->case_id }}" value="{{ $case->students->pluck('user_id')->implode(',') }}">
+                                    <div id="edit_student_search_results{{ $case->case_id }}" class="list-group" style="display: none;"></div>
                                 </div>
                             </div>
 
@@ -363,7 +365,6 @@
     // Toggle Other Case Type input
     function toggleOtherType(select) {
         const input = document.getElementById('other_case_type');
-        if (!input) return;
         input.style.display = select.value === 'other' ? 'block' : 'none';
         input.required = select.value === 'other';
     }
@@ -371,12 +372,11 @@
     function toggleOtherTypeEdit(caseId) {
         const select = document.getElementById('edit_case_type_id' + caseId);
         const input = document.getElementById('edit_other_case_type' + caseId);
-        if (!select || !input) return;
         input.style.display = select.value === 'other' ? 'block' : 'none';
         input.required = select.value === 'other';
     }
 
-    // Modal close when clicking outside content (Bootstrap-compatible behavior)
+    // Modal close when clicking outside content
     document.addEventListener('DOMContentLoaded', function() {
         document.querySelectorAll('.modal.case-modal').forEach(modal => {
             modal.addEventListener('mousedown', e => {
@@ -387,109 +387,4 @@
             });
         });
     });
-
-    (function(){
-        // small helper to fetch students from server; empty query returns a default list
-        function fetchStudents(query, cb) {
-            $.ajax({ url: "{{ route('Head.students.search') }}", dataType: 'json', data: { q: query || '' }, success: function(data){ cb && cb(data); }, error: function(){ cb && cb([]); } });
-        }
-
-        // ----- Add modal state -----
-        var selectedStudents = [];
-        function renderTags() {
-            const $tagInput = $("#student-tag-input");
-            $tagInput.find('.student-tag').remove();
-            selectedStudents.forEach(student => {
-                $(`<span class="student-tag" data-id="${student.id}">
-                    ${student.text}
-                    <span class="remove-tag" title="Remove">&times;</span>
-                </span>`).insertBefore($("#student_search"));
-            });
-            $("#involved_students").val(selectedStudents.map(s => s.id).join(','));
-        }
-
-        function renderResults(items, $container, existing) {
-            $container.empty();
-            const filtered = (items || []).filter(i => !existing.some(s => s.id == i.id));
-            if (filtered.length === 0) { $container.hide(); return; }
-            filtered.forEach(item => {
-                $container.append(`<button type="button" class="list-group-item list-group-item-action" data-id="${item.id}" data-text="${item.text}">${item.text}</button>`);
-            });
-            $container.show();
-        }
-
-        // input handlers for add modal
-        $(document).on('focus click', '#student_search', function(){
-            const $results = $('#student_search_results');
-            if ($results.is(':visible')) return;
-            fetchStudents('', function(data){ renderResults(data, $results, selectedStudents); });
-        });
-
-        $(document).on('input', '#student_search', function(){
-            const q = $(this).val();
-            const $results = $('#student_search_results');
-            if (!q || q.length < 2) { $results.hide(); return; }
-            fetchStudents(q, function(data){ renderResults(data, $results, selectedStudents); });
-        });
-
-        // click result (add)
-        $(document).on('click', '#student_search_results .list-group-item', function(){
-            const id = $(this).data('id'); const text = $(this).data('text');
-            if (!selectedStudents.some(s => s.id == id)) selectedStudents.push({ id, text });
-            renderTags(); $('#student_search').val(''); $('#student_search_results').hide(); $('#student_search').focus();
-        });
-
-        // remove tag
-        $(document).on('click', '#student-tag-input .remove-tag', function(){
-            const id = $(this).parent().data('id'); selectedStudents = selectedStudents.filter(s => s.id != id); renderTags();
-        });
-
-        // hide results when clicking outside
-        $(document).on('click', function(e){ if (!$(e.target).closest('#student_search, #student_search_results').length) $('#student_search_results').hide(); });
-
-        // ----- Per-case edit inputs -----
-        @isset($cases)
-            @foreach($cases as $case)
-                (function(){
-                    var selectedEdit{{ $case->case_id }} = [
-                        @foreach($case->students as $s)
-                            { id: '{{ $s->s_id }}', text: '{{ ($s->user->first_name ?? '') . " " . ($s->user->last_name ?? '') }} | {{ $s->s_id }}' },
-                        @endforeach
-                    ];
-
-                    function renderEditTags{{ $case->case_id }}(){
-                        var $tagInput = $("#edit-student-tag-input{{ $case->case_id }}"); $tagInput.find('.student-tag').remove();
-                        selectedEdit{{ $case->case_id }}.forEach(student => {
-                            $(`<span class="student-tag" data-id="${student.id}">${student.text}<span class="remove-tag" title="Remove">&times;</span></span>`).insertBefore($("#edit_student_search{{ $case->case_id }}"));
-                        });
-                        $("#edit_involved_students{{ $case->case_id }}").val(selectedEdit{{ $case->case_id }}.map(s => s.id).join(','));
-                    }
-
-                    // focus shows list
-                    $(document).on('focus click', '#edit_student_search{{ $case->case_id }}', function(){
-                        var $results = $('#edit_student_search_results{{ $case->case_id }}'); if ($results.is(':visible')) return;
-                        fetchStudents('', function(data){ renderResults(data, $results, selectedEdit{{ $case->case_id }}); });
-                    });
-
-                    // typing search
-                    $(document).on('input', '#edit_student_search{{ $case->case_id }}', function(){
-                        var q = $(this).val(); var $results = $('#edit_student_search_results{{ $case->case_id }}'); if (!q || q.length < 2) { $results.hide(); return; }
-                        fetchStudents(q, function(data){ renderResults(data, $results, selectedEdit{{ $case->case_id }}); });
-                    });
-
-                    // click result -> add
-                    $(document).on('click', '#edit_student_search_results{{ $case->case_id }} .list-group-item', function(){
-                        var id = $(this).data('id'); var text = $(this).data('text'); if (!selectedEdit{{ $case->case_id }}.some(s => s.id == id)) selectedEdit{{ $case->case_id }}.push({id, text}); renderEditTags{{ $case->case_id }}(); $('#edit_student_search{{ $case->case_id }}').val(''); $('#edit_student_search_results{{ $case->case_id }}').hide();
-                    });
-
-                    // remove tag
-                    $(document).on('click', '#edit-student-tag-input{{ $case->case_id }} .remove-tag', function(){ var id = $(this).parent().data('id'); selectedEdit{{ $case->case_id }} = selectedEdit{{ $case->case_id }}.filter(s => s.id != id); renderEditTags{{ $case->case_id }}(); });
-
-                    // initial render
-                    renderEditTags{{ $case->case_id }}();
-                })();
-            @endforeach
-        @endisset
-
-    })();
 </script>

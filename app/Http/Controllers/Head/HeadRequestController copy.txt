@@ -208,8 +208,7 @@ class HeadRequestController extends Controller
         }
 
         $parent = $requests->first()->parent->user;
-        $profileImage = $parent->profile_image ?? null;
-        
+
         // top-level requested_at for modal header (first request)
         $topRequestedAt = optional($requests->first()->requested_at)->format('M d, Y g:i A') ?? null;
 
@@ -248,7 +247,6 @@ class HeadRequestController extends Controller
             'parent_name' => ($parent->first_name ?? '') . ' ' . ($parent->last_name ?? ''),
             'email' => $parent->email,
             'contact' => $parent->contact_num,
-            'profile_image' => $profileImage,
             'requested_at' => $topRequestedAt,
             'requests' => $data,
         ]);

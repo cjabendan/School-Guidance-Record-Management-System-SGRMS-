@@ -190,7 +190,6 @@ Route::prefix('Head')->name('Head.')->middleware(['auth', 'role.head'])->group(f
 
     Route::prefix('users')->name('users.')->group(function () {
         Route::get('/', [HeadUserController::class, 'index'])->name('index');
-      
     });
 
     /* Parents
@@ -225,6 +224,8 @@ Route::prefix('Head')->name('Head.')->middleware(['auth', 'role.head'])->group(f
         Route::get('/{type}/{id}', [HeadRequestController::class, 'show'])->name('show');
         Route::post('/student/{id}/approve', [HeadRequestController::class, 'approveStudent'])->name('approve.student');
         Route::post('/student/{id}/reject', [HeadRequestController::class, 'rejectStudent'])->name('reject.student');
+        Route::post('/student/{id}/unlink', [HeadRequestController::class, 'unlinkStudent'])->name('unlink.student');
+        Route::post('/request/{id}/delete', [HeadRequestController::class, 'deleteRequest'])->name('delete.request');
     });
 
     // Appointments

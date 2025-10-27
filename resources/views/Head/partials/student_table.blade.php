@@ -55,7 +55,7 @@
                 {{ $row->s_id }}
             </div>
             <div class="table-col tittle">
-                <img src="{{ asset ('images/user/'. $row->profile_image )}}" alt="student-pfp" class="profile-thumb">
+                <img src="{{ asset('images/user/' . ($row->profile_image ?? 'default.jpg')) }}" alt="student-pfp" class="profile-thumb" data-sid="{{ $row->s_id }}" data-img="{{ $row->profile_image ?? 'default.jpg' }}">
                 {{ $name }}</div>
           <!--  <div class="table-col">{{ $row->sex }}</div> -->
             <div class="table-col">{{ $row->educ_level }}</div>

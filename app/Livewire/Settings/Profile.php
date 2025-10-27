@@ -14,6 +14,7 @@ class Profile extends Component
     public $email = '';
     public $num = '';
     public $cropped_image_data = null;
+    public $cropped_image_name = null;
     public $toastPayload = null;
 
     public function mount()
@@ -97,10 +98,21 @@ class Profile extends Component
                     if (strpos($parts[0], 'jpeg') !== false || strpos($parts[0], 'jpg') !== false) {
                         $ext = 'jpg';
                     }
-                    $filename = 'profile_' . $user->id . '_' . time() . '.' . $ext;
+                    // use provided original filename if present, else fallback to generated name
                     $dir = public_path('images/user');
                     if (!is_dir($dir)) {
                         mkdir($dir, 0755, true);
+                    }
+                    if ($this->cropped_image_name) {
+                        // sanitize and use base name, force png extension
+                        $safeBase = preg_replace('/[^A-Za-z0-9_\-\.]/', '_', pathinfo($this->cropped_image_name, PATHINFO_FILENAME));
+                        $filename = $safeBase . '.png';
+                        $target = $dir . DIRECTORY_SEPARATOR . $filename;
+                        if (file_exists($target)) {
+                            $filename = $safeBase . '_' . time() . '.png';
+                        }
+                    } else {
+                        $filename = 'profile_' . $user->id . '_' . time() . '.' . $ext;
                     }
                     $path = $dir . DIRECTORY_SEPARATOR . $filename;
                     file_put_contents($path, $imageData);
@@ -109,6 +121,8 @@ class Profile extends Component
                     $user->save();
                     // clear the temporary cropped data so UI shows stored image on mount
                     $this->cropped_image_data = null;
+                    // clear uploaded name too
+                    $this->cropped_image_name = null;
                 }
             } catch (\Exception $e) {
                 // swallow error but log it

@@ -21,6 +21,12 @@ class ParentLinkRequest extends Model
         'rejection_reason'
     ];
 
+    protected $casts = [
+        'requested_at' => 'datetime',
+        'updated_at' => 'datetime', 
+        'created_at' => 'datetime',
+    ];
+
     public function parent()
     {
         return $this->belongsTo(ParentModel::class, 'parent_id');

@@ -1,14 +1,8 @@
 function openRequestModal(type, id) {
     const modal = document.getElementById("request-modal");
     const parentEl = document.getElementById("modal-parent");
-    // New contact elements
-    const emailLinkEl = document.getElementById("modal-email-link");
-    const contactLinkEl = document.getElementById("modal-contact-link");
-    const emailTextEl = document.getElementById("modal-email-text");
-    const contactTextEl = document.getElementById("modal-contact-text");
-    // Removed: const emailEl = document.getElementById("modal-email");
-    // Removed: const contactEl = document.getElementById("modal-contact");
-
+    const emailEl = document.getElementById("modal-email");
+    const contactEl = document.getElementById("modal-contact"); // may be null
     const requestedAtEl = document.getElementById("modal-requested-at"); // may be null
     const statusEl = document.getElementById("modal-status"); // may be null
     const tableBody = document.querySelector("#modal-students tbody");
@@ -28,42 +22,9 @@ function openRequestModal(type, id) {
         .then((data) => {
             if (loader) loader.style.display = "none";
 
-            const parentImgEl = document.getElementById("modal-parent-image");
-            if (parentImgEl) {
-                parentImgEl.src = data.profile_image ? (imageBase + "/" + data.profile_image) : defaultImage;
-                parentImgEl.alt = data.parent_name ?? "Parent";
-            }
-            
             parentEl && (parentEl.textContent = data.parent_name ?? "N/A");
-            
-            // --- UPDATED CONTACT LOGIC ---
-            const email = data.email ?? "N/A";
-            const contact = data.contact ?? "N/A";
-            const chatLinkEl = document.getElementById("modal-chat-link");
-            
-            if (chatLinkEl) {
-                // 'id' is the parent id passed to openRequestModal(...)
-                chatLinkEl.href = `/Head/messages/${id}`;
-            }
-
-            if (emailLinkEl) {
-                // Construct mailto link
-                emailLinkEl.href = email !== "N/A" ? `https://mail.google.com/mail/u/0/?view=cm&fs=1&tf=1&to=${encodeURIComponent(email)}` : "#";
-            }
-            if (emailTextEl) {
-                emailTextEl.textContent = email;
-            }
-
-            if (contactLinkEl) {
-                // Construct tel link
-                contactLinkEl.href = contact !== "N/A" ? `tel:${contact}` : "#";
-            }
-            if (contactTextEl) {
-                contactTextEl.textContent = contact;
-            }
-            // --- END UPDATED CONTACT LOGIC ---
-
-
+            emailEl && (emailEl.textContent = data.email ?? "N/A");
+            contactEl && (contactEl.textContent = data.contact ?? "N/A");
             requestedAtEl &&
                 (requestedAtEl.textContent = data.requested_at ?? "");
 
@@ -178,8 +139,6 @@ function openRequestModal(type, id) {
                     } else {
                         actionButtons = "-";
                     }
-
-                    // --- END OF ACTION BUTTONS LOGIC ---
 
                     tr.innerHTML = `
                         <td>${escapeHtml(studentName)}</td>
