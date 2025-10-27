@@ -1,6 +1,6 @@
 <div id="chatList" class="chat-list" wire:poll.3s="loadChatList">
     @php
-        // Map user role values to route name prefixes. Update if your app stores roles differently.
+    
         $roleToPrefix = [
             'admin' => 'Head',
             'counselor' => 'Counselor',

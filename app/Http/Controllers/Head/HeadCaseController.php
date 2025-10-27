@@ -72,7 +72,8 @@ class HeadCaseController extends Controller
             });
         }
 
-        $cases = $query->get();
+    // Paginate results: show 10 cases per page and preserve query string for filters/search
+    $cases = $query->paginate(10)->appends($request->except('page'));
         $statusOptions = $this->getStatusEnumValues();
         $severityOptions = $this->getSeverityEnumValues();
         return view('Head.case', compact('cases', 'statusOptions', 'severityOptions'));
@@ -229,38 +230,129 @@ class HeadCaseController extends Controller
 
     public function export()
     {
-        $cases = CaseModel::with('caseType')->get();
-        $filename = 'cases_export_' . date('Ymd_His') . '.csv';
+    $request = request();
 
-        $headers = [
-            'Content-Type' => 'text/csv',
-            'Content-Disposition' => "attachment; filename=\"$filename\"",
-        ];
+        // Base query: include case type and students
+        $query = CaseModel::with(['caseType', 'students'])->orderBy('case_id', 'desc');
 
-        $columns = [
+        // Keep compatibility with existing filters if any
+        if ($request->filled('archived') && $request->archived == '1') {
+            $query->where('archived', true);
+        } else {
+            $query->where('archived', false);
+        }
+
+        if ($request->filled('filter_type')) {
+            $query->where('case_type_id', $request->filter_type);
+        }
+
+        if ($request->filled('filter_status')) {
+            $query->where('status', $request->filter_status);
+        }
+
+        if ($request->filled('filter_severity')) {
+            $query->where('severity', $request->filter_severity);
+        }
+
+        if ($request->filled('search')) {
+            $search = $request->input('search');
+            $query->where(function($q) use ($search) {
+                $q->where('case_id', 'LIKE', "%$search%")
+                  ->orWhereHas('caseType', function($t) use ($search) {
+                      $t->where('type_name', 'LIKE', "%$search%");
+                  });
+            });
+        }
+
+        $cases = $query->get();
+
+        $format = $request->query('format', 'csv');
+
+        // Columns for export
+        $exportColumns = [
             'case_id', 'case_type', 'presenting_problem', 'description', 'severity', 'filed_date', 'filed_time', 'status'
         ];
 
-        $callback = function() use ($cases, $columns) {
-            $file = fopen('php://output', 'w');
-            fputcsv($file, $columns);
+        // Prepare export rows
+        $exportData = [];
+        foreach ($cases as $case) {
+            $row = [];
+            $row['case_id'] = $case->case_id ?? '';
+            $row['case_type'] = $case->caseType->type_name ?? '';
+            $row['presenting_problem'] = $case->presenting_problem ?? '';
+            $row['description'] = $case->description ?? '';
+            $row['severity'] = $case->severity ?? '';
+            $row['filed_date'] = $case->filed_date ?? '';
+            $row['filed_time'] = $case->filed_time ?? '';
+            $row['status'] = $case->status ?? '';
+            $exportData[] = $row;
+        }
 
-            foreach ($cases as $case) {
-                fputcsv($file, [
-                    $case->case_id,
-                    $case->caseType->type_name ?? '',
-                    $case->presenting_problem,
-                    $case->description,
-                    $case->severity,
-                    $case->filed_date,
-                    $case->filed_time,
-                    $case->status,
-                ]);
+        // Filename base
+        $filenameBase = 'Case_List';
+
+        if ($format === 'pdf') {
+            $columns = [
+                'Case ID', 'Case Type', 'Presenting Problem', 'Description', 'Severity', 'Filed Date', 'Filed Time', 'Status'
+            ];
+            $html = view('Head.case_export_pdf', compact('cases', 'columns'))->render();
+            $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadHTML($html)->setPaper('a4', 'landscape');
+            // Use a fixed filename 'case record.pdf' per user request
+            $filename = 'case record.pdf';
+            return response($pdf->output(), 200)
+                ->header('Content-Type', 'application/pdf')
+                ->header('Content-Disposition', 'attachment; filename="' . $filename . '"');
+        } elseif ($format === 'xlsx' || $format === 'xls') {
+            // Title + Subtitle + Date + Blank + Header + Data
+            $schoolTitle = ['Montessori Academy of Southern Cebu, Inc.'];
+            $subtitle = ['Case List'];
+            $dateRow = ['Date Generated: ' . now()->format('F d, Y h:i A')];
+            $colCount = count($exportColumns);
+
+            $exportDataWithTitle = [];
+            $exportDataWithTitle[] = array_merge([$schoolTitle[0]], array_fill(1, $colCount - 1, ''));
+            $exportDataWithTitle[] = array_merge([$subtitle[0]], array_fill(1, $colCount - 1, ''));
+            $exportDataWithTitle[] = array_merge([$dateRow[0]], array_fill(1, $colCount - 1, ''));
+            $exportDataWithTitle[] = array_fill(0, $colCount, ''); // Blank row
+            $exportDataWithTitle[] = $exportColumns; // header row
+            foreach ($exportData as $row) {
+                $exportDataWithTitle[] = array_values($row);
             }
-            fclose($file);
-        };
 
-        return Response::stream($callback, 200, $headers);
+            $filename = $filenameBase . '.' . $format;
+            $excelFormat = $format === 'xlsx' ? \Maatwebsite\Excel\Excel::XLSX : \Maatwebsite\Excel\Excel::XLS;
+
+            return \Maatwebsite\Excel\Facades\Excel::download(
+                new \App\Exports\CasesExport($exportDataWithTitle, $exportColumns),
+                $filename,
+                $excelFormat
+            );
+        } elseif ($format === 'csv') {
+            $schoolTitle = ['Montessori Academy of Southern Cebu, Inc.'];
+            $subtitle = ['Case List'];
+            $dateRow = ['Date Generated: ' . now()->format('F d, Y h:i A')];
+            $filename = $filenameBase . '.csv';
+            $headers = [
+                'Content-Type' => 'text/csv',
+                'Content-Disposition' => "attachment; filename=\"$filename\""
+            ];
+            $callback = function() use ($exportData, $exportColumns, $schoolTitle, $subtitle, $dateRow) {
+                $file = fopen('php://output', 'w');
+                $colCount = count($exportColumns);
+                fputcsv($file, array_merge([$schoolTitle[0]], array_fill(1, $colCount-1, '')));
+                fputcsv($file, array_merge([$subtitle[0]], array_fill(1, $colCount-1, '')));
+                fputcsv($file, array_merge([$dateRow[0]], array_fill(1, $colCount-1, '')));
+                fputcsv($file, array_fill(0, $colCount, ''));
+                fputcsv($file, $exportColumns);
+                foreach ($exportData as $row) {
+                    fputcsv($file, array_values($row));
+                }
+                fclose($file);
+            };
+            return Response::stream($callback, 200, $headers);
+        } else {
+            return response()->json(['error' => 'Invalid export format'], 400);
+        }
     }
 
     public function import(Request $request)

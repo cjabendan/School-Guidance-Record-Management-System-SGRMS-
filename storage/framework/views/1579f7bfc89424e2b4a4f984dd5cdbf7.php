@@ -57,8 +57,6 @@
                 <div class="table-header">
                     <div class="table-col type">Type</div>
                     <div class="table-col requester">Requester</div>
-                    <div class="table-col student">Student</div>
-                    <div class="table-col datetime">Date & Time</div>
                     <div class="table-col counselor">Counselor</div>
                     <div class="table-col status">Status</div>
                     <div class="table-col actions">Actions</div>
@@ -174,7 +172,15 @@
                     if (!calendarEl) return;
                     if (calendar) calendar.destroy();
 
-                    let rawAppointments = <?php echo json_encode($appointments, 15, 512) ?>;
+                    // Use the paginator items (array of appointment objects) instead of the
+                    // paginator object so we can call array methods like filter/map in JS.
+                    let rawAppointments = <?php echo json_encode($appointments->items(), 15, 512) ?>;
+
+                    // Only show Approved and Rescheduled appointments on the calendar
+                    rawAppointments = rawAppointments.filter(function(item) {
+                        const st = (item.status || '').toLowerCase();
+                        return st === 'approved' || st === 'rescheduled';
+                    });
 
                     let formattedAppointments = rawAppointments.map(item => ({
                         id: item.appointment_id, // Ensure event has correct id
@@ -193,6 +199,9 @@
                         counselorAvatar: item.counselor_avatar ?? null,
                         requesterAvatar: item.requester_avatar ?? null,
                         status: item.status ?? "N/A",
+                        // disable moving/resizing for completed/cancelled/declined/ongoing
+                        startEditable: !(item.status && ['completed','cancelled','declined','ongoing'].includes(item.status.toLowerCase())),
+                        durationEditable: !(item.status && ['completed','cancelled','declined','ongoing'].includes(item.status.toLowerCase())),
                         color: item.status?.toLowerCase() === 'approved' ? '#10b981' :
                             item.status?.toLowerCase() === 'pending' ? '#f59e0b' :
                             item.status?.toLowerCase() === 'declined' ? '#ef4444' :
@@ -262,16 +271,27 @@
                         },
 
                         eventClick: function(info) {
-                            let props = info.event.extendedProps;
-                            alert(
-                                "Type: " + props.type + "\n" +
-                                "Requester: " + props.requester + "\n" +
-                                "Student: " + props.student + "\n" +
-                                "Counselor: " + props.counselor + "\n" +
-                                "Status: " + props.status
-                            );
+                             let props = info.event.extendedProps;
+                             alert(
+                                 "Type: " + props.type + "\n" +
+                                 "Requester: " + props.requester + "\n" +
+                                 "Student: " + props.student + "\n" +
+                                 "Counselor: " + props.counselor + "\n" +
+                                 "Status: " + props.status
+                             );
+                         },
+                        eventDragStop: function() {
+                            if (calendar && calendar._lastDenied) calendar._lastDenied = null;
                         },
                         eventDrop: function(info) {
+                            // safety: prevent moving completed/cancelled/declined/ongoing even if client tried
+                            let st = (info.event.extendedProps.status || '').toLowerCase();
+                            if (['completed','cancelled','declined','ongoing'].includes(st)) {
+                                    showError('This appointment cannot be moved.');
+                                info.revert();
+                                return;
+                            }
+
                             fetch('/Head/appointments/' + info.event.id + '/move', {
                                 method: 'POST',
                                 headers: {
@@ -282,15 +302,23 @@
                                     appointment_datetime: info.event.start.toISOString()
                                 })
                             })
-                            .then(response => response.json())
+                            .then(response => {
+                                if (!response.ok) {
+                                    // try to parse error json and throw it to catch block
+                                    return response.json().then(err => { throw err; });
+                                }
+                                return response.json();
+                            })
                             .then(data => {
                                 if (!data.success) {
-                                    alert('Failed to update appointment!');
+                                        showError('This Appointment is already taken. Please choose another available date or time.');
                                     info.revert();
                                 }
                             })
-                            .catch(() => {
-                                alert('Failed to update appointment!');
+                            .catch(err => {
+                                // If server returned a message, show it. Otherwise show generic message.
+                                const msg = (err && err.error) ? err.error : 'This Appointment is already taken. Please choose another available date or time.';
+                                    showError(msg);
                                 info.revert();
                             });
                         }
@@ -315,6 +343,53 @@ document.addEventListener('click', function(e) {
     }
 });
 </script>
+<!-- Error modal (centered) -->
+<div id="sgrms-error-modal" style="display:none;">
+    <div class="sgrms-error-overlay"></div>
+    <div class="sgrms-error-card">
+        <button class="sgrms-error-close" aria-label="Close">&times;</button>
+        <div class="sgrms-error-icon">!</div>
+        <div id="sgrms-error-message" class="sgrms-error-message">An error occurred</div>
+        <div class="sgrms-error-actions">
+            <button id="sgrms-error-ok" class="sgrms-btn">OK</button>
+        </div>
+    </div>
+</div>
+
+<script>
+function showError(msg) {
+    const modal = document.getElementById('sgrms-error-modal');
+    const msgEl = document.getElementById('sgrms-error-message');
+    if (!modal || !msgEl) {
+        alert(msg);
+        return;
+    }
+    msgEl.textContent = msg;
+    // use flex so the modal centers via align-items/justify-content
+    modal.style.display = 'flex';
+}
+function hideError() { const modal = document.getElementById('sgrms-error-modal'); if (modal) modal.style.display = 'none'; }
+document.addEventListener('click', function(e) {
+    const modal = document.getElementById('sgrms-error-modal');
+    // modal may be shown using 'flex' display; only proceed when it's visible
+    if (!modal || modal.style.display === 'none') return;
+    if (e.target === modal.querySelector('.sgrms-error-overlay') || e.target.classList.contains('sgrms-error-close') || e.target.id === 'sgrms-error-ok') {
+        hideError();
+    }
+});
+
+// Also attach direct listeners to the modal buttons/overlay to ensure they respond
+(function attachModalListeners() {
+    const modal = document.getElementById('sgrms-error-modal');
+    if (!modal) return;
+    const ok = modal.querySelector('#sgrms-error-ok');
+    const close = modal.querySelector('.sgrms-error-close');
+    const overlay = modal.querySelector('.sgrms-error-overlay');
+    if (ok) ok.addEventListener('click', hideError);
+    if (close) close.addEventListener('click', hideError);
+    if (overlay) overlay.addEventListener('click', hideError);
+})();
+</script>
 <?php $__env->startPush('scripts'); ?>
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
 <?php $__env->stopPush(); ?>
@@ -326,6 +401,15 @@ document.addEventListener('click', function(e) {
 .fc-event-title-wrap { display:flex; flex-direction:column; line-height:1; }
 .fc-event-title-text { font-weight:600; font-size:0.9rem; color:inherit; }
 .fc-event-sub { font-size:0.75rem; color:rgba(255,255,255,0.9); }
+/* Error modal styles */
+#sgrms-error-modal { position:fixed; inset:0; display:none; align-items:center; justify-content:center; z-index:1200; }
+.sgrms-error-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.45); }
+.sgrms-error-card { position:relative; width:420px; max-width:92%; margin:auto; background:#fff; color:#111; border-radius:10px; padding:22px; box-shadow:0 10px 30px rgba(0,0,0,0.25); display:flex; flex-direction:column; align-items:center; gap:12px; z-index:1201; }
+.sgrms-error-icon { background:#f97373; color:#fff; width:56px; height:56px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:1.2rem; }
+.sgrms-error-message { text-align:center; font-size:1rem; font-weight:600; color:#111; }
+.sgrms-error-actions { margin-top:6px; }
+.sgrms-btn { background:#2563eb; color:#fff; padding:8px 14px; border-radius:8px; border:none; cursor:pointer; }
+.sgrms-error-close { position:absolute; top:8px; right:10px; border:none; background:transparent; font-size:1.3rem; cursor:pointer; color:#666; }
 </style>
 
 <?php echo $__env->make('layouts.main', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\Administrator\School-Guidance-Record-Management-System-SGRMS\resources\views/Head/appointments.blade.php ENDPATH**/ ?>

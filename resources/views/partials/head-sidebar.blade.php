@@ -41,28 +41,43 @@
                             <span class="text">Counselors</span>
                         </a>
                     </li>
+                 <!--   
                     <li class="{{ Request::is('Head/parents*') ? 'active' : '' }}">
                         <a href="{{ url('Head/parents') }}">
                             <i class="fi fi-sr-users"></i>
                             <span class="text">Parents</span>
                         </a>
-                    </li>
+                    </li> -->
+                    
                     <li class="{{ Request::is('Head/students*') ? 'active' : '' }}">
                         <a href="{{ url('Head/students') }}">
                             <i class="fi fi-sr-student"></i>
                             <span class="text">Students</span>
                         </a>
                     </li>
+                     <li class="{{ Request::is('Head/users*') ? 'active' : '' }}">
+                        <a href="{{ url('Head/users') }}">
+                            <i class="fi fi-sr-users"></i>
+                            <span class="text">Users</span>
+                        </a>
+                    </li>
                 </ul>
 
                 <!-- Other menus -->
-                <li class="{{ Request::is('Head/cases*') ? 'active' : '' }}">
+               
+                 <li class="{{ Request::is('Head/requests*') ? 'active' : '' }}">
+                    <a href="{{ url('Head/requests') }}">
+                       <i class="fi fi-sr-user-link"></i>
+                        <span class="text">Child Links</span>
+                    </a>
+                </li>
+                 <li class="{{ Request::is('Head/cases*') ? 'active' : '' }}">
                     <a href="{{ url('Head/cases') }}">
                         <i class='bx bxs-report'></i>
                         <span class="text">Case Reports</span>
                     </a>
                 </li>
-                   <li class="{{ Request::is('Head/counseling*') ? 'active' : '' }}">
+                <li class="{{ Request::is('Head/counseling*') ? 'active' : '' }}">
                     <a href="{{ url('Head/counseling') }}">
                         <i class="fi fi-sr-journal-alt"></i>
                         <span class="text">Counseling Notes</span>
@@ -75,12 +90,7 @@
                     </a>
                 </li>
              
-                <li class="{{ Request::is('Head/requests*') ? 'active' : '' }}">
-                    <a href="{{ url('Head/requests') }}">
-                       <i class="fi fi-sr-user-link"></i>
-                        <span class="text">Child Links</span>
-                    </a>
-                </li>
+               
                 <li class="{{ Request::is('Head/appointments*') ? 'active' : '' }}">
                     <a href="{{ url('Head/appointments') }}">
                         <i class='bx bxs-calendar'></i>

@@ -19,25 +19,32 @@
                                     <a href="#" class="type-filter <?php echo e($type == 'all' ? 'active' : ''); ?>"
                                         data-type="all">All</a>
                                     <a href="#" class="type-filter <?php echo e($type == 'approved' ? 'active' : ''); ?>"
-                                        data-type="approved">Request</a>
+                                        data-type="approved">With Linked Students</a>
                                     <a href="#" class="type-filter <?php echo e($type == 'pending' ? 'active' : ''); ?>"
-                                        data-type="pending">Pending</a>
-                                    <a href="#" class="type-filter <?php echo e($type == 'rejected' ? 'active' : ''); ?>"
-                                        data-type="rejected">Rejected</a>
-                                    <a href="#" class="type-filter <?php echo e($type == 'unlinked' ? 'active' : ''); ?>"
-                                        data-type="unlinked">Unlinked</a>
+                                        data-type="pending">With Pending Requests</a>
                                 </li>
                             </div>
+                        </div>
+                    </div>
+                    <div class="search-bar">
+                        <div class="table-search">
+                            <form method="GET" action="">
+                                <i class="fi fi-br-search"></i>
+                                <input type="text" name="search" value="<?php echo e(request('search')); ?>"
+                                    placeholder="Search parents..." id="student-search-input">
+                                <button type="submit" style="display:none"></button>
+                            </form>
                         </div>
                     </div>
                 </div>
 
                 <div class="table-list">
                     <div class="table-header">
-                        <div class="table-col requested-by">Parent Name</div>
-                        <div class="table-col requested-at">Requested At</div>
-                        <div class="table-col status">Status</div>
-                        <div class="table-col actions">Actions</div>
+                        <div class="table-col">Parent Name</div>
+                        <div class="table-col">Linked Students</div>
+                        <div class="table-col">Pending Requests</div>
+                        <div class="table-col ">Last Updated</div>
+                        <div class="table-col ">Actions</div>
                     </div>
 
                     <div class="table" id="requests-table"></div>

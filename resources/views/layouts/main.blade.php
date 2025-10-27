@@ -30,7 +30,6 @@
         <link rel="stylesheet" href="{{ asset('css/counseling.css') }}">
         <link rel="stylesheet" href="{{ asset('css/announcements.css') }}">
         <link rel="stylesheet" href="{{ asset('css/appointments.css') }}">
-        <link rel="stylesheet" href="{{ asset('css/caseModal.css') }}">
         <link rel="stylesheet" href="{{ asset('css/case.css') }}">
         <link rel="stylesheet" href="{{ asset('css/student.css') }}">
         <link rel="stylesheet" href="{{ asset('css/requests.css') }}">

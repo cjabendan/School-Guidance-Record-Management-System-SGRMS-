@@ -37,7 +37,11 @@
                                 <i class="fi fi-sr-badge-check official-badge" title="Verified"></i>
                             @endif
                         </h2>
-                        <p>Online</p>
+                        @if ($selectedUser->is_online)
+                            <p>Active now  <span class="status-online"></span></p>
+                        @else
+                            <p class="status-offline">Offline</p>
+                        @endif
                     </div>
                 </div>
                 <div class="chat-header-right">
@@ -110,9 +114,7 @@
                             $highlightedMessage = $message->message;
                             $searchQuery = $this->profileSearchQuery ?? '';
 
-                         
                             if ($message->id === $this->messageIdToHighlight && !empty($searchQuery)) {
-                               
                                 $escapedQuery = preg_quote($searchQuery, '/');
 
                                 $pattern = '/(' . $escapedQuery . ')/i';
@@ -158,7 +160,8 @@
             <div class="chat-footer">
                 @if ($isBlocked)
                     <div class="blocked-status-message">
-                        <p class="block-message">You’ve been blocked by the counselor and you can’t send or receive messages
+                        <p class="block-message">You’ve been blocked by the counselor and you can’t send or receive
+                            messages
                             in this chat.</p>
                         <p class="block-reason">This action was taken due to a policy violation. Please report to the
                             Guidance Office to
@@ -168,7 +171,8 @@
                     <div iv class="blocked-status-message">
                         <p>You blocked messages from <span class="blocked-user-name">{{ $selectedUser->first_name }}
                                 {{ $selectedUser->last_name }}</span>'s account.</p>
-                        <p class="block-reason">You can't message in this chat, and you won't receive their messages.</p>
+                        <p class="block-reason">You can't message in this chat, and you won't receive their messages.
+                        </p>
 
                         <a href="#" wire:click.prevent="toggleBlockUser" class="block-btn">
                             {{ $hasBlocked ? 'Unblock' : 'Block' }}

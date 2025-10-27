@@ -85,11 +85,17 @@ class CounselorAppointmentController extends Controller
     public function reschedule(Request $request, $id)
     {
         $appointment = Appointments::findOrFail($id);
+        
+        // Store the current time as original before updating to new time
+        if (!$appointment->original_appointment_datetime) {
+            $appointment->original_appointment_datetime = $appointment->appointment_datetime;
+        }
 
         $appointment->update([
             'appointment_datetime' => $request->new_datetime,
             'rescheduled_count' => $appointment->rescheduled_count + 1,
             'last_rescheduled_at' => now(),
+            'status' => 'Approved' // Mark as approved since counselor is doing the reschedule
         ]);
 
         return redirect()->back()->with('success', 'Appointment rescheduled successfully.');
@@ -213,6 +219,24 @@ class CounselorAppointmentController extends Controller
         ]);
     }
 
+    public function decline(Request $request, $id)
+    {
+        $request->validate([
+            'decline_reason' => 'required|string',
+        ]);
+
+        $appointment = Appointments::findOrFail($id);
+        $appointment->status = 'Declined';
+        $appointment->decline_reason = $request->decline_reason;
+        $appointment->save();
+
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json(['success' => true, 'status' => 'Declined']);
+        }
+
+        return redirect()->back()->with('success', 'Appointment declined successfully.');
+    }
+
     public function startSession(Request $request, $id)
     {
         $appointment = Appointments::findOrFail($id);
@@ -327,6 +351,4 @@ class CounselorAppointmentController extends Controller
 
         return redirect()->back()->with('success', 'Appointment requested successfully.');
     }
-
-
 }

@@ -14,13 +14,13 @@ class ParentLinkRequestStudent extends Model
         'request_id',
         'student_id',
         'student_name',
+        'status',
     ];
 
     public function linkRequest()
     {
         return $this->belongsTo(ParentLinkRequest::class, 'request_id', 'request_id');
     }
-
 
     public function student()
     {

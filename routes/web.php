@@ -37,6 +37,7 @@ use App\Http\Controllers\Head\HeadMessageController;
 use App\Http\Controllers\Head\HeadRequestController;
 use App\Http\Controllers\Head\HeadAppointmentController;
 use App\Http\Controllers\Head\HeadAnnouncementController;
+use App\Http\Controllers\Head\HeadUserController;
 use App\Http\Controllers\Head\HeadSettingsController;
 
 // Counselor Controllers
@@ -91,10 +92,10 @@ Route::prefix('announcements')->name('announcements.')->group(function () {
 
 
 // Chatbot and RAG
-Route::post('/rag/docs', [RagController::class, 'store']) ->name('rag.store');
+Route::post('/rag/docs', [RagController::class, 'store'])->name('rag.store');
 Route::post('/chatbot/generate', [ChatbotController::class, 'generateResponse'])
-->middleware('normalize.chat')
-->name('chatbot.generate');
+    ->middleware('normalize.chat')
+    ->name('chatbot.generate');
 
 
 /*
@@ -187,14 +188,19 @@ Route::prefix('Head')->name('Head.')->middleware(['auth', 'role.head'])->group(f
         Route::get('/Head/students/table', [HeadStudentController::class, 'partialTable']);
     });
 
-    // Parents
+    Route::prefix('users')->name('users.')->group(function () {
+        Route::get('/', [HeadUserController::class, 'index'])->name('index');
+      
+    });
+
+    /* Parents
     Route::prefix('parents')->name('parents.')->group(function () {
         Route::get('/', [HeadParentController::class, 'index'])->name('index');
         Route::post('/add', [HeadParentController::class, 'store'])->name('add');
         Route::get('/{id}/get', [HeadParentController::class, 'get'])->name('get');
         Route::post('/{id}/update', [HeadParentController::class, 'update'])->name('update');
         Route::get('/parents/table', [HeadParentController::class, 'partialTable']);
-    });
+    }); */
 
     // Cases
     Route::prefix('cases')->name('cases.')->group(function () {
@@ -217,8 +223,8 @@ Route::prefix('Head')->name('Head.')->middleware(['auth', 'role.head'])->group(f
     Route::prefix('requests')->name('requests.')->group(function () {
         Route::get('/', [HeadRequestController::class, 'index'])->name('index');
         Route::get('/{type}/{id}', [HeadRequestController::class, 'show'])->name('show');
-        Route::post('/{type}/{id}/approve', [HeadRequestController::class, 'approve'])->name('approve');
-        Route::post('/{type}/{id}/reject', [HeadRequestController::class, 'reject'])->name('reject');
+        Route::post('/student/{id}/approve', [HeadRequestController::class, 'approveStudent'])->name('approve.student');
+        Route::post('/student/{id}/reject', [HeadRequestController::class, 'rejectStudent'])->name('reject.student');
     });
 
     // Appointments
@@ -226,12 +232,12 @@ Route::prefix('Head')->name('Head.')->middleware(['auth', 'role.head'])->group(f
     Route::post('/appointments/{id}/move', [HeadAppointmentController::class, 'move'])->name('appointments.move');
     Route::post('/appointments/{id}/approve', [HeadAppointmentController::class, 'approve'])->name('appointments.approve');
     Route::post('/appointments/{id}/decline', [HeadAppointmentController::class, 'decline'])->name('appointments.decline');
-     Route::post('/appointments/{id}/missed', [HeadAppointmentController::class, 'markMissed'])->name('appointments.missed');
+    Route::post('/appointments/{id}/missed', [HeadAppointmentController::class, 'markMissed'])->name('appointments.missed');
     Route::post('/appointments/{id}/cancel', [HeadAppointmentController::class, 'cancel'])->name('appointments.cancel');
     Route::post('/appointments/store', [HeadAppointmentController::class, 'store'])->name('appointments.store');
     Route::post('/appointments/{id}/start', [HeadAppointmentController::class, 'startSession'])->name('appointments.start');
     Route::post('/appointments/{id}/end', [HeadAppointmentController::class, 'endSession'])->name('appointments.end');
-      // Update appointment (reschedule/edit)
+    // Update appointment (reschedule/edit)
     Route::put('/appointments/{id}', [HeadAppointmentController::class, 'update'])->name('appointments.update');
     Route::get('/appointments/{id}/json', [HeadAppointmentController::class, 'json'])->name('appointments.json');
     // Allow moving appointments via drag-and-drop in calendar for Head
@@ -257,17 +263,17 @@ Route::prefix('Head')->name('Head.')->middleware(['auth', 'role.head'])->group(f
 Route::prefix('Counselor')->name('Counselor.')->middleware(['auth', 'role.counselor', 'system.access'])->group(function () {
 
     Route::get('/messages/{user?}', [CounselorMessageController::class, 'index'])
-    ->middleware('feature:chat')
-    ->name('messages');
+        ->middleware('feature:chat')
+        ->name('messages');
 
     Route::get('/appointments', [CounselorDashboardController::class, 'appointments'])
-    ->middleware('feature:appointment')
-    ->name('appointments.index');
+        ->middleware('feature:appointment')
+        ->name('appointments.index');
     Route::post('/appointments/{id}/move', [CounselorDashboardController::class, 'move'])->name('appointments.move');
     Route::post('/appointments', [CounselorAppointmentController::class, 'store'])->name('appointments.store');
     Route::post('/appointments/{id}/approve', [CounselorDashboardController::class, 'approve'])->name('appointments.approve');
     Route::post('/appointments/{id}/decline', [CounselorDashboardController::class, 'decline'])->name('appointments.decline');
-     Route::post('/appointments/{id}/cancel', [\App\Http\Controllers\Counselor\CounselorAppointmentController::class, 'cancel'])->name('appointments.cancel');
+    Route::post('/appointments/{id}/cancel', [\App\Http\Controllers\Counselor\CounselorAppointmentController::class, 'cancel'])->name('appointments.cancel');
     Route::post('/appointments/{id}/start', [\App\Http\Controllers\Counselor\CounselorAppointmentController::class, 'startSession'])->name('appointments.start');
     Route::post('/appointments/{id}/end', [\App\Http\Controllers\Counselor\CounselorAppointmentController::class, 'endSession'])->name('appointments.end');
     Route::post('/appointments', [\App\Http\Controllers\Counselor\CounselorAppointmentController::class, 'store'])->name('appointments.store');
@@ -291,8 +297,8 @@ Route::prefix('Parent')->name('Parent.')->middleware(['auth', 'role.parent', 'sy
 
     // Messages
     Route::get('/messages/{user?}', [ParentMessageController::class, 'index'])
-     ->middleware('feature:chat')
-     ->name('messages');
+        ->middleware('feature:chat')
+        ->name('messages');
 
     // Requests
     Route::get('/requests', [ParentRequestController::class, 'index'])
@@ -307,7 +313,7 @@ Route::prefix('Parent')->name('Parent.')->middleware(['auth', 'role.parent', 'sy
     //Appointments
     Route::get('/appointments', [ParentAppointmentController::class, 'index'])->name('appointments.index');
     Route::post('/appointments', [ParentAppointmentController::class, 'store'])->name('appointments.store');
-     // Reschedule requests
+    // Reschedule requests
     Route::post('/appointments/{id}/reschedule', [\App\Http\Controllers\AppointmentRescheduleController::class, 'store'])->name('appointments.reschedule.store');
     Route::post('/appointments/{id}/cancel', [\App\Http\Controllers\Parents\ParentAppointmentController::class, 'cancel'])->name('appointments.cancel');
     Route::post('/appointments/{id}/start', [\App\Http\Controllers\Parents\ParentAppointmentController::class, 'startSession'])->name('appointments.start');
@@ -322,12 +328,12 @@ Route::prefix('Parent')->name('Parent.')->middleware(['auth', 'role.parent', 'sy
 */
 
 Route::prefix('Student')->name('Student.')->middleware(['auth', 'role.student', 'system.access'])->group(function () {
-    
+
 
     Route::get('/messages/{user?}', [StudentMessageController::class, 'index'])
-    ->middleware('feature:chat')
-    ->name('messages');
-      // Student Appointments
+        ->middleware('feature:chat')
+        ->name('messages');
+    // Student Appointments
     Route::get('/appointments', [\App\Http\Controllers\Student\StudentAppointmentController::class, 'index'])->name('appointments.index');
     Route::post('/appointments', [\App\Http\Controllers\Student\StudentAppointmentController::class, 'store'])->name('appointments.store');
     Route::get('/appointments/{id}', [\App\Http\Controllers\Student\StudentAppointmentController::class, 'show'])->name('appointments.show')->whereNumber('id');

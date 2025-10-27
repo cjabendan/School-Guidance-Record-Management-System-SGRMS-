@@ -26,7 +26,7 @@
     </div>
 
     <div class="content">
-        <h1>Book<br><span>Appointments</span></h1>
+        <h1>Request<br><span>Appointments</span></h1>
         <p>Students and parents can easily schedule counseling sessions online without waiting in line or paperwork.</p>
         <a href="#" onclick="openLoginModal()">Schedule Now</a>
     </div>
@@ -54,7 +54,7 @@
 
     {{-- Highlight Section: Feature Blocks --}}
     <div class="highlight-overlay">
-        <div class="highlight-box">
+        <div class="highlight-box active" >
             <i class="fas fa-user-graduate"></i>
             <h3>Student Records</h3>
 

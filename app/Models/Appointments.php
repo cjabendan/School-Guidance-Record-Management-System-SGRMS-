@@ -26,12 +26,15 @@ class Appointments extends Model
         'decline_reason',
         'rescheduled_count',
         'last_rescheduled_at',
+        'original_appointment_datetime',
+        'reminded',
     ];
 
     protected $casts = [
         'appointment_datetime' => 'datetime',
         'last_rescheduled_at' => 'datetime',
         'reschedule_proposed_datetime' => 'datetime',
+        'original_appointment_datetime' => 'datetime',
     ];
 
     // Relationships
@@ -110,41 +113,5 @@ class Appointments extends Model
         return $user ? trim($user->first_name . ' ' . $user->last_name) : 'N/A';
     }
 
-    /**
-     * Model boot: enforce a centralized approval conflict check so any code path
-     * that sets status => 'Approved' will be validated.
-     */
-    protected static function booted()
-    {
-        static::saving(function ($appointment) {
-            try {
-                $newStatus = $appointment->status;
-            } catch (\Exception $e) {
-                return true;
-            }
-
-            // Only enforce when status is being set to Approved (case-insensitive)
-            if ($newStatus && strtolower($newStatus) === 'approved' && $appointment->appointment_datetime) {
-                $requested = \Carbon\Carbon::parse($appointment->appointment_datetime);
-                $startWindow = $requested->copy()->subHour();
-                $endWindow = $requested->copy()->addHour();
-
-                $conflict = self::where('counselor_id', $appointment->counselor_id)
-                    ->whereDate('appointment_datetime', $requested->toDateString())
-                    ->whereBetween('appointment_datetime', [$startWindow, $endWindow])
-                    ->whereRaw('LOWER(status) = ?', ['approved'])
-                    ->where('appointment_id', '!=', $appointment->appointment_id)
-                    ->exists();
-
-                if ($conflict) {
-                    // Throw a validation exception which controllers can surface to the user
-                    throw \Illuminate\Validation\ValidationException::withMessages([
-                        'appointment_datetime' => ['this time is already taken by someone']
-                    ]);
-                }
-            }
-
-            return true;
-        });
-    }
+    
 }

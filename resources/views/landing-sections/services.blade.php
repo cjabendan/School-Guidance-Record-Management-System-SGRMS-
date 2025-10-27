@@ -6,9 +6,7 @@
         </p>
         <div class="services-container">
             <div class="card">
-                <div class="arrow">
-                    <i class="fi fi-rr-arrow-small-right"></i>
-                </div>
+               
                 <div class="icon-box">
                     <div class="icon">
                         <i class="fi fi-sr-user-headset"></i>
@@ -20,9 +18,7 @@
                 </p>
             </div>
             <div class="card">
-                <div class="arrow">
-                    <i class="fi fi-rr-arrow-small-right"></i>
-                </div>
+                
                 <div class="icon-box">
                     <div class="icon">
                         <i class="fi fi-sr-family-dress"></i>
@@ -34,9 +30,7 @@
                 </p>
             </div>
             <div class="card">
-                <div class="arrow">
-                    <i class="fi fi-rr-arrow-small-right"></i>
-                </div>
+              
                 <div class="icon-box">
                     <div class="icon">
                         <i class="fi fi-sr-chalkboard"></i>
@@ -48,9 +42,7 @@
                 </p>
             </div>
             <div class="card">
-                <div class="arrow">
-                    <i class="fi fi-rr-arrow-small-right"></i>
-                </div>
+                
                 <div class="icon-box">
                     <div class="icon">
                         <i class="fi fi-sc-calendar"></i>
@@ -58,13 +50,11 @@
                 </div>
                 <p class="heading">Appointment Scheduling</p>
                 <p class="content">
-                    Book sessions with guidance counselors conveniently through our online scheduling system.
+                    Request sessions with guidance counselors conveniently through our online scheduling system.
                 </p>
             </div>
             <div class="card">
-                <div class="arrow">
-                    <i class="fi fi-rr-arrow-small-right"></i>
-                </div>
+                
                 <div class="icon-box">
                     <div class="icon">
                         <i class="fi fi-sr-heart-partner-handshake"></i>
@@ -76,9 +66,7 @@
                 </p>
             </div>
             <div class="card">
-                <div class="arrow">
-                    <i class="fi fi-rr-arrow-small-right"></i>
-                </div>
+              
                 <div class="icon-box">
                     <div class="icon">
                         <i class="fi fi-ss-shield-check"></i>

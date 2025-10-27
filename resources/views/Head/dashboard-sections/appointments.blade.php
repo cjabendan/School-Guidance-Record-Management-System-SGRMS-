@@ -52,8 +52,7 @@
                 @empty
                     <tr>
                         <td colspan="3" class="no-appointments-cell">
-                            <img src="{{ asset ('images/icons/appointments.png') }}" alt="no-appointments" class="no-appointments-img">
-                            You have no upcoming appointments.
+                            No upcoming appointments.
                         </td>
                     </tr>
                 @endforelse

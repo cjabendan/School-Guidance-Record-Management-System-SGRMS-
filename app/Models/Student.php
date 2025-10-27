@@ -13,7 +13,7 @@ class Student extends Model
     public $timestamps = false;
 
     protected $fillable = [
-        's_id', 
+        's_id',
         'user_id',
         'father_name',
         'mother_name',
@@ -52,33 +52,40 @@ class Student extends Model
         return $this->hasManyThrough(
             ParentLinkRequest::class,
             ParentLinkRequestStudent::class,
-            'student_id',   // FK on parent_link_request_students
-            'request_id',   // FK on parent_link_requests
-            's_id',         // Local key on students
-            'request_id'    // Local key on parent_link_request_students
+            'student_id',   
+            'request_id',  
+            's_id',      
+            'request_id'  
         );
     }
 
-    // ✅ Appointments (many-to-many)
     public function appointments()
     {
-        // appointment_students table stores appointment_id and student_user_id (which is users.id)
-        // We must map the student's user_id (students.user_id) to the pivot.student_user_id.
+     
         return $this->belongsToMany(
             Appointments::class,
             'appointment_students',
-            'student_user_id',   // this model's pivot key (appointment_students.student_user_id)
-            'appointment_id',    // related pivot key (appointment_students.appointment_id)
-            's_id',              // local key on students table that maps to student_user_id (students.s_id)
-            'appointment_id'     // related key on appointments table
+            'student_user_id',   
+            'appointment_id',  
+            's_id',              
+            'appointment_id'     
         )
-        ->using(\App\Models\AppointmentStudent::class)
-        ->withPivot('student_user_id');
+            ->using(\App\Models\AppointmentStudent::class)
+            ->withPivot('student_user_id');
     }
 
-    // ✅ Cases (reverse of ParentModel->cases, assuming you have CaseModel)
     public function cases()
     {
         return $this->hasMany(CaseModel::class, 'student_id', 's_id');
+    }
+
+    public function studentSchoolYear()
+    {
+        return $this->belongsTo(SchoolYear::class, 'school_year_id');
+    }
+
+    public function schoolYear()
+    {
+        return $this->hasOne(StudentSchoolYear::class, 'student_id', 's_id')->latestOfMany();
     }
 }

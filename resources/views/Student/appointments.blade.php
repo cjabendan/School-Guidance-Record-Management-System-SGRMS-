@@ -20,6 +20,10 @@
                                 data-filter="approved">Approved</a>
                             <a href="#" class="a-nav {{ request('status') == 'declined' ? 'active' : '' }}"
                                 data-filter="declined">Declined</a>
+                            <a href="#" class="a-nav {{ request('status') == 'cancelled' ? 'active' : '' }}"
+                                data-filter="cancelled">Cancelled</a>
+                            <a href="#" class="a-nav {{ request('status') == 'completed' ? 'active' : '' }}"
+                                data-filter="completed">Complete</a>
                         </li>
                     </div>
                     <a href="#" class="add-btn" onclick="openModal(); return false;">
@@ -48,8 +52,6 @@
                 <div class="table-header">
                     <div class="table-col type">Type</div>
                     <div class="table-col requester">Requester</div>
-                    <div class="table-col student">Student</div>
-                    <div class="table-col datetime">Date & Time</div>
                     <div class="table-col counselor">Counselor</div>
                     <div class="table-col status">Status</div>
                     <div class="table-col actions">Actions</div>
@@ -164,6 +166,12 @@
                     if (calendar) calendar.destroy();
 
                     let rawAppointments = @json($appointments);
+
+                    // Only show Approved and Rescheduled appointments on the calendar
+                    rawAppointments = rawAppointments.filter(function(item) {
+                        const st = (item.status || '').toLowerCase();
+                        return st === 'approved' || st === 'rescheduled';
+                    });
                     // base paths for user images
                     let userImgBase = "{{ asset('images/user') }}";
                     let defaultAvatar = "{{ asset('images/default-avatar.png') }}";

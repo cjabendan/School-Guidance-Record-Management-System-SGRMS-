@@ -30,7 +30,6 @@
         <link rel="stylesheet" href="<?php echo e(asset('css/counseling.css')); ?>">
         <link rel="stylesheet" href="<?php echo e(asset('css/announcements.css')); ?>">
         <link rel="stylesheet" href="<?php echo e(asset('css/appointments.css')); ?>">
-        <link rel="stylesheet" href="<?php echo e(asset('css/caseModal.css')); ?>">
         <link rel="stylesheet" href="<?php echo e(asset('css/case.css')); ?>">
         <link rel="stylesheet" href="<?php echo e(asset('css/student.css')); ?>">
         <link rel="stylesheet" href="<?php echo e(asset('css/requests.css')); ?>">

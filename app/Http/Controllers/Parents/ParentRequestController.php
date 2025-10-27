@@ -11,44 +11,43 @@ use Illuminate\Support\Facades\Validator;
 
 class ParentRequestController extends Controller
 {
-    // Show list of this parent's requests
+    // Show all link requests of this parent
     public function index(Request $request)
     {
-        $parentId = Auth::user()->parentProfile->p_id ?? null;
-
-        if (!$parentId) {
+        $parent = Auth::user()->parentProfile ?? null;
+        if (!$parent) {
             return redirect()->back()->withErrors(['error' => 'Parent profile not found.']);
         }
 
         $requests = ParentLinkRequest::with(['students.student.user'])
-            ->where('parent_id', $parentId)
-            ->orderByDesc('requested_at')
+            ->where('parent_id', $parent->p_id)
+            ->orderByDesc('updated_at')
             ->get();
 
-        // Convert to structure expected by the blade
         $allRequests = $requests->map(function ($r) {
             $students = $r->students->map(function ($ps) {
-                $u = $ps->student->user ?? null;
-                return $u ? trim(($u->first_name ?? '') . ' ' . ($u->last_name ?? '')) : ($ps->student->s_id ?? 'N/A');
+                $user = $ps->student->user ?? null;
+                return $user
+                    ? trim(($user->first_name ?? '') . ' ' . ($user->last_name ?? ''))
+                    : ($ps->student->s_id ?? 'N/A');
             })->toArray();
 
             return [
                 'type' => 'Child Link',
                 'students' => $students,
-                'requested_at' => $r->requested_at ? $r->requested_at : '',
-                'status' => $r->status ?? 'pending',
+                'updated_at' => $r->updated_at ? $r->updated_at->format('M d, Y g:i A') : 'N/A',
+                'status' => ucfirst(strtolower($r->status ?? 'Pending')),
             ];
         });
 
         return view('Parent.requests', ['allRequests' => $allRequests]);
     }
 
-    // Handle form POST to create a new child-link request
+    // Handle form submission to create a new child-link request
     public function store(Request $request)
     {
-        $parentId = Auth::user()->parentProfile->p_id ?? null;
-
-        if (!$parentId) {
+        $parent = Auth::user()->parentProfile ?? null;
+        if (!$parent) {
             return redirect()->back()->withErrors(['error' => 'Parent profile not found.']);
         }
 
@@ -62,22 +61,17 @@ class ParentRequestController extends Controller
         }
 
         $studentIds = $request->input('student_ids', []);
-
         $validIds = [];
         $skipped = [];
 
         foreach ($studentIds as $sId) {
-            // Check already linked
-            $alreadyLinked = ParentStudent::where('p_id', $parentId)
+            $alreadyLinked = ParentStudent::where('p_id', $parent->p_id)
                 ->where('s_id', $sId)
                 ->exists();
 
-            // Check pending
-            $pending = ParentLinkRequest::where('parent_id', $parentId)
-                ->whereHas('students', function ($q) use ($sId) {
-                    $q->where('student_id', $sId);
-                })
-                ->where('status', 'pending')
+            $pending = ParentLinkRequest::where('parent_id', $parent->p_id)
+                ->whereHas('students', fn($q) => $q->where('student_id', $sId))
+                ->where('status', 'Pending')
                 ->exists();
 
             if ($alreadyLinked || $pending) {
@@ -87,28 +81,24 @@ class ParentRequestController extends Controller
             }
         }
 
-        if (count($validIds) === 0) {
+        if (empty($validIds)) {
             return redirect()->back()->withErrors([
-                'error' => 'All selected students are either already linked or have pending requests.'
+                'error' => 'All selected students are already linked or have pending requests.'
             ])->withInput();
         }
 
-        // Create request only for valid students
         $linkRequest = ParentLinkRequest::create([
-            'parent_id' => $parentId,
-            'status' => 'pending',
-            'requested_at' => now(),
+            'parent_id' => $parent->p_id,
+            'status' => 'Pending',
         ]);
 
         foreach ($validIds as $sId) {
-            $linkRequest->students()->create([
-                'student_id' => $sId,
-            ]);
+            $linkRequest->students()->create(['student_id' => $sId]);
         }
 
         $message = 'Request submitted successfully.';
-        if (count($skipped) > 0) {
-            $message .= ' Some students were skipped because they are already linked or pending: ' . implode(', ', $skipped);
+        if (!empty($skipped)) {
+            $message .= ' Some students were skipped: ' . implode(', ', $skipped);
         }
 
         return redirect()->route('Parent.requests.index')->with('success', $message);

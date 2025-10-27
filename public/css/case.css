@@ -151,50 +151,610 @@
     color: #1ea7ff;
 }
 
-/* Import Button */
-.pro-add-import {
-    background: linear-gradient(90deg, #38bdf8 0%, #0ea5e9 100%);
-    color: #fff;
-    font-weight: 700;
-    border-radius: 4px;
-    padding: 8px 24px;
-    font-size: 1rem;
+/* Polished list-group (search results) and selected student tags */
+.list-group {
+    background: #fff;
+    border: 1px solid #e6eef8;
+    border-radius: 8px;
+    box-shadow: 0 6px 18px rgba(10, 36, 71, 0.06);
+    padding: 6px;
+    max-height: 260px;
+    overflow-y: auto;
+    width: 100%;
+}
+
+.list-group-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: 6px;
     border: none;
-    box-shadow: 0 2px 8px rgba(56, 189, 248, 0.12);
-    transition: background 0.2s, transform 0.2s;
+    background: transparent;
+    color: #0b2b4a;
     cursor: pointer;
+    transition: background 0.12s ease, transform 0.05s ease;
+    font-size: 0.98rem;
+}
+
+.list-group-item:hover {
+    background: linear-gradient(90deg, rgba(30,167,255,0.06), rgba(30,167,255,0.02));
+    transform: translateY(-1px);
+}
+
+.list-group-item .badge-id {
+    background: #eef7ff;
+    color: #1e6fbf;
+    padding: 4px 8px;
+    border-radius: 999px;
+    font-size: 0.82rem;
+    margin-left: auto;
+}
+
+.student-tag-input {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+    border: 1px solid #e6eef8;
+    padding: 6px 8px;
+    border-radius: 8px;
+    background: #fff;
+    min-height: 40px;
+}
+
+.student-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #f0f8ff;
+    color: #0b3a66;
+    padding: 6px 10px;
+    border-radius: 999px;
+    font-weight: 500;
+    box-shadow: 0 4px 12px rgba(12, 55, 93, 0.06);
+}
+
+.student-tag .remove-tag {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: rgba(0,0,0,0.06);
+    color: #084b83;
+    cursor: pointer;
+    font-weight: 700;
+    line-height: 1;
+}
+
+/* Smooth, minimal scrollbar for the list */
+.list-group::-webkit-scrollbar {
+    width: 8px;
+}
+.list-group::-webkit-scrollbar-track {
+    background: transparent;
+}
+.list-group::-webkit-scrollbar-thumb {
+    background: rgba(13, 60, 98, 0.12);
+    border-radius: 8px;
+}
+
+.case-modal {
+    display: none;
+    position: fixed;
+    z-index: 2000; 
+    left: 0;
+    top: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.6);
+    box-sizing: border-box;
+    align-items: center;
+    justify-content: center;
+    overflow-y: auto;
+    padding: 0;
+}
+
+.case-modal-content {
+    background: #fff;
+    border-radius: 7px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+    padding: 32px 28px 24px 28px;
+    max-width: 800px;
+    width: 100%;
+    margin: 2rem auto;
+    position: relative;
+    animation: fadeIn 0.3s ease-in-out;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.case-modal-content h2 {
+    margin-top: 0;
+    margin-bottom: 18px;
+    font-size: 1.6rem;
+    font-weight: 600;
+    color: #2563eb;
+    letter-spacing: 1px;
+}
+
+.case-modal-content label {
+    font-weight: 500;
+    margin-bottom: 4px;
+    color: #222;
+}
+
+.case-modal-content input[type="text"],
+.case-modal-content input[type="email"],
+.case-modal-content input[type="date"],
+.case-modal-content input[type="file"],
+.case-modal-content select {
+    padding: 8px 10px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    margin-bottom: 10px;
+    font-size: 1rem;
+    background: #f9fafb;
+    transition: border 0.2s;
+}
+
+.case-modal-content input[type="text"]:focus,
+.case-modal-content input[type="email"]:focus,
+.case-modal-content input[type="date"]:focus,
+.case-modal-content select:focus {
+    border: 1.5px solid #2563eb;
+    outline: none;
+    background: #fff;
+}
+
+.case-modal-content .form-row {
+    display: flex;
+    gap: 18px;
+    margin-bottom: 14px;
+    flex-wrap: wrap;
+}
+.case-modal-content .form-row > div {
+    flex: 1 1 0;
+    min-width: 120px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+}
+
+.case-modal-content .form-row .program-section-field {
+    min-width: 120px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    height: 100%;
+}
+
+.case-modal-content button[type="submit"],
+.case-modal-content button.btn.save {
+    background: #2563eb;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 10px 22px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: background 0.2s;
+}
+.case-modal-content button[type="submit"]:hover,
+.case-modal-content button.btn.save:hover {
+    background: #1e40af;
+}
+
+.case-modal-content button.btn.cancel {
+    background: #e5e7eb;
+    color: #222;
+    border: none;
+    border-radius: 6px;
+    padding: 10px 22px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    margin-top: 10px;
     margin-left: 10px;
-    margin-right: 4px;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
+    transition: background 0.2s;
+}
+.case-modal-content button.btn.cancel:hover {
+    background: #d1d5db;
 }
 
-.pro-add-import:hover {
-    background: linear-gradient(90deg, #0ea5e9 0%, #38bdf8 100%);
-    
-}
-
-/* Export Button */
-.pro-add-export {
-    background: linear-gradient(90deg, #22c55e 0%, #16a34a 100%);
-    color: #fff;
-    font-weight: 700;
-    border-radius: 4px;
-    padding: 8px 24px;
-    font-size: 1rem;
-    border: none;
-    box-shadow: 0 2px 8px rgba(34, 197, 94, 0.12);
-    transition: background 0.2s, transform 0.2s;
+.case-modal-content .close {
+    position: absolute;
+    top: 18px;
+    right: 22px;
+    font-size: 1.5rem;
+    color: #888;
     cursor: pointer;
-    margin-left: 4px;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
+    transition: color 0.2s;
+}
+.case-modal-content .close:hover {
+    color: #dc2626;
 }
 
-.pro-add-export:hover {
-    background: linear-gradient(90deg, #16a34a 0%, #22c55e 100%);
-    
+.case-modal-content hr {
+    border: none;
+    border-top: 1px solid #e5e7eb;
+    margin: 24px 0 18px 0;
+}
+
+.case-modal-content .alert {
+    background: #fee2e2;
+    color: #b91c1c;
+    border-radius: 6px;
+    padding: 10px 16px;
+    margin-bottom: 16px;
+    font-size: 0.98rem;
+}
+
+.modal.case-modal {
+    display: none;
+    position: fixed;
+    z-index: 2000; 
+    left: 0;
+    top: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.6);
+    box-sizing: border-box;
+    align-items: center;
+    justify-content: center;
+    overflow-y: auto;
+    padding: 0;
+}
+
+.modal.case-modal .modal-content,
+.modal.case-modal .case-modal-content {
+    background: #fff;
+    border-radius: 7px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+    padding: 32px 28px 24px 28px;
+    max-width: 800px;
+    width: 100%;
+    margin: 2rem auto;
+    position: relative;
+    animation: fadeIn 0.3s ease-in-out;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.modal.case-modal .modal-content h2,
+.modal.case-modal .case-modal-content h2 {
+    margin-top: 0;
+    margin-bottom: 18px;
+    font-size: 1.6rem;
+    font-weight: 600;
+    color: #2563eb;
+    letter-spacing: 1px;
+}
+
+.modal.case-modal .modal-content label,
+.modal.case-modal .case-modal-content label {
+    font-weight: 500;
+    margin-bottom: 4px;
+    color: #222;
+}
+
+.modal.case-modal .modal-content input[type="text"],
+.modal.case-modal .modal-content input[type="email"],
+.modal.case-modal .modal-content input[type="date"],
+.modal.case-modal .modal-content input[type="file"],
+.modal.case-modal .modal-content select,
+.modal.case-modal .case-modal-content input[type="text"],
+.modal.case-modal .case-modal-content input[type="email"],
+.modal.case-modal .case-modal-content input[type="date"],
+.modal.case-modal .case-modal-content input[type="file"],
+.modal.case-modal .case-modal-content select {
+    padding: 8px 10px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    margin-bottom: 10px;
+    font-size: 1rem;
+    background: #f9fafb;
+    transition: border 0.2s;
+}
+
+.modal.case-modal .modal-content input[type="text"]:focus,
+.modal.case-modal .modal-content input[type="email"]:focus,
+.modal.case-modal .modal-content input[type="date"]:focus,
+.modal.case-modal .modal-content select:focus,
+.modal.case-modal .case-modal-content input[type="text"]:focus,
+.modal.case-modal .case-modal-content input[type="email"]:focus,
+.modal.case-modal .case-modal-content input[type="date"]:focus,
+.modal.case-modal .case-modal-content select:focus {
+    border: 1.5px solid #2563eb;
+    outline: none;
+    background: #fff;
+}
+
+.modal.case-modal .modal-content .form-row,
+.modal.case-modal .case-modal-content .form-row {
+    display: flex;
+    gap: 18px;
+    margin-bottom: 14px;
+    flex-wrap: wrap;
+}
+.modal.case-modal .modal-content .form-row > div,
+.modal.case-modal .case-modal-content .form-row > div {
+    flex: 1 1 0;
+    min-width: 120px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+}
+
+.modal.case-modal .modal-content .form-row .program-section-field,
+.modal.case-modal .case-modal-content .form-row .program-section-field {
+    min-width: 120px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    height: 100%;
+}
+
+.modal.case-modal .modal-content button[type="submit"],
+.modal.case-modal .modal-content button.btn.save,
+.modal.case-modal .case-modal-content button[type="submit"],
+.modal.case-modal .case-modal-content button.btn.save {
+    background: #2563eb;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 10px 22px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: background 0.2s;
+}
+.modal.case-modal .modal-content button[type="submit"]:hover,
+.modal.case-modal .modal-content button.btn.save:hover,
+.modal.case-modal .case-modal-content button[type="submit"]:hover,
+.modal.case-modal .case-modal-content button.btn.save:hover {
+    background: #1e40af;
+}
+
+.modal.case-modal .modal-content button.btn.cancel,
+.modal.case-modal .case-modal-content button.btn.cancel {
+    background: #e5e7eb;
+    color: #222;
+    border: none;
+    border-radius: 6px;
+    padding: 10px 22px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    margin-top: 10px;
+    margin-left: 10px;
+    transition: background 0.2s;
+}
+.modal.case-modal .modal-content button.btn.cancel:hover,
+.modal.case-modal .case-modal-content button.btn.cancel:hover {
+    background: #d1d5db;
+}
+
+.modal.case-modal .modal-content .close,
+.modal.case-modal .case-modal-content .close {
+    position: absolute;
+    top: 18px;
+    right: 22px;
+    font-size: 1.5rem;
+    color: #888;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+.modal.case-modal .modal-content .close:hover,
+.modal.case-modal .case-modal-content .close:hover {
+    color: #dc2626;
+}
+
+.modal.case-modal .modal-content hr,
+.modal.case-modal .case-modal-content hr {
+    border: none;
+    border-top: 1px solid #e5e7eb;
+    margin: 24px 0 18px 0;
+}
+
+.modal.case-modal .modal-content .alert,
+.modal.case-modal .case-modal-content .alert {
+    background: #fee2e2;
+    color: #b91c1c;
+    border-radius: 6px;
+    padding: 10px 16px;
+    margin-bottom: 16px;
+    font-size: 0.98rem;
+}
+
+/* Force export dropdown menu to show above all and not be clipped */
+#exportDropdownMenu {
+    z-index: 99999 !important;
+    position: absolute !important;
+    right: 0 !important;
+    left: auto !important;
+    top: 110% !important;
+    min-width: 180px;
+    background: #fff;
+    border-radius: 8px;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+    display: none;
+    max-width: 90vw;
+    overflow-x: auto;
+}
+
+#exportDropdownMenu.show {
+    display: block !important;
+}
+
+.case-modal .modal-dialog {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+}
+
+.archive-modal {
+  background: #fff;
+  border-radius: 10px;
+  width: 100%;
+  max-width: 460px;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.15);
+  overflow: hidden;
+  animation: slideUp 0.3s ease;
+}
+
+.archive-modal .modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 18px 24px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.archive-modal .modal-title {
+  font-size: 1.1rem;
+  color: #0b2b4a;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+}
+
+.archive-modal .close {
+  font-size: 1.6rem;
+  color: #999;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.archive-modal .close:hover {
+  color: #dc2626;
+}
+
+.archive-modal .modal-body {
+  padding: 18px 24px;
+  color: #0b2b4a;
+  font-size: 0.98rem;
+}
+
+.archive-modal .modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 16px 24px 22px;
+}
+
+.archive-modal .btn {
+  font-size: 0.95rem;
+  border-radius: 6px;
+  padding: 8px 18px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+/* Cancel button */
+.archive-modal .btn-cancel {
+  background: #f3f4f6;
+  color: #0b2b4a;
+  border: 1px solid #d1d5db;
+}
+
+/* Confirm button */
+.archive-modal .btn-confirm {
+  background: linear-gradient(180deg, #2563eb, #1e40af);
+  color: #fff;
+  border: none;
+  box-shadow: 0 4px 10px rgba(37, 99, 235, 0.25);
+}
+
+/* ===== Animations ===== */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+/* Pagination helper styles to match project theme (applies to Laravel paginator markup) */
+.pagination {
+    display: flex;
+    flex-direction: row;
+    justify-content: right;
+    align-items: center;
+    padding-top: 1.3rem;
+    gap: 0.5rem;
+}
+.pagination .page-link,
+.pagination li.page-item > a,
+.pagination li.page-item > span {
+    background: #fff;
+    color: #1ea7ff;
+    border-radius: 6px;
+    padding: 8px 18px;
+    font-size: 16px;
+    border: 1px solid #bcd6f7;
+    font-weight: 500;
+    text-decoration: none;
+    transition: background 0.2s, color 0.2s, border 0.2s;
+    margin: 0 2px;
+    display: flex;
+    align-items: center;
+}
+.pagination .page-item.active .page-link,
+.pagination .page-item.active > span {
+    background: #1ea7ff;
+    color: #fff;
+    border-color: #1ea7ff;
+}
+.pagination .page-link:hover,
+.pagination .page-item > a:hover {
+    background: #0080ff;
+    color: #fff;
+    border-color: #0080ff;
+}
+.pagination .page-item.disabled .page-link,
+.pagination .page-item.disabled > span {
+    color: #bcd6f7;
+    background: #f5faff;
+    border-color: #bcd6f7;
+    cursor: not-allowed;
+}
+
+/* Ensure custom pagination-links class matches the page-link styling used by Laravel's paginator */
+.pagination-links {
+    background: #fff;
+    color: #1ea7ff;
+    border-radius: 6px;
+    padding: 8px 18px;
+    font-size: 16px;
+    border: 1px solid #bcd6f7;
+    font-weight: 500;
+    text-decoration: none;
+    transition: background 0.2s, color 0.2s, border 0.2s;
+    margin: 0 2px;
+    display: flex;
+    align-items: center;
+}
+.pagination .page-item.active .pagination-links,
+.pagination .page-item.active > .pagination-links {
+    background: #1ea7ff;
+    color: #fff;
+    border-color: #1ea7ff;
+}
+.pagination .pagination-links:hover {
+    background: #0080ff;
+    color: #fff;
+    border-color: #0080ff;
 }
 

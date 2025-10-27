@@ -6,7 +6,7 @@
 }
 header {
     z-index: 999;
-    position: sticky;
+    position: fixed;
     top: 0;
     left: 0;
     width: 100%;
@@ -104,7 +104,7 @@ section {
 }
 
 .home {
-    min-height: 80vh;
+    min-height: 85vh;
     background: rgba(60, 145, 230);
 }
 
@@ -123,7 +123,6 @@ section {
     z-index: 888;
     color: #fff;
     width: 70%;
-    margin-top: -80px;
     display: none;
 }
 
@@ -290,7 +289,7 @@ section {
 .about-section {
     min-height: 100vh;
     background: #ffffff;
-    margin-top: 6rem;
+   
 }
 
 .about-section .content {
@@ -375,7 +374,7 @@ section {
 .services-section {
     min-height: 100vh;
     background: #ffff;
-    margin-top: 6rem;
+   
 }
 
 .services-section .content {
@@ -528,7 +527,7 @@ section {
         linear-gradient(to bottom, transparent 50%, #fff 50%);
     background-size: 100% 60%, 100% 100%;
     background-repeat: no-repeat;
-    margin-top: 6rem;
+    
 }
 
 .staff-content {
@@ -651,12 +650,14 @@ section {
 
 .announcement-container {
     display: flex;
+    min-height: 100vh;
     flex-direction: column;
 }
 
 .announcement-header {
     width: 100%;
-    height: 150px;
+    height: 180px;
+    margin-top: 60px;
     background: linear-gradient(to right, rgb(21, 163, 255), rgb(0, 88, 175));
     padding: 1.5rem 0;
     display: flex;
@@ -665,21 +666,22 @@ section {
 }
 
 .announcement-header h2 {
+    margin-top: 20px;
     font-size: 42px;
     letter-spacing: 1.5px;
     color: #ffffff;
-    margin-bottom: 5px;
 }
 
 .announcement-header p {
     font-size: 18px;
     color: #fcfdff;
+    font-weight: 500;
     letter-spacing: 2px;
 }
 
 .announcement-board {
     display: flex;
-    height: 110vh;
+    min-height: 100%;
     flex-direction: column;
     padding: 1.5rem 20rem;
 }
@@ -869,7 +871,7 @@ section {
 }
 
 .an-header h3 {
-    color: #1ea7ff;
+    color: #003060;
     font-size: 34px;
     letter-spacing: 2px;
     padding-bottom: 2px;
@@ -948,6 +950,7 @@ section {
     overflow: hidden;
     box-sizing: border-box;
     padding: 0 0;
+    
     transition: height 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease,
         padding 0.3s;
     will-change: height, opacity;
@@ -964,6 +967,15 @@ section {
     font-size: 1.1rem;
     line-height: 1.7;
 }
+
+.faq-item .plus-btn i {
+    transition: transform 0.3s ease;
+}
+
+.faq-item.active .plus-btn i {
+    transform: rotate(180deg);
+}
+
 
 .question {
     display: flex;
@@ -1451,4 +1463,75 @@ footer {
     color: #0080ff;
 }
 
+.staff-carousel {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 2rem;
+    max-width: 1300px;
+    margin: 2rem auto;
+    overflow: visible;
+}
 
+/* Scroll area */
+.staff-list-wrapper {
+    overflow: hidden;
+    flex: 1;
+    padding: 0 1rem;
+}
+
+.staff-list {
+    display: flex;
+    gap: 2rem;
+    transition: transform 0.5s ease;
+    white-space: nowrap;
+    flex-wrap: nowrap;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+/* Individual staff card (flex layout) */
+.staff-carousel .staff-list > .staff-card {
+    display: inline-block;
+    vertical-align: top;
+    flex: 0 0 calc((100% - 32px) / 3);
+    box-sizing: border-box;
+}
+
+/* ARROWS */
+.staff-arrow {
+    background: #fff;
+    color: #007bff;
+    border: 2px solid #007bff;
+    border-radius: 6px;
+    width: 55px;
+    height: 55px;
+    font-size: 26px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 20;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 10px rgba(0, 123, 255, 0.25);
+}
+
+/* Left/Right arrow positioning outside */
+.staff-arrow.left {
+    left: -100px;
+}
+
+.staff-arrow.right {
+    right: -100px;
+}
+
+.staff-arrow:disabled {
+    opacity: 0.4;
+    cursor: default;
+}

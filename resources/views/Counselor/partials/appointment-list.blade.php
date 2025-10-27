@@ -16,29 +16,6 @@
                 N/A
             @endif
         </div>
-        <div class="table-col student">
-            @php
-                $studentCount = $appointment->students->count();
-                $firstStudent = $appointment->students->first();
-            @endphp
-            @if($studentCount === 1)
-                {{ $firstStudent->user->first_name ?? '' }} {{ $firstStudent->user->last_name ?? '' }}
-            @elseif($studentCount > 1)
-                {{ $firstStudent->user->first_name ?? '' }} {{ $firstStudent->user->last_name ?? '' }}...<span class="see-more-text" style="color: #888;"> see more</span>
-            @else
-                N/A
-            @endif
-        </div>
-        <div class="table-col datetime">
-            @if($appointment->appointment_datetime)
-                @php
-                    $dt = $appointment->appointment_datetime->setTimezone('Asia/Manila');
-                @endphp
-                {{ $dt->format('M d, Y h:i A') }}
-            @else
-                N/A
-            @endif
-        </div>
         <div class="table-col counselor">
             @if ($appointment->counselor)
                 {{ $appointment->counselor->first_name }} {{ $appointment->counselor->last_name }}
@@ -80,16 +57,27 @@
                 $status = strtolower($appointment->status);
                 $latestReq = $appointment->reschedules()->first();
                 $resStatus = $latestReq ? $latestReq->status : '';
-                
                 // Only show previous and preferred times for rescheduled appointments
                 $prevText = '';
                 $reqText = '';
-                if ($status === 'rescheduled') {
-                    $prevText = $appointment->appointment_datetime ? $appointment->appointment_datetime->setTimezone('Asia/Manila')->format('M d, Y h:i A') : '';
-                    if ($appointment->reschedule_proposed_datetime) {
-                        $reqText = $appointment->reschedule_proposed_datetime->setTimezone('Asia/Manila')->format('M d, Y h:i A');
-                    } elseif ($latestReq && !empty($latestReq->proposed_datetime)) {
+                if ($status === 'rescheduled' || $status === 'approved') {
+                    // Show original time if it exists
+                    if ($appointment->original_appointment_datetime) {
+                        $prevText = $appointment->original_appointment_datetime->setTimezone('Asia/Manila')->format('M d, Y h:i A');
+                    }
+                    // For rescheduled status, show the preferred time
+                    if ($status === 'rescheduled') {
+                        $reqText = $appointment->reschedule_proposed_datetime 
+                            ? $appointment->reschedule_proposed_datetime->setTimezone('Asia/Manila')->format('M d, Y h:i A')
+                            : ($appointment->appointment_datetime 
+                                ? $appointment->appointment_datetime->setTimezone('Asia/Manila')->format('M d, Y h:i A')
+                                : '');
+                    }
+                    // Preferred: the proposed new time
+                    if ($latestReq && !empty($latestReq->proposed_datetime)) {
                         $reqText = \Carbon\Carbon::parse($latestReq->proposed_datetime)->setTimezone('Asia/Manila')->format('M d, Y h:i A');
+                    } elseif ($appointment->reschedule_proposed_datetime) {
+                        $reqText = $appointment->reschedule_proposed_datetime->setTimezone('Asia/Manila')->format('M d, Y h:i A');
                     }
                 }
             @endphp

@@ -1,6 +1,5 @@
 .todo-list,
 .chat-list,
-.side-container,
 .appointments-table {
     overflow-y: auto;
     overflow-x: hidden;
@@ -39,7 +38,7 @@
     transition: opacity 0.3s ease;
 }
 
-/* Show scrollbar when hovered or scrolling */
+
 .todo-list:hover::-webkit-scrollbar-thumb,
 .todo-list.scrolling::-webkit-scrollbar-thumb,
 .chat-list:hover::-webkit-scrollbar-thumb,

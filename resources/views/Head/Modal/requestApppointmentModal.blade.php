@@ -40,12 +40,7 @@
               <span class="modal-title"><i class="fi fi-rr-exclamation"></i> Error</span>
               <button type="button" class="close-modal-btn" onclick="closeErrorModal()">×</button>
             </div>
-            <div class="modal-body">
-              <div class="alert alert-danger" style="margin-bottom:0; border-radius:6px; border:1px solid #fca5a5; background:#fff0f0; color:#b91c1c; font-weight:600; font-size:1.05em; padding:12px 16px; display:flex; align-items:center; gap:8px;">
-                <i class="fi fi-rr-exclamation" style="color:#b91c1c; font-size:1.3em;"></i>
-                <div style="line-height:1.2;">{{ $errors->first() }}</div>
-              </div>
-            </div>
+          
             <div class="modal-footer">
               <button type="button" class="btn btn-secondary" onclick="closeErrorModal()">Close</button>
             </div>

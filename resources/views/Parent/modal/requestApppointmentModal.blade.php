@@ -33,12 +33,7 @@
         <button type="button" class="close-modal-btn" onclick="closeModal()">×</button>
       </div>
       <div class="modal-body">
-    @if($errors->has('appointment_datetime'))
-    <div class="alert alert-danger" style="margin-bottom:16px; border-radius:6px; border:1px solid #fca5a5; background:#fff0f0; color:#b91c1c; font-weight:600; font-size:1.05em; padding:10px 16px; display:flex; align-items:center; gap:8px;">
-      <i class="fi fi-rr-exclamation" style="color:#b91c1c; font-size:1.3em;"></i>
-      <span>{{ $errors->first('appointment_datetime') }}</span>
-    </div>
-    @endif
+    <!-- Removed inline appointment_datetime validation message per request (handled by error modal) -->
         <!-- Counselor -->
         <div class="mb-3">
           <label for="counselor_id" class="form-label">Choose Counselor</label>

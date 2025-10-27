@@ -2,9 +2,11 @@
 
 namespace App\Models;
 
-
+use Illuminate\Support\Facades\DB;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\Casts\Attribute;
+use Carbon\Carbon;
 use Illuminate\Support\Str;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 
@@ -109,5 +111,26 @@ class User extends Authenticatable
     public function blockedBy()
     {
         return $this->belongsToMany(User::class, 'user_blocks', 'blocked_id', 'blocker_id');
+    }
+
+    protected function isOnline(): Attribute
+    {
+        return Attribute::make(
+            get: function () {
+                
+                $activity_threshold_minutes = 5;
+
+            
+                $threshold_timestamp = Carbon::now()->subMinutes($activity_threshold_minutes)->getTimestamp();
+
+             
+                return DB::table('sessions')
+                 
+                    ->where('user_id', $this->id)
+                 
+                    ->where('last_activity', '>=', $threshold_timestamp)
+                    ->exists();
+            },
+        );
     }
 }

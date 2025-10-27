@@ -1,14 +1,14 @@
 <!-- Add Case Modal -->
-<div class="modal fade" id="addCaseModal" tabindex="-1" aria-labelledby="addCaseModalLabel" aria-hidden="true">
+<div class="modal case-modal" id="addCaseModal" tabindex="-1" aria-labelledby="addCaseModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <form method="POST" action="<?php echo e(route('Head.cases.store')); ?>">
             <?php echo csrf_field(); ?>
-            <div class="modal-content add-modal-content pro-add-modal">
+            <div class="modal-content add-modal-content pro-add-modal case-modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="addCaseModalLabel">Add New Case</h5>
-                    <button type="button" class="close pro-add-close" data-bs-dismiss="modal" aria-label="Close">&times;</button>
+                    <span class="close add-modal-close pro-add-close" data-bs-dismiss="modal" aria-label="Close">&times;</span>
                 </div>
-                <div class="modal-body">
+                <div class="modal-body case-modal-body">
                     <!-- Student Search Input (full row) -->
                     <div class="form-row">
                         <div class="add-field-col" style="flex:1;">
@@ -115,7 +115,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="modal-footer pro-add-buttons">
+                <div class="modal-footer pro-add-buttons case-modal-footer">
                     <button type="submit" class="pro-add-save">Add Case</button>
                 </div>
             </div>
@@ -126,15 +126,15 @@
 <!-- View Case Modal (form layout, read-only) -->
 <?php if(isset($cases)): ?>
     <?php $__currentLoopData = $cases; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $case): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-        <div class="modal fade" id="viewCaseModal<?php echo e($case->case_id); ?>" tabindex="-1"
+        <div class="modal case-modal" id="viewCaseModal<?php echo e($case->case_id); ?>" tabindex="-1"
             aria-labelledby="viewCaseModalLabel<?php echo e($case->case_id); ?>" aria-hidden="true">
             <div class="modal-dialog modal-lg">
-                <div class="modal-content add-modal-content pro-add-modal">
+                <div class="modal-content add-modal-content pro-add-modal case-modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="viewCaseModalLabel<?php echo e($case->case_id); ?>">Case Details</h5>
-                        <button type="button" class="close pro-add-close" data-bs-dismiss="modal" aria-label="Close">&times;</button>
+                    <h5 class="modal-title" id="viewCaseModalLabel<?php echo e($case->case_id); ?>">Case Details</h5>
+                    <span class="close add-modal-close pro-add-close" data-bs-dismiss="modal" aria-label="Close">&times;</span>
                     </div>
-                    <div class="modal-body">
+                    <div class="modal-body case-modal-body">
                         <!-- Involved Students -->
                         <div class="form-row">
                             <div class="add-field-col">
@@ -231,7 +231,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="modal-footer pro-add-buttons">
+                    <div class="modal-footer pro-add-buttons case-modal-footer">
                         <button type="button" class="pro-add-save" data-bs-dismiss="modal">Close</button>
                     </div>
                 </div>
@@ -239,18 +239,18 @@
         </div>
 
         <!-- Edit Case Modal (form layout) -->
-        <div class="modal fade" id="editCaseModal<?php echo e($case->case_id); ?>" tabindex="-1"
+        <div class="modal case-modal" id="editCaseModal<?php echo e($case->case_id); ?>" tabindex="-1"
             aria-labelledby="editCaseModalLabel<?php echo e($case->case_id); ?>" aria-hidden="true">
             <div class="modal-dialog modal-lg">
                 <form method="POST" action="<?php echo e(route('Head.cases.update', $case->case_id)); ?>">
                     <?php echo csrf_field(); ?>
                     <?php echo method_field('PUT'); ?>
-                    <div class="modal-content add-modal-content pro-add-modal">
+                    <div class="modal-content add-modal-content pro-add-modal case-modal-content">
                         <div class="modal-header">
                             <h5 class="modal-title" id="editCaseModalLabel<?php echo e($case->case_id); ?>">Edit Case</h5>
-                            <button type="button" class="close pro-add-close" data-bs-dismiss="modal" aria-label="Close">&times;</button>
+                            <span class="close add-modal-close pro-add-close" data-bs-dismiss="modal" aria-label="Close">&times;</span>
                         </div>
-                        <div class="modal-body">
+                        <div class="modal-body case-modal-body">
                             <!-- Student Search Input (full row) -->
                             <div class="form-row">
                                 <div class="add-field-col" style="flex:1;">
@@ -380,7 +380,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="modal-footer pro-add-buttons">
+                        <div class="modal-footer pro-add-buttons case-modal-footer">
                             <button type="submit" class="pro-add-save">Save Changes</button>
                         </div>
                     </div>
@@ -413,6 +413,46 @@
             otherInput.required = false;
         }
     }
+</script>
+
+<script>
+// Close case modals when clicking outside modal-content (matches other modal behavior)
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.modal.case-modal').forEach(function(modal) {
+        // click on modal background
+        modal.addEventListener('mousedown', function(e) {
+            // if clicked directly on the backdrop (not inside modal-content)
+            var content = modal.querySelector('.modal-content');
+            if (!content) return;
+            if (!content.contains(e.target)) {
+                // prefer Bootstrap modal hide if available
+                try {
+                    if (window.bootstrap && bootstrap.Modal) {
+                        var instance = bootstrap.Modal.getInstance(modal);
+                        if (instance) instance.hide();
+                        else {
+                            // create temporary instance to call hide
+                            var tmp = new bootstrap.Modal(modal);
+                            tmp.hide();
+                        }
+                    } else {
+                        modal.style.display = 'none';
+                    }
+                } catch (err) {
+                    modal.style.display = 'none';
+                }
+            }
+        });
+
+        // also wire the close X elements to hide the modal (safe-guard)
+        var closeEl = modal.querySelector('.close.add-modal-close, .close');
+        if (closeEl) {
+            closeEl.addEventListener('click', function() {
+                try { if (window.bootstrap && bootstrap.Modal) bootstrap.Modal.getInstance(modal)?.hide(); else modal.style.display = 'none'; } catch(e) { modal.style.display = 'none'; }
+            });
+        }
+    });
+});
 </script>
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -584,4 +624,97 @@ $(function() {
 });
 <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
 <?php endif; ?>
+</script>
+
+<!-- Archive Case Modal -->
+<div class="modal case-modal" id="archiveCaseModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-sm">
+    <div class="modal-content archive-modal" style="max-width: 500px;">
+      <div class="modal-header">
+        <h5 class="modal-title">Archive Case</h5>
+        <span class="close" id="archiveModalClose">&times;</span>
+      </div>
+      <div class="modal-body">
+        <p>Are you sure you want to archive this case?</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-cancel" id="archiveCancelBtn">Cancel</button>
+        <button type="button" class="btn btn-confirm" id="archiveConfirmBtn">Archive</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<script>
+    // Archive case modal logic: uses relative route and AJAX PUT to avoid hardcoded host
+    (function(){
+        let currentArchiveCaseId = null;
+
+        window.openArchiveCaseModal = function(caseId, title) {
+            currentArchiveCaseId = caseId;
+            const modal = document.getElementById('archiveCaseModal');
+            const text = document.getElementById('archiveModalText');
+            if (text) text.textContent = `Archive case ${caseId} — ${title}? This will mark the case as archived.`;
+            if (modal) modal.style.display = 'block';
+        }
+
+        function closeArchiveModal() {
+            const modal = document.getElementById('archiveCaseModal');
+            if (modal) modal.style.display = 'none';
+            currentArchiveCaseId = null;
+        }
+
+        document.addEventListener('DOMContentLoaded', function(){
+            const confirmBtn = document.getElementById('archiveConfirmBtn');
+            const cancelBtn = document.getElementById('archiveCancelBtn');
+            const closeX = document.getElementById('archiveModalClose');
+
+            if (cancelBtn) cancelBtn.addEventListener('click', closeArchiveModal);
+            if (closeX) closeX.addEventListener('click', closeArchiveModal);
+
+            if (confirmBtn) confirmBtn.addEventListener('click', function(){
+                if (!currentArchiveCaseId) return closeArchiveModal();
+                // Build relative URL using route helper output base path
+                const url = new URL(window.location.origin + '<?php echo e(url("/Head/cases")); ?>');
+                // send PUT to /Head/cases/{id}/archive or use named route if available
+                const archiveUrl = `${url.origin}${url.pathname}/${currentArchiveCaseId}/archive`;
+
+                fetch(archiveUrl, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: JSON.stringify({})
+                })
+                .then(async res => {
+                    const text = await res.text();
+                    let data = {};
+                    try { data = JSON.parse(text); } catch(e) { /* ignore */ }
+                    if (res.ok) {
+                        createToast('success', (data.message || 'Case archived'));
+                        // refresh list via AJAX same as search handler
+                        $('#case-search-input').trigger('input');
+                        closeArchiveModal();
+                    } else {
+                        createToast('error', (data.message || 'Failed to archive case'));
+                    }
+                })
+                .catch(err => {
+                    console.error('Archive error', err);
+                    createToast('error', 'Failed to archive case');
+                });
+            });
+
+            // clicking outside should close (consistent with other modals)
+            document.querySelectorAll('.modal.case-modal').forEach(function(modal){
+                modal.addEventListener('mousedown', function(e){
+                    const content = modal.querySelector('.modal-content');
+                    if (content && !content.contains(e.target)) modal.style.display = 'none';
+                });
+            });
+        });
+    })();
 </script><?php /**PATH C:\Users\Administrator\School-Guidance-Record-Management-System-SGRMS\resources\views/Head/Modal/caseModal.blade.php ENDPATH**/ ?>

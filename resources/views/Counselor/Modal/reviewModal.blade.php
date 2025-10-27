@@ -45,8 +45,8 @@ function openReviewModal(appointmentId, detailsHtml, approveUrl, declineUrl, can
       var prev = el.dataset.prev || '';
       var req = el.dataset.req || '';
       var extra = '';
-      if (prev) extra += '<div style="font-size:0.95em; margin-top:6px;"><strong>Previous:</strong> ' + prev + '</div>';
-      if (req) extra += '<div style="font-size:0.95em;"><strong>Preferred date to reschedule:</strong> ' + req + '</div>';
+      if (prev) extra += '<div style="font-size:0.95em; margin-top:6px;"><strong>Previous Appointment Time:</strong> ' + prev + '</div>';
+      if (req) extra += '<div style="font-size:0.95em;"><strong>Preferred New Time:</strong> ' + req + '</div>';
       if (extra) body.innerHTML = body.innerHTML + extra;
     }
   } catch(e) {}
@@ -87,6 +87,17 @@ function openReviewModal(appointmentId, detailsHtml, approveUrl, declineUrl, can
     if (document.getElementById('declineForm')) document.getElementById('declineForm').style.display = 'none';
     if (rescheduleEl) rescheduleEl.style.display = 'inline-block';
     if (closeEl) closeEl.style.display = 'inline-block';
+    // Show Start Session button for approved appointments and wire its action
+    var startFormEl = document.getElementById('startSessionForm');
+    if (startFormEl) {
+      var startAction = '';
+      try { if (typeof startUrl !== 'undefined' && startUrl) startAction = startUrl; } catch(e) { startAction = ''; }
+      if (!startAction) startAction = '/Counselor/appointments/' + appointmentId + '/start';
+      startFormEl.action = startAction;
+      startFormEl.style.display = 'inline-block';
+    }
+    // Ensure endSession is hidden when showing start
+    if (document.getElementById('endSessionForm')) document.getElementById('endSessionForm').style.display = 'none';
   } else {
     if (document.getElementById('approveForm')) document.getElementById('approveForm').style.display = 'inline';
     if (document.getElementById('declineForm')) document.getElementById('declineForm').style.display = 'inline';
@@ -254,4 +265,260 @@ function openRescheduleModal(appointmentId) {
       disableForm(false);
     });
 }
+</script>
+
+<script>
+// Attach submit handler to Approve form to perform AJAX POST and show centered error modal on conflict (Counselor)
+document.addEventListener('DOMContentLoaded', function () {
+  var approveForm = document.getElementById('approveForm');
+  if (!approveForm) return;
+
+  approveForm.addEventListener('submit', function (e) {
+    e.preventDefault();
+    var action = approveForm.action;
+    if (!action) return;
+
+    var tokenInput = approveForm.querySelector('input[name="_token"]');
+    var token = tokenInput ? tokenInput.value : '';
+    var btn = document.getElementById('approveBtn');
+    if (btn) { btn.disabled = true; btn.innerText = 'Approving...'; }
+
+    fetch(action, {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-TOKEN': token,
+        'X-Requested-With': 'XMLHttpRequest'
+      },
+      body: JSON.stringify({})
+    }).then(function (res) {
+      if (!res.ok) {
+        if (res.status === 422) {
+          return res.json().then(function (err) {
+            var msg = (err && (err.error || err.message)) ? (err.error || err.message) : 'The appointment is already taken.';
+            if (typeof showError === 'function') {
+              showError(msg);
+            } else {
+              alert(msg);
+            }
+            throw new Error(msg);
+          });
+        }
+        return res.text().then(function (text) { throw new Error('Server returned ' + res.status + ': ' + text); });
+      }
+      return res.json().catch(function () { return { success: true }; });
+    }).then(function (data) {
+      // On success, update modal UI to hide approve/decline and show In Session badge
+      if (document.getElementById('approveForm')) document.getElementById('approveForm').style.display = 'none';
+      if (document.getElementById('declineForm')) document.getElementById('declineForm').style.display = 'none';
+
+      var footer = document.querySelector('#reviewAppointmentModal .modal-footer');
+      if (footer && !document.getElementById('inSessionBadge')) {
+        var badge = document.createElement('span');
+        badge.className = 'badge badge-warning';
+        badge.id = 'inSessionBadge';
+        badge.style.marginRight = '8px';
+        badge.innerText = 'In Session';
+        footer.insertBefore(badge, footer.firstChild);
+      }
+
+      // Update in-page appointment status cell if present
+      if (window.currentAppointmentId) {
+        var statusEl = document.querySelector('[data-appointment-status="' + window.currentAppointmentId + '"]');
+        if (statusEl) statusEl.innerText = 'In Session';
+      }
+    }).catch(function (err) {
+      console.error('Approve failed', err);
+    }).finally(function () {
+      if (btn) { btn.disabled = false; btn.innerText = 'Approve'; }
+    });
+  });
+});
+</script>
+
+<!-- Start/End session AJAX handlers (copied from Head modal) -->
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var startForm = document.getElementById('startSessionForm');
+  if (!startForm) return;
+
+  startForm.addEventListener('submit', function (e) {
+    e.preventDefault();
+    var action = startForm.action;
+    if (!action) return;
+
+    var tokenInput = startForm.querySelector('input[name="_token"]');
+    var token = tokenInput ? tokenInput.value : '';
+    function getCookie(name) {
+      var v = document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)');
+      return v ? v.pop() : '';
+    }
+    var xsrf = getCookie('XSRF-TOKEN');
+
+    var btn = document.getElementById('startSessionBtn');
+    if (btn) { btn.disabled = true; btn.innerText = 'Starting...'; }
+
+    fetch(action, {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: (function(){
+        var h = {
+          'Content-Type': 'application/json',
+          'X-CSRF-TOKEN': token,
+          'X-Requested-With': 'XMLHttpRequest'
+        };
+        if (xsrf) {
+          try { h['X-XSRF-TOKEN'] = decodeURIComponent(xsrf); } catch(e){ h['X-XSRF-TOKEN'] = xsrf; }
+        }
+        return h;
+      })(),
+      body: JSON.stringify({})
+    }).then(function (res) {
+      if (!res.ok) {
+        return res.text().then(function (text) { throw new Error('Server returned ' + res.status + ': ' + text); });
+      }
+      return res.json().catch(function () { return { success: true }; });
+    }).then(function (data) {
+      if (document.getElementById('approveForm')) document.getElementById('approveForm').style.display = 'none';
+      if (document.getElementById('declineForm')) document.getElementById('declineForm').style.display = 'none';
+      if (startForm) startForm.style.display = 'none';
+
+      var footer = document.querySelector('#reviewAppointmentModal .modal-footer');
+      if (footer) {
+        var cb = document.getElementById('cancelledBadge');
+        if (cb && cb.parentNode) cb.parentNode.removeChild(cb);
+        var badge = document.createElement('span');
+        badge.className = 'badge badge-warning';
+        badge.id = 'inSessionBadge';
+        badge.style.marginRight = '8px';
+        badge.innerText = 'In Session';
+        footer.insertBefore(badge, footer.firstChild);
+      }
+
+      if (window.currentAppointmentId) {
+        var statusEl = document.querySelector('[data-appointment-status="' + window.currentAppointmentId + '"]');
+        if (statusEl) statusEl.innerText = 'In Session';
+      }
+
+    }).catch(function (err) {
+      console.error('Start session failed', err);
+      var msg = err && err.message ? err.message : 'Failed to start session. Refresh the page and try again.';
+      alert(msg);
+    }).finally(function () {
+      if (btn) { btn.disabled = false; btn.innerText = 'Start Session'; }
+    });
+  });
+});
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var endForm = document.getElementById('endSessionForm');
+  if (!endForm) return;
+
+  endForm.addEventListener('submit', function (e) {
+    e.preventDefault();
+    var action = endForm.action;
+    if (!action) return;
+
+    var tokenInput = endForm.querySelector('input[name="_token"]');
+    var token = tokenInput ? tokenInput.value : '';
+    var btn = document.getElementById('endSessionBtn');
+    if (btn) { btn.disabled = true; btn.innerText = 'Completing...'; }
+
+    fetch(action, {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-TOKEN': token,
+        'X-Requested-With': 'XMLHttpRequest'
+      },
+      body: JSON.stringify({})
+    }).then(function (res) {
+      if (!res.ok) return res.text().then(function (text) { throw new Error('Server returned ' + res.status + ': ' + text); });
+      return res.json().catch(function () { return { success: true }; });
+    }).then(function (data) {
+      var footer = document.querySelector('#reviewAppointmentModal .modal-footer');
+      if (footer) {
+        var cb = document.getElementById('cancelledBadge');
+        if (cb && cb.parentNode) cb.parentNode.removeChild(cb);
+        var badge = document.getElementById('inSessionBadge');
+        if (badge) { badge.innerText = 'Completed'; badge.className = 'badge badge-success'; }
+        if (endForm) endForm.style.display = 'none';
+      }
+
+      if (window.currentAppointmentId) {
+        var statusEl = document.querySelector('[data-appointment-status="' + window.currentAppointmentId + '"]');
+        if (statusEl) statusEl.innerText = 'Complete';
+      }
+
+    }).catch(function (err) {
+      console.error('End session failed', err);
+      alert(err && err.message ? err.message : 'Failed to mark session as done.');
+    }).finally(function () {
+      if (btn) { btn.disabled = false; btn.innerText = 'Complete'; }
+    });
+  });
+
+  function showDeclineReason() {
+    var reasonTextarea = document.getElementById('decline_reason');
+    var declineBtn = document.getElementById('declineBtn');
+    var submitBtn = document.getElementById('submitDeclineBtn');
+    
+    if (reasonTextarea && declineBtn && submitBtn) {
+      reasonTextarea.style.display = 'block';
+      declineBtn.style.display = 'none';
+      submitBtn.style.display = 'inline-block';
+    }
+  }
+
+  function handleDeclineSubmit(event) {
+    event.preventDefault();
+    
+    var form = event.target;
+    var reasonTextarea = document.getElementById('decline_reason');
+    var submitBtn = document.getElementById('submitDeclineBtn');
+    
+    if (!reasonTextarea || !reasonTextarea.value.trim()) {
+      alert('Please enter a reason for declining.');
+      return false;
+    }
+
+    if (submitBtn) submitBtn.disabled = true;
+    
+    var formData = new FormData(form);
+    fetch(form.action, {
+      method: 'POST',
+      credentials: 'same-origin',
+      body: formData
+    })
+    .then(response => {
+      if (!response.ok) throw new Error('Network response was not ok');
+      return response.json();
+    })
+    .then(data => {
+      closeReviewModal();
+      
+      // Update status in appointment list if available
+      if (window.currentAppointmentId) {
+        var statusEl = document.querySelector('[data-appointment-status="' + window.currentAppointmentId + '"]');
+        if (statusEl) statusEl.innerText = 'Declined';
+      }
+      
+      // Refresh calendar if available
+      if (window.calendar) window.calendar.refetchEvents();
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      alert('Failed to decline appointment. Please try again.');
+    })
+    .finally(() => {
+      if (submitBtn) submitBtn.disabled = false;
+    });
+
+    return false;
+  }
+});
 </script>

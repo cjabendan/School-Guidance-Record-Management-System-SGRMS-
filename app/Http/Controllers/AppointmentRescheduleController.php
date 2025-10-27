@@ -42,43 +42,74 @@ class AppointmentRescheduleController extends Controller
             return redirect()->back()->withErrors(['status' => 'You can only request a reschedule for appointments that are Approved.']);
         }
 
-        // Persist reschedule request data on the appointments row (fused approach)
+        // Prefer inserting into appointment_reschedules table if it exists (safer and avoids touching missing columns)
         try {
-            if (Schema::hasColumn('appointments', 'rescheduled_count')) {
-                $appointment->rescheduled_count = ($appointment->rescheduled_count ?? 0) + 1;
-            }
-            if (Schema::hasColumn('appointments', 'last_rescheduled_at')) {
-                $appointment->last_rescheduled_at = now();
-            }
-
-            // store proposed datetime and reason on dedicated columns (don't overwrite official appointment_datetime)
+            $proposedDatetime = null;
             if ($request->filled('proposed_datetime')) {
                 try {
                     $proposedDatetime = Carbon::parse($request->input('proposed_datetime'));
-                    // Set both the reschedule proposal and update the actual appointment time
-                    if (Schema::hasColumn('appointments', 'reschedule_proposed_datetime')) {
-                        $appointment->reschedule_proposed_datetime = $proposedDatetime;
-                    }
-                    $appointment->appointment_datetime = $proposedDatetime;
                 } catch (\Exception $e) {
                     Log::warning('Failed to parse proposed_datetime for reschedule: '.$e->getMessage());
                 }
             }
 
-            if (Schema::hasColumn('appointments', 'reschedule_reason')) {
-                $appointment->reschedule_reason = $request->input('reason');
-            }
+            if (Schema::hasTable('appointment_reschedules')) {
+                // Create the reschedule request record
+                \App\Models\AppointmentReschedule::create([
+                    'appointment_id' => $appointment->appointment_id,
+                    'requester_id' => $user->id,
+                    'reason' => $request->input('reason'),
+                    'proposed_datetime' => $proposedDatetime,
+                    'status' => 'Pending',
+                ]);
 
-            if (Schema::hasColumn('appointments', 'reschedule_requester_id')) {
-                $appointment->reschedule_requester_id = $user->id;
-            }
+                // Update the appointment status and tracking fields
+                $updates = [
+                    'status' => 'Rescheduled'
+                ];
 
-            // Mark appointment as Rescheduled
-            if (Schema::hasColumn('appointments', 'status')) {
-                $appointment->status = 'Rescheduled';
-            }
+                // Track original datetime if this is first reschedule
+                if (!$appointment->original_appointment_datetime) {
+                    $updates['original_appointment_datetime'] = $appointment->appointment_datetime;
+                }
 
-            $appointment->save();
+                // Update reschedule counters
+                if (Schema::hasColumn($appointment->getTable(), 'rescheduled_count')) {
+                    $updates['rescheduled_count'] = ($appointment->rescheduled_count ?? 0) + 1;
+                }
+                if (Schema::hasColumn($appointment->getTable(), 'last_rescheduled_at')) {
+                    $updates['last_rescheduled_at'] = now();
+                }
+
+                // Update the appointment with the new datetime
+                if ($proposedDatetime) {
+                    $updates['appointment_datetime'] = $proposedDatetime;
+                }
+
+                // Apply all updates at once
+                $appointment->update($updates);
+            } else {
+                // Fallback: keep the old behaviour but be defensive and only set columns that exist
+                if (Schema::hasColumn($appointment->getTable(), 'rescheduled_count')) {
+                    $appointment->rescheduled_count = ($appointment->rescheduled_count ?? 0) + 1;
+                }
+                if (Schema::hasColumn($appointment->getTable(), 'last_rescheduled_at')) {
+                    $appointment->last_rescheduled_at = now();
+                }
+                if ($proposedDatetime && Schema::hasColumn($appointment->getTable(), 'appointment_datetime')) {
+                    $appointment->appointment_datetime = $proposedDatetime;
+                }
+                if (Schema::hasColumn($appointment->getTable(), 'reschedule_reason')) {
+                    $appointment->reschedule_reason = $request->input('reason');
+                }
+                if (Schema::hasColumn($appointment->getTable(), 'reschedule_requester_id')) {
+                    $appointment->reschedule_requester_id = $user->id;
+                }
+                if (Schema::hasColumn($appointment->getTable(), 'status')) {
+                    $appointment->status = 'Rescheduled';
+                }
+                $appointment->save();
+            }
         } catch (\Exception $e) {
             Log::error('Failed updating appointment during reschedule request: '.$e->getMessage(), ['appointment_id' => $appointmentId]);
             return redirect()->back()->withErrors(['db' => 'Failed to submit reschedule request.']);

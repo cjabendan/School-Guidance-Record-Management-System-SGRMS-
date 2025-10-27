@@ -28,14 +28,20 @@ class StudentAppointmentController extends Controller
 				$q->where('user_id', $userId);
 			});
 
-		if ($request->has('status') && $request->status != 'all') {
-			$status = $request->status;
+		// Apply status filtering (case-insensitive) similar to Counselor/Head
+		$statusFilter = $request->has('status') ? strtolower($request->status) : null;
+		if ($statusFilter && $statusFilter !== 'all') {
 			// When filtering for pending, include Rescheduled since those are awaiting approval
-			if (strtolower($status) === 'pending') {
+			if ($statusFilter === 'pending') {
 				$query->whereIn('status', ['Pending', 'Rescheduled']);
 			} else {
 				// Case-insensitive match for other statuses
-				$query->whereRaw('LOWER(status) = ?', [strtolower($status)]);
+				$query->whereRaw('LOWER(status) = ?', [$statusFilter]);
+			}
+
+			// If filtering completed, optionally restrict by end_datetime if that column exists
+			if ($statusFilter === 'completed' && Schema::hasColumn((new Appointments)->getTable(), 'end_datetime')) {
+				$query->where('end_datetime', '>=', now());
 			}
 		}
 
@@ -147,14 +153,14 @@ class StudentAppointmentController extends Controller
 	public function startSession(Request $request, $id)
 	{
 		$appointment = Appointments::findOrFail($id);
-		$appointment->status = 'Ongoing';
+		$appointment->status = 'In Session';
 		if (Schema::hasColumn($appointment->getTable(), 'started_at')) {
 			$appointment->started_at = now();
 		}
 		$appointment->save();
 
 		if ($request->ajax() || $request->wantsJson()) {
-			return response()->json(['success' => true, 'status' => 'Ongoing']);
+			return response()->json(['success' => true, 'status' => 'In Session']);
 		}
 
 		return redirect()->back()->with('success', 'Session started.');
@@ -199,4 +205,3 @@ class StudentAppointmentController extends Controller
 		return redirect()->back()->with('success', 'Appointment cancelled successfully.');
 	}
 }
-

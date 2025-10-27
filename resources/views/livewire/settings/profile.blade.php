@@ -92,24 +92,6 @@
         <button id="profileSaveBtn" wire:click="save" class="settings-form-button">Save</button>
     </div>
 
-    @if (Auth::user()->role === 'admin')
-        <div class="settings-form-footer">
-            <p class="settings-form-heading">Transfer privilege</p>
-            <p class="settings-form-subheading">Transfer your admin role or delete this account.</p>
-        </div>
-
-        <div>
-            <button wire:click="transferPrivilege" class="settings-form-button delete">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
-                    stroke="currentColor" class="icons">
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                        d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
-                </svg>
-                Transfer role
-            </button>
-        </div>
-    @endif
-
     <script src="{{ asset('js/toast.js') }}"></script>
     <script>
         // Listen for Livewire emitted toast events (works across Livewire versions)

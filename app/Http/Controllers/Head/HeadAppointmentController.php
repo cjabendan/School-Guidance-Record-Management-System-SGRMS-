@@ -28,6 +28,38 @@ class HeadAppointmentController extends Controller
     // Convert UTC to Asia/Manila timezone
     $utcDate = $request->input('appointment_datetime');
     $manilaDate = \Carbon\Carbon::parse($utcDate)->setTimezone('Asia/Manila');
+
+    // Conflict check similar to reschedule/approve: prevent moving into an occupied approved slot
+    $requested = $manilaDate->copy();
+    $startWindow = $requested->copy()->subHour();
+    $endWindow = $requested->copy()->addHour();
+
+    $conflict = Appointments::where('counselor_id', $appointment->counselor_id)
+        ->whereDate('appointment_datetime', $requested->toDateString())
+        ->whereBetween('appointment_datetime', [$startWindow, $endWindow])
+        ->where('appointment_id', '!=', $appointment->appointment_id)
+        ->exists();
+
+    // Also check student conflicts (if appointment has students attached)
+    $studentIds = $appointment->students()->pluck('student_user_id')->toArray();
+    $studentConflict = false;
+    if (!empty($studentIds)) {
+        $studentConflict = Appointments::whereDate('appointment_datetime', $requested->toDateString())
+            ->whereBetween('appointment_datetime', [$startWindow, $endWindow])
+            ->whereHas('students', function($q) use ($studentIds) {
+                $q->whereIn('student_user_id', $studentIds);
+            })
+            ->where('appointment_id', '!=', $appointment->appointment_id)
+            ->exists();
+    }
+
+    if ($conflict || $studentConflict) {
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json(['error' => 'this time is already taken by someone'], 422);
+        }
+        return redirect()->back()->with('error', 'this time is already taken by someone');
+    }
+
     $appointment->appointment_datetime = $manilaDate;
     $appointment->save();
     return response()->json(['success' => true]);
@@ -70,10 +102,10 @@ class HeadAppointmentController extends Controller
 
         // NOTE: completed filtering and end_datetime handling is done above when normalizing status
 
-        $appointments = $query->orderBy('appointment_datetime', 'desc')->get();
+        $appointments = $query->orderBy('appointment_datetime', 'desc')->paginate(10)->withQueryString();
 
         // Attach avatar URLs for counselor and requester to simplify client rendering
-        $appointments->transform(function ($a) {
+        $appointments->getCollection()->transform(function ($a) {
             
             // counselor avatar
             $a->counselor_avatar = null;
@@ -217,18 +249,19 @@ class HeadAppointmentController extends Controller
             $startWindow = $requested->copy()->subHour();
             $endWindow = $requested->copy()->addHour();
 
-            $conflict = Appointments::where('counselor_id', $appointment->counselor_id)
-                ->whereDate('appointment_datetime', $requested->toDateString())
+            // Check for any approved appointment in the same 1-hour window regardless of counselor
+            $conflict = Appointments::whereDate('appointment_datetime', $requested->toDateString())
                 ->whereBetween('appointment_datetime', [$startWindow, $endWindow])
                 ->whereRaw('LOWER(status) = ?', ['approved'])
                 ->where('appointment_id', '!=', $appointment->appointment_id)
                 ->exists();
 
             if ($conflict) {
+                $errMsg = 'The appointment is already taken.';
                 if (request()->ajax() || request()->wantsJson()) {
-                    return response()->json(['error' => 'this time is already taken by someone'], 422);
+                    return response()->json(['error' => $errMsg], 422);
                 }
-                return redirect()->back()->with('error', 'this time is already taken by someone');
+                return redirect()->back()->with('error', $errMsg);
             }
         }
 
@@ -237,7 +270,7 @@ class HeadAppointmentController extends Controller
             $appointment->save();
         } catch (\Illuminate\Validation\ValidationException $e) {
             // Surface the conflict as a table-level error message (not the create modal)
-            $message = $e->validator->errors()->first('appointment_datetime') ?? 'this time is already taken by someone';
+            $message = $e->validator->errors()->first('appointment_datetime') ?? 'The appointment is already taken.';
             if (request()->ajax() || request()->wantsJson()) {
                 return response()->json(['error' => $message], 422);
             }
@@ -358,22 +391,6 @@ class HeadAppointmentController extends Controller
         // Treat submitted time as Asia/Manila local time
     $manilaDate = \Carbon\Carbon::createFromFormat('Y-m-d\TH:i', $request->appointment_datetime)->toDateTimeString();
 
-        // Conflict check: any appointment at the same time
-        $globalConflict = Appointments::where('appointment_datetime', $manilaDate)
-            ->whereIn('status', ['Pending', 'Approved'])
-            ->exists();
-
-        // Conflict check: any selected student has appointment at same time
-        $studentConflict = Appointments::where('appointment_datetime', $manilaDate)
-            ->whereIn('status', ['Pending', 'Approved'])
-            ->whereHas('students', function($q) use ($request) {
-                $q->whereIn('student_user_id', $request->student_id);
-            })->exists();
-
-        if ($globalConflict || $studentConflict) {
-            return back()->withErrors(['appointment_datetime' => 'Appointment cannot be booked. A schedule already exists'])->withInput();
-        }
-
         $appointment = Appointments::create([
             'counselor_id' => $request->counselor_id,
             'appointment_type_id' => $typeId,
@@ -425,23 +442,6 @@ class HeadAppointmentController extends Controller
 
         // Convert submitted datetime (local Manila) to ISO string
     $manilaDate = \Carbon\Carbon::createFromFormat('Y-m-d\TH:i', $request->appointment_datetime)->toDateTimeString();
-
-        // Conflict checks excluding the current appointment
-        $globalConflict = Appointments::where('appointment_datetime', $manilaDate)
-            ->whereIn('status', ['Pending', 'Approved'])
-            ->where('appointment_id', '!=', $appointment->appointment_id)
-            ->exists();
-
-        $studentConflict = Appointments::where('appointment_datetime', $manilaDate)
-            ->whereIn('status', ['Pending', 'Approved'])
-            ->where('appointment_id', '!=', $appointment->appointment_id)
-            ->whereHas('students', function($q) use ($request) {
-                $q->whereIn('student_user_id', $request->student_id);
-            })->exists();
-
-        if ($globalConflict || $studentConflict) {
-            return back()->withErrors(['appointment_datetime' => 'Appointment cannot be booked. A schedule already exists'])->withInput();
-        }
 
         // Update fields
         $appointment->counselor_id = $request->counselor_id;

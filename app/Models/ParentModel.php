@@ -22,19 +22,36 @@ class ParentModel extends Model
         return $this->belongsTo(User::class, 'user_id');
     }
 
-    // ✅ Relationship to pivot table
+
     public function parentStudents()
     {
         return $this->hasMany(ParentStudent::class, 'p_id', 'p_id');
     }
 
-    // ✅ Direct children via pivot
+
     public function children()
     {
         return $this->belongsToMany(Student::class, 'parent_student', 'p_id', 's_id');
     }
 
-    // ✅ Cases linked through children
+
+    public function linkedStudents()
+    {
+        return $this->hasMany(ParentStudent::class, 'p_id');
+    }
+    
+    public function linkRequests()
+    {
+        return $this->hasMany(ParentLinkRequest::class, 'parent_id');
+    }
+
+    public function latestLinkRequest()
+    {
+      
+        return $this->hasOne(ParentLinkRequest::class, 'parent_id')
+            ->latestOfMany('updated_at'); 
+    }
+
     public function cases()
     {
         return $this->hasManyThrough(

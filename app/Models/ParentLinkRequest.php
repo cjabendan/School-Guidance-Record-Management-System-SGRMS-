@@ -8,7 +8,7 @@ class ParentLinkRequest extends Model
 {
     protected $table = 'parent_link_requests';
     protected $primaryKey = 'request_id';
-    public $timestamps = false;
+    public $timestamps = true;
     protected $dates = ['requested_at'];
 
 

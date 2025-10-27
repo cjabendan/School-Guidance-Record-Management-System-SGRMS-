@@ -48,9 +48,18 @@
                                 <button class="level-option" data-level="kinder" type="button">Kinder</button>
                             </div>
                         </div>
-                        <a href="<?php echo e(route('Head.cases.export')); ?>" class="export-btn toggle-btn" id="exportDropdownBtn">
-                            <i class="fi fi-rr-file-download"></i>
-                        </a>
+                        <div class="dropdown">
+                            <button class="export-btn toggle-btn" id="exportDropdownBtn">
+                                <i class="fi fi-rr-file-download"></i>
+                            </button>
+
+                            <div id="exportDropdownMenu" class="dropdown-menu">
+                                <a href="#" class="dropdown-item" onclick="downloadExport('pdf')">Export as PDF</a>
+                                <a href="#" class="dropdown-item" onclick="downloadExport('xlsx')">Export as Excel (.xlsx)</a>
+                                <a href="#" class="dropdown-item" onclick="downloadExport('xls')">Export as Excel (.xls)</a>
+                                <a href="#" class="dropdown-item" onclick="downloadExport('csv')">Export as CSV</a>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -83,14 +92,7 @@
                                         data-bs-target="#viewCaseModal<?php echo e($case->case_id); ?>"><i class='bx bx-show'></i></button>
                                     <button type="button" class="edit-btn" data-bs-toggle="modal"
                                         data-bs-target="#editCaseModal<?php echo e($case->case_id); ?>"><i class='bx bx-edit'></i></button>
-                                    <button type="button" class="archive-btn"
-                                        onclick="if(confirm('Archive this case?')) { document.getElementById('archive-form-<?php echo e($case->case_id); ?>').submit(); }"><i class='bx bx-archive'></i></button>
-                                    <form id="archive-form-<?php echo e($case->case_id); ?>"
-                                        action="<?php echo e(route('Head.cases.archive', $case->case_id)); ?>" method="POST"
-                                        style="display:none;">
-                                        <?php echo csrf_field(); ?>
-                                        <?php echo method_field('PUT'); ?>
-                                    </form>
+                                    <button type="button" class="archive-btn" onclick="openArchiveCaseModal(<?php echo e($case->case_id); ?>, '<?php echo e(addslashes($case->caseType->type_name ?? 'Case')); ?>')"><i class='bx bx-archive'></i></button>
                                 </div>
                             </div>
                         <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
@@ -98,14 +100,91 @@
                         <?php endif; ?>
                     </div>
                 </div>
+                
+                <div id="cases-pagination" style="padding:12px 18px;">
+                    <?php if(method_exists($cases, 'links')): ?>
+                        <?php echo $__env->make('components.parent-pagination', ['paginator' => $cases], array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
+                    <?php endif; ?>
+                </div>
             </div>
         </div>
     </section>
     <?php echo $__env->make('Head.Modal.caseModal', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
-
     <script>
+        // Archive case modal logic: uses relative route and AJAX POST to avoid hardcoded host
+        (function(){
+            let currentArchiveCaseId = null;
+
+            window.openArchiveCaseModal = function(caseId, title) {
+                currentArchiveCaseId = caseId;
+                const modal = document.getElementById('archiveCaseModal');
+                const text = document.getElementById('archiveModalText');
+                if (text) text.textContent = `Archive case ${caseId} — ${title}? This will mark the case as archived.`;
+                if (modal) modal.style.display = 'block';
+            }
+
+            function closeArchiveModal() {
+                const modal = document.getElementById('archiveCaseModal');
+                if (modal) modal.style.display = 'none';
+                currentArchiveCaseId = null;
+            }
+
+            document.addEventListener('DOMContentLoaded', function(){
+                const confirmBtn = document.getElementById('archiveConfirmBtn');
+                const cancelBtn = document.getElementById('archiveCancelBtn');
+                const closeX = document.getElementById('archiveModalClose');
+
+                if (cancelBtn) cancelBtn.addEventListener('click', closeArchiveModal);
+                if (closeX) closeX.addEventListener('click', closeArchiveModal);
+
+                if (confirmBtn) confirmBtn.addEventListener('click', function(){
+                    if (!currentArchiveCaseId) return closeArchiveModal();
+                    // Build relative URL using route helper output base path
+                    const url = new URL(window.location.origin + '<?php echo e(url("/Head/cases")); ?>');
+                    // send PUT to /Head/cases/{id}/archive or use named route if available
+                    const archiveUrl = `${url.origin}${url.pathname}/${currentArchiveCaseId}/archive`;
+
+                    fetch(archiveUrl, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                            'X-Requested-With': 'XMLHttpRequest'
+                        },
+                        body: JSON.stringify({})
+                    })
+                    .then(async res => {
+                        const text = await res.text();
+                        let data = {};
+                        try { data = JSON.parse(text); } catch(e) { /* ignore */ }
+                        if (res.ok) {
+                            createToast('success', (data.message || 'Case archived'));
+                            // refresh list via AJAX same as search handler
+                            $('#case-search-input').trigger('input');
+                            closeArchiveModal();
+                        } else {
+                            createToast('error', (data.message || 'Failed to archive case'));
+                        }
+                    })
+                    .catch(err => {
+                        console.error('Archive error', err);
+                        createToast('error', 'Failed to archive case');
+                    });
+                });
+
+                // clicking outside should close (consistent with other modals)
+                document.querySelectorAll('.modal.case-modal').forEach(function(modal){
+                    modal.addEventListener('mousedown', function(e){
+                        const content = modal.querySelector('.modal-content');
+                        if (content && !content.contains(e.target)) modal.style.display = 'none';
+                    });
+                });
+            });
+        })();
+
         $(document).ready(function() {
-            
+
+            // Search input (AJAX replace table)
             $('#case-search-input').on('input', function() {
                 let query = $(this).val();
                 let level = $('.level-option.active').data('level') || '';
@@ -123,15 +202,14 @@
                 });
             });
 
+            // Level menu toggle
             $('#toggle-view-btn').on('click', function(e) {
                 e.stopPropagation();
                 $('#level-menu').toggle();
             });
+            $(document).on('click', function() { $('#level-menu').hide(); });
 
-            $(document).on('click', function() {
-                $('#level-menu').hide();
-            });
-
+            // Level option change
             $('.level-option').on('click', function() {
                 $('.level-option').removeClass('active');
                 $(this).addClass('active');
@@ -142,10 +220,7 @@
                 $.ajax({
                     url: "<?php echo e(route('Head.cases.index')); ?>",
                     type: "GET",
-                    data: {
-                        search: search,
-                        level: level
-                    },
+                    data: { search: search, level: level },
                     success: function(response) {
                         let html = $(response).find('#cases-list').html();
                         $('#cases-list').html(html);
@@ -153,14 +228,11 @@
                 });
             });
 
-            // Import button triggers file input
-            $('#import-btn').on('click', function() {
-                $('#import-file-input').click();
-            });
-            $('#import-file-input').on('change', function() {
-                $(this).closest('form').submit();
-            });
+            // Import trigger
+            $('#import-btn').on('click', function() { $('#import-file-input').click(); });
+            $('#import-file-input').on('change', function() { $(this).closest('form').submit(); });
 
+            // Severity filters
             $('.filters .a-nav').on('click', function(e) {
                 e.preventDefault();
                 $('.filters .a-nav').removeClass('active');
@@ -170,16 +242,111 @@
                 $.ajax({
                     url: "<?php echo e(route('Head.cases.index')); ?>",
                     type: "GET",
-                    data: {
-                        search: search,
-                        filter_severity: severity === 'all' ? '' : severity
-                    },
+                    data: { search: search, filter_severity: severity === 'all' ? '' : severity },
                     success: function(response) {
                         let html = $(response).find('#cases-list').html();
                         $('#cases-list').html(html);
                     }
                 });
             });
+
+            // Export dropdown init (single, robust instance)
+            const exportBtn = document.getElementById('exportDropdownBtn');
+            const exportMenu = document.getElementById('exportDropdownMenu');
+            if (exportBtn && exportMenu) {
+                // Ensure hidden by default (inline fallback if CSS missing)
+                exportMenu.style.display = exportMenu.style.display || 'none';
+
+                exportBtn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const isShown = exportMenu.classList.contains('show') || exportMenu.style.display === 'block';
+                    if (isShown) {
+                        exportMenu.classList.remove('show');
+                        exportMenu.style.display = 'none';
+                    } else {
+                        exportMenu.classList.add('show');
+                        exportMenu.style.display = 'block';
+                    }
+                });
+
+                document.addEventListener('mousedown', function(e) {
+                    const target = e.target;
+                    if (exportMenu.classList.contains('show') || exportMenu.style.display === 'block') {
+                        if (!exportMenu.contains(target) && target !== exportBtn) {
+                            exportMenu.classList.remove('show');
+                            exportMenu.style.display = 'none';
+                        }
+                    }
+                });
+
+                exportMenu.querySelectorAll('.dropdown-item').forEach(function(item) {
+                    item.addEventListener('mouseover', function() { this.style.background = '#f3f4f6'; });
+                    item.addEventListener('mouseout', function() { this.style.background = 'none'; });
+                    item.addEventListener('click', function() { exportMenu.classList.remove('show'); exportMenu.style.display = 'none'; });
+                });
+            }
+
+            // Global export function
+            window.downloadExport = function(format) {
+                var exportMenuEl = document.getElementById('exportDropdownMenu');
+                if (exportMenuEl) { exportMenuEl.classList.remove('show'); exportMenuEl.style.display = 'none'; }
+                let url = new URL(window.location.origin + '/Head/cases/export');
+                url.searchParams.set('format', format);
+                // Preserve search and filters if present
+                const searchVal = document.getElementById('case-search-input')?.value;
+                if (searchVal) url.searchParams.set('search', searchVal);
+                const activeFilter = document.querySelector('.filters .a-nav.active');
+                if (activeFilter && activeFilter.dataset.filter) {
+                    const severity = activeFilter.dataset.filter;
+                    if (severity && severity !== 'all') url.searchParams.set('filter_severity', severity);
+                }
+                // Trigger browser download via an anchor click (avoids extra fetch handling)
+                const a = document.createElement('a');
+                a.href = url.toString();
+                a.style.display = 'none';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+            };
+
+            // AJAX pagination: intercept clicks on pagination links
+            $(document).on('click', '#cases-pagination .pagination a', function(e) {
+                e.preventDefault();
+                var href = $(this).attr('href');
+                if (!href) return;
+
+                // Build params to preserve filters/search/level
+                var params = {};
+                var searchVal = $('#case-search-input').val();
+                if (searchVal) params.search = searchVal;
+                var activeFilter = document.querySelector('.filters .a-nav.active');
+                if (activeFilter && activeFilter.dataset.filter && activeFilter.dataset.filter !== 'all') {
+                    params.filter_severity = activeFilter.dataset.filter;
+                }
+                var level = $('.level-option.active').data('level');
+                if (level) params.level = level;
+
+                // merge query params from href (page parameter)
+                var url = new URL(href, window.location.origin);
+                Object.keys(params).forEach(function(k){ url.searchParams.set(k, params[k]); });
+
+                $.ajax({
+                    url: url.toString(),
+                    type: 'GET',
+                    success: function(response) {
+                        var html = $(response).find('#cases-list').html();
+                        $('#cases-list').html(html);
+                        var pag = $(response).find('#cases-pagination').html();
+                        $('#cases-pagination').html(pag);
+                        // scroll to top of list for better UX
+                        $('html, body').animate({ scrollTop: $('#cases-list').offset().top - 80 }, 200);
+                    },
+                    error: function() {
+                        createToast('error', 'Failed to load page');
+                    }
+                });
+            });
+
         });
     </script>
 <?php $__env->stopSection(); ?>

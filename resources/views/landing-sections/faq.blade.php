@@ -1,18 +1,28 @@
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const faqItems = document.querySelectorAll('.faq-item');
-        faqItems.forEach(item => {
-            const question = item.querySelector('.question');
-            question.addEventListener('click', function() {
-                // Accordion: close others
-                faqItems.forEach(i => {
-                    if (i !== item) i.classList.remove('active');
-                });
-                item.classList.toggle('active');
+document.addEventListener('DOMContentLoaded', function() {
+    const faqItems = document.querySelectorAll('.faq-item');
+    faqItems.forEach(item => {
+        const question = item.querySelector('.question');
+        const icon = item.querySelector('.plus-btn i');
+
+        question.addEventListener('click', function() {
+            faqItems.forEach(i => {
+                if (i !== item) {
+                    i.classList.remove('active');
+                    i.querySelector('.plus-btn i').className = 'fi fi-br-plus';
+                }
             });
+
+            item.classList.toggle('active');
+            icon.className = item.classList.contains('active') 
+                ? 'fi fi-br-angle-up'
+                : 'fi fi-br-plus';
         });
     });
+});
+
 </script>
+
 <section class="faq-section" id="faq">
     <div class="content">
         <h2>Frequently Asked Questions</h2>
@@ -28,10 +38,8 @@
                     </div>
                 </div>
                 <div class="answer">
-                    <p>You must login in the SGRMS portal. Then you can click the "Request Appointment" button under any
-                        counselor's profile. Choose your
-                        preferred
-                        date and time, and wait for confirmation.
+                    <p> You must log in to the SGRMS portal. Navigate to "Appointments," request a counseling session, fill in the 
+                        necessary information, and then you’re done — just wait for confirmation.
                     </p>
                 </div>
             </div>
