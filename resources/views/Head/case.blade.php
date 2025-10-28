@@ -34,21 +34,6 @@
                                 <button type="submit" style="display:none"></button>
                             </form>
                         </div>
-
-                        <!-- Filter Button with Dropdown -->
-                        <div class="filter-dropdown" style="position:relative; display:inline-block;">
-                            <button class="toggle-btn" id="toggle-view-btn" type="button">
-                                <i class="fi fi-br-bars-filter" id="toggle-icon"></i>
-                            </button>
-                            <div id="level-menu" class="level-menu">
-                                <button class="level-option" data-level="" type="button">All Levels</button>
-                                <button class="level-option" data-level="senior_high" type="button">Senior High School
-                                </button>
-                                <button class="level-option" data-level="high_school" type="button">High School</button>
-                                <button class="level-option" data-level="elementary" type="button">Elementary</button>
-                                <button class="level-option" data-level="kinder" type="button">Kinder</button>
-                            </div>
-                        </div>
                         <div class="dropdown">
                             <button class="export-btn toggle-btn" id="exportDropdownBtn">
                                 <i class="fi fi-rr-file-download"></i>
@@ -77,7 +62,7 @@
                 <div id="cases-list">
                     <div class="table">
                         @forelse($cases as $case)
-                            <div class="table-card">
+                            <div class="table-card" data-id="{{ $case->case_id }}">
                                 <div class="table-col title">{{ $case->case_id }}</div>
                                 <div class="table-col category">{{ $case->caseType->type_name ?? 'N/A' }}</div>
                                 <div class="table-col">{{ $case->severity }}</div>
@@ -89,9 +74,9 @@
                                 </div>
                                 <div class="table-col date">{{ $case->filed_date }}</div>
                                 <div class="table-col actions" style="display:flex; gap:8px;">
-                                    <button type="button" class="view-btn" data-bs-toggle="modal"
+                                    <button type="button" class="view-btn" data-sid="{{ $case->case_id }}" data-bs-toggle="modal"
                                         data-bs-target="#viewCaseModal{{ $case->case_id }}"><i class='bx bx-show'></i></button>
-                                    <button type="button" class="edit-btn" data-bs-toggle="modal"
+                                    <button type="button" class="edit-btn" data-sid="{{ $case->case_id }}" data-bs-toggle="modal"
                                         data-bs-target="#editCaseModal{{ $case->case_id }}"><i class='bx bx-edit'></i></button>
                                     <button type="button" class="archive-btn" onclick="openArchiveCaseModal({{ $case->case_id }}, '{{ addslashes($case->caseType->type_name ?? 'Case') }}')"><i class='bx bx-archive'></i></button>
                                 </div>
@@ -111,7 +96,9 @@
             </div>
         </div>
     </section>
-    @include('Head.Modal.caseModal')
+    <div id="case-modals">
+        @include('Head.Modal.caseModal')
+    </div>
     <script>
         // Archive case modal logic: uses relative route and AJAX POST to avoid hardcoded host
         (function(){
@@ -141,10 +128,11 @@
 
                 if (confirmBtn) confirmBtn.addEventListener('click', function(){
                     if (!currentArchiveCaseId) return closeArchiveModal();
-                    // Build relative URL using route helper output base path
-                    const url = new URL(window.location.origin + '{{ url("/Head/cases") }}');
-                    // send PUT to /Head/cases/{id}/archive or use named route if available
-                    const archiveUrl = `${url.origin}${url.pathname}/${currentArchiveCaseId}/archive`;
+                    const archiveUrl = '{{ url("/Head/cases") }}' + '/' + currentArchiveCaseId + '/archive';
+
+                    // Disable confirm button and show loading state
+                    confirmBtn.disabled = true; confirmBtn.textContent = 'Archiving...';
+                    console.log('Archiving case', currentArchiveCaseId, 'URL:', archiveUrl);
 
                     fetch(archiveUrl, {
                         method: 'PUT',
@@ -157,20 +145,25 @@
                     })
                     .then(async res => {
                         const text = await res.text();
+                        console.log('Archive response text:', text);
                         let data = {};
-                        try { data = JSON.parse(text); } catch(e) { /* ignore */ }
+                        try { data = JSON.parse(text); } catch(e) { console.warn('Failed to parse JSON from archive response'); }
                         if (res.ok) {
                             createToast('success', (data.message || 'Case archived'));
                             // refresh list via AJAX same as search handler
                             $('#case-search-input').trigger('input');
                             closeArchiveModal();
                         } else {
+                            console.error('Archive failed', data);
                             createToast('error', (data.message || 'Failed to archive case'));
                         }
                     })
                     .catch(err => {
                         console.error('Archive error', err);
                         createToast('error', 'Failed to archive case');
+                    })
+                    .finally(() => {
+                        confirmBtn.disabled = false; confirmBtn.textContent = 'Yes, Archive';
                     });
                 });
 
@@ -183,6 +176,128 @@
                 });
             });
         })();
+
+        // Helper: safely replace the #case-modals content by disposing existing Bootstrap modal instances
+        function replaceCaseModals(html) {
+            try {
+                // Dispose any existing Bootstrap Modal instances inside the container
+                document.querySelectorAll('#case-modals .modal').forEach(function(modalEl){
+                    try {
+                        var inst = bootstrap.Modal.getInstance(modalEl);
+                        if (inst && typeof inst.dispose === 'function') inst.dispose();
+                    } catch(e) {
+                        // ignore
+                    }
+                });
+            } catch (e) {
+                // bootstrap may be undefined; ignore
+            }
+            // Remove leftover backdrops
+            document.querySelectorAll('.modal-backdrop').forEach(function(b){ b.remove(); });
+            // Replace html
+            var container = document.getElementById('case-modals');
+            if (container) container.innerHTML = html || '';
+            // initialize behaviors for any newly inserted modals
+            try { initCaseModals(container); } catch(e) { console.warn('initCaseModals error', e); }
+        }
+
+                // Initialize modal behaviors for newly inserted modals (outside-click close, student tags, view-more)
+                function initCaseModals(root) {
+                    root = root || document.getElementById('case-modals');
+                    if (!root) return;
+                    root.querySelectorAll('.modal.case-modal').forEach(function(modal){
+                        if (modal.dataset.initialized) return;
+                        modal.dataset.initialized = '1';
+                        // sanitize modal internals: remove data-bs attributes to prevent Bootstrap data-api from acting on removed nodes
+                        try {
+                            modal.querySelectorAll('[data-bs-toggle], [data-bs-target], [data-bs-dismiss]').forEach(function(el){ el.removeAttribute('data-bs-toggle'); el.removeAttribute('data-bs-target'); el.removeAttribute('data-bs-dismiss'); });
+                        } catch(e){}
+
+                        // clicking outside closes modal (Bootstrap-compatible)
+                        modal.addEventListener('mousedown', function(e){
+                            const content = modal.querySelector('.modal-content');
+                            if (content && !content.contains(e.target)) {
+                                try { bootstrap.Modal.getInstance(modal)?.hide(); } catch(err) { modal.style.display = 'none'; }
+                            }
+                        });
+
+                        // Ensure any 'X' / close buttons still work even after we removed data-bs-* attributes
+                        try {
+                            modal.querySelectorAll('.add-modal-close, [data-role="modal-close"]').forEach(function(closeBtn){
+                                closeBtn.removeEventListener('click', closeBtn._caseCloseHandler);
+                                closeBtn._caseCloseHandler = function(ev){ ev.preventDefault(); ev.stopPropagation(); try { bootstrap.Modal.getInstance(modal)?.hide(); } catch(e) { modal.style.display = 'none'; } };
+                                closeBtn.addEventListener('click', closeBtn._caseCloseHandler);
+                            });
+                        } catch(e) {}
+
+                        // Render compact view tags for view modals
+                        if (modal.id && modal.id.indexOf('viewCaseModal') === 0) {
+                            var caseId = modal.id.replace('viewCaseModal','');
+                            var $container = modal.querySelector('#view-student-tag-input'+caseId) || modal.querySelector('[id^="view-student-tag-input"]');
+                            if ($container) {
+                                // collect existing tags if present
+                                var existing = Array.from($container.querySelectorAll('.student-tag')).map(function(s){ return { id: s.dataset && s.dataset.id ? s.dataset.id : '', text: s.textContent.trim() }; });
+                                if (existing.length === 0) {
+                                    // try to build from hidden input if present
+                                    var hidden = document.getElementById('view_involved_students'+caseId);
+                                    if (hidden && hidden.value) {
+                                        existing = hidden.value.split(',').map(function(id){ id = id.trim(); return id ? { id: id, text: id } : null; }).filter(Boolean);
+                                    }
+                                }
+                                // render compact
+                                $container.innerHTML = '';
+                                // ensure nothing inside modal is focused (prevents aria-hidden focus issue)
+                                try { if (modal.contains(document.activeElement)) document.activeElement.blur(); } catch(_) {}
+                                if (!existing || existing.length === 0) {
+                                    var span = document.createElement('span'); span.className = 'student-tag'; span.textContent = 'No students'; $container.appendChild(span);
+                                } else {
+                                    var first = document.createElement('span'); first.className = 'student-tag'; first.textContent = existing[0].text; $container.appendChild(first);
+                                    if (existing.length > 1) {
+                                        var more = document.createElement('span'); more.className = 'student-more'; more.textContent = '+' + (existing.length - 1) + ' view more';
+                                        $container.appendChild(more);
+                                        more.addEventListener('click', function(ev){
+                                            ev.stopPropagation();
+                                            $container.querySelectorAll('.student-more-list').forEach(function(n){ n.remove(); });
+                                            var list = document.createElement('div'); list.className = 'student-more-list';
+                                            existing.slice(1).forEach(function(s){ var item = document.createElement('div'); item.className='student-more-item'; item.textContent = s.text; list.appendChild(item); });
+                                            $container.appendChild(list);
+                                            // close on outside
+                                            var listener = function(evt){ if (!$container.contains(evt.target)) { list.remove(); document.removeEventListener('click', listener); } };
+                                            document.addEventListener('click', listener);
+                                        });
+                                    }
+                                }
+                            }
+                        }
+
+                        // Render edit tags for edit modals
+                        if (modal.id && modal.id.indexOf('editCaseModal') === 0) {
+                            var caseId = modal.id.replace('editCaseModal','');
+                            var tagInput = modal.querySelector('#edit-student-tag-input'+caseId) || modal.querySelector('[id^="edit-student-tag-input"]');
+                            var inputEl = modal.querySelector('#edit_student_search'+caseId) || modal.querySelector('input[id^="edit_student_search"]');
+                            var hidden = modal.querySelector('#edit_involved_students'+caseId) || modal.querySelector('input[id^="edit_involved_students"]');
+                            if (tagInput && inputEl) {
+                                // If server-rendered tags (with names) already exist, keep them and sync hidden input.
+                                var existingTags = tagInput.querySelectorAll('.student-tag');
+                                if (!existingTags || existingTags.length === 0) {
+                                    // build tags from hidden ids (fallback)
+                                    var ids = [];
+                                    if (hidden && hidden.value) ids = hidden.value.split(',').map(function(s){ return s.trim(); }).filter(Boolean);
+                                    ids.forEach(function(sid){
+                                        var span = document.createElement('span'); span.className = 'student-tag'; span.dataset.id = sid; span.textContent = sid;
+                                        var rem = document.createElement('span'); rem.className = 'remove-tag'; rem.title = 'Remove'; rem.innerHTML = '&times;'; span.appendChild(rem);
+                                        tagInput.insertBefore(span, inputEl);
+                                    });
+                                    if (hidden) hidden.value = ids.join(',');
+                                } else {
+                                    // preserve server-rendered tags (which include names) and ensure hidden input matches their data-ids
+                                    var ids = Array.from(existingTags).map(function(s){ return (s.dataset && s.dataset.id) ? s.dataset.id : s.textContent.trim(); });
+                                    if (hidden) hidden.value = ids.join(',');
+                                }
+                            }
+                        }
+                    });
+                }
 
         $(document).ready(function() {
 
@@ -197,9 +312,14 @@
                         search: query,
                         level: level
                     },
-                    success: function(response) {
-                        let html = $(response).find('#cases-list').html();
-                        $('#cases-list').html(html);
+                        success: function(response) {
+                            let html = $(response).find('#cases-list').html();
+                            $('#cases-list').html(html);
+                            // Also replace the modals block so View/Edit modals for the current page exist
+                            let modalsHtml = $(response).find('#case-modals').html();
+                            if (modalsHtml !== undefined) {
+                                replaceCaseModals(modalsHtml);
+                            }
                     }
                 });
             });
@@ -223,9 +343,13 @@
                     url: "{{ route('Head.cases.index') }}",
                     type: "GET",
                     data: { search: search, level: level },
-                    success: function(response) {
-                        let html = $(response).find('#cases-list').html();
-                        $('#cases-list').html(html);
+                        success: function(response) {
+                            let html = $(response).find('#cases-list').html();
+                            $('#cases-list').html(html);
+                            let modalsHtml = $(response).find('#case-modals').html();
+                            if (modalsHtml !== undefined) {
+                                replaceCaseModals(modalsHtml);
+                            }
                     }
                 });
             });
@@ -245,9 +369,13 @@
                     url: "{{ route('Head.cases.index') }}",
                     type: "GET",
                     data: { search: search, filter_severity: severity === 'all' ? '' : severity },
-                    success: function(response) {
-                        let html = $(response).find('#cases-list').html();
-                        $('#cases-list').html(html);
+                        success: function(response) {
+                            let html = $(response).find('#cases-list').html();
+                            $('#cases-list').html(html);
+                            let modalsHtml = $(response).find('#case-modals').html();
+                            if (modalsHtml !== undefined) {
+                                replaceCaseModals(modalsHtml);
+                            }
                     }
                 });
             });
@@ -340,6 +468,11 @@
                         $('#cases-list').html(html);
                         var pag = $(response).find('#cases-pagination').html();
                         $('#cases-pagination').html(pag);
+                            // also update per-row modals
+                            let modalsHtml = $(response).find('#case-modals').html();
+                            if (modalsHtml !== undefined) {
+                                replaceCaseModals(modalsHtml);
+                            }
                         // scroll to top of list for better UX
                         $('html, body').animate({ scrollTop: $('#cases-list').offset().top - 80 }, 200);
                     },
@@ -348,6 +481,103 @@
                     }
                 });
             });
+
+            // Delegated handler: show modals programmatically to avoid Bootstrap data-api errors
+            // This prevents Bootstrap from trying to use removed/stale instances/backdrops
+                    // Delegated click handlers: prefer app-level openers so modals work after pagination/ajax
+                    // Use explicit functions so other parts of the app can open modals reliably.
+                    window.openViewCaseModal = function(caseId) {
+                        if (!caseId) return;
+                        var modalId = '#viewCaseModal' + caseId;
+                        var el = document.querySelector(modalId);
+                        if (el) {
+                            try {
+                                // ensure no lingering backdrop
+                                document.querySelectorAll('.modal-backdrop').forEach(b => b.remove());
+                                // programmatically show
+                                if (window.bootstrap && window.bootstrap.Modal) {
+                                    var inst = new bootstrap.Modal(el);
+                                    inst.show();
+                                } else {
+                                    // fallback: just set display block
+                                    el.style.display = 'block';
+                                }
+                            } catch (err) { console.warn('openViewCaseModal show error', err); }
+                            return;
+                        }
+
+                        // modal not present (likely after ajax pagination) -> fetch single-modal HTML and insert
+                        var url = window.location.origin + '/Head/cases/' + caseId + '/modal';
+                        fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+                            .then(r => r.text())
+                            .then(html => {
+                                // replace entire modals block so add/edit/view modals are consistent
+                                replaceCaseModals(html);
+                                // now show target
+                                var el2 = document.querySelector(modalId);
+                                if (el2 && window.bootstrap && window.bootstrap.Modal) {
+                                    var inst2 = new bootstrap.Modal(el2);
+                                    inst2.show();
+                                }
+                            }).catch(err => console.warn('fetch modal failed', err));
+                    };
+
+                    window.openAddEditModal = function(action, payload) {
+                        // action: 'add' | 'edit'
+                        // payload: if edit, may be caseId or object { caseId }
+                        if (action === 'add') {
+                            var el = document.getElementById('addCaseModal');
+                            if (!el) return;
+                            if (window.bootstrap && window.bootstrap.Modal) {
+                                new bootstrap.Modal(el).show();
+                            } else { el.style.display = 'block'; }
+                            return;
+                        }
+
+                        var caseId = (typeof payload === 'object' && payload.s_id) ? payload.s_id : payload;
+                        if (!caseId) return;
+                        var modalId = '#editCaseModal' + caseId;
+                        var el = document.querySelector(modalId);
+                        if (el) {
+                            if (window.bootstrap && window.bootstrap.Modal) {
+                                new bootstrap.Modal(el).show();
+                            } else { el.style.display = 'block'; }
+                            return;
+                        }
+
+                        var url = window.location.origin + '/Head/cases/' + caseId + '/modal';
+                        fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+                            .then(r => r.text())
+                            .then(html => {
+                                replaceCaseModals(html);
+                                var el2 = document.querySelector(modalId);
+                                if (el2 && window.bootstrap && window.bootstrap.Modal) new bootstrap.Modal(el2).show();
+                            }).catch(err => console.warn('fetch modal failed', err));
+                    };
+
+                    // Delegate clicks from table cards to the app-level openers so pagination works
+                    $(document).on('click', '.view-btn', function(e){
+                        e.preventDefault(); e.stopImmediatePropagation();
+                        var caseId = $(this).data('sid') || $(this).attr('data-sid') || $(this).closest('[data-id]').data('id');
+                        if (!caseId) {
+                            // try to read from onclick attribute (legacy)
+                            var on = $(this).attr('onclick') || '';
+                            var m = on.match(/openViewStudentModal\(['"]([^'"\)]+)['"]\)/);
+                            if (m) caseId = m[1];
+                        }
+                        if (caseId) window.openViewCaseModal(caseId);
+                    });
+
+                    $(document).on('click', '.edit-btn', function(e){
+                        e.preventDefault(); e.stopImmediatePropagation();
+                        var caseId = $(this).data('sid') || $(this).attr('data-sid') || $(this).closest('[data-id]').data('id');
+                        if (!caseId) {
+                            var on = $(this).attr('onclick') || '';
+                            var m = on.match(/openAddEditModal\(['"]edit['"],\s*\{\s*s_id:\s*'([^'"\}]+)'\s*\}\)/);
+                            if (m) caseId = m[1];
+                        }
+                        if (caseId) window.openAddEditModal('edit', caseId);
+                    });
 
         });
     </script>

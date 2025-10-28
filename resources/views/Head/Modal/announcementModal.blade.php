@@ -27,7 +27,10 @@
 
             <div class="form-group">
                 <label for="link">External Link (optional)</label>
-                <input type="url" id="link" name="link">
+                <div id="link-input-group" class="link-group">
+                    <input type="url" id="link" name="link" placeholder="https://example.com">
+                    <a id="link-view" href="#" target="_blank" class="announcement-btn-link" style="display:none;">Open Link</a>
+                </div>
             </div>
 
             <div class="form-group">
@@ -69,15 +72,16 @@
 
             <div class="form-group">
                 <label for="image" class="custom-file-label">Upload Image</label>
-                <label class="custom-upload-btn" for="image">
-                    <i class="fas fa-image"></i> Choose Image
-                </label>
-                <input type="file" id="image" name="image" accept="image/*" style="display:none;">
-                <span id="file-chosen" class="file-chosen-text">No file chosen</span>
+                <div class="file-group">
+                    <label class="custom-upload-btn" for="image">
+                        <i class="fas fa-image"></i> Choose Image
+                    </label>
+                    <input type="file" id="image" name="image" accept="image/*" style="display:none;">
+                    <span id="file-chosen" class="file-chosen-text">No file chosen</span>
+                </div>
                 <div id="image-preview-wrapper" style="display:none;">
                     <img id="image-preview" src="" alt="Image Preview">
-                    <button type="button" id="remove-image-btn" class="btn cancel" style="margin-top:8px;">Remove Image
-                    </button>
+                    <button type="button" id="remove-image-btn" class="btn cancel" style="margin-top:8px;">Remove Image</button>
                 </div>
             </div>
 
@@ -94,36 +98,28 @@
 
             <!-- Modal Footer -->
             <div class="modal-footer">
-                <button type="button" class="btn cancel" onclick="closeModal()">Cancel</button>
+                <button type="button" class="btn cancel" id="modalCancelBtn" onclick="closeModal()">Cancel</button>
                 <button type="submit" class="btn save" id="saveBtn">Post</button>
             </div>
         </form>
     </div>
 </div>
-
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
         const categorySelect = document.getElementById('category');
         const eventFields = document.getElementById('event-fields');
 
         function toggleEventFields() {
-            if (categorySelect.value === 'Event') {
-                eventFields.style.display = 'block';
-                document.getElementById('start_date').required = true;
-                document.getElementById('start_time').required = true;
-                document.getElementById('end_date').required = true;
-                document.getElementById('end_time').required = true;
-            } else {
-                eventFields.style.display = 'none';
-                document.getElementById('start_date').required = false;
-                document.getElementById('start_time').required = false;
-                document.getElementById('end_date').required = false;
-                document.getElementById('end_time').required = false;
-            }
+            const isEvent = categorySelect.value === 'Event';
+            eventFields.style.display = isEvent ? 'block' : 'none';
+            document.getElementById('start_date').required = isEvent;
+            document.getElementById('start_time').required = isEvent;
+            document.getElementById('end_date').required = isEvent;
+            document.getElementById('end_time').required = isEvent;
         }
 
         categorySelect.addEventListener('change', toggleEventFields);
-        toggleEventFields(); // initialize on page load
+        toggleEventFields();
 
         const imageInput = document.getElementById('image');
         const previewWrapper = document.getElementById('image-preview-wrapper');
@@ -132,26 +128,28 @@
         const label = document.querySelector('.custom-upload-btn');
         const fileChosen = document.getElementById('file-chosen');
 
-        imageInput.addEventListener('change', function(){
+        imageInput.addEventListener('change', function () {
             const file = this.files[0];
             if (file) {
                 const reader = new FileReader();
-                reader.onload = function(e) {
+                reader.onload = function (e) {
                     previewImg.src = e.target.result;
                     previewWrapper.style.display = 'flex';
                     label.style.display = 'none';
                     fileChosen.style.display = 'none';
-                }
+                };
                 reader.readAsDataURL(file);
+                fileChosen.textContent = file.name;
             } else {
                 previewImg.src = '';
                 previewWrapper.style.display = 'none';
                 label.style.display = 'inline-block';
                 fileChosen.style.display = 'inline-block';
+                fileChosen.textContent = 'No file chosen';
             }
         });
 
-        removeBtn.addEventListener('click', function() {
+        removeBtn.addEventListener('click', function () {
             imageInput.value = '';
             previewImg.src = '';
             previewWrapper.style.display = 'none';
@@ -160,7 +158,7 @@
         });
     });
 
-    document.getElementById('announcementForm').addEventListener('submit', function(e) {
+    document.getElementById('announcementForm').addEventListener('submit', function (e) {
         const category = document.getElementById('category').value;
         if (category === 'Event') {
             const startDate = document.getElementById('start_date').value;
@@ -174,11 +172,9 @@
                 return;
             }
 
-            // Combine into ISO datetime strings for backend
             const startDatetime = `${startDate} ${startTime}`;
             const endDatetime = `${endDate} ${endTime}`;
 
-            // Add hidden inputs for backend processing
             let hiddenStart = document.createElement('input');
             hiddenStart.type = 'hidden';
             hiddenStart.name = 'start_datetime';
@@ -195,67 +191,92 @@
     });
 
     function openAnnouncementModal(id, mode) {
-        // Find the clicked element
         const btn = document.querySelector(`[data-id='${id}'][onclick*='${mode}']`);
         if (!btn) return;
 
-        // Get modal and form fields
         const modal = document.getElementById('announcementModal');
         const form = document.getElementById('announcementForm');
         const formMethod = document.getElementById('form-method');
         const announcementIdInput = document.getElementById('announcement_id');
+        const linkField = document.querySelector('.form-group label[for="link"]').parentElement;
+        const imageGroup = document.querySelector('.form-group label[for="image"]').parentElement;
+        const modalCancelBtn = document.getElementById('modalCancelBtn');
+        const saveBtn = document.getElementById('saveBtn');
+        const modalTitle = document.getElementById('modalTitle');
+
+        imageGroup.style.display = 'block';
+        linkField.style.display = 'block';
+        modalCancelBtn.style.display = 'inline-block';
 
         if (mode === 'edit') {
             form.action = '/Head/announcements/' + id;
             formMethod.value = 'PUT';
             announcementIdInput.value = id;
-            // ...enable fields...
+            modalTitle.textContent = 'Edit Announcement';
+            saveBtn.textContent = 'Update';
         } else if (mode === 'view') {
             form.action = '{{ route('Head.announcements.store') }}';
             formMethod.value = 'POST';
             announcementIdInput.value = '';
-            // ...disable fields...
+            modalTitle.textContent = 'View Announcement';
+            saveBtn.style.display = 'none';
+            modalCancelBtn.style.display = 'none';
+
+            if (!btn.dataset.image || btn.dataset.image === 'default.png' || btn.dataset.image === '') {
+                imageGroup.style.display = 'none';
+            }
+
+            const linkInputGroup = document.getElementById('link-input-group');
+            const linkView = document.getElementById('link-view');
+            if (btn.dataset.link && btn.dataset.link.trim() !== '') {
+                linkInputGroup.querySelector('input').style.display = 'none';
+                linkView.style.display = 'inline-block';
+                linkView.href = btn.dataset.link;
+            } else {
+                linkField.style.display = 'none';
+            }
         } else {
-            // Add mode
             form.action = '{{ route('Head.announcements.store') }}';
             formMethod.value = 'POST';
             announcementIdInput.value = '';
-            // ...enable fields...
+            modalTitle.textContent = 'Add Announcement';
+            saveBtn.textContent = 'Post';
+            saveBtn.style.display = 'inline-block';
         }
 
-        // Fill fields
         form.title.value = btn.dataset.title || '';
         form.description.value = btn.dataset.description || '';
         form.link.value = btn.dataset.link || '';
+        const linkView = document.getElementById('link-view');
+        if (linkView) { linkView.style.display = 'none'; linkView.href = '#'; }
+        const linkInput = document.querySelector('#link-input-group input');
+        if (linkInput) linkInput.style.display = 'inline-block';
         form.category.value = btn.dataset.category || 'Announcement';
         form.status.value = btn.dataset.status || 'active';
 
-        // Handle event fields
         if (btn.dataset.category === 'Event') {
             document.getElementById('event-fields').style.display = 'block';
             if (btn.dataset.start_datetime) {
                 const [startDate, startTime] = btn.dataset.start_datetime.split(' ');
                 form.start_date.value = startDate;
-                form.start_time.value = startTime ? startTime.substring(0,5) : '';
+                form.start_time.value = startTime ? startTime.substring(0, 5) : '';
             }
             if (btn.dataset.end_datetime) {
                 const [endDate, endTime] = btn.dataset.end_datetime.split(' ');
                 form.end_date.value = endDate;
-                form.end_time.value = endTime ? endTime.substring(0,5) : '';
+                form.end_time.value = endTime ? endTime.substring(0, 5) : '';
             }
         } else {
             document.getElementById('event-fields').style.display = 'none';
-            form.start_date.value = '';
-            form.start_time.value = '';
-            form.end_date.value = '';
-            form.end_time.value = '';
         }
 
-        // Image preview
         const previewWrapper = document.getElementById('image-preview-wrapper');
         const previewImg = document.getElementById('image-preview');
         const label = document.querySelector('.custom-upload-btn');
         const fileChosen = document.getElementById('file-chosen');
+        const removeBtn = document.getElementById('remove-image-btn');
+        const uploadLabel = document.querySelector('label[for="image"]');
+
         if (btn.dataset.image && btn.dataset.image !== 'default.png') {
             previewImg.src = '/images/announcements/' + btn.dataset.image;
             previewWrapper.style.display = 'flex';
@@ -268,24 +289,46 @@
             fileChosen.style.display = 'inline-block';
         }
 
-        // Set modal mode
         if (mode === 'view') {
-            modalTitle.textContent = 'View Announcement';
-            Array.from(form.elements).forEach(el => el.disabled = true);
-            document.getElementById('saveBtn').style.display = 'none';
-            document.getElementById('remove-image-btn').style.display = 'none';
+            if (uploadLabel) uploadLabel.textContent = 'Photo Uploaded';
+            if (removeBtn) removeBtn.style.display = 'none';
         } else {
-            modalTitle.textContent = 'Edit Announcement';
-            Array.from(form.elements).forEach(el => el.disabled = false);
-            document.getElementById('saveBtn').style.display = 'inline-block';
-            document.getElementById('remove-image-btn').style.display = 'inline-block';
+            if (uploadLabel) uploadLabel.textContent = 'Upload Image';
+            if (removeBtn) removeBtn.style.display = 'inline-block';
         }
 
+        Array.from(form.elements).forEach(el => el.disabled = (mode === 'view'));
         modal.style.display = 'block';
     }
 
     function closeModal() {
-        document.getElementById('announcementModal').style.display = 'none';
-        // Optionally reset form here
+        const modal = document.getElementById('announcementModal');
+        const form = document.getElementById('announcementForm');
+        const saveBtn = document.getElementById('saveBtn');
+        const modalCancelBtn = document.getElementById('modalCancelBtn');
+        const previewWrapper = document.getElementById('image-preview-wrapper');
+        const label = document.querySelector('.custom-upload-btn');
+        const fileChosen = document.getElementById('file-chosen');
+        const linkInputGroup = document.getElementById('link-input-group');
+        const linkView = document.getElementById('link-view');
+        const uploadLabel = document.querySelector('label[for="image"]');
+        const removeBtn = document.getElementById('remove-image-btn');
+
+        form.reset();
+        previewWrapper.style.display = 'none';
+        label.style.display = 'flex';
+        fileChosen.style.display = 'inline-block';
+        fileChosen.textContent = 'No file chosen';
+        if (uploadLabel) uploadLabel.textContent = 'Upload Image';
+        if (removeBtn) removeBtn.style.display = 'inline-block';
+        if (linkInputGroup) linkInputGroup.querySelector('input').style.display = 'inline-block';
+        if (linkView) {
+            linkView.style.display = 'none';
+            linkView.href = '#';
+        }
+        saveBtn.textContent = 'Post';
+        saveBtn.style.display = 'inline-block';
+        modalCancelBtn.style.display = 'inline-block';
+        modal.style.display = 'none';
     }
 </script>

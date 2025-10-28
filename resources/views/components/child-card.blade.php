@@ -13,5 +13,5 @@
        
     </div>
 @empty
-    <p>No children found.</p>
+    
 @endforelse

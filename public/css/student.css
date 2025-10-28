@@ -525,7 +525,7 @@
     width: 250px;             
     text-align: center;
     padding: 10px 0;
-    background: #2563eb;
+    background: #003060;
     color: #fff;
     font-weight: 600;
     border-radius: 6px;
@@ -534,7 +534,7 @@
 }
 
 .custom-upload-btn:hover {
-    background: #1e40af;
+    background: #0358ad;
 }
 
 

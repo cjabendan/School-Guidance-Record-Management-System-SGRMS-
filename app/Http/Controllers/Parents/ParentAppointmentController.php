@@ -11,6 +11,8 @@ use Illuminate\Support\Facades\Schema;
 
 class ParentAppointmentController extends Controller
 {
+
+
     public function index(Request $request)
     {
         $relations = ['students', 'counselor', 'requester', 'type'];
@@ -157,13 +159,25 @@ class ParentAppointmentController extends Controller
     public function cancel(Request $request, $id)
     {
         $appointment = Appointments::findOrFail($id);
-        if (strtolower($appointment->status) !== 'pending') {
+        $userId = auth()->id();
+
+        // Verify this parent is the requester of the appointment
+        if ($appointment->requester_id !== $userId) {
             if ($request->ajax() || $request->wantsJson()) {
-                return response()->json(['success' => false, 'message' => 'Only pending appointments can be cancelled.'], 400);
+                return response()->json(['success' => false, 'message' => 'Unauthorized to cancel this appointment'], 403);
             }
-            return redirect()->back()->withErrors(['status' => 'Only pending appointments can be cancelled.']);
+            return redirect()->back()->with('error', 'Unauthorized to cancel this appointment');
         }
 
+        // Check if appointment is in a cancellable state
+        if (!in_array(strtolower($appointment->status), ['pending', 'approved'])) {
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json(['success' => false, 'message' => 'This appointment cannot be cancelled'], 400);
+            }
+            return redirect()->back()->with('error', 'This appointment cannot be cancelled');
+        }
+
+        // Update status to cancelled
         $appointment->status = 'Cancelled';
         if (Schema::hasColumn($appointment->getTable(), 'cancelled_at')) {
             $appointment->cancelled_at = now();
@@ -174,7 +188,7 @@ class ParentAppointmentController extends Controller
             return response()->json(['success' => true, 'status' => 'Cancelled']);
         }
 
-        return redirect()->back()->with('success', 'Appointment cancelled successfully.');
+        return redirect()->back()->with('success', 'Appointment cancelled successfully');
     }
 }
 

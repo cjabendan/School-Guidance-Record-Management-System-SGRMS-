@@ -19,16 +19,30 @@ class CounselorAppointmentController extends Controller
         $query = Appointments::with($relations);
 
         // Apply filters if any (case-insensitive)
-        $statusFilter = $request->has('status') ? strtolower($request->status) : null;
+        $statusFilter = $request->has('status') ? strtolower(trim($request->status)) : null;
         if ($statusFilter && $statusFilter !== 'all') {
-            // When filtering for pending, include 'Rescheduled' since they're awaiting approval
-            if ($statusFilter === 'pending') {
-                $query->whereIn('status', ['Pending', 'Rescheduled']);
+            // Initial status filter
+            if ($statusFilter === 'approved') {
+                $query->where(function ($q) {
+                    $q->where('status', 'Approved')
+                      ->orWhere('status', 'Rescheduled');
+                });
             } else {
-                $query->whereRaw('LOWER(`status`) = ?', [$statusFilter]);
+                // For all other statuses including missed, use exact match with proper case
+                $statusMap = [
+                    'missed' => 'Missed',
+                    'pending' => 'Pending',
+                    'declined' => 'Declined',
+                    'cancelled' => 'Cancelled',
+                    'completed' => 'Completed'
+                ];
+                
+                if (isset($statusMap[$statusFilter])) {
+                    $query->where('status', $statusMap[$statusFilter]);
+                }
             }
 
-            // If filtering completed, optionally restrict by end_datetime if that column exists
+            // Additional completion date filter if needed
             if ($statusFilter === 'completed' && Schema::hasColumn((new Appointments)->getTable(), 'end_datetime')) {
                 $query->where('end_datetime', '>=', now());
             }
@@ -80,6 +94,55 @@ class CounselorAppointmentController extends Controller
         $children = \App\Models\Student::with('user')->get();
 
         return view('Counselor.appointments', compact('appointments', 'counselors', 'types', 'children'));
+    }
+
+    /**
+     * Move an appointment (drag/drop from calendar) and mark as Rescheduled
+     */
+    public function move(Request $request, $id)
+    {
+        $appointment = Appointments::findOrFail($id);
+
+        // Convert UTC/ISO input to Manila timezone
+        $utcDate = $request->input('appointment_datetime');
+        $manilaDate = \Carbon\Carbon::parse($utcDate)->setTimezone('Asia/Manila');
+
+        $requested = $manilaDate->copy();
+        $startWindow = $requested->copy()->subHour();
+        $endWindow = $requested->copy()->addHour();
+
+        // Check counselor conflict
+        $conflict = Appointments::where('counselor_id', $appointment->counselor_id)
+            ->whereDate('appointment_datetime', $requested->toDateString())
+            ->whereBetween('appointment_datetime', [$startWindow, $endWindow])
+            ->where('appointment_id', '!=', $appointment->appointment_id)
+            ->exists();
+
+        // Also check student conflicts
+        $studentIds = $appointment->students()->pluck('student_user_id')->toArray();
+        $studentConflict = false;
+        if (!empty($studentIds)) {
+            $studentConflict = Appointments::whereDate('appointment_datetime', $requested->toDateString())
+                ->whereBetween('appointment_datetime', [$startWindow, $endWindow])
+                ->whereHas('students', function($q) use ($studentIds) {
+                    $q->whereIn('student_user_id', $studentIds);
+                })
+                ->where('appointment_id', '!=', $appointment->appointment_id)
+                ->exists();
+        }
+
+        if ($conflict || $studentConflict) {
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json(['error' => 'this time is already taken by someone'], 422);
+            }
+            return redirect()->back()->with('error', 'this time is already taken by someone');
+        }
+
+        $appointment->appointment_datetime = $manilaDate;
+        $appointment->status = 'Rescheduled';
+        $appointment->save();
+
+        return response()->json(['success' => true, 'status' => 'Rescheduled']);
     }
 
     public function reschedule(Request $request, $id)
@@ -168,6 +231,8 @@ class CounselorAppointmentController extends Controller
         $appointment->appointment_type_id = $typeId;
         $appointment->reason = $request->reason;
         $appointment->appointment_datetime = $manilaDate;
+            // Automatically approve when counselor edits
+            $appointment->status = 'Rescheduled';
         $appointment->save();
 
         // Sync students
@@ -181,7 +246,7 @@ class CounselorAppointmentController extends Controller
         $start = $request->query('start');
         $end = $request->query('end');
 
-        $appointments = Appointments::where('status', 'Approved')
+        $appointments = Appointments::whereIn('status', ['Approved', 'Rescheduled'])
             ->where(function ($query) use ($start, $end) {
                 $query->where(function ($q) use ($start, $end) {
                     $q->whereNotNull('appointment_datetime')
@@ -270,16 +335,37 @@ class CounselorAppointmentController extends Controller
     }
 
     /**
+     * Mark an appointment as missed
+     */
+    public function markMissed(Request $request, $id)
+    {
+        $appointment = Appointments::findOrFail($id);
+        $appointment->status = 'Missed';
+        if (Schema::hasColumn($appointment->getTable(), 'missed_at')) {
+            $appointment->missed_at = now();
+        }
+        $appointment->save();
+
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json(['success' => true, 'status' => 'Missed']);
+        }
+
+        return redirect()->back()->with('success', 'Appointment marked as missed.');
+    }
+
+    /**
      * Cancel an appointment (Counselor)
      */
     public function cancel(Request $request, $id)
     {
         $appointment = Appointments::findOrFail($id);
-        if (strtolower($appointment->status) !== 'pending') {
+        // Allow cancelling for Pending, Approved, or Rescheduled
+        $cancellable = ['pending', 'approved', 'rescheduled'];
+        if (!in_array(strtolower($appointment->status), $cancellable)) {
             if ($request->ajax() || $request->wantsJson()) {
-                return response()->json(['success' => false, 'message' => 'Only pending appointments can be cancelled.'], 400);
+                return response()->json(['success' => false, 'message' => 'Only pending, approved, or rescheduled appointments can be cancelled.'], 400);
             }
-            return redirect()->back()->withErrors(['status' => 'Only pending appointments can be cancelled.']);
+            return redirect()->back()->withErrors(['status' => 'Only pending, approved, or rescheduled appointments can be cancelled.']);
         }
 
         $appointment->status = 'Cancelled';
@@ -343,7 +429,7 @@ class CounselorAppointmentController extends Controller
             'appointment_type_id' => $typeId,
             'reason' => $request->reason,
             'appointment_datetime' => $manilaDate,
-            'status' => 'Pending',
+            'status' => $request->counselor_id == auth()->id() ? 'Approved' : 'Pending',
             'requester_id' => auth()->id(),
         ]);
 

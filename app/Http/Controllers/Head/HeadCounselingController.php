@@ -10,7 +10,7 @@ class HeadCounselingController extends Controller
 {
     public function index()
     {
-        $counselings = CounselingNotes::with(['notes'])->get();
+        $counselings = CounselingNotes::with(['user'])->get();
         return view('Head.counseling', compact('counselings'));
     }
 

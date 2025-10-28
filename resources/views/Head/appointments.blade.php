@@ -29,7 +29,10 @@
                                 data-filter="cancelled">Cancelled</a>
                             <a href="#" class="a-nav {{ request('status') == 'completed' ? 'active' : '' }}"
                                 data-filter="completed">Complete</a>
+                            <a href="#" class="a-nav {{ request('status') == 'missed' ? 'active' : '' }}"
+                                data-filter="missed">Missed</a>
                         </li>
+                        
                     </div>
                     <a href="#" class="add-btn" onclick="openModal(); return false;">
                         <i class="fi fi-br-plus"></i>Create appointment
@@ -47,11 +50,23 @@
                             <button type="submit" style="display:none"></button>
                         </form>
                     </div>
+                    <div class="filters">
+                            <select id="counselor-filter">
+                                <option value="">All Counselors</option>
+                                @foreach($counselors as $counselor)
+                                    <option value="{{ $counselor->id }}" {{ (string)request('counselor_id') === (string)$counselor->id ? 'selected' : '' }}>
+                                        {{ $counselor->first_name }} {{ $counselor->last_name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
                     <button class="toggle-btn" id="toggle-view-btn">
                         <i class="fi fi-rr-table-layout" id="toggle-icon"></i>
                         <span id="toggle-label"></span>
                     </button>
                 </div>
+
+                
             </div>
             <div class="table-list" id="appointments-list">
                 <div class="table-header">
@@ -92,10 +107,27 @@
                 const toggleLabel = document.getElementById('toggle-label');
                 // filters container may not exist on all pages
                 const filtersContainer = document.querySelector('.table-filter .filters');
+                const counselorFilter = document.getElementById('counselor-filter');
                 let timeout = null;
                 let currentStatus = '{{ strtolower(request('status') ?? 'all') }}';
                 let calendar = null;
                 let isTableView = true;
+
+                // Status links - wire them so they respect counselor filter when clicked
+                const statusLinks = document.querySelectorAll('.table-filter .filters .a-nav');
+                statusLinks.forEach(link => {
+                    link.addEventListener('click', function (e) {
+                        e.preventDefault();
+                        // update currentStatus and active classes
+                        const filter = this.dataset.filter || 'all';
+                        currentStatus = filter;
+                        statusLinks.forEach(l => l.classList.remove('active'));
+                        this.classList.add('active');
+
+                        // Fetch with current counselor + search + status
+                        fetchAppointments(counselorFilter ? counselorFilter.value : '', searchInput ? searchInput.value : '', currentStatus);
+                    });
+                });
 
                 function setView(table) {
                     isTableView = table;
@@ -104,8 +136,8 @@
                         if (calendarView) calendarView.style.display = 'none';
                         if (filtersContainer) filtersContainer.style.display = 'flex';
                         if (toggleIcon) toggleIcon.className = 'fi fi-rr-table-layout';
-                        // Refresh table when returning from calendar view
-                        fetchAppointments(currentStatus, searchInput.value);
+                        // Refresh table when returning from calendar view (include status + counselor)
+                        fetchAppointments(counselorFilter ? counselorFilter.value : '', searchInput ? searchInput.value : '', currentStatus);
                     } else {
                         appointmentList.style.display = 'none';
                         if (calendarView) calendarView.style.display = 'block';
@@ -130,28 +162,24 @@
                     searchInput.addEventListener('input', function() {
                         clearTimeout(timeout);
                         timeout = setTimeout(function() {
-                            fetchAppointments(currentStatus, searchInput.value);
+                            fetchAppointments(counselorFilter ? counselorFilter.value : '', searchInput.value, currentStatus);
                         }, 400);
                     });
                 }
 
                 // AJAX filters
-                filtersContainer.querySelectorAll('a').forEach(link => {
-                    link.addEventListener('click', function(e) {
+                if (counselorFilter) {
+                    counselorFilter.addEventListener('change', function() {
                         if (!isTableView) return;
-                        e.preventDefault();
-                        filtersContainer.querySelectorAll('a').forEach(l => l.classList.remove(
-                            'active'));
-                        this.classList.add('active');
-                        currentStatus = this.dataset.filter; // uses data-filter from Blade
-                        fetchAppointments(currentStatus, searchInput.value);
+                        fetchAppointments(counselorFilter.value, searchInput ? searchInput.value : '', currentStatus);
                     });
-                });
+                }
 
-                function fetchAppointments(status = 'all', search = '') {
+                function fetchAppointments(counselorId = '', search = '', status = '') {
                     let params = new URLSearchParams();
-                    if (status && status !== 'all') params.append('status', status);
+                    if (counselorId) params.append('counselor_id', counselorId);
                     if (search && search.trim() !== '') params.append('search', search.trim());
+                    if (status && status !== 'all') params.append('status', status);
                     let url = `{{ route('Head.appointments.index') }}?` + params.toString();
 
                     fetch(url)
@@ -202,10 +230,27 @@
                         // disable moving/resizing for completed/cancelled/declined/ongoing
                         startEditable: !(item.status && ['completed','cancelled','declined','ongoing'].includes(item.status.toLowerCase())),
                         durationEditable: !(item.status && ['completed','cancelled','declined','ongoing'].includes(item.status.toLowerCase())),
-                        color: item.status?.toLowerCase() === 'approved' ? '#10b981' :
-                            item.status?.toLowerCase() === 'pending' ? '#f59e0b' :
-                            item.status?.toLowerCase() === 'declined' ? '#ef4444' :
-                            '#6b7280'
+                        color: (() => {
+                            const status = item.status?.toLowerCase();
+                            switch(status) {
+                                case 'pending':
+                                    return '#f59e0b'; // Orange
+                                case 'approved':
+                                case 'rescheduled':
+                                    return '#10b981'; // Green
+                                case 'declined':
+                                case 'cancelled':
+                                case 'missed':
+                                    return '#ef4444'; // Red
+                                case 'ongoing':
+                                case 'in session':
+                                    return '#3b82f6'; // Blue
+                                case 'completed':
+                                    return '#6b7280'; // Gray
+                                default:
+                                    return '#6b7280'; // Default Gray
+                            }
+                        })()
                     }));
 
                     calendar = new FullCalendar.Calendar(calendarEl, {
@@ -410,4 +455,23 @@ document.addEventListener('click', function(e) {
 .sgrms-error-actions { margin-top:6px; }
 .sgrms-btn { background:#2563eb; color:#fff; padding:8px 14px; border-radius:8px; border:none; cursor:pointer; }
 .sgrms-error-close { position:absolute; top:8px; right:10px; border:none; background:transparent; font-size:1.3rem; cursor:pointer; color:#666; }
+
+/* Head page: align counselor filter with search bar */
+.table-search, .filters { display: inline-block; vertical-align: middle; }
+#counselor-filter {
+    height: 40px;
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: 1rem;
+    vertical-align: middle;
+    box-sizing: border-box;
+    border: 1px solid #d1d5db;
+    background: #fff;
+    margin-left: 8px;
+}
+.table-search input[type="text"] {
+    height: 40px;
+    padding: 8px 12px;
+    box-sizing: border-box;
+}
 </style>

@@ -5,7 +5,9 @@
 @endif
 
 @forelse($appointments as $appointment)
-    <div class="table-card">
+    <div class="table-card" 
+         data-previous-schedule="{{ isset($appointment->previous_schedule) && $appointment->previous_schedule ? $appointment->previous_schedule->format('M d, Y h:i A') : '' }}"
+         data-current-schedule="{{ $appointment->appointment_datetime ? $appointment->appointment_datetime->format('M d, Y h:i A') : '' }}">
         <div class="table-col type">
             {{ $appointment->type ? $appointment->type->type_name : 'N/A' }}
         </div>
@@ -16,33 +18,20 @@
                 N/A
             @endif
         </div>
-       <div class="table-col student">
-            @php
-                $studentCount = $appointment->students->count();
-                $firstStudent = $appointment->students->first();
-            @endphp
-            @if($studentCount === 1)
-                {{ $firstStudent->user->first_name ?? '' }} {{ $firstStudent->user->last_name ?? '' }}
-            @elseif($studentCount > 1)
-                {{ $firstStudent->user->first_name ?? '' }} {{ $firstStudent->user->last_name ?? '' }}&nbsp;
-                <span class="see-more-text" style="color: #888;">see more</span>
-            @else
-                N/A
-            @endif
-        </div>
-        <div class="table-col datetime">
-            @if($appointment->status === 'Rescheduled' && $appointment->reschedule_proposed_datetime)
-                {{ $appointment->reschedule_proposed_datetime->format('M d, Y h:i A') }}
-            @else
-                {{ $appointment->appointment_datetime ? $appointment->appointment_datetime->format('M d, Y h:i A') : 'N/A' }}
-            @endif
-        </div>
+        {{-- Student and datetime columns intentionally hidden for Head view per requirement --}}
         <div class="table-col counselor">
-            @if ($appointment->counselor)
-                {{ $appointment->counselor->first_name }} {{ $appointment->counselor->last_name }}
-            @else
-                N/A
-            @endif
+            @php
+                $counselorName = $appointment->counselor 
+                    ? $appointment->counselor->first_name . ' ' . $appointment->counselor->last_name 
+                    : 'N/A';
+                
+                // Get previous schedule if this is a rescheduled appointment
+                $previousSchedule = '';
+                if ($appointment->previous_datetime) {
+                    $previousSchedule = $appointment->previous_datetime->format('M d, Y h:i A');
+                }
+            @endphp
+            <span data-previous-schedule="{{ $previousSchedule }}">{{ $counselorName }}</span>
         </div>
         <div class="table-col status">
             @php
@@ -51,6 +40,7 @@
                     'approved' => 'status-dot status-approved',
                     'declined' => 'status-dot status-declined',
                     'cancelled' => 'status-dot status-declined',
+                    'missed' => 'status-dot status-declined',
                     'pending' => 'status-dot status-pending',
                     'ongoing' => 'status-dot status-ongoing',
                     'completed' => 'status-dot status-completed',
@@ -60,6 +50,7 @@
                     'approved' => 'status-label status-approved',
                     'declined' => 'status-label status-declined',
                     'cancelled' => 'status-label status-declined',
+                    'missed' => 'status-label status-declined',
                     'pending' => 'status-label status-pending',
                     'ongoing' => 'status-label status-ongoing',
                     'completed' => 'status-label status-completed',

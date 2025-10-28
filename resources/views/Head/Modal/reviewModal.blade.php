@@ -19,8 +19,15 @@
       </form>
       <form id="cancelForm" method="POST" style="display:none; margin-right:8px;">
         @csrf
-        <button type="submit" class="btn btn-secondary" id="cancelBtn">Cancel</button>
+        <button type="submit" class="btn btn-secondary" id="cancelBtn">Cancel Appointment</button>
       </form>
+
+      <!-- NEW: Mark as Missed form (hidden by default) -->
+      <form id="missedForm" method="POST" style="display:none; margin-right:8px;">
+        @csrf
+        <button type="submit" class="btn btn-dark" id="missedBtn">Mark as Missed</button>
+      </form>
+
       <form id="approveForm" method="POST" style="display:inline;">
         @csrf
         <button type="submit" class="btn btn-success" id="approveBtn">Approve</button>
@@ -38,7 +45,48 @@
 </div>
 <script>
 function openReviewModal(appointmentId, detailsHtml, approveUrl, declineUrl, cancelUrl, status, startUrl, el) {
+  const missedForm = document.getElementById('missedForm');
+  if (missedForm) {
+    missedForm.action = `/Head/appointments/${appointmentId}/missed`;
+    // Show missed button for approved/rescheduled appointments that aren't completed/cancelled
+    const st = (status || '').toLowerCase();
+    missedForm.style.display = ['approved', 'rescheduled'].includes(st) && 
+      !['completed', 'cancelled', 'declined', 'missed'].includes(st) ? 'inline' : 'none';
+  }
   var body = document.getElementById('review-modal-body');
+
+  // Get previous schedule if it exists
+  var previousSchedule = '';
+  if (el) {
+    // Try to get previous schedule from data attribute
+    previousSchedule = el.dataset.previousSchedule || '';
+    
+    // If not in data attribute, try to get from span
+    if (!previousSchedule && el.querySelector('.appointment-datetime span')) {
+      previousSchedule = el.querySelector('.appointment-datetime span')?.textContent?.trim() || '';
+    }
+  }
+
+  // If we have previous schedule and this is an approved or rescheduled appointment
+  if (previousSchedule && (status === 'approved' || status === 'rescheduled')) {
+    // Find where we should insert the previous schedule (after Date & Time)
+    var dateTimeMatch = detailsHtml.match(/(Date & Time:.*?)(<br>|<\/div>)/i);
+    if (dateTimeMatch) {
+      var insertPoint = dateTimeMatch.index + dateTimeMatch[1].length;
+      
+      // Create previous schedule HTML with improved styling
+      var prevScheduleHtml = `
+        <div style="margin:8px 0 12px 0;padding:10px 12px;border-radius:6px;background:#f0f9ff;border:1px solid #bae6fd;">
+          <div style="color:#0369a1;font-size:0.9rem;margin-bottom:2px;">Previous Schedule:</div>
+          <div style="color:#0c4a6e;font-weight:600;font-size:1.1rem;">${previousSchedule}</div>
+        </div>
+      `;
+      
+      // Insert the previous schedule information
+      detailsHtml = detailsHtml.slice(0, insertPoint) + prevScheduleHtml + detailsHtml.slice(insertPoint);
+    }
+  }
+  
   body.innerHTML = detailsHtml;
 
   // Show previous and preferred times only for rescheduled appointments
@@ -104,9 +152,9 @@ function openReviewModal(appointmentId, detailsHtml, approveUrl, declineUrl, can
   if (status === 'declined') {
     if (document.getElementById('approveForm')) document.getElementById('approveForm').style.display = 'none';
     if (document.getElementById('declineForm')) document.getElementById('declineForm').style.display = 'none';
-    if (rescheduleEl) rescheduleEl.style.display = 'inline-block';
+    if (rescheduleEl) rescheduleEl.style.display = 'none'; // hide reschedule when declined
     if (closeEl) closeEl.style.display = 'none';
-  } else if (status === 'approved') {
+  } else if (status === 'approved' || status === 'rescheduled') {
     if (document.getElementById('approveForm')) document.getElementById('approveForm').style.display = 'none';
     if (document.getElementById('declineForm')) document.getElementById('declineForm').style.display = 'none';
     if (rescheduleEl) rescheduleEl.style.display = 'inline-block';
@@ -122,6 +170,13 @@ function openReviewModal(appointmentId, detailsHtml, approveUrl, declineUrl, can
     } else {
       if (document.getElementById('startSessionForm')) document.getElementById('startSessionForm').style.display = 'none';
     }
+  } else if (status === 'missed') {
+    // Hide approve/decline buttons for missed appointments
+    if (document.getElementById('approveForm')) document.getElementById('approveForm').style.display = 'none';
+    if (document.getElementById('declineForm')) document.getElementById('declineForm').style.display = 'none';
+    if (document.getElementById('endSessionForm')) document.getElementById('endSessionForm').style.display = 'none';
+    if (rescheduleEl) rescheduleEl.style.display = 'none';
+    if (closeEl) closeEl.style.display = 'inline-block';
   } else {
     if (document.getElementById('approveForm')) document.getElementById('approveForm').style.display = 'inline';
     if (document.getElementById('declineForm')) document.getElementById('declineForm').style.display = 'inline';
@@ -180,10 +235,10 @@ function openReviewModal(appointmentId, detailsHtml, approveUrl, declineUrl, can
       footer.insertBefore(cbadge, footer.firstChild);
     }
   }
-  // Show cancel only when appointment is pending
+  // Show cancel when appointment is Pending, Approved, or Rescheduled
   if (document.getElementById('cancelForm')) {
-    // show cancel only for pending
-    if (status === 'pending') {
+    var cancellable = ['pending', 'approved', 'rescheduled'];
+    if (cancellable.includes(status)) {
       document.getElementById('cancelForm').style.display = 'inline-block';
     } else {
       document.getElementById('cancelForm').style.display = 'none';
@@ -232,12 +287,30 @@ function closeReviewModal() {
 }
 
 function openRescheduleModal(appointmentId) {
+  // Store current appointment details from the review modal content
+  const currentDateTime = document.querySelector('#review-modal-body')?.textContent.match(/Date & Time: ([^\n]+)/)?.[1] || '';
+
   // Close review modal
   closeReviewModal();
 
   // Open the request modal immediately to improve perceived responsiveness
   const requestModal = document.getElementById('requestAppointmentModal');
-  if (requestModal) requestModal.style.display = 'flex';
+  if (requestModal) {
+    requestModal.style.display = 'flex';
+    
+    // Add previous time info if available
+    if (currentDateTime) {
+      const infoDiv = document.createElement('div');
+      infoDiv.className = 'previous-time-info';
+      infoDiv.style.cssText = 'margin:12px 0 20px;padding:12px;border-radius:8px;background:#f0f9ff;color:#0369a1;border:1px solid #bae6fd;font-weight:500;font-size:1.1em;';
+      infoDiv.innerHTML = `<strong>Previous Schedule:</strong> ${currentDateTime}`;
+      
+      const modalBody = requestModal.querySelector('.modal-body');
+      if (modalBody) {
+        modalBody.insertBefore(infoDiv, modalBody.firstChild);
+      }
+    }
+  }
 
   // Add a small loading indicator inside the modal if not present
   let loadingEl = document.getElementById('modal-loading-indicator');
@@ -383,7 +456,7 @@ document.addEventListener('DOMContentLoaded', function () {
         badge.className = 'badge badge-warning';
         badge.id = 'inSessionBadge';
         badge.style.marginRight = '8px';
-        badge.innerText = 'In Session';
+        badge.innerText = 'Approved';
         footer.insertBefore(badge, footer.firstChild);
       }
 

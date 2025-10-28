@@ -111,7 +111,7 @@
                                         data-start_datetime="{{ $announcement->start_datetime }}"
                                         data-end_datetime="{{ $announcement->end_datetime }}"><i
                                             class='bx bx-edit'></i></a>
-                                    <a href="#" title="Archive" class="archive-btn"><i class='bx bx-archive'></i></a>
+                                  
                                 </div>
                             </div>
                         @empty

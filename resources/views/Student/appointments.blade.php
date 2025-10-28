@@ -24,6 +24,8 @@
                                 data-filter="cancelled">Cancelled</a>
                             <a href="#" class="a-nav {{ request('status') == 'completed' ? 'active' : '' }}"
                                 data-filter="completed">Complete</a>
+                            <a href="#" class="a-nav {{ request('status') == 'missed' ? 'active' : '' }}"
+                                data-filter="missed">Missed</a>
                         </li>
                     </div>
                     <a href="#" class="add-btn" onclick="openModal(); return false;">
@@ -199,10 +201,27 @@
                         })(),
                         requesterAvatar: null,
                         status: item.status ?? "N/A",
-                        color: item.status?.toLowerCase() === 'approved' ? '#10b981' :
-                            item.status?.toLowerCase() === 'pending' ? '#f59e0b' :
-                            item.status?.toLowerCase() === 'declined' ? '#ef4444' :
-                            '#6b7280'
+                        color: (() => {
+                            const status = item.status?.toLowerCase();
+                            switch(status) {
+                                case 'pending':
+                                    return '#f59e0b'; // Orange
+                                case 'approved':
+                                case 'rescheduled':
+                                    return '#10b981'; // Green
+                                case 'declined':
+                                case 'cancelled':
+                                case 'missed':
+                                    return '#ef4444'; // Red
+                                case 'ongoing':
+                                case 'in session':
+                                    return '#3b82f6'; // Blue
+                                case 'completed':
+                                    return '#6b7280'; // Gray
+                                default:
+                                    return '#6b7280'; // Default Gray
+                            }
+                        })()
                     }));
 
                     calendar = new FullCalendar.Calendar(calendarEl, {

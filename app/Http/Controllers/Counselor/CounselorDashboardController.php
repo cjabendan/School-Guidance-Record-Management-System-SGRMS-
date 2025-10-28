@@ -57,9 +57,47 @@ class CounselorDashboardController extends Controller
         // Convert UTC to Asia/Manila timezone
         $utcDate = $request->input('appointment_datetime');
         $manilaDate = \Carbon\Carbon::parse($utcDate)->setTimezone('Asia/Manila');
+
+        // Conflict check: prevent moving into an occupied approved slot (±1 hour)
+        $requested = $manilaDate->copy();
+        $startWindow = $requested->copy()->subHour();
+        $endWindow = $requested->copy()->addHour();
+
+        // Treat both Approved and Rescheduled as blocking statuses so the
+        // counselor cannot move into an occupied slot (matches Head behavior).
+        $conflict = \App\Models\Appointments::where('counselor_id', $appointment->counselor_id)
+            ->whereDate('appointment_datetime', $requested->toDateString())
+            ->whereBetween('appointment_datetime', [$startWindow, $endWindow])
+            ->where('appointment_id', '!=', $appointment->appointment_id)
+            ->whereIn('status', ['Approved', 'Rescheduled'])
+            ->exists();
+
+        // Also check student conflicts
+        $studentIds = $appointment->students()->pluck('student_user_id')->toArray();
+        $studentConflict = false;
+        if (!empty($studentIds)) {
+            $studentConflict = \App\Models\Appointments::whereDate('appointment_datetime', $requested->toDateString())
+                ->whereBetween('appointment_datetime', [$startWindow, $endWindow])
+                ->whereHas('students', function($q) use ($studentIds) {
+                    $q->whereIn('student_user_id', $studentIds);
+                })
+                ->where('appointment_id', '!=', $appointment->appointment_id)
+                ->whereIn('status', ['Approved', 'Rescheduled'])
+                ->exists();
+        }
+
+        if ($conflict || $studentConflict) {
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json(['error' => 'this time is already taken by someone'], 422);
+            }
+            return redirect()->back()->with('error', 'this time is already taken by someone');
+        }
+
         $appointment->appointment_datetime = $manilaDate;
+        $appointment->status = 'Rescheduled';
         $appointment->save();
-        return response()->json(['success' => true]);
+
+        return response()->json(['success' => true, 'status' => 'Rescheduled']);
     }
     public function dashboard(Request $request)
     {
@@ -97,9 +135,19 @@ class CounselorDashboardController extends Controller
         $query = \App\Models\Appointments::with(['type', 'requester', 'students.user', 'counselor'])
             ->where('counselor_id', $user->id);
 
-        // Filter by status if provided
-        if (request()->has('status') && in_array(request('status'), ['pending', 'approved', 'declined'])) {
-            $query->where('status', request('status'));
+        // Filter by status if provided (accepts: pending, approved, declined, cancelled, completed)
+        if (request()->has('status')) {
+            $status = strtolower(request('status'));
+            $allowed = ['pending', 'approved', 'declined', 'cancelled', 'completed'];
+            if (in_array($status, $allowed)) {
+                // For pending, include rescheduled entries
+                if ($status === 'pending') {
+                    $query->whereIn('status', ['Pending', 'Rescheduled']);
+                } else {
+                    // case-insensitive equality for other statuses
+                    $query->whereRaw('LOWER(`status`) = ?', [$status]);
+                }
+            }
         }
 
         // Filter by search if provided

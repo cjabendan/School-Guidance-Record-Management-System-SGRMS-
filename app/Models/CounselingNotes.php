@@ -9,15 +9,16 @@ class CounselingNotes extends Model
 {
     use HasFactory;
 
-    protected $table = 'counseling_notes';
     protected $primaryKey = 'note_id';
+    public $incrementing = true; // or false if note_id is not auto-increment integer
+    protected $keyType = 'int';
 
     protected $fillable = [
-        'appointment_id',
+        'student_name',
         'user_id',
         'observations',
-        'recommendations',
         'remarks',
+        'recommendations',
         'follow_up_needed',
         'follow_up_date',
     ];
@@ -27,14 +28,15 @@ class CounselingNotes extends Model
         'follow_up_date' => 'datetime',
     ];
 
-    // Relationships
-    public function appointment()
+
+    public function student()
     {
-        return $this->belongsTo(Appointments::class, 'appointment_id');
+        return $this->belongsTo(Student::class, 'student_name', 's_id');
     }
 
-    public function author()
+
+    public function user()
     {
-        return $this->belongsTo(User::class, 'user_id');
+        return $this->belongsTo(User::class, 'user_id', 'id');
     }
 }

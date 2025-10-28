@@ -7,11 +7,13 @@
             @csrf
             <div class="modal-content case-modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="addCaseModalLabel">Add New Case</h5>
+                    <h5 class="case-modal-title" id="addCaseModalLabel">New Case Record</h5>
                     <span class="close add-modal-close pro-add-close" data-bs-dismiss="modal" aria-label="Close">&times;</span>
                 </div>
 
                 <div class="modal-body case-modal-body">
+                    <!-- ================= CASE IDENTIFICATION ================= -->
+                    <h6 class="section-title">Case Identification</h6>
                     <!-- Student Search Input -->
                     <div class="form-row">
                         <div class="add-field-col" style="flex:1; position: relative;">
@@ -27,8 +29,8 @@
                     <!-- Row 1: Type & Severity -->
                     <div class="form-row">
                         <div class="add-field-col">
-                            <label for="case_type_id" class="add-label">Type</label>
-                            <select class="add-input" name="case_type_id" id="case_type_id" required onchange="toggleOtherType(this)">
+                            <label for="case_type_id" class="add-label">Case Type</label>
+                            <select class="add-input" name="case_type_id" id="case_type_id"  onchange="toggleOtherType(this)">
                                 <option value="">Select Type</option>
                                 @foreach (\App\Models\CaseType::all() as $type)
                                     <option value="{{ $type->type_id }}">{{ $type->type_name }}</option>
@@ -39,7 +41,7 @@
                         </div>
                         <div class="add-field-col">
                             <label for="severity" class="add-label">Severity</label>
-                            <select class="add-input" name="severity" required>
+                            <select class="add-input" name="severity" >
                                 <option value="Minor">Minor</option>
                                 <option value="Major">Major</option>
                                 <option value="Grave">Grave</option>
@@ -47,15 +49,20 @@
                         </div>
                     </div>
 
-                    <!-- Row 2: Presenting Problem & Action Taken -->
+                    <!-- ================= DETAILS ================= -->
+                    <h6 class="section-title">Details</h6>
+
                     <div class="form-row">
                         <div class="add-field-col">
                             <label for="presenting_problem" class="add-label">Presenting Problem</label>
-                            <input type="text" class="add-input" name="presenting_problem" required>
+                            <textarea class="add-input" name="presenting_problem" id="presenting_problem" rows="3" placeholder="Describe the initial issue or complaint"></textarea>
                         </div>
+                    </div>
+
+                    <div class="form-row">
                         <div class="add-field-col">
                             <label for="action_taken" class="add-label">Action Taken</label>
-                            <input type="text" class="add-input" name="action_taken">
+                            <textarea class="add-input" name="action_taken" id="action_taken" rows="2" placeholder="Describe any immediate actions taken"></textarea>
                         </div>
                     </div>
 
@@ -63,21 +70,24 @@
                     <div class="form-row">
                         <div class="add-field-col">
                             <label for="filed_date" class="add-label">Filed Date</label>
-                            <input type="date" class="add-input" name="filed_date" required>
+                            <input type="date" class="add-input" name="filed_date" >
                         </div>
                         <div class="add-field-col">
                             <label for="filed_time" class="add-label">Filed Time</label>
-                            <input type="time" class="add-input" name="filed_time" required>
+                            <input type="time" class="add-input" name="filed_time" >
                         </div>
                         <div class="add-field-col">
                             <label for="status" class="add-label">Status</label>
-                            <select class="add-input" name="status" required>
-                                <option value="Pending">Pending</option>
-                                <option value="Under Investigation">Under Investigation</option>
-                                <option value="Resolved">Resolved</option>
+                            <select class="add-input" name="status" >
+                                <option value="">Choose Status</option>
+                                <option value="open">Open</option>
+                                <option value="closed">Closed</option>
                             </select>
                         </div>
                     </div>
+
+                    <!-- ================= RESOLUTION ================= -->
+                    <h6 class="section-title">Resolution</h6>
 
                     <!-- Row 4: Resolved & Follow-Up Dates -->
                     <div class="form-row">
@@ -91,39 +101,46 @@
                         </div>
                     </div>
 
-                    <!-- Row 5: Description & Witnesses -->
+                    <!-- Row 5: Description -->
                     <div class="form-row">
                         <div class="add-field-col">
                             <label for="description" class="add-label">Description</label>
-                            <textarea class="add-input" name="description" required></textarea>
-                        </div>
-                        <div class="add-field-col">
-                            <label for="witnesses" class="add-label">Witnesses</label>
-                            <textarea class="add-input" name="witnesses"></textarea>
+                            <textarea class="add-input" name="description" placeholder="Provide a detailed description of the case"></textarea>
                         </div>
                     </div>
 
-                    <!-- Row 6: Investigation Notes & Evidence -->
+                    <!-- Row 6: Witnesses -->
+                    <div class="form-row">
+                        <div class="add-field-col">
+                            <label for="witnesses" class="add-label">Witnesses</label>
+                            <textarea class="add-input" name="witnesses" placeholder="List names and contact info of witnesses"></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Row 7: Investigation Notes -->
                     <div class="form-row">
                         <div class="add-field-col">
                             <label for="investigation_notes" class="add-label">Investigation Notes</label>
-                            <textarea class="add-input" name="investigation_notes"></textarea>
-                        </div>
-                        <div class="add-field-col">
-                            <label for="evidence" class="add-label">Evidence</label>
-                            <textarea class="add-input" name="evidence"></textarea>
+                            <textarea class="add-input" name="investigation_notes" placeholder="Record findings from the investigation"></textarea>
                         </div>
                     </div>
 
-                    <!-- Row 7: Resolution Notes -->
+                    <!-- Row 8: Evidence -->
+                    <div class="form-row">
+                        <div class="add-field-col">
+                            <label for="evidence" class="add-label">Evidence</label>
+                            <textarea class="add-input" name="evidence" placeholder="Describe or list evidence"></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Row 9: Resolution Notes -->
                     <div class="form-row">
                         <div class="add-field-col">
                             <label for="resolution_notes" class="add-label">Resolution Notes</label>
-                            <textarea class="add-input" name="resolution_notes"></textarea>
+                            <textarea class="add-input" name="resolution_notes" placeholder="Summarize the resolution and outcomes"></textarea>
                         </div>
                     </div>
                 </div>
-          
                 <button type="submit" class="pro-add-save">Add Case</button>
             </div>
         </form>
@@ -132,68 +149,138 @@
 
 
 <!-- =========================
-     VIEW + EDIT CASE MODALS
+     VIEW CASE MODAL
 ========================= -->
 @isset($cases)
     @foreach ($cases as $case)
-        <!-- View Case Modal -->
+        <!-- View Case Modal - use disabled inputs identical to Edit layout -->
         <div class="modal case-modal" id="viewCaseModal{{ $case->case_id }}" tabindex="-1" aria-labelledby="viewCaseModalLabel{{ $case->case_id }}" aria-hidden="true">
             <div class="modal-dialog modal-lg">
                 <div class="modal-content case-modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="viewCaseModalLabel{{ $case->case_id }}">Case Details</h5>
+                        <h5 class="case-modal-title" id="viewCaseModalLabel{{ $case->case_id }}">Case Information</h5>
                         <span class="close add-modal-close pro-add-close" data-bs-dismiss="modal" aria-label="Close">&times;</span>
                     </div>
                     <div class="modal-body case-modal-body">
-                        <!-- Involved Students -->
+                        <!-- ================= CASE IDENTIFICATION ================= -->
+                        <h6 class="section-title">Case Identification</h6>
                         <div class="form-row">
-                            <div class="add-field-col">
-                                <label class="add-label">Involved Students</label>
-                                @if($case->students && count($case->students) > 0)
-                                    <ul class="list-group">
-                                        @foreach($case->students as $student)
-                                            <li class="list-group-item">
-                                                {{ $student->user->first_name ?? '' }} {{ $student->user->last_name ?? '' }} | {{ $student->s_id }}
-                                            </li>
-                                        @endforeach
-                                    </ul>
-                                @else
-                                    <span>No students involved.</span>
-                                @endif
+                            <div class="add-field-col" style="flex:1; position: relative;">
+                                <label class="add-label">Search Student</label>
+                                <div id="view-student-tag-input{{ $case->case_id }}" class="student-tag-input">
+                                    @foreach($case->students as $s)
+                                        <span class="student-tag">{{ ($s->user->first_name ?? '') . ' ' . ($s->user->last_name ?? '') }} | {{ $s->s_id }}</span>
+                                    @endforeach
+                                </div>
+                                <input type="hidden" id="view_involved_students{{ $case->case_id }}" value="{{ $case->students->pluck('s_id')->implode(',') }}">
                             </div>
                         </div>
 
-                        <!-- Case Fields -->
-                        @php
-                            $fields = [
-                                ['Type' => $case->caseType->type_name ?? 'N/A', 'Severity' => $case->severity],
-                                ['Presenting Problem' => $case->presenting_problem, 'Action Taken' => $case->action_taken],
-                                ['Filed Date' => $case->filed_date, 'Filed Time' => $case->filed_time, 'Status' => $case->status],
-                                ['Resolved Date' => $case->resolved_date, 'Follow Up Date' => $case->follow_up_date],
-                                ['Description' => $case->description, 'Witnesses' => $case->witnesses],
-                                ['Investigation Notes' => $case->investigation_notes, 'Evidence' => $case->evidence],
-                                ['Resolution Notes' => $case->resolution_notes]
-                            ];
-                        @endphp
-
-                        @foreach($fields as $row)
-                            <div class="form-row">
-                                @foreach($row as $label => $value)
-                                    <div class="add-field-col">
-                                        <label class="add-label">{{ $label }}</label>
-                                        <div class="add-input" readonly>{{ $value }}</div>
-                                    </div>
-                                @endforeach
+                        <!-- Row 1: Type & Severity -->
+                        <div class="form-row">
+                            <div class="add-field-col">
+                                <label class="add-label">Case Type</label>
+                                <select class="add-input" disabled>
+                                    <option>{{ $case->caseType->type_name ?? 'N/A' }}</option>
+                                </select>
                             </div>
-                        @endforeach
-                    </div>
-                    <div class="modal-footer pro-add-buttons case-modal-footer">
-                        <button type="button" class="pro-add-save" data-bs-dismiss="modal">Close</button>
+                            <div class="add-field-col">
+                                <label class="add-label">Severity</label>
+                                <select class="add-input" disabled>
+                                    <option>{{ $case->severity }}</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <h6 class="section-title">Details</h6>
+
+                        <div class="form-row">
+                            <div class="add-field-col">
+                                <label class="add-label">Presenting Problem</label>
+                                <textarea class="add-input" rows="3" disabled>{{ $case->presenting_problem }}</textarea>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="add-field-col">
+                                <label class="add-label">Action Taken</label>
+                                <textarea class="add-input" rows="2" disabled>{{ $case->action_taken }}</textarea>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="add-field-col">
+                                <label class="add-label">Filed Date</label>
+                                <input type="date" class="add-input" value="{{ $case->filed_date }}" disabled>
+                            </div>
+                            <div class="add-field-col">
+                                <label class="add-label">Filed Time</label>
+                                <input type="time" class="add-input" value="{{ $case->filed_time }}" disabled>
+                            </div>
+                            <div class="add-field-col">
+                                <label class="add-label">Status</label>
+                                <select class="add-input" disabled>
+                                    <option>{{ $case->status }}</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <h6 class="section-title">Resolution</h6>
+
+                        <div class="form-row">
+                            <div class="add-field-col">
+                                <label class="add-label">Resolved Date</label>
+                                <input type="date" class="add-input" value="{{ $case->resolved_date }}" disabled>
+                            </div>
+                            <div class="add-field-col">
+                                <label class="add-label">Follow Up Date</label>
+                                <input type="date" class="add-input" value="{{ $case->follow_up_date }}" disabled>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="add-field-col">
+                                <label class="add-label">Description</label>
+                                <textarea class="add-input" disabled>{{ $case->description }}</textarea>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="add-field-col">
+                                <label class="add-label">Witnesses</label>
+                                <textarea class="add-input" disabled>{{ $case->witnesses }}</textarea>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="add-field-col">
+                                <label class="add-label">Investigation Notes</label>
+                                <textarea class="add-input" disabled>{{ $case->investigation_notes }}</textarea>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="add-field-col">
+                                <label class="add-label">Evidence</label>
+                                <textarea class="add-input" disabled>{{ $case->evidence }}</textarea>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="add-field-col">
+                                <label class="add-label">Resolution Notes</label>
+                                <textarea class="add-input" disabled>{{ $case->resolution_notes }}</textarea>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
 
+
+<!-- =========================
+    EDIT CASE MODAL
+========================= -->
         <!-- Edit Case Modal -->
         <div class="modal case-modal" id="editCaseModal{{ $case->case_id }}" tabindex="-1" aria-labelledby="editCaseModalLabel{{ $case->case_id }}" aria-hidden="true">
             <div class="modal-dialog modal-lg">
@@ -202,27 +289,33 @@
                     @method('PUT')
                     <div class="modal-content case-modal-content">
                         <div class="modal-header">
-                            <h5 class="modal-title" id="editCaseModalLabel{{ $case->case_id }}">Edit Case</h5>
+                            <h5 class="case-modal-title" id="editCaseModalLabel{{ $case->case_id }}">Update Case Information</h5>
                             <span class="close add-modal-close pro-add-close" data-bs-dismiss="modal" aria-label="Close">&times;</span>
                         </div>
                         <div class="modal-body case-modal-body">
+                            <!-- ================= CASE IDENTIFICATION ================= -->
+                            <h6 class="section-title">Case Identification</h6>
                             <!-- Student Search Input -->
                             <div class="form-row">
                                 <div class="add-field-col" style="flex:1; position: relative;">
                                     <label for="edit_student_search{{ $case->case_id }}" class="add-label">Search Student</label>
                                     <div id="edit-student-tag-input{{ $case->case_id }}" class="student-tag-input">
+                                        {{-- Server-render existing student tags so AJAX-inserted modals show names immediately --}}
+                                        @foreach($case->students as $s)
+                                            <span class="student-tag" data-id="{{ $s->s_id }}">{{ ($s->user->first_name ?? '') . ' ' . ($s->user->last_name ?? '') }} | {{ $s->s_id }}<span class="remove-tag" title="Remove">&times;</span></span>
+                                        @endforeach
                                         <input type="text" id="edit_student_search{{ $case->case_id }}" class="add-input student-search-input" placeholder="Type name or ID" autocomplete="off">
                                     </div>
                                     <div id="edit_student_search_results{{ $case->case_id }}" class="list-group" style="display: none;"></div>
-                                    <input type="hidden" name="involved_students" id="edit_involved_students{{ $case->case_id }}" value="{{ $case->students->pluck('user_id')->implode(',') }}">
+                                    <input type="hidden" name="involved_students" id="edit_involved_students{{ $case->case_id }}" value="{{ $case->students->pluck('s_id')->implode(',') }}">
                                 </div>
                             </div>
 
                             <!-- Row 1: Type & Severity -->
                             <div class="form-row">
                                 <div class="add-field-col">
-                                    <label for="edit_case_type_id{{ $case->case_id }}" class="add-label">Type</label>
-                                    <select class="add-input" name="case_type_id" id="edit_case_type_id{{ $case->case_id }}" required onchange="toggleOtherTypeEdit({{ $case->case_id }})">
+                                    <label for="edit_case_type_id{{ $case->case_id }}" class="add-label">Case Type</label>
+                                    <select class="add-input" name="case_type_id" id="edit_case_type_id{{ $case->case_id }}"  onchange="toggleOtherTypeEdit({{ $case->case_id }})">
                                         @foreach (\App\Models\CaseType::all() as $type)
                                             <option value="{{ $type->type_id }}" {{ $case->case_type_id == $type->type_id ? 'selected' : '' }}>
                                                 {{ $type->type_name }}
@@ -234,7 +327,7 @@
                                 </div>
                                 <div class="add-field-col">
                                     <label for="edit_severity{{ $case->case_id }}" class="add-label">Severity</label>
-                                    <select class="add-input" name="severity" id="edit_severity{{ $case->case_id }}" required>
+                                    <select class="add-input" name="severity" id="edit_severity{{ $case->case_id }}" >
                                         <option value="Minor" {{ $case->severity == 'Minor' ? 'selected' : '' }}>Minor</option>
                                         <option value="Major" {{ $case->severity == 'Major' ? 'selected' : '' }}>Major</option>
                                         <option value="Grave" {{ $case->severity == 'Grave' ? 'selected' : '' }}>Grave</option>
@@ -242,15 +335,20 @@
                                 </div>
                             </div>
 
-                            <!-- Row 2: Presenting Problem & Action Taken -->
+                            <!-- ================= DETAILS ================= -->
+                            <h6 class="section-title">Details</h6>
+
                             <div class="form-row">
                                 <div class="add-field-col">
                                     <label for="edit_presenting_problem{{ $case->case_id }}" class="add-label">Presenting Problem</label>
-                                    <input type="text" class="add-input" name="presenting_problem" id="edit_presenting_problem{{ $case->case_id }}" value="{{ $case->presenting_problem }}" required>
+                                    <textarea class="add-input" name="presenting_problem" id="edit_presenting_problem{{ $case->case_id }}" rows="3">{{ $case->presenting_problem }}</textarea>
                                 </div>
+                            </div>
+
+                            <div class="form-row">
                                 <div class="add-field-col">
                                     <label for="edit_action_taken{{ $case->case_id }}" class="add-label">Action Taken</label>
-                                    <input type="text" class="add-input" name="action_taken" id="edit_action_taken{{ $case->case_id }}" value="{{ $case->action_taken }}">
+                                    <textarea class="add-input" name="action_taken" id="edit_action_taken{{ $case->case_id }}" rows="2">{{ $case->action_taken }}</textarea>
                                 </div>
                             </div>
 
@@ -258,21 +356,24 @@
                             <div class="form-row">
                                 <div class="add-field-col">
                                     <label for="edit_filed_date{{ $case->case_id }}" class="add-label">Filed Date</label>
-                                    <input type="date" class="add-input" name="filed_date" id="edit_filed_date{{ $case->case_id }}" value="{{ $case->filed_date }}" required>
+                                    <input type="date" class="add-input" name="filed_date" id="edit_filed_date{{ $case->case_id }}" value="{{ $case->filed_date }}" >
                                 </div>
                                 <div class="add-field-col">
                                     <label for="edit_filed_time{{ $case->case_id }}" class="add-label">Filed Time</label>
-                                    <input type="time" class="add-input" name="filed_time" id="edit_filed_time{{ $case->case_id }}" value="{{ $case->filed_time }}" required>
+                                    <input type="time" class="add-input" name="filed_time" id="edit_filed_time{{ $case->case_id }}" value="{{ $case->filed_time }}" >
                                 </div>
                                 <div class="add-field-col">
                                     <label for="edit_status{{ $case->case_id }}" class="add-label">Status</label>
-                                    <select class="add-input" name="status" id="edit_status{{ $case->case_id }}" required>
-                                        <option value="Pending" {{ $case->status == 'Pending' ? 'selected' : '' }}>Pending</option>
-                                        <option value="Under Investigation" {{ $case->status == 'Under Investigation' ? 'selected' : '' }}>Under Investigation</option>
-                                        <option value="Resolved" {{ $case->status == 'Resolved' ? 'selected' : '' }}>Resolved</option>
+                                    <select class="add-input" name="status" id="edit_status{{ $case->case_id }}" >
+                                        <option value="">Choose Status</option>
+                                        <option value="open" {{ $case->status == 'Open' ? 'selected' : '' }}>Open</option>
+                                        <option value="closed" {{ $case->status == 'Closed' ? 'selected' : '' }}>Closed</option>
                                     </select>
                                 </div>
                             </div>
+
+                            <!-- ================= RESOLUTION ================= -->
+                            <h6 class="section-title">Resolution</h6>
 
                             <!-- Row 4: Resolved Date & Follow Up Date -->
                             <div class="form-row">
@@ -286,42 +387,47 @@
                                 </div>
                             </div>
 
-                            <!-- Row 5: Description & Witnesses -->
+                            <!-- Row 5: Description -->
                             <div class="form-row">
                                 <div class="add-field-col">
                                     <label for="edit_description{{ $case->case_id }}" class="add-label">Description</label>
-                                    <textarea class="add-input" name="description" id="edit_description{{ $case->case_id }}" required>{{ $case->description }}</textarea>
+                                    <textarea class="add-input" name="description" id="edit_description{{ $case->case_id }}">{{ $case->description }}</textarea>
                                 </div>
+                            </div>
+
+                            <!-- Row 6: Witnesses -->
+                            <div class="form-row">
                                 <div class="add-field-col">
                                     <label for="edit_witnesses{{ $case->case_id }}" class="add-label">Witnesses</label>
                                     <textarea class="add-input" name="witnesses" id="edit_witnesses{{ $case->case_id }}">{{ $case->witnesses }}</textarea>
                                 </div>
                             </div>
 
-                            <!-- Row 6: Investigation Notes & Evidence -->
+                            <!-- Row 7: Investigation Notes -->
                             <div class="form-row">
                                 <div class="add-field-col">
                                     <label for="edit_investigation_notes{{ $case->case_id }}" class="add-label">Investigation Notes</label>
                                     <textarea class="add-input" name="investigation_notes" id="edit_investigation_notes{{ $case->case_id }}">{{ $case->investigation_notes }}</textarea>
                                 </div>
+                            </div>
+
+                            <!-- Row 8: Evidence -->
+                            <div class="form-row">
                                 <div class="add-field-col">
                                     <label for="edit_evidence{{ $case->case_id }}" class="add-label">Evidence</label>
                                     <textarea class="add-input" name="evidence" id="edit_evidence{{ $case->case_id }}">{{ $case->evidence }}</textarea>
                                 </div>
                             </div>
 
-                            <!-- Row 7: Resolution Notes -->
+                            <!-- Row 9: Resolution Notes -->
                             <div class="form-row">
                                 <div class="add-field-col">
                                     <label for="edit_resolution_notes{{ $case->case_id }}" class="add-label">Resolution Notes</label>
                                     <textarea class="add-input" name="resolution_notes" id="edit_resolution_notes{{ $case->case_id }}">{{ $case->resolution_notes }}</textarea>
                                 </div>
                             </div>
-
                         </div>
-                        <div class="modal-footer pro-add-buttons case-modal-footer">
-                            <button type="submit" class="pro-add-save">Save Changes</button>
-                        </div>
+                        <button type="submit" class="pro-add-save">Save Changes</button>
                     </div>
                 </form>
             </div>
@@ -334,22 +440,46 @@
      ARCHIVE CASE MODAL
 ========================= -->
 <div class="modal case-modal" id="archiveCaseModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-sm">
-        <div class="modal-content archive-modal" style="max-width: 500px;">
-            <div class="modal-header">
-                <h5 class="modal-title">Archive Case</h5>
-                <span class="close" id="archiveModalClose">&times;</span>
-            </div>
-            <div class="modal-body">
-                <p>Are you sure you want to archive this case?</p>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-cancel" id="archiveCancelBtn">Cancel</button>
-                <button type="button" class="btn btn-confirm" id="archiveConfirmBtn">Archive</button>
-            </div>
+  <div class="modal-dialog modal-sm">
+    <div class="modal-content archive-modal-card">
+      <div class="header">
+        <div class="image">
+          <svg
+            aria-hidden="true"
+            stroke="currentColor"
+            stroke-width="1.5"
+            viewBox="0 0 24 24"
+            fill="none"
+          >
+            <path
+              d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"
+              stroke-linejoin="round"
+              stroke-linecap="round"
+            ></path>
+          </svg>
         </div>
+
+        <div class="content">
+          <span class="case-modal-title" style="font-size: 1.5rem;">Archive Case Record</span>
+          <p class="message">
+            Are you sure you want to archive this case? Once archived, it will move to
+            your archive list and can be restored later if necessary.
+          </p>
+        </div>
+
+        <div class="actions">
+          <button class="archive" type="button" id="archiveConfirmBtn">
+            Yes, Archive
+          </button>
+          <button class="cancel" type="button" id="archiveModalClose">
+            Cancel
+          </button>
+        </div>
+      </div>
     </div>
+  </div>
 </div>
+
 
 
 <!-- =========================
@@ -391,7 +521,16 @@
     (function(){
         // small helper to fetch students from server; empty query returns a default list
         function fetchStudents(query, cb) {
-            $.ajax({ url: "{{ route('Head.students.search') }}", dataType: 'json', data: { q: query || '' }, success: function(data){ cb && cb(data); }, error: function(){ cb && cb([]); } });
+            $.ajax({
+                url: "{{ route('Head.students.search') }}",
+                dataType: 'json',
+                data: { q: query || '' },
+                success: function(data){ cb && cb(data); },
+                error: function(xhr, status, err){
+                    console.error('Student search error:', status, err, xhr.responseText);
+                    cb && cb([]);
+                }
+            });
         }
 
         // ----- Add modal state -----
@@ -411,7 +550,12 @@
         function renderResults(items, $container, existing) {
             $container.empty();
             const filtered = (items || []).filter(i => !existing.some(s => s.id == i.id));
-            if (filtered.length === 0) { $container.hide(); return; }
+            if (filtered.length === 0) {
+                // show a non-clickable placeholder so the dropdown is visible
+                $container.append(`<div class="list-group-item disabled">No students found</div>`);
+                $container.show();
+                return;
+            }
             filtered.forEach(item => {
                 $container.append(`<button type="button" class="list-group-item list-group-item-action" data-id="${item.id}" data-text="${item.text}">${item.text}</button>`);
             });
@@ -421,7 +565,8 @@
         // input handlers for add modal
         $(document).on('focus click', '#student_search', function(){
             const $results = $('#student_search_results');
-            if ($results.is(':visible')) return;
+            $results.show(); // ensure container is visible immediately
+            // always fetch default list to populate
             fetchStudents('', function(data){ renderResults(data, $results, selectedStudents); });
         });
 
@@ -467,7 +612,8 @@
 
                     // focus shows list
                     $(document).on('focus click', '#edit_student_search{{ $case->case_id }}', function(){
-                        var $results = $('#edit_student_search_results{{ $case->case_id }}'); if ($results.is(':visible')) return;
+                        var $results = $('#edit_student_search_results{{ $case->case_id }}');
+                        $results.show();
                         fetchStudents('', function(data){ renderResults(data, $results, selectedEdit{{ $case->case_id }}); });
                     });
 
@@ -487,6 +633,59 @@
 
                     // initial render
                     renderEditTags{{ $case->case_id }}();
+                })();
+            @endforeach
+        @endisset
+
+        // ----- Render compact view tags for View Modal -----
+        @isset($cases)
+            @foreach($cases as $case)
+                (function(){
+                    var viewStudents{{ $case->case_id }} = [
+                        @foreach($case->students as $s)
+                            { id: '{{ $s->s_id }}', text: '{{ ($s->user->first_name ?? '') . " " . ($s->user->last_name ?? '') }} | {{ $s->s_id }}' },
+                        @endforeach
+                    ];
+
+                    function renderViewTags{{ $case->case_id }}(){
+                        var $container = $("#view-student-tag-input{{ $case->case_id }}");
+                        $container.empty();
+                        if(!viewStudents{{ $case->case_id }} || viewStudents{{ $case->case_id }}.length === 0){
+                            $container.append('<span class="student-tag">No students</span>');
+                            return;
+                        }
+                        // show first student
+                        var first = viewStudents{{ $case->case_id }}[0];
+                        $container.append(`<span class="student-tag">${first.text}</span>`);
+
+                        if(viewStudents{{ $case->case_id }}.length > 1){
+                            var moreCount = viewStudents{{ $case->case_id }}.length - 1;
+                            var $more = $(`<span class="student-more">+${moreCount} view more</span>`);
+                            $container.append($more);
+
+                            $more.on('click', function(e){
+                                e.stopPropagation();
+                                // remove any existing popup
+                                $container.find('.student-more-list').remove();
+                                var $list = $('<div class="student-more-list" role="menu"></div>');
+                                viewStudents{{ $case->case_id }}.slice(1).forEach(function(s){
+                                    $list.append(`<div class="student-more-item">${s.text}</div>`);
+                                });
+                                $container.append($list);
+
+                                // close on outside click
+                                $(document).on('click.viewmore{{ $case->case_id }}', function(ev){
+                                    if(!$(ev.target).closest('#view-student-tag-input{{ $case->case_id }}').length){
+                                        $list.remove();
+                                        $(document).off('click.viewmore{{ $case->case_id }}');
+                                    }
+                                });
+                            });
+                        }
+                    }
+
+                    // initial render
+                    renderViewTags{{ $case->case_id }}();
                 })();
             @endforeach
         @endisset

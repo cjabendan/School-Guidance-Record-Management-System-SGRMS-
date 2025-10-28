@@ -11,6 +11,7 @@ use App\Models\Student;
 use App\Models\CaseType;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Response;
+use Illuminate\Support\Facades\Log;
 
 class HeadCaseController extends Controller
 {
@@ -33,6 +34,20 @@ class HeadCaseController extends Controller
             $enum[] = trim($value, "'");
         }
         return $enum;
+    }
+
+    /**
+     * Return max length (int) for a column if it is varchar(n), otherwise null for TEXT/other.
+     */
+    private function getColumnMaxLength(string $table, string $field)
+    {
+        $col = DB::select("SHOW COLUMNS FROM `{$table}` WHERE Field = ?", [$field]);
+        if (!$col || !isset($col[0]->Type)) return null;
+        $type = $col[0]->Type;
+        if (preg_match('/varchar\((\d+)\)/i', $type, $m)) {
+            return (int)$m[1];
+        }
+        return null; // text, mediumtext, etc.
     }
 
     public function index(Request $request)
@@ -83,7 +98,7 @@ class HeadCaseController extends Controller
     {
         $request->validate([
             'case_type_id' => 'required',
-            'presenting_problem' => 'required|string|max:255',
+            'presenting_problem' => 'required|string',
             'description' => 'required|string',
             'severity' => 'required|string',
             'filed_date' => 'required|date',
@@ -103,23 +118,91 @@ class HeadCaseController extends Controller
             $case_type_id = $request->case_type_id;
         }
 
-        // Create the case
-        $case = CaseModel::create([
-            'case_type_id' => $case_type_id,
-            'presenting_problem' => $request->presenting_problem,
-            'description' => $request->description,
-            'severity' => $request->severity,
-            'witnesses' => $request->witnesses,
-            'investigation_notes' => $request->investigation_notes,
-            'evidence' => $request->evidence,
-            'filed_date' => $request->filed_date,
-            'filed_time' => $request->filed_time,
-            'status' => $request->status,
-            'action_taken' => $request->action_taken,
-            'resolution_notes' => $request->resolution_notes,
-            'resolved_date' => $request->resolved_date,
-            'follow_up_date' => $request->follow_up_date,
-        ]);
+        // Truncate fields to actual DB column limits when possible
+        $maxPresenting = $this->getColumnMaxLength('cases', 'presenting_problem');
+        $presenting_problem_input = $request->presenting_problem;
+        if ($maxPresenting && strlen($presenting_problem_input) > $maxPresenting) {
+            $presenting_problem_input = (function($v, $n){
+                if (function_exists('mb_substr')) return mb_substr($v,0,$n);
+                return substr($v,0,$n);
+            })($presenting_problem_input, $maxPresenting);
+        }
+
+        $maxAction = $this->getColumnMaxLength('cases', 'action_taken');
+        $action_taken_input = $request->action_taken ?? null;
+        if ($maxAction && $action_taken_input && strlen($action_taken_input) > $maxAction) {
+            $action_taken_input = (function($v, $n){
+                if (function_exists('mb_substr')) return mb_substr($v,0,$n);
+                return substr($v,0,$n);
+            })($action_taken_input, $maxAction);
+        }
+
+        $maxDesc = $this->getColumnMaxLength('cases', 'description');
+        $description_input = $request->description ?? null;
+        if ($maxDesc && $description_input && strlen($description_input) > $maxDesc) {
+            $description_input = (function($v, $n){
+                if (function_exists('mb_substr')) return mb_substr($v,0,$n);
+                return substr($v,0,$n);
+            })($description_input, $maxDesc);
+        }
+
+        // Normalize status
+        $status = $request->status;
+        if ($status === 'open') $status = 'Open';
+        if ($status === 'closed') $status = 'Closed';
+
+        try {
+            $case = CaseModel::create([
+                'case_type_id' => $case_type_id,
+                'presenting_problem' => $presenting_problem_input,
+                'description' => $description_input,
+                'severity' => $request->severity,
+                'witnesses' => $request->witnesses,
+                'investigation_notes' => $request->investigation_notes,
+                'evidence' => $request->evidence,
+                'filed_date' => $request->filed_date,
+                'filed_time' => $request->filed_time,
+                'status' => $status,
+                'action_taken' => $action_taken_input,
+                'resolution_notes' => $request->resolution_notes,
+                'resolved_date' => $request->resolved_date,
+                'follow_up_date' => $request->follow_up_date,
+            ]);
+        } catch (\Illuminate\Database\QueryException $e) {
+            // Fallback truncation for older DB schemas: try again with safe lengths
+            Log::warning('Case create QueryException, attempting fallback truncation', ['error' => $e->getMessage()]);
+            $presenting_problem_short = (function($v){
+                if (function_exists('mb_substr')) return mb_substr($v,0,255);
+                return substr($v,0,255);
+            })($presenting_problem_input ?? '');
+
+            $description_short = (function($v){
+                if (function_exists('mb_substr')) return mb_substr($v,0,1000);
+                return substr($v,0,1000);
+            })($description_input ?? '');
+
+            $action_short = (function($v){
+                if (function_exists('mb_substr')) return mb_substr($v,0,255);
+                return substr($v,0,255);
+            })($action_taken_input ?? '');
+
+            $case = CaseModel::create([
+                'case_type_id' => $case_type_id,
+                'presenting_problem' => $presenting_problem_short,
+                'description' => $description_short,
+                'severity' => $request->severity,
+                'witnesses' => $request->witnesses,
+                'investigation_notes' => $request->investigation_notes,
+                'evidence' => $request->evidence,
+                'filed_date' => $request->filed_date,
+                'filed_time' => $request->filed_time,
+                'status' => $status,
+                'action_taken' => $action_short,
+                'resolution_notes' => $request->resolution_notes,
+                'resolved_date' => $request->resolved_date,
+                'follow_up_date' => $request->follow_up_date,
+            ]);
+        }
 
         // Link involved students
         $studentIds = array_map('trim', explode(',', $request->involved_students));
@@ -137,9 +220,12 @@ class HeadCaseController extends Controller
 
     public function update(Request $request, $case_id)
     {
+    // Debug logging: capture request payload to help diagnose save failures
+    Log::info('HeadCaseController@update called', ['case_id' => $case_id, 'payload' => $request->all()]);
+
         $request->validate([
             'case_type_id' => 'required',
-            'presenting_problem' => 'required|string|max:255',
+            'presenting_problem' => 'required|string',
             'description' => 'required|string',
             'severity' => 'required|string',
             'filed_date' => 'required|date',
@@ -159,27 +245,89 @@ class HeadCaseController extends Controller
             $case_type_id = $request->case_type_id;
         }
 
-        $case = CaseModel::findOrFail($case_id);
+    $case = CaseModel::findOrFail($case_id);
+    Log::info('Case found for update', ['case_id' => $case->case_id]);
 
-        $case->update([
-            'case_type_id' => $case_type_id,
-            'presenting_problem' => $request->presenting_problem,
-            'description' => $request->description,
-            'severity' => $request->severity,
-            'witnesses' => $request->witnesses,
-            'investigation_notes' => $request->investigation_notes,
-            'evidence' => $request->evidence,
-            'filed_date' => $request->filed_date,
-            'filed_time' => $request->filed_time,
-            'status' => $request->status,
-            'action_taken' => $request->action_taken,
-            'resolution_notes' => $request->resolution_notes,
-            'resolved_date' => $request->resolved_date,
-            'follow_up_date' => $request->follow_up_date,
-        ]);
+    // Map simple UI status values to DB enum (Open/Closed)
+    $status = $request->status;
+    if ($status === 'open') $status = 'Open';
+    if ($status === 'closed') $status = 'Closed';
 
-        // Update involved students
-        $studentIds = array_map('trim', explode(',', $request->involved_students));
+        // Determine actual max length and truncate if needed
+        $maxPresenting = $this->getColumnMaxLength('cases', 'presenting_problem');
+        $presenting_problem_input = $request->presenting_problem;
+        if ($maxPresenting && strlen($presenting_problem_input) > $maxPresenting) {
+            $presenting_problem_input = (function($v, $n){
+                if (function_exists('mb_substr')) return mb_substr($v,0,$n);
+                return substr($v,0,$n);
+            })($presenting_problem_input, $maxPresenting);
+        }
+
+        // Truncate action_taken and description if necessary
+        $maxAction = $this->getColumnMaxLength('cases', 'action_taken');
+        $action_taken_input = $request->action_taken ?? null;
+        if ($maxAction && $action_taken_input && strlen($action_taken_input) > $maxAction) {
+            $action_taken_input = (function($v, $n){
+                if (function_exists('mb_substr')) return mb_substr($v,0,$n);
+                return substr($v,0,$n);
+            })($action_taken_input, $maxAction);
+        }
+
+        $maxDesc = $this->getColumnMaxLength('cases', 'description');
+        $description_input = $request->description ?? null;
+        if ($maxDesc && $description_input && strlen($description_input) > $maxDesc) {
+            $description_input = (function($v, $n){
+                if (function_exists('mb_substr')) return mb_substr($v,0,$n);
+                return substr($v,0,$n);
+            })($description_input, $maxDesc);
+        }
+
+        try {
+            $case->update([
+                'case_type_id' => $case_type_id,
+                'presenting_problem' => $presenting_problem_input,
+                'description' => $description_input,
+                'severity' => $request->severity,
+                'witnesses' => $request->witnesses,
+                'investigation_notes' => $request->investigation_notes,
+                'evidence' => $request->evidence,
+                'filed_date' => $request->filed_date,
+                'filed_time' => $request->filed_time,
+                'status' => $status,
+                'action_taken' => $action_taken_input,
+                'resolution_notes' => $request->resolution_notes,
+                'resolved_date' => $request->resolved_date,
+                'follow_up_date' => $request->follow_up_date,
+            ]);
+        } catch (\Illuminate\Database\QueryException $e) {
+            Log::warning('Case update QueryException, attempting fallback truncation', ['error' => $e->getMessage(), 'case_id' => $case->case_id]);
+
+            $presenting_short = (function($v){ if (function_exists('mb_substr')) return mb_substr($v,0,255); return substr($v,0,255); })($presenting_problem_input ?? '');
+            $description_short = (function($v){ if (function_exists('mb_substr')) return mb_substr($v,0,1000); return substr($v,0,1000); })($description_input ?? '');
+            $action_short = (function($v){ if (function_exists('mb_substr')) return mb_substr($v,0,255); return substr($v,0,255); })($action_taken_input ?? '');
+
+            // Try update again with safe truncated values
+            $case->update([
+                'case_type_id' => $case_type_id,
+                'presenting_problem' => $presenting_short,
+                'description' => $description_short,
+                'severity' => $request->severity,
+                'witnesses' => $request->witnesses,
+                'investigation_notes' => $request->investigation_notes,
+                'evidence' => $request->evidence,
+                'filed_date' => $request->filed_date,
+                'filed_time' => $request->filed_time,
+                'status' => $status,
+                'action_taken' => $action_short,
+                'resolution_notes' => $request->resolution_notes,
+                'resolved_date' => $request->resolved_date,
+                'follow_up_date' => $request->follow_up_date,
+            ]);
+        }
+
+    // Update involved students
+    $studentIds = array_map('trim', explode(',', $request->involved_students));
+    Log::info('Updating involved students', ['case_id' => $case->case_id, 'studentIds' => $studentIds]);
         // Remove all current links
         DB::table('case_students')->where('case_id', $case->case_id)->delete();
         // Add new links
@@ -195,11 +343,16 @@ class HeadCaseController extends Controller
         return redirect()->route('Head.cases.index')->with('success', 'Case updated successfully!');
     }
 
-    public function archive($case_id)
+    public function archive(Request $request, $case_id)
     {
         $case = CaseModel::findOrFail($case_id);
         $case->archived = true;
         $case->save();
+
+        // If AJAX/Fetch request, return JSON for smoother UX
+        if ($request->wantsJson() || $request->ajax() || $request->header('X-Requested-With') === 'XMLHttpRequest') {
+            return response()->json(['success' => true, 'message' => 'Case archived successfully!']);
+        }
 
         return redirect()->route('Head.cases.index')->with('success', 'Case archived successfully!');
     }
@@ -393,5 +546,18 @@ class HeadCaseController extends Controller
         fclose($handle);
 
         return redirect()->route('Head.cases.index')->with('success', 'Cases imported successfully!');
+    }
+
+    /**
+     * Return modal HTML for a single case.
+     * Useful when AJAX pagination replaces rows but the per-row modal markup is not present.
+     */
+    public function modal($case_id)
+    {
+    $case = CaseModel::with(['caseType', 'students'])->findOrFail($case_id);
+    // reuse the main modal partial but pass a single-item collection as `$cases`
+    $cases = collect([$case]);
+    $html = view('Head.Modal.caseModal', compact('cases'))->render();
+        return response($html, 200)->header('Content-Type', 'text/html');
     }
 }

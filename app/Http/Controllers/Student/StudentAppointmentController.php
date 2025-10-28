@@ -31,9 +31,9 @@ class StudentAppointmentController extends Controller
 		// Apply status filtering (case-insensitive) similar to Counselor/Head
 		$statusFilter = $request->has('status') ? strtolower($request->status) : null;
 		if ($statusFilter && $statusFilter !== 'all') {
-			// When filtering for pending, include Rescheduled since those are awaiting approval
-			if ($statusFilter === 'pending') {
-				$query->whereIn('status', ['Pending', 'Rescheduled']);
+			// When filtering for approved, include Rescheduled appointments
+			if ($statusFilter === 'approved') {
+				$query->whereIn('status', ['Approved', 'Rescheduled']);
 			} else {
 				// Case-insensitive match for other statuses
 				$query->whereRaw('LOWER(status) = ?', [$statusFilter]);
@@ -185,13 +185,26 @@ class StudentAppointmentController extends Controller
 	public function cancel(Request $request, $id)
 	{
 		$appointment = Appointments::findOrFail($id);
-		if (strtolower($appointment->status) !== 'pending') {
+		$userId = auth()->id();
+
+		// Verify this student is part of the appointment
+		$isStudentAppointment = $appointment->students()->where('user_id', $userId)->exists();
+		if (!$isStudentAppointment) {
 			if ($request->ajax() || $request->wantsJson()) {
-				return response()->json(['success' => false, 'message' => 'Only pending appointments can be cancelled.'], 400);
+				return response()->json(['success' => false, 'message' => 'Unauthorized to cancel this appointment'], 403);
 			}
-			return redirect()->back()->withErrors(['status' => 'Only pending appointments can be cancelled.']);
+			return redirect()->back()->with('error', 'Unauthorized to cancel this appointment');
 		}
 
+		// Check if appointment is in a cancellable state
+		if (!in_array(strtolower($appointment->status), ['pending', 'approved'])) {
+			if ($request->ajax() || $request->wantsJson()) {
+				return response()->json(['success' => false, 'message' => 'This appointment cannot be cancelled'], 400);
+			}
+			return redirect()->back()->with('error', 'This appointment cannot be cancelled');
+		}
+
+		// Update status to cancelled
 		$appointment->status = 'Cancelled';
 		if (Schema::hasColumn($appointment->getTable(), 'cancelled_at')) {
 			$appointment->cancelled_at = now();
@@ -202,6 +215,6 @@ class StudentAppointmentController extends Controller
 			return response()->json(['success' => true, 'status' => 'Cancelled']);
 		}
 
-		return redirect()->back()->with('success', 'Appointment cancelled successfully.');
+		return redirect()->back()->with('success', 'Appointment cancelled successfully');
 	}
 }

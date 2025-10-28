@@ -20,6 +20,7 @@ class HeadAppointmentController extends Controller
             'student_ids' => $appointment->students->pluck('s_id')->toArray(),
             'reason' => $appointment->reason,
             'appointment_datetime' => $appointment->appointment_datetime ? $appointment->appointment_datetime->format('Y-m-d\TH:i') : null,
+            'formatted_datetime' => $appointment->appointment_datetime ? $appointment->appointment_datetime->format('M d, Y h:i A') : null,
         ]);
     }
     public function move(Request $request, $id)
@@ -61,46 +62,58 @@ class HeadAppointmentController extends Controller
     }
 
     $appointment->appointment_datetime = $manilaDate;
+    $appointment->status = 'Rescheduled';
     $appointment->save();
-    return response()->json(['success' => true]);
+    return response()->json(['success' => true, 'status' => 'Rescheduled']);
     }
     public function index(Request $request)
     {
-
         $relations = ['students', 'counselor', 'requester', 'type'];
-        if (Schema::hasTable('appointment_reschedules')) {
-            $relations[] = 'reschedules';
-        }
         $query = Appointments::with($relations);
 
-        // Apply filters if any (case-insensitive)
-        $statusFilter = $request->has('status') ? strtolower($request->status) : null;
-        if ($statusFilter && $statusFilter !== 'all') {
-            // When filtering for pending, include 'Rescheduled' since they're awaiting approval
-            if ($statusFilter === 'pending') {
-                $query->whereIn('status', ['Pending', 'Rescheduled']);
-            } else {
-                // Use a case-insensitive WHERE to match ENUM values like 'Approved', 'Completed', etc.
-                $query->whereRaw('LOWER(`status`) = ?', [$statusFilter]);
-            }
-
-            // If filtering completed, optionally restrict by end_datetime if that column exists
-            if ($statusFilter === 'completed' && Schema::hasColumn((new Appointments)->getTable(), 'end_datetime')) {
-                $query->where('end_datetime', '>=', now());
-            }
-        }
-
-        if ($request->has('search') && $request->search != '') {
-            $search = $request->search;
-            $query->where(function ($q) use ($search) {
-                $q->where('appointment_id', 'like', '%' . $search . '%')
-                  ->orWhereHas('type', function ($typeQuery) use ($search) {
-                      $typeQuery->where('type_name', 'like', '%' . $search . '%');
-                  });
+        // search filter (keep existing logic if any)
+        if ($request->filled('search')) {
+            $s = $request->search;
+            $query->where(function($q) use ($s) {
+                $q->whereHas('students', function($sq) use ($s) {
+                    $sq->where('first_name', 'like', "%{$s}%")
+                       ->orWhere('last_name', 'like', "%{$s}%");
+                })
+                ->orWhereHas('counselor', function($cq) use ($s) {
+                    $cq->where('first_name', 'like', "%{$s}%")
+                       ->orWhere('last_name', 'like', "%{$s}%");
+                })
+                ->orWhere('appointment_id', 'like', "%{$s}%");
             });
         }
 
-        // NOTE: completed filtering and end_datetime handling is done above when normalizing status
+        // counselor filter
+        if ($request->filled('counselor_id')) {
+            $query->where('counselor_id', $request->counselor_id);
+        }
+
+        // status filter: treat "approved" filter as including "Rescheduled"; add missed filter
+        $status = strtolower($request->get('status', 'all'));
+        if ($status !== 'all') {
+            if ($status === 'approved') {
+                $query->whereIn('status', ['Approved', 'Rescheduled']);
+            } elseif ($status === 'pending') {
+                $query->whereRaw('LOWER(status) = ?', ['pending']);
+            } elseif ($status === 'declined') {
+                $query->whereRaw('LOWER(status) = ?', ['declined']);
+            } elseif ($status === 'cancelled') {
+                $query->whereRaw('LOWER(status) = ?', ['cancelled']);
+            } elseif ($status === 'completed') {
+                $query->whereRaw('LOWER(status) = ?', ['completed']);
+            } elseif ($status === 'missed') {
+                $query->whereRaw('LOWER(status) = ?', ['missed']);
+            } elseif ($status === 'rescheduled') {
+                $query->where('status', 'Rescheduled');
+            } else {
+                // generic exact match for other statuses (case-insensitive)
+                $query->whereRaw('LOWER(status) = ?', [$status]);
+            }
+        }
 
         $appointments = $query->orderBy('appointment_datetime', 'desc')->paginate(10)->withQueryString();
 
@@ -215,7 +228,7 @@ class HeadAppointmentController extends Controller
         $start = $request->query('start');
         $end = $request->query('end');
 
-        $appointments = Appointments::where('status', 'Approved')
+        $appointments = Appointments::whereIn('status', ['Approved', 'Rescheduled'])
             ->where(function ($query) use ($start, $end) {
                 $query->where(function ($q) use ($start, $end) {
                     $q->whereNotNull('appointment_datetime')
@@ -327,6 +340,25 @@ class HeadAppointmentController extends Controller
 
         return redirect()->back()->with('success', 'Session ended.');
     }
+
+    /**
+     * Mark an appointment as missed
+     */
+    public function markMissed(Request $request, $id)
+    {
+        $appointment = Appointments::findOrFail($id);
+        $appointment->status = 'Missed';
+        if (Schema::hasColumn($appointment->getTable(), 'missed_at')) {
+            $appointment->missed_at = now();
+        }
+        $appointment->save();
+
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json(['success' => true, 'status' => 'Missed']);
+        }
+
+        return redirect()->back()->with('success', 'Appointment marked as missed.');
+    }
     
     /**
      * Cancel an appointment (Head)
@@ -334,12 +366,13 @@ class HeadAppointmentController extends Controller
     public function cancel(Request $request, $id)
     {
         $appointment = Appointments::findOrFail($id);
-        // Only allow cancelling if appointment is currently pending
-        if (strtolower($appointment->status) !== 'pending') {
+        // Allow cancelling for Pending, Approved, or Rescheduled
+        $cancellable = ['pending', 'approved', 'rescheduled'];
+        if (!in_array(strtolower($appointment->status), $cancellable)) {
             if ($request->ajax() || $request->wantsJson()) {
-                return response()->json(['success' => false, 'message' => 'Only pending appointments can be cancelled.'], 400);
+                return response()->json(['success' => false, 'message' => 'Only pending, approved, or rescheduled appointments can be cancelled.'], 400);
             }
-            return redirect()->back()->withErrors(['status' => 'Only pending appointments can be cancelled.']);
+            return redirect()->back()->withErrors(['status' => 'Only pending, approved, or rescheduled appointments can be cancelled.']);
         }
 
         $appointment->status = 'Cancelled';
@@ -396,7 +429,7 @@ class HeadAppointmentController extends Controller
             'appointment_type_id' => $typeId,
             'reason' => $request->reason,
             'appointment_datetime' => $manilaDate,
-            'status' => 'Pending',
+            'status' => $request->counselor_id == auth()->id() ? 'Approved' : 'Pending',
             'requester_id' => auth()->id(),
         ]);
 
@@ -448,6 +481,8 @@ class HeadAppointmentController extends Controller
         $appointment->appointment_type_id = $typeId;
         $appointment->reason = $request->reason;
         $appointment->appointment_datetime = $manilaDate;
+            // Automatically approve when head counselor edits
+            $appointment->status = 'Rescheduled';
         $appointment->save();
 
         // Sync students

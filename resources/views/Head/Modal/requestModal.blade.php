@@ -2,11 +2,16 @@
     <div class="request-modal-content">
         <button id="close-modal-btn" class="qr-close">&times;</button>
         @include('components.small-loader')
-        <h2 id="modal-title">Child Link Information</h2>
+        <div class="modal-header-user">
+            <i class="fi fi-sr-folder-open"></i>
+            <h2 id="modal-title">Child Link Record</h2>
+            <span class="close-btn" onclick="closeUserModal()">&times;</span>
+        </div>
 
         <div class="request-info">
             <div class="request-left">
-                <img id="modal-parent-image" src="{{ asset('images/default.png') }}" alt="Parent" class="profile-thumb"
+                <img id="modal-parent-image" src="{{ asset('images/default.png') }}" alt="Parent"
+                    class="profile-thumb"
                     style="width:48px;height:48px;border-radius:50%;object-fit:cover;border:1px solid #ccc;">
                 <div style="display: flex; flex-direction: column;">
                     <span id="modal-parent" class="request-parent"></span>

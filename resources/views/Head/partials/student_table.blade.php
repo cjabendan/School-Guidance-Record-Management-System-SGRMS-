@@ -1,30 +1,37 @@
 <div class="table">
     @foreach ($students as $row)
         @php
-            // Case Severity Color
-            $cases = DB::table('case_students')
+               $cases = DB::table('case_students')
                 ->join('cases', 'cases.case_id', '=', 'case_students.case_id')
                 ->where('case_students.student_id', $row->s_id)
                 ->where('cases.archived', 0)
                 ->pluck('cases.severity');
 
             $severityColor = '#9ca3af'; // default gray
-            if ($cases->count() > 0) {
-                $minorCount = 0;
-                $majorCount = 0;
+            $totalCases = $cases->count();
+            if ($totalCases > 0) {
                 $hasGrave = false;
+                $firstSeverity = null; // used when there's exactly one case
                 foreach ($cases as $sev) {
                     $sev = strtolower(trim($sev));
-                    if ($sev === 'grave') $hasGrave = true;
-                    elseif ($sev === 'major') $majorCount++;
-                    elseif ($sev === 'minor') $minorCount++;
+                    if ($sev === 'grave') {
+                        $hasGrave = true;
+                    }
+                    if ($firstSeverity === null) {
+                        $firstSeverity = $sev;
+                    }
                 }
-                if ($hasGrave) {
+
+                if ($hasGrave || $totalCases >= 3) {
                     $severityColor = '#dc2626'; // red
-                } elseif ($majorCount >= 2 || $minorCount >= 2) {
+                } elseif ($totalCases === 2) {
                     $severityColor = '#f59e0b'; // orange
-                } elseif ($majorCount === 1 || $minorCount === 1) {
-                    $severityColor = '#16a34a'; // green
+                } else { // totalCases === 1
+                    if ($firstSeverity === 'major') {
+                        $severityColor = '#f59e0b'; // orange
+                    } elseif ($firstSeverity === 'minor') {
+                        $severityColor = '#16a34a'; // green
+                    }
                 }
             }
 

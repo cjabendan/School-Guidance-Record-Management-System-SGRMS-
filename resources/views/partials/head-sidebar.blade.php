@@ -24,7 +24,7 @@
 
                 <!-- Profiling (main link) -->
                 <li
-                    class="{{ Request::is('Head/counselors*') || Request::is('Head/parents*') || Request::is('Head/students*') ? 'active' : '' }}">
+                    class="{{ Request::is('Head/counselors*') || Request::is('Head/users*') || Request::is('Head/students*') ? 'active' : '' }}">
                     <a href="#" id="profiling-link">
                         <i class='bx bxs-user'></i>
                         <span class="text">Profiling</span>
@@ -33,15 +33,16 @@
                 </li>
 
                 <!-- Profiling submenu -->
-                <ul class="submenu {{ Request::is('Head/counselors*') || Request::is('Head/parents*') || Request::is('Head/students*') ? 'active' : '' }}"
+                <ul class="submenu {{ Request::is('Head/counselors*') || Request::is('Head/users*') || Request::is('Head/students*') ? 'active' : '' }}"
                     id="profiling-submenu">
+                       <!--   
                     <li class="{{ Request::is('Head/counselors*') ? 'active' : '' }}">
                         <a href="{{ url('Head/counselors') }}">
                             <i class="fi fi-sr-review"></i>
                             <span class="text">Counselors</span>
                         </a>
                     </li>
-                 <!--   
+                   
                     <li class="{{ Request::is('Head/parents*') ? 'active' : '' }}">
                         <a href="{{ url('Head/parents') }}">
                             <i class="fi fi-sr-users"></i>

@@ -19,10 +19,9 @@
       </form>
       <form id="cancelForm" method="POST" style="display:none; margin-right:8px;">
         @csrf
-        <button type="submit" class="btn btn-secondary" id="cancelBtn">Cancel</button>
+        <button type="submit" class="btn btn-secondary" id="cancelBtn">Cancel Appointment</button>
       </form>
-      <button type="button" class="btn btn-warning" id="studentRescheduleBtn" style="display:none; margin-right:8px;" onclick="openStudentRescheduleModal(0)">Request Reschedule</button>
-      <button type="button" class="btn btn-secondary" onclick="closeStudentReviewModal()">Close</button>
+     
     </div>
   </div>
 </div>
@@ -47,8 +46,21 @@ function openStudentReviewModal(appointmentId, detailsHtml, cancelUrl, status, s
   // remove badges
   var oldComp = document.getElementById('completedBadge'); if (oldComp && oldComp.parentNode) oldComp.parentNode.removeChild(oldComp);
   var oldCancelled = document.getElementById('cancelledBadge'); if (oldCancelled && oldCancelled.parentNode) oldCancelled.parentNode.removeChild(oldCancelled);
-  // Show cancel only for pending
-  if (cancelForm) { if (status === 'pending') cancelForm.style.display = 'inline-block'; else cancelForm.style.display = 'none'; }
+  
+  // Hide approve/decline for missed appointments
+  if (status === 'missed') {
+    if (document.getElementById('approveForm')) document.getElementById('approveForm').style.display = 'none';
+    if (document.getElementById('declineForm')) document.getElementById('declineForm').style.display = 'none';
+  }
+  
+  // Show cancel for pending and approved appointments
+  if (cancelForm) {
+    if (status === 'pending' || status === 'approved') {
+      cancelForm.style.display = 'inline-block';
+    } else {
+      cancelForm.style.display = 'none';
+    }
+  }
   // Show reschedule only for approved appointments
   var rescheduleBtn = document.getElementById('studentRescheduleBtn');
   if (rescheduleBtn) {
@@ -74,41 +86,5 @@ function closeStudentReviewModal() {
 }
 </script>
 
-<!-- Reschedule Modal for Student -->
-<div id="studentRescheduleModal" class="custom-modal" style="display:none;">
-  <div class="custom-modal-content">
-    <div class="modal-header">
-      <h5 class="modal-title">Request Reschedule</h5>
-      <button type="button" class="close-modal-btn" onclick="closeStudentRescheduleModal()">×</button>
-    </div>
-    <div class="modal-body">
-      <form id="studentRescheduleForm" method="POST" action="">
-        @csrf
-        <input type="hidden" name="appointment_id" id="student_reschedule_appointment_id" value="">
-        <div class="form-group">
-          <label for="proposed_datetime">Proposed Date & Time</label>
-          <input type="datetime-local" name="proposed_datetime" id="student_proposed_datetime" class="form-control">
-        </div>
-        <div class="form-group">
-          <label for="reason">Reason</label>
-          <textarea name="reason" id="student_reschedule_reason" class="form-control" rows="3" required></textarea>
-        </div>
-        <div style="margin-top:12px; text-align:right;">
-          <button type="button" class="btn btn-secondary" onclick="closeStudentRescheduleModal()">Cancel</button>
-          <button type="submit" class="btn btn-primary">Send Request</button>
-        </div>
-      </form>
-    </div>
-  </div>
-</div>
 
-<script>
-function openStudentRescheduleModal(appointmentId) {
-  document.getElementById('student_reschedule_appointment_id').value = appointmentId;
-  var form = document.getElementById('studentRescheduleForm');
-  // set action to the Student reschedule route
-  form.action = "{{ url('Student/appointments') }}/" + appointmentId + "/reschedule";
-  document.getElementById('studentRescheduleModal').style.display = 'flex';
-}
-function closeStudentRescheduleModal() { document.getElementById('studentRescheduleModal').style.display = 'none'; }
-</script>
+

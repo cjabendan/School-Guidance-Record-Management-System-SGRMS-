@@ -17,7 +17,11 @@
         @csrf
         <button type="submit" class="btn btn-danger" id="endSessionBtn">Complete</button>
       </form>
-      <form id="cancelForm" method="POST" style="display:none; margin-right:8px;">
+      <form id="missedForm" method="POST" style="display:none; margin-right:8px;">
+        @csrf
+        <button type="submit" class="btn btn-danger" id="missedBtn">Mark as Missed</button>
+      </form>
+      <form id="cancelForm" method="POST" style="display:none; margin-right:8px;">\
         @csrf
         <button type="submit" class="btn btn-secondary" id="cancelBtn">Cancel</button>
       </form>
@@ -55,11 +59,16 @@ function openReviewModal(appointmentId, detailsHtml, approveUrl, declineUrl, can
   var approveForm = document.getElementById('approveForm');
   var declineForm = document.getElementById('declineForm');
   var cancelForm = document.getElementById('cancelForm');
+  var missedForm = document.getElementById('missedForm');
   if (approveForm) approveForm.action = approveUrl || '';
   if (declineForm) declineForm.action = declineUrl || '';
   if (cancelForm) {
     cancelForm.action = cancelUrl || '';
     cancelForm.style.display = 'none';
+  }
+  if (missedForm) {
+    missedForm.action = '/Counselor/appointments/' + appointmentId + '/missed';
+    missedForm.style.display = (status === 'approved' || status === 'rescheduled') ? 'inline-block' : 'none';
   }
   window.currentAppointmentId = appointmentId;
   status = (status || '').toLowerCase();
@@ -80,9 +89,9 @@ function openReviewModal(appointmentId, detailsHtml, approveUrl, declineUrl, can
   if (status === 'declined') {
     if (document.getElementById('approveForm')) document.getElementById('approveForm').style.display = 'none';
     if (document.getElementById('declineForm')) document.getElementById('declineForm').style.display = 'none';
-    if (rescheduleEl) rescheduleEl.style.display = 'inline-block';
+    if (rescheduleEl) rescheduleEl.style.display = 'none'; // hide reschedule when declined
     if (closeEl) closeEl.style.display = 'none';
-  } else if (status === 'approved') {
+  } else if (status === 'approved' || status === 'rescheduled') {
     if (document.getElementById('approveForm')) document.getElementById('approveForm').style.display = 'none';
     if (document.getElementById('declineForm')) document.getElementById('declineForm').style.display = 'none';
     if (rescheduleEl) rescheduleEl.style.display = 'inline-block';
@@ -138,12 +147,17 @@ function openReviewModal(appointmentId, detailsHtml, approveUrl, declineUrl, can
       var cbadge = document.createElement('span'); cbadge.className = 'badge badge-success'; cbadge.id = 'completedBadge'; cbadge.style.marginRight = '8px'; cbadge.innerText = 'Complete'; footer.insertBefore(cbadge, footer.firstChild);
     }
   }
-  // Show cancel only when appointment is pending
+  // Show cancel when appointment is Pending, Approved, or Rescheduled (but not if Missed)
   if (document.getElementById('cancelForm')) {
-    if (status === 'pending') { document.getElementById('cancelForm').style.display = 'inline-block'; } else { document.getElementById('cancelForm').style.display = 'none'; }
+    var cancellable = ['pending', 'approved', 'rescheduled'];
+    if (cancellable.includes(status) && status !== 'missed') {
+      document.getElementById('cancelForm').style.display = 'inline-block';
+    } else {
+      document.getElementById('cancelForm').style.display = 'none';
+    }
   }
-  // If appointment is cancelled, hide all action buttons and show a Cancelled badge
-  if (status === 'cancelled') {
+  // If appointment is cancelled or missed, hide all action buttons and show appropriate badge
+  if (status === 'cancelled' || status === 'missed') {
     if (document.getElementById('approveForm')) document.getElementById('approveForm').style.display = 'none';
     if (document.getElementById('declineForm')) document.getElementById('declineForm').style.display = 'none';
     if (document.getElementById('startSessionForm')) document.getElementById('startSessionForm').style.display = 'none';
@@ -152,8 +166,10 @@ function openReviewModal(appointmentId, detailsHtml, approveUrl, declineUrl, can
     if (rescheduleEl) rescheduleEl.style.display = 'none';
     if (closeEl) closeEl.style.display = 'inline-block';
     var footer = document.querySelector('#reviewAppointmentModal .modal-footer');
-    if (footer && !document.getElementById('cancelledBadge')) {
+    if (status === 'cancelled' && footer && !document.getElementById('cancelledBadge')) {
       var badge = document.createElement('span'); badge.className = 'badge badge-danger'; badge.id = 'cancelledBadge'; badge.style.marginRight = '8px'; badge.innerText = 'Cancelled'; footer.insertBefore(badge, footer.firstChild);
+    } else if (status === 'missed' && footer && !document.getElementById('missedBadge')) {
+      var badge = document.createElement('span'); badge.className = 'badge badge-danger'; badge.id = 'missedBadge'; badge.style.marginRight = '8px'; badge.innerText = 'Missed'; footer.insertBefore(badge, footer.firstChild);
     }
   }
 }
@@ -319,7 +335,7 @@ document.addEventListener('DOMContentLoaded', function () {
         badge.className = 'badge badge-warning';
         badge.id = 'inSessionBadge';
         badge.style.marginRight = '8px';
-        badge.innerText = 'In Session';
+        badge.innerText = 'Approved';
         footer.insertBefore(badge, footer.firstChild);
       }
 

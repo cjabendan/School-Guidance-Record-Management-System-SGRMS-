@@ -1,0 +1,188 @@
+.modal-user {
+    display: none;
+    position: fixed;
+    z-index: 2000;
+    left: 0;
+    top: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.35);
+    backdrop-filter: blur(3px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    font-family: "Poppins", sans-serif;
+    overflow-y: auto;
+    animation: fadeInModal 0.3s ease-in-out;
+}
+
+.modal-user[style*="display: block"] {
+    display: flex !important;
+}
+
+.modal-content-user {
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.15);
+    padding: 32px 36px;
+    width: 100%;
+    max-width: 900px;
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+    position: relative;
+}
+
+.modal-header-user {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    padding-bottom: 10px;
+}
+
+
+
+.modal-header-user h2,
+.modal-header-user i {
+    color: #003060;
+    font-size: 1.5rem;
+    letter-spacing: 1px;
+    font-weight: 700;
+}
+
+
+.close-btn {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    background: none;
+    border: none;
+    font-size: 28px;
+    color: #c2c0c0;
+    cursor: pointer;
+    line-height: 1;
+    transition: color 0.2s ease;
+}
+.close-btn:hover {
+    color: #000;
+}
+
+
+.form-row {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.form-group {
+    flex: 1 1 45%;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+label {
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: #003060;
+}
+
+input, select {
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 1px solid #d1e6ff;
+    font-size: 0.95rem;
+    outline: none;
+    transition: 0.2s;
+}
+
+input:focus, select:focus, textarea:focus {
+    border-color: #003060;
+}
+
+.select-wrapper {
+    position: relative;
+}
+
+.select-icon {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+    color: #0080ff;
+}
+
+.modal-footer-user {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 10px;
+}
+
+.btn {
+    padding: 10px 22px;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    border: none;
+    transition: 0.2s;
+}
+
+.btn.save {
+    background: #003060;
+    color: #fff;
+}
+
+.btn.cancel {
+    background: #e2e2e2;
+    color: #0f0f0f;
+}
+
+.btn.save:hover { background: #055cb3; }
+.btn.cancel:hover { background: #e2e2e2; color: black; }
+
+@keyframes fadeInModal {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+@media (max-width: 650px) {
+    .form-row { flex-direction: column; gap: 12px; }
+    .form-group { flex: 1 1 100%; }
+    .modal-content-user { padding: 24px 20px; }
+}
+
+.reset-password-btn {
+    margin-top: 6px;
+    padding: 6px 12px;
+    font-size: 0.85rem;
+    border-radius: 6px;
+    border: none;
+    background-color: #ff4d4f;
+    color: #fff;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.reset-password-btn:hover {
+    background-color: #d9363e;
+}
+
+
+.modal-icon-wrapper {
+    background-color: #003060;
+    border-radius: 50%;
+    padding: .8rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-icon {
+      width: 28px;
+      color: #fff;
+    height: 28px;
+}

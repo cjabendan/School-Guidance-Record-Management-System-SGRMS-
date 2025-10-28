@@ -26,7 +26,7 @@
 .auth-icon {
     width: 30px;
     height: 30px;
-    color: #1ea7ff;
+    color: #003060;
 }
 
 .auth-header {
@@ -97,7 +97,7 @@
     width: 100%;
     padding: 0.75rem 1rem;
     border-radius: 7px;
-    background-color: #1ea7ff;
+    background-color: #003060;
     color: white;
     font-size: 0.95rem;
     font-weight: 500;

@@ -31,6 +31,7 @@
                     'declined' => 'status-dot status-declined',
                     'cancelled' => 'status-dot status-declined',
                     'pending' => 'status-dot status-pending',
+                    'missed' => 'status-dot status-declined',
                     default => 'status-dot',
                 };
                 $labelClass = match ($status) {
@@ -38,6 +39,7 @@
                     'declined' => 'status-label status-declined',
                     'cancelled' => 'status-label status-declined',
                     'pending' => 'status-label status-pending',
+                    'missed' => 'status-label status-declined',
                     default => 'status-label',
                 };
             @endphp

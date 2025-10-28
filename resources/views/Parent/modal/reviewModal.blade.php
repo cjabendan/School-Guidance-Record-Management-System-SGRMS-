@@ -19,10 +19,9 @@
       </form>
       <form id="cancelForm" method="POST" style="display:none; margin-right:8px;">
         @csrf
-        <button type="submit" class="btn btn-secondary" id="cancelBtn">Cancel</button>
+        <button type="submit" class="btn btn-secondary" id="cancelBtn">Cancel Appointment</button>
       </form>
-      <button type="button" class="btn btn-warning" id="parentRescheduleBtn" style="display:none; margin-right:8px;" onclick="openParentRescheduleModal(0)">Request Reschedule</button>
-      <button type="button" class="btn btn-secondary" onclick="closeParentReviewModal()">Close</button>
+     
     </div>
   </div>
 </div>
@@ -47,12 +46,23 @@ function openParentReviewModal(appointmentId, detailsHtml, cancelUrl, status, st
   var cancelForm = document.getElementById('cancelForm');
   if (cancelForm) { cancelForm.action = cancelUrl || ''; cancelForm.style.display = 'none'; }
   status = (status || '').toLowerCase();
+  
+  // Hide approve/decline for missed appointments
+  if (status === 'missed') {
+    if (document.getElementById('approveForm')) document.getElementById('approveForm').style.display = 'none';
+    if (document.getElementById('declineForm')) document.getElementById('declineForm').style.display = 'none';
+  }
+  
   // remove old badges
   var oldComp = document.getElementById('completedBadge'); if (oldComp && oldComp.parentNode) oldComp.parentNode.removeChild(oldComp);
   var oldCancelled = document.getElementById('cancelledBadge'); if (oldCancelled && oldCancelled.parentNode) oldCancelled.parentNode.removeChild(oldCancelled);
   // Show cancel only for pending
   if (cancelForm) {
-    if (status === 'pending') cancelForm.style.display = 'inline-block'; else cancelForm.style.display = 'none';
+    if (status === 'pending' || status === 'approved') {
+        cancelForm.style.display = 'inline-block';
+    } else {
+        cancelForm.style.display = 'none';
+    }
   }
   // Show reschedule only for approved appointments
   var rescheduleBtn = document.getElementById('parentRescheduleBtn');

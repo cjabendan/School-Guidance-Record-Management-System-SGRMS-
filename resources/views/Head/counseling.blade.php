@@ -81,5 +81,5 @@
             </div>
         </div>
     </section>
-    @include('Head.Modal.caseModal')
+    @include('Head.Modal.counselingModal')
 @endsection

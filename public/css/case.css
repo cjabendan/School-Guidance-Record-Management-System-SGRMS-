@@ -244,6 +244,49 @@
     line-height: 1;
 }
 
+/* Compact "view more" control for View modal */
+.student-more {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #eef6ff;
+    color: #0b66b2;
+    border: 1px solid #dbeffd;
+    padding: 6px 10px;
+    border-radius: 999px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 6px 18px rgba(13, 60, 98, 0.04);
+    margin-left: 6px;
+}
+.student-more:hover {
+    background: #e6f3ff;
+    transform: translateY(-1px);
+}
+
+/* Popup list that appears when clicking view more */
+.student-more-list {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    min-width: 220px;
+    max-width: 420px;
+    background: #fff;
+    border: 1px solid #e6f3ff;
+    border-radius: 8px;
+    box-shadow: 0 8px 28px rgba(13,60,98,0.12);
+    padding: 8px;
+    z-index: 2000;
+}
+.student-more-item {
+    padding: 8px 10px;
+    border-radius: 6px;
+    color: #032b53;
+    font-weight: 500;
+}
+.student-more-item + .student-more-item { margin-top: 6px; }
+.student-more-item:hover { background: #f5fbff; }
+
 /* Smooth, minimal scrollbar for the list */
 .list-group::-webkit-scrollbar {
     width: 8px;
@@ -260,18 +303,110 @@
     max-width: 700px !important; 
 }
 
+.case-modal-title {
+    font-size: 2rem;
+    color: #0b2b4a;
+    letter-spacing: 0.5px;
+}
+
+/* ============================
+   Section Title Enhancement
+   ============================ */
+.section-title {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #0b2b4a;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    border-left: 4px solid #1ea7ff;
+    padding-left: 10px;
+    margin-top: 50px;
+    margin-bottom: 16px;
+    background: linear-gradient(to right, rgba(30,167,255,0.05), transparent);
+    display: inline-block;
+}
+
+/* ============================
+   Form Appearance Enhancement
+   ============================ */
 .case-modal .add-input,
 .case-modal textarea,
 .case-modal select,
 .case-modal input {
     font-family: 'Poppins', sans-serif;
-    color: #6b7280; 
+    color: #0b2b4a;
     font-weight: 400;
-}s
+    background: #f9fafb;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 0.95rem;
+    width: 100%;
+    transition: all 0.25s ease;
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+}
 
+.case-modal .add-input:focus,
+.case-modal textarea:focus,
+.case-modal select:focus,
+.case-modal input:focus {
+    border-color: #1ea7ff;
+    box-shadow: 0 0 0 3px rgba(30,167,255,0.15);
+    outline: none;
+    background: #fff;
+}
+
+.case-modal textarea {
+    resize: vertical;
+    min-height: 100px;
+}
+
+/* Placeholder refinement */
 .case-modal .add-input::placeholder,
-.case-modal textarea::placeholder {
+.case-modal textarea::placeholder,
+.case-modal select::placeholder {
     color: #9ca3af;
+    font-style: italic;
+}
+
+/* Labels Styling */
+.case-modal label {
+    font-weight: 600;
+    color: #0b2b4a;
+    display: block;
+    margin-bottom: 6px;
+    font-size: 0.95rem;
+}
+
+/* Buttons in Modal */
+.case-modal .btn {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+    border-radius: 8px;
+    padding: 10px 20px;
+    cursor: pointer;
+    transition: all 0.25s ease;
+}
+
+.case-modal .btn-primary {
+    background: linear-gradient(90deg, #1ea7ff, #0078d7);
+    color: #fff;
+    border: none;
+    box-shadow: 0 4px 10px rgba(30,167,255,0.25);
+}
+
+.case-modal .btn-primary:hover {
+    background: linear-gradient(90deg, #0078d7, #1ea7ff);
+    transform: translateY(-1px);
+}
+
+/* Optional subtle card effect for form sections */
+.case-modal-content {
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 24px 28px;
+    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.08);
+    animation: fadeIn 0.3s ease;
 }
 
 #exportDropdownMenu {
@@ -294,88 +429,129 @@
     display: block !important;
 }
 
-.archive-modal {
-  background: #fff;
-  border-radius: 10px;
-  width: 100%;
-  max-width: 460px;
-  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.15);
+/* =========================
+   ARCHIVE CASE MODAL
+========================= */
+.archive-modal-card {
   overflow: hidden;
-  animation: slideUp 0.3s ease;
+  position: relative;
+  background-color: #ffffff;
+  text-align: left;
+  border-radius: 0.75rem;
+  max-width: 500px !important;
+  margin-top: 150px !important;
+  box-shadow:
+    0 20px 25px -5px rgba(0, 0, 0, 0.1),
+    0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  animation: slideUp 0.35s ease;
 }
 
-.archive-modal .modal-header {
+/* Header container */
+.archive-modal-card .header {
+  padding: 1.5rem 1.25rem 1rem;
+  background-color: #ffffff;
+}
+
+/* Red warning icon */
+.archive-modal-card .image {
   display: flex;
-  justify-content: space-between;
+  margin: 0 auto;
+  background-color: #fee2e2;
+  flex-shrink: 0;
+  justify-content: center;
   align-items: center;
-  padding: 18px 24px;
-  border-bottom: 1px solid #e5e7eb;
+  width: 5rem;
+  height: 5rem;
+  border-radius: 9999px;
 }
-
-.archive-modal .modal-title {
-  font-size: 1.1rem;
-  color: #0b2b4a;
-  font-weight: 600;
-  letter-spacing: 0.3px;
-}
-
-.archive-modal .close {
-  font-size: 1.6rem;
-  color: #999;
-  cursor: pointer;
-  transition: color 0.2s ease;
-}
-
-.archive-modal .close:hover {
+.archive-modal-card .image svg {
   color: #dc2626;
+  width: 2.5rem;
+  height: 2.5rem;
 }
 
-.archive-modal .modal-body {
-  padding: 18px 24px;
-  color: #0b2b4a;
-  font-size: 0.98rem;
+/* Content (Title + Message) */
+.archive-modal-card .content {
+  margin-top: 1rem;
+  text-align: center;
+}
+.archive-modal-card .title {
+  color: #111827;
+  font-size: 1.05rem;
+  font-weight: 600;
+  line-height: 1.5rem;
+}
+.archive-modal-card .message {
+  margin-top: 0.5rem;
+  color: #6b7280;
+  font-size: 1.25rem;
+  line-height: 1.4rem;
 }
 
-.archive-modal{
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-  padding: 16px 24px 22px;
+/* Actions (Buttons) */
+.archive-modal-card .actions {
+  margin: 1.25rem 1.25rem 1rem;
+  background-color: #f9fafb;
+  text-align: center;
 }
 
-.archive-modal .btn {
-  font-size: 0.95rem;
-  border-radius: 6px;
-  padding: 8px 18px;
+/* Archive button (primary action) */
+.archive-modal-card .archive {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0.6rem 1rem;
+  width: 100%;
+  height: 60px;
+  background-color: #dc2626;
+  color: #ffffff;
+  font-size: 1.15rem;
+  line-height: 1.5rem;
   font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s ease;
+  border-radius: 0.4rem;
+  border: 1px solid transparent;
+  transition: background-color 0.2s ease, transform 0.15s ease;
+  box-shadow: 0 2px 4px rgba(220, 38, 38, 0.2);
+}
+.archive-modal-card .archive:hover {
+  background-color: #b91c1c;
+  transform: translateY(-1px);
 }
 
-/* Cancel button */
-.archive-modal .btn-cancel {
-  background: #f3f4f6;
-  color: #0b2b4a;
+/* Cancel button (secondary action) */
+.archive-modal-card .cancel {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 0.75rem;
+  padding: 0.6rem 1rem;
+  width: 100%;
+  height: 60px;
+  background-color: #ffffff;
+  color: #374151;
+  font-size: 1.15rem;
+  line-height: 1.5rem;
+  font-weight: 500;
+  border-radius: 0.4rem;
   border: 1px solid #d1d5db;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  transition: background-color 0.2s ease, transform 0.15s ease;
+}
+.archive-modal-card .cancel:hover {
+  background-color: #f3f4f6;
+  transform: translateY(-1px);
 }
 
-/* Confirm button */
-.archive-modal .btn-confirm {
-  background: linear-gradient(180deg, #2563eb, #1e40af);
-  color: #fff;
-  border: none;
-  box-shadow: 0 4px 10px rgba(37, 99, 235, 0.25);
-}
-
-/* ===== Animations ===== */
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
+/* Animation for entry */
 @keyframes slideUp {
-  from { transform: translateY(20px); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
 
 /* Pagination helper styles to match project theme (applies to Laravel paginator markup) */
