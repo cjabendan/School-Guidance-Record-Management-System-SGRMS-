@@ -39,17 +39,7 @@
                     </a>
                 </div>
                 <div class="search-bar">
-                    <div class="table-search">
-                        <form method="GET" action="<?php echo e(route('Head.appointments.index')); ?>">
-                            <i class="fi fi-br-search"></i>
-                            <input type="text" name="search" value="<?php echo e(request('search')); ?>"
-                                placeholder="Search appointments..." id="appointment-search-input">
-                            <?php if(request('category')): ?>
-                                <input type="hidden" name="category" value="<?php echo e(request('category')); ?>">
-                            <?php endif; ?>
-                            <button type="submit" style="display:none"></button>
-                        </form>
-                    </div>
+                    
                     <div class="filters">
                             <select id="counselor-filter">
                                 <option value="">All Counselors</option>

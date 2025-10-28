@@ -14,14 +14,8 @@
             <div class="form-group">
                 <label for="student_id">Student</label>
                 <!-- now storing student full name as student_name -->
-                <select id="student_name" name="student_name" required>
-                    <option value="">Select Student</option>
-                    @foreach($students as $student)
-                        <option value="{{ $student->user->first_name }} {{ $student->user->last_name }}">
-                            {{ $student->user->first_name }} {{ $student->user->last_name }}
-                        </option>
-                    @endforeach
-                </select>
+                <input id="student_name" name="student_name" required>
+                </input>
             </div>
 
             <div class="form-group">

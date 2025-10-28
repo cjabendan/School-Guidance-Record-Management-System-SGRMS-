@@ -1,4 +1,5 @@
 
+
 // Utility: Get year suffix (for college levels)
 function getYearSuffix(i) {
     if (i === 1) return "st";
@@ -512,30 +513,138 @@ window.openViewStudentModal = function openViewStudentModal(s_id) {
                 modal.style.zIndex = 9999;
             }
 
-            // Fetch case records and display
+            // Fetch case records and display + offense summary
             fetch(`/Head/students/${s_id}/cases`)
                 .then(response => response.json())
                 .then(cases => {
                     console.log('Case records response:', cases);
                     const caseRecordsDiv = document.getElementById('view_case_records');
                     const template = document.getElementById('case_record_template');
+                    const viewMoreBtn = document.getElementById('viewMoreCasesBtn');
+                    const offenseContainer = document.getElementById('offenseSummaryContainer');
+                    const offenseTotalEl = document.getElementById('offenseTotal');
+
+                    // Helper: compute school year start (assume school year starts July 1)
+                    function getSchoolYearLabel(dateStr) {
+                        if (!dateStr) return null;
+                        const d = new Date(dateStr);
+                        if (isNaN(d.getTime())) return null;
+                        const month = d.getMonth(); // 0-11
+                        let startYear = (month >= 6) ? d.getFullYear() : d.getFullYear() - 1; // July or later => startYear = year
+                        return `${startYear}-${startYear + 1}`;
+                    }
+
+                    // Build offense counts grouped by school year
+                    const counts = {};
+                    let minYear = null;
+                    let maxYear = null;
+
+                    if (Array.isArray(cases) && cases.length > 0) {
+                        cases.forEach(c => {
+                            const dateStr = c.filed_date || c.date_reported || c.created_at || c.date;
+                            const label = getSchoolYearLabel(dateStr) || 'Unknown';
+                            if (label !== 'Unknown') {
+                                const start = parseInt(label.split('-')[0], 10);
+                                if (minYear === null || start < minYear) minYear = start;
+                                if (maxYear === null || start > maxYear) maxYear = start;
+                            }
+                            counts[label] = (counts[label] || 0) + 1;
+                        });
+                    }
+
+                    // If we have a range of years, ensure every year in range is represented (0 if none)
+                    const now = new Date();
+                    const currentStart = (now.getMonth() >= 6) ? now.getFullYear() : now.getFullYear() - 1;
+                    if (minYear === null && maxYear === null) {
+                        // no cases: show current year only
+                        minYear = currentStart;
+                        maxYear = currentStart;
+                    } else {
+                        // ensure we at least include up to currentStart
+                        if (maxYear < currentStart) maxYear = currentStart;
+                    }
+
+                    // Render offense summary
+                    if (offenseContainer) {
+                        offenseContainer.innerHTML = '';
+                        for (let y = minYear; y <= maxYear; y++) {
+                            const label = `${y}-${y + 1}`;
+                            const count = counts[label] || 0;
+                            const entry = document.createElement('div');
+                            entry.className = 'offense-year-row';
+                            entry.innerHTML = `<div class="offense-year">${label}</div><div class="offense-count">Offense ${count}</div>`;
+                            offenseContainer.appendChild(entry);
+                        }
+                    }
+
+                    // Total offenses
+                    const total = Object.keys(counts).reduce((sum, k) => sum + (counts[k] || 0), 0);
+                    if (offenseTotalEl) {
+                        offenseTotalEl.textContent = `Total Offenses: ${total}`;
+                    }
+
+                    // Render case cards: show up to 2 recent by default, toggle to show all
                     if (caseRecordsDiv) {
                         caseRecordsDiv.innerHTML = '';
                         if (!cases || cases.length === 0) {
                             caseRecordsDiv.innerHTML = '<div style="color:#64748b;">No case records found.</div>';
+                            if (viewMoreBtn) viewMoreBtn.style.display = 'none';
                         } else {
-                            cases.forEach(c => {
-                                if (!template) return;
-                                const clone = template.cloneNode(true);
-                                clone.style.display = '';
-                                // Fill in values
-                                clone.querySelector('.case-title').textContent = c.case_title || 'Case';
-                                clone.querySelector('.case-severity').innerHTML = `<span style='font-weight:500;'>Severity:</span> <span style='color:${c.severity === 'Severe' ? '#e11d48' : c.severity === 'Intermediate' ? '#f59e42' : '#2563eb'}; font-weight:600;'>${c.severity || 'N/A'}</span>`;
-                                clone.querySelector('.case-date').innerHTML = `<span style='font-weight:500;'>Date:</span> ${c.filed_date || c.date_reported || 'N/A'}`;
-                                clone.querySelector('.case-status').innerHTML = `<span style='font-weight:500;'>Status:</span> ${c.status || 'N/A'}`;
-                                clone.querySelector('.case-description').textContent = c.description || '';
-                                caseRecordsDiv.appendChild(clone);
-                            });
+                            // show first 2 records by default
+                            const initialCount = 1;
+                            function renderList(list) {
+                                caseRecordsDiv.innerHTML = '';
+                                list.forEach(c => {
+                                    if (!template) return;
+                                    const clone = template.cloneNode(true);
+                                    clone.style.display = '';
+                                    const titleEl = clone.querySelector('.case-title');
+                                    if (titleEl) titleEl.textContent = c.case_title || 'Case';
+                                    const sevEl = clone.querySelector('.case-severity');
+                                    const sevTextEl = sevEl ? sevEl.querySelector('.badge-text') : null;
+                                    if (sevTextEl) {
+                                        // Map server severity to color classes or inline color
+                                        let color = '#2563eb';
+                                        if (c.severity && (c.severity.toLowerCase() === 'grave' || c.severity.toLowerCase() === 'severe')) color = '#e11d48';
+                                        else if (c.severity && c.severity.toLowerCase() === 'minor') color = '#10b981';
+                                        else if (c.severity && c.severity.toLowerCase() === 'intermediate') color = '#f59e42';
+                                        sevTextEl.textContent = c.severity || 'N/A';
+                                        sevTextEl.style.color = color;
+                                        sevTextEl.style.fontWeight = '600';
+                                    }
+                                    const dateEl = clone.querySelector('.case-date');
+                                    if (dateEl) dateEl.innerHTML = `<span style='font-weight:500;'>Date:</span> ${c.filed_date || c.date_reported || 'N/A'}`;
+                                    const statusEl = clone.querySelector('.case-status');
+                                    if (statusEl) statusEl.innerHTML = `<span style='font-weight:500;'>Status:</span> ${c.status || 'N/A'}`;
+                                    const descEl = clone.querySelector('.case-description') || clone.querySelector('.record-description');
+                                    if (descEl) descEl.textContent = c.description || '';
+                                    caseRecordsDiv.appendChild(clone);
+                                });
+                            }
+
+                            // initial render
+                            const initialList = cases.slice(0, initialCount);
+                            renderList(initialList);
+
+                            // View more toggle (show all / collapse)
+                            if (viewMoreBtn) {
+                                viewMoreBtn.style.display = (cases.length >= 2) ? 'inline-block' : 'none';
+                                viewMoreBtn.textContent = 'View More...';
+                                viewMoreBtn.dataset.expanded = 'false';
+                                viewMoreBtn.onclick = function(e) {
+                                    e.preventDefault();
+                                    const expanded = viewMoreBtn.dataset.expanded === 'true';
+                                    if (!expanded) {
+                                        renderList(cases);
+                                        viewMoreBtn.textContent = 'Show Less';
+                                        viewMoreBtn.dataset.expanded = 'true';
+                                    } else {
+                                        renderList(initialList);
+                                        viewMoreBtn.textContent = 'View More...';
+                                        viewMoreBtn.dataset.expanded = 'false';
+                                    }
+                                };
+                            }
                         }
                     } else {
                         console.warn('view_case_records div not found in modal!');
@@ -692,24 +801,56 @@ function updateStudentStatusCell(s_id, newStatus) {
 
     // Find student card in your current responsive layout
     const card = document.querySelector(`#student-list .table-card[data-id="${s_id}"]`);
-    if (card) {
-        const cols = card.querySelectorAll(".table-col");
-        if (cols.length >= 6) {
-            const statusCol = cols[5];
-            statusCol.innerHTML = `
-                <span style="display:inline-block;
-                             padding:4px 14px;
-                             border-radius:16px;
-                             font-weight:600;
-                             background:${color}20;
-                             color:${color};
-                             border:1px solid ${color};
-                             min-width:90px;
-                             text-align:center;">
-                    ${newStatus}
-                </span>`;
+    if (!card) return;
+
+    // Prefer locating the status column by header text (if table has a header), else fallback to index
+    let statusCol = null;
+
+    // If there is a header row in the table wrapper, try to find which column index contains 'Status'
+    try {
+        const tableRoot = document.querySelector('#student-list .table');
+        if (tableRoot) {
+            const header = tableRoot.querySelector('.table-header');
+            if (header) {
+                const headerCols = Array.from(header.querySelectorAll('.table-col'));
+                const idx = headerCols.findIndex(h => (h.textContent || '').trim().toLowerCase() === 'status');
+                if (idx >= 0) {
+                    const cols = card.querySelectorAll('.table-col');
+                    statusCol = cols[idx];
+                }
+            }
+        }
+    } catch (e) {
+        // ignore header parsing errors
+    }
+
+    // Fallback: common layout places status in column index 4 (0-based), otherwise try to find by badge
+    if (!statusCol) {
+        const cols = card.querySelectorAll('.table-col');
+        if (cols.length > 4) {
+            statusCol = cols[4];
+        } else if (cols.length > 3) {
+            statusCol = cols[3];
+        } else {
+            // last resort: find element containing the status badge
+            statusCol = card.querySelector('.table-col');
         }
     }
+
+    if (!statusCol) return;
+
+    statusCol.innerHTML = `
+        <span style="display:inline-block;
+                     padding:4px 14px;
+                     border-radius:16px;
+                     font-weight:600;
+                     background:${color}20;
+                     color:${color};
+                     border:1px solid ${color};
+                     min-width:90px;
+                     text-align:center;">
+            ${newStatus}
+        </span>`;
 }
 
 

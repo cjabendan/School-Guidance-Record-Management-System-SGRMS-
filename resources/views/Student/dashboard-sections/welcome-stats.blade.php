@@ -10,7 +10,27 @@
         <span id='greeting' style="color: #474545;">Hello,</span> {{ $lastName }}!
     </h2>
     <p class="welcome-note">Welcome back! Here’s a quick overview of your guidance records.</p>
-
+    <div class="welcome-counts">
+        <div class="box">
+            <div class="icon">
+                <i class="fi fi-sr-info"></i>
+            </div>
+            <div class="text-container">
+                <p class="box-text1">Active Cases</p>
+                <h3 class="box-count1">{{ $casesCount ?? 0 }}</h3>
+            </div>
+        </div>
+        <!-- New box: Upcoming Appointments for the student -->
+        <div class="box">
+            <div class="icon">
+                <i class="fi fi-sr-calendar"></i>
+            </div>
+            <div class="text-container">
+                <p class="box-text">Upcoming Appointments</p>
+                <h3 class="box-count">{{ $appointmentsCount ?? 0 }}</h3>
+            </div>
+        </div>
+    </div>    
 </div>
 
 <script>

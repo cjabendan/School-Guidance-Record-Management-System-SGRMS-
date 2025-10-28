@@ -14,15 +14,8 @@
             <div class="form-group">
                 <label for="student_id">Student</label>
                 <!-- now storing student full name as student_name -->
-                <select id="student_name" name="student_name" required>
-                    <option value="">Select Student</option>
-                    <?php $__currentLoopData = $students; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $student): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                        <option value="<?php echo e($student->user->first_name); ?> <?php echo e($student->user->last_name); ?>">
-                            <?php echo e($student->user->first_name); ?> <?php echo e($student->user->last_name); ?>
-
-                        </option>
-                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-                </select>
+                <input id="student_name" name="student_name" required>
+                </input>
             </div>
 
             <div class="form-group">

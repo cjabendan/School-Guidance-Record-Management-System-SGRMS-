@@ -358,7 +358,7 @@
 
 .case-modal textarea {
     resize: vertical;
-    min-height: 100px;
+    height: 100px;
 }
 
 /* Placeholder refinement */

@@ -1,10 +1,9 @@
-@extends('layouts.student')
-@section('title', 'SGRMS - School Guidance Records Management System')
-@section('content')
+<?php $__env->startSection('title', 'SGRMS - School Guidance Records Management System'); ?>
+<?php $__env->startSection('content'); ?>
 
     <!-- MAIN CONTENT -->
     <section id="content">
-        @include('partials.navbar')
+        <?php echo $__env->make('partials.navbar', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
 
         <div class="wrapper">
             <div class="table-management">
@@ -12,19 +11,19 @@
                     <div class="filters">
                         <li>
                             <a href="#"
-                                class="a-nav {{ request('status') == 'all' || !request()->has('status') ? 'active' : '' }}"
+                                class="a-nav <?php echo e(request('status') == 'all' || !request()->has('status') ? 'active' : ''); ?>"
                                 data-filter="all">All</a>
-                            <a href="#" class="a-nav {{ request('status') == 'pending' ? 'active' : '' }}"
+                            <a href="#" class="a-nav <?php echo e(request('status') == 'pending' ? 'active' : ''); ?>"
                                 data-filter="pending">Pending</a>
-                            <a href="#" class="a-nav {{ request('status') == 'approved' ? 'active' : '' }}"
+                            <a href="#" class="a-nav <?php echo e(request('status') == 'approved' ? 'active' : ''); ?>"
                                 data-filter="approved">Approved</a>
-                            <a href="#" class="a-nav {{ request('status') == 'declined' ? 'active' : '' }}"
+                            <a href="#" class="a-nav <?php echo e(request('status') == 'declined' ? 'active' : ''); ?>"
                                 data-filter="declined">Declined</a>
-                            <a href="#" class="a-nav {{ request('status') == 'cancelled' ? 'active' : '' }}"
+                            <a href="#" class="a-nav <?php echo e(request('status') == 'cancelled' ? 'active' : ''); ?>"
                                 data-filter="cancelled">Cancelled</a>
-                            <a href="#" class="a-nav {{ request('status') == 'completed' ? 'active' : '' }}"
+                            <a href="#" class="a-nav <?php echo e(request('status') == 'completed' ? 'active' : ''); ?>"
                                 data-filter="completed">Complete</a>
-                            <a href="#" class="a-nav {{ request('status') == 'missed' ? 'active' : '' }}"
+                            <a href="#" class="a-nav <?php echo e(request('status') == 'missed' ? 'active' : ''); ?>"
                                 data-filter="missed">Missed</a>
                         </li>
                     </div>
@@ -33,7 +32,17 @@
                     </a>
                 </div>
                 <div class="search-bar">
-                    
+                    <div class="table-search">
+                        <form method="GET" action="<?php echo e(route('Parent.appointments.index')); ?>">
+                            <i class="fi fi-br-search"></i>
+                            <input type="text" name="search" value="<?php echo e(request('search')); ?>"
+                                placeholder="Search appointments..." id="appointment-search-input">
+                            <?php if(request('category')): ?>
+                                <input type="hidden" name="category" value="<?php echo e(request('category')); ?>">
+                            <?php endif; ?>
+                            <button type="submit" style="display:none"></button>
+                        </form>
+                    </div>
                     <button class="toggle-btn" id="toggle-view-btn">
                         <i class="fi fi-rr-table-layout" id="toggle-icon"></i>
                         <span id="toggle-label"></span>
@@ -49,7 +58,7 @@
                     <div class="table-col actions">Actions</div>
                 </div>
                 <div class="table">
-                    @include('Student.partials.appointment-list', ['appointments' => $appointments])
+                    <?php echo $__env->make('Parent.partials.appointment-list', ['appointments' => $appointments], array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
                 </div>
             </div>
 
@@ -65,11 +74,11 @@
         </div>
     </section>
 
-    {{-- Place the modal include here, outside the table/wrapper --}}
-    @include('Student.modal.requestApppointmentModal', ['counselors' => $counselors, 'types' => $types])
-    @include('Student.modal.reviewModal')
+    
+    <?php echo $__env->make('Parent.modal.requestApppointmentModal', ['counselors' => $counselors, 'types' => $types, 'children' => $children], array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
+    <?php echo $__env->make('Parent.modal.reviewModal', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
 
-@endsection
+<?php $__env->stopSection(); ?>
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
@@ -81,7 +90,7 @@
                 const toggleLabel = document.getElementById('toggle-label');
                 const filtersContainer = document.querySelector('.table-filter .filters');
                 let timeout = null;
-                let currentStatus = '{{ strtolower(request('status') ?? 'all') }}';
+                let currentStatus = '<?php echo e(strtolower(request('status') ?? 'all')); ?>';
                 let calendar = null;
                 let isTableView = true;
 
@@ -134,7 +143,7 @@
                     let params = new URLSearchParams();
                     if (status && status !== 'all') params.append('status', status);
                     if (search && search.trim() !== '') params.append('search', search.trim());
-                    let url = `{{ route('Student.appointments.index') }}?` + params.toString();
+                    let url = `<?php echo e(route('Parent.appointments.index')); ?>?` + params.toString();
 
                     fetch(url)
                         .then(response => response.text())
@@ -149,24 +158,18 @@
                         });
                 }
 
-
-                // CALENDAR DATA RENDERING
-                
                 function renderCalendar() {
                     const calendarEl = document.getElementById('calendar');
                     if (!calendarEl) return;
                     if (calendar) calendar.destroy();
 
-                    let rawAppointments = @json($appointments);
+                    let rawAppointments = <?php echo json_encode($appointments, 15, 512) ?>;
 
                     // Only show Approved and Rescheduled appointments on the calendar
                     rawAppointments = rawAppointments.filter(function(item) {
                         const st = (item.status || '').toLowerCase();
                         return st === 'approved' || st === 'rescheduled';
                     });
-                    // base paths for user images
-                    let userImgBase = "{{ asset('images/user') }}";
-                    let defaultAvatar = "{{ asset('images/default-avatar.png') }}";
 
                     let formattedAppointments = rawAppointments.map(item => ({
                         id: item.appointment_id,
@@ -181,12 +184,11 @@
                             : "N/A",
                         counselor: item.counselor ?
                             `${item.counselor.first_name} ${item.counselor.last_name}` : "N/A",
-                        // counselor image path (supports several shapes: counselor.profile_image OR counselor.profile_photo_path OR counselor.user.profile_image)
                         counselorAvatar: (function(){
                             if (!item.counselor) return null;
-                            if (item.counselor.profile_image) return `${userImgBase}/${item.counselor.profile_image}`;
+                            if (item.counselor.profile_image) return `<?php echo e(asset('images/user')); ?>/${item.counselor.profile_image}`;
                             if (item.counselor.profile_photo_path) return item.counselor.profile_photo_path;
-                            if (item.counselor.user && item.counselor.user.profile_image) return `${userImgBase}/${item.counselor.user.profile_image}`;
+                            if (item.counselor.user && item.counselor.user.profile_image) return `<?php echo e(asset('images/user')); ?>/${item.counselor.user.profile_image}`;
                             return null;
                         })(),
                         requesterAvatar: null,
@@ -224,7 +226,6 @@
                             events: formattedAppointments,
 
                             eventContent: function(arg) {
-                                // Build a custom DOM node with avatar + title (match Head layout)
                                 const container = document.createElement('div');
                                 container.className = 'fc-event-custom';
 
@@ -234,7 +235,6 @@
                                 container.style.padding = '6px 8px';
                                 container.style.borderRadius = '6px';
 
-                                // Avatar (counselor first)
                                 const avatarUrl = arg.event.extendedProps.counselorAvatar || arg.event.extendedProps.requesterAvatar || null;
                                 if (avatarUrl) {
                                     const img = document.createElement('img');
@@ -244,7 +244,6 @@
                                     container.appendChild(img);
                                 }
 
-                                // Title and optional subtext
                                 const titleWrap = document.createElement('div');
                                 titleWrap.className = 'fc-event-title-wrap';
 
@@ -311,9 +310,9 @@ document.addEventListener('click', function(e) {
 });
 </script>
 
-@push('scripts')
+<?php $__env->startPush('scripts'); ?>
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
-@endpush
+<?php $__env->stopPush(); ?>
 
 <style>
 /* Calendar event avatar styles (match Head layout) */
@@ -323,3 +322,5 @@ document.addEventListener('click', function(e) {
 .fc-event-title-text { font-weight:600; font-size:0.9rem; color:inherit; }
 .fc-event-sub { font-size:0.75rem; color:rgba(255,255,255,0.9); }
 </style>
+
+<?php echo $__env->make('layouts.parent', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\Administrator\School-Guidance-Record-Management-System-SGRMS\resources\views/Parent/appointments.blade.php ENDPATH**/ ?>

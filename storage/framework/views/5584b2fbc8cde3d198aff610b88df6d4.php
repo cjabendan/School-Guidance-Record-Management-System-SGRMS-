@@ -1,58 +1,36 @@
 <div class="welcome">
-    @php
+    <?php
         $user = Auth::user();
         $sex = strtolower($user->sex ?? '');
         $lastName = $user->last_name ?? 'Unknown';
 
-        if ($sex === 'male') {
-            $prefix = 'Mr.';
-        } elseif ($sex === 'female') {
-            $prefix = 'Ms.';
-        } else {
-            $prefix = '';
-        }
-    @endphp
+    ?>
 
-    <h2 class="Parent-name">
-        <span id='greeting' style="color: #474545;">Hello,</span> {{ $prefix ? $prefix . ' ' : '' }}{{ $lastName }}!
+    <h2 class="Student-name">
+        <span id='greeting' style="color: #474545;">Hello,</span> <?php echo e($lastName); ?>!
     </h2>
-    <p class="welcome-note">Here’s a quick summary of your children’s guidance records.</p>
+    <p class="welcome-note">Welcome back! Here’s a quick overview of your guidance records.</p>
     <div class="welcome-counts">
-        <div class="box">
-            <div class="icon">
-                <i class='bx bxs-user'></i>
-            </div>
-            <div class="text-container">
-                <p class="box-text1">My Children</p>
-                <h3 class="box-count1">{{ $childCount ?? 0 }}</h3>
-
-            </div>
-        </div>
-
-    
         <div class="box">
             <div class="icon">
                 <i class="fi fi-sr-info"></i>
             </div>
             <div class="text-container">
-                <p class="box-text">Active Cases</p>
-                <h3 class="box-count">{{ $casesCount ?? 0 }}</h3>
+                <p class="box-text1">Active Cases</p>
+                <h3 class="box-count1"><?php echo e($casesCount ?? 0); ?></h3>
             </div>
         </div>
-
-       
+        <!-- New box: Upcoming Appointments for the student -->
         <div class="box">
             <div class="icon">
-                <i class="fi fi-sr-clock-three"></i>
+                <i class="fi fi-sr-calendar"></i>
             </div>
             <div class="text-container">
-                <p class="box-text">Requests</p>
-                <h3 class="box-count">{{ $pendingRequestCount ?? 0 }}</h3>
-
+                <p class="box-text">Upcoming Appointments</p>
+                <h3 class="box-count"><?php echo e($appointmentsCount ?? 0); ?></h3>
             </div>
         </div>
-    </div> 
-
+    </div>    
 </div>
 
 <script>
@@ -77,3 +55,4 @@
 
     greetingEl.textContent = emoji + ' ' + greeting + ',';
 </script>
+<?php /**PATH C:\Users\Administrator\School-Guidance-Record-Management-System-SGRMS\resources\views/Student/dashboard-sections/welcome-stats.blade.php ENDPATH**/ ?>

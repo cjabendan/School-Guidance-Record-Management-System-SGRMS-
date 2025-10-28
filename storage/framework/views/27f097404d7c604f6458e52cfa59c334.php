@@ -5,8 +5,8 @@
             <span class="close add-modal-close pro-add-close" id="closeAddModalBtn">&times;</span>
             <h2 id="addModalTitle" class="add-modal-title pro-add-title">Add Student</h2>
 
-            <form id="addStudentForm" method="POST" action="{{ url('Head/students') }}" enctype="multipart/form-data">
-                @csrf
+            <form id="addStudentForm" method="POST" action="<?php echo e(url('Head/students')); ?>" enctype="multipart/form-data">
+                <?php echo csrf_field(); ?>
                 <input type="hidden" id="delete_profile_image" name="delete_photo" value="0">
 
                 <!-- 🟦 Student Information Section -->
@@ -113,7 +113,7 @@
                     </div>
 
                     <p style="color:#003060; font-size:0.95rem; font-weight:500; margin:10px 0;">
-                        Note: Student will be automatically assigned to the current school year (e.g., {{ date('Y') }}–{{ date('Y', strtotime('+1 year')) }}).
+                        Note: Student will be automatically assigned to the current school year (e.g., <?php echo e(date('Y')); ?>–<?php echo e(date('Y', strtotime('+1 year'))); ?>).
                     </p>
                 </div>
 
@@ -173,7 +173,7 @@
             <h2 class="add-modal-title pro-add-title">Student Record</h2>
 
             <form id="editStudentForm" method="POST" action="#" enctype="multipart/form-data">
-                @csrf
+                <?php echo csrf_field(); ?>
 
                 <!-- 🟦 SECTION 1: STUDENT INFORMATION -->
                 <div class="form-section">
@@ -181,8 +181,8 @@
 
                     <div class="form-row image-name-row">
                         <div class="image-col">
-                            <img id="viewStudentImage" src="{{ asset('images/user/default.jpg') }}"
-                                data-default="{{ asset('images/user/default.jpg') }}"
+                            <img id="viewStudentImage" src="<?php echo e(asset('images/user/default.jpg')); ?>"
+                                data-default="<?php echo e(asset('images/user/default.jpg')); ?>"
                                 alt="Student Image" class="student-image-box pro-add-image">
 
                             <div class="student-id-row pro-add-id-row">
@@ -383,8 +383,8 @@
       <span id="archiveStudentIdDisplay" class="student-id"></span>
     </h2>
 
-    <form id="archiveStudentForm" method="POST" action="{{ url('/students/archive') }}">
-      @csrf
+    <form id="archiveStudentForm" method="POST" action="<?php echo e(url('/students/archive')); ?>">
+      <?php echo csrf_field(); ?>
       <input type="hidden" name="s_id" id="archive_s_id">
 
       <p class="modal-description">
@@ -441,3 +441,4 @@
 <input type="hidden" id="cropped_image_data" name="cropped_image_data">
 <!-- Original filename of the selected file (used when cropping) -->
 <input type="hidden" id="cropped_image_name" name="cropped_image_name">
+<?php /**PATH C:\Users\Administrator\School-Guidance-Record-Management-System-SGRMS\resources\views/Head/Modal/studentModal.blade.php ENDPATH**/ ?>

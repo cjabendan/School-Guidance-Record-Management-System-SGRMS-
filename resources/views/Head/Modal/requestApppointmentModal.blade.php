@@ -29,8 +29,8 @@
       @csrf
       <input type="hidden" name="form_origin" value="create_appointment">
       <div class="modal-header">
-        <span class="modal-title"><i class="fi fi-rr-calendar"></i> Request Appointment</span>
-        <button type="button" class="close-modal-btn" onclick="closeModal()">×</button>
+        <span class="modal-title"><i class="fi fi-sr-calendar-day"></i> Request Appointment</span>
+        <button type="button" class="close-btn" onclick="closeModal()">×</button>
       </div>
         <!-- Error-only modal (small) - shows when there are validation errors not originating from create form -->
         @php $showErrorModal = $errors->any() && old('form_origin') !== 'create_appointment'; @endphp

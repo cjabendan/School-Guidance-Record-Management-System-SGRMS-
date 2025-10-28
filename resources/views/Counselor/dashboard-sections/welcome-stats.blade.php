@@ -16,7 +16,7 @@
     <h2 class="Counselor-name">
         <span id='greeting' style="color: #474545;">Hello,</span> {{ $prefix ? $prefix . ' ' : '' }}{{ $lastName }}!
     </h2>
-    <p class="welcome-note">As your counselor, I’ve prepared a quick summary of the student’s guidance records.</p>
+    <p class="welcome-note"></p>
 
 </div>
 

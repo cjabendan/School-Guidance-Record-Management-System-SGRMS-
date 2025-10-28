@@ -79,17 +79,23 @@
 
 .welcome-box .box:nth-child(1) {
     background: #1ea7ff;
-    color: #1ea7ff;
+    color: #003060;
 }
 
 .welcome-box .box:nth-child(2) {
-    background: #ff4d4f;
-    color: #ff4d4f;
+    background: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e9e9e9;
+    color: #003060;
 }
 
 .welcome-box .box:nth-child(3) {
-    background: #ffaa1d;
-    color: #ffaa1d;
+     background: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e9e9e9;
+    color: #003060;
 }
 
 .welcome-counts .box .icon {
@@ -112,16 +118,30 @@
     margin-left: 5px;
 }
 
-.box-text {
+
+.box-text1 {
+    font-weight: 500;
     font-size: 1.15rem;
     color: #ffffff;
+}
+
+.box-count1 {
+    font-size: 1.8rem;
+    font-weight: 600;
+    color: #ffffff;
+    padding-left: 5px;
+}
+
+.box-text {
+    font-size: 1.15rem;
+    color: #003060;
     font-weight: 500;
 }
 
 .box-count {
     font-size: 1.8rem;
     font-weight: 600;
-    color: #ffffff;
+    color: #003060;
     padding-left: 5px;
 }
 

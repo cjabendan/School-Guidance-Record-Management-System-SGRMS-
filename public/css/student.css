@@ -46,7 +46,7 @@
     height: 100%;
     object-fit: cover;
     border-radius: 5px;
-    border: 2px solid #2563eb;
+    border: 2px solid #003060;
     background: #f4f6fa;
     box-shadow: 0 2px 10px rgba(44, 62, 80, 0.1);
 }
@@ -131,7 +131,7 @@
     margin-bottom: 18px;
     font-size: 1.6rem;
     font-weight: 600;
-    color: #2563eb;
+    color: #003060;
     letter-spacing: 1px;
 }
 
@@ -159,7 +159,7 @@
 .modal-content input[type="email"]:focus,
 .modal-content input[type="date"]:focus,
 .modal-content select:focus {
-    border: 1.5px solid #2563eb;
+    border: 1.5px solid #003060;
     outline: none;
     background: #fff;
 }
@@ -188,7 +188,7 @@
 
 .modal-content button[type="submit"],
 .modal-content button.btn.save {
-    background: #2563eb;
+    background: #003060;
     color: #fff;
     border: none;
     border-radius: 6px;
@@ -282,7 +282,7 @@
     height: 120px;
     object-fit: cover;
     border-radius: 50%;
-    border: 3px solid #2563eb;
+    border: 3px solid #003060;
     box-shadow: 0 2px 12px rgba(37, 99, 235, 0.1);
     margin-bottom: 18px;
     background: #f8fafc;
@@ -304,7 +304,7 @@
     transition: border 0.2s;
 }
 .pro-add-image-input:focus {
-    border: 1.5px solid #2563eb;
+    border: 1.5px solid #003060;
     outline: none;
 }
 
@@ -319,19 +319,14 @@
 .pro-add-id-label {
     font-size: 1.08rem;
     font-weight: 600;
-    color: #2563eb;
+    color: #003060;
     letter-spacing: 0.01em;
     margin: 0;
 }
 .pro-add-id-value {
-    font-size: 1.13rem;
     font-weight: 700;
-    color: #2563eb;
+    color: #003060;
     letter-spacing: 0.02em;
-    background: #e0e7ff;
-    border-radius: 5px;
-    padding: 2px 12px;
-    box-shadow: 0 1px 4px rgba(37, 99, 235, 0.06);
 }
 /* Make right-side form rows' fields fill available width and match sizing */
 .name-fields-col .form-row > div {
@@ -341,13 +336,8 @@
 }
 /* Student ID row beside image */
 .student-id-row {
-    width: 250px;
     display: flex;
     align-items: flex-start;
-    gap: 4px;
-    margin-top: 12px;
-    font-weight: 600;
-    color: #222;
 }
 
 .image-name-row .name-fields-col .form-row > div {
@@ -371,23 +361,23 @@
 
 /*Add Student Modal*/
 .pro-add-modal {
-    background: #f8fafc;
+    background: #ffffff; /* changed to white as requested */
     border-radius: 18px;
-    box-shadow: 0 8px 32px rgba(37, 99, 235, 0.13);
-    padding: 40px 44px 32px 44px;
-    margin: 2.5rem auto;
+    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.08);
+    padding: 36px 40px 28px 40px;
+    margin: 2rem auto;
 }
 .pro-add-title {
-    font-size: 2rem;
+    font-size: 1.85rem; /* slightly reduced for balance */
     font-weight: 800;
-    color: #2563eb;
-    letter-spacing: 1px;
-    margin-bottom: 28px;
+    color: #003060; /* dark blue requested */
+    letter-spacing: 0.6px;
+    margin-bottom: 22px;
     text-align: center;
 }
 .pro-add-close {
     font-size: 2.1rem;
-    color: #2563eb;
+    color: #003060;
     font-weight: 700;
     position: absolute;
     top: 18px;
@@ -401,7 +391,7 @@
     margin-top: 18px;
 }
 .pro-add-save {
-    background: #2563eb;
+    background: #003060;
     color: #fff;
     font-weight: 700;
     border-radius: 6px;
@@ -431,16 +421,17 @@
     min-width: 140px;
     margin-bottom: 10px;
 }
-.add-modal-content .add-label {
+.add-modal-content .add-label,
+.view-label {
     font-weight: 700;
-    color: #1e293b;
-    font-size: 1.08rem;
-    margin-bottom: 2px;
+    color: #003060; 
+    font-size: 1rem; 
+    margin-bottom: 6px;
     letter-spacing: 0.01em;
 }
 .add-modal-content .add-input {
-    font-size: 1.13rem;
-    color: #475569;
+    font-size: 1.05rem; /* keep inputs slightly smaller than title but readable */
+    color: #475569; /* input text color remains unchanged */
     font-weight: 600;
     letter-spacing: 0.01em;
     padding: 8px 10px;
@@ -450,7 +441,7 @@
     transition: border 0.2s;
 }
 .add-modal-content .add-input:focus {
-    border: 1.5px solid #2563eb;
+    border: 1.5px solid #003060;
     outline: none;
     background: #fff;
 }
@@ -482,13 +473,12 @@
 #editStudentForm input,
 #addStudentForm select,
 #editStudentForm select {
-    padding: 11px 14px;
     border: 1.5px solid #d1d5db;
     border-radius: 7px;
     font-size: 15px;
     background-color: #fff;
     transition: border-color 0.2s, box-shadow 0.2s;
-    margin-bottom: 4px;
+    margin-bottom: -10px;
     box-sizing: border-box;
     width: 100%;
 }
@@ -514,7 +504,7 @@
     height: 225px;
     object-fit: cover;
     border-radius: 5px;
-    border: 2px solid #2563eb;
+    border: 2px solid #003060;
     background: #f4f6fa;
     box-shadow: 0 2px 10px rgba(44, 62, 80, 0.1);
 }
@@ -525,7 +515,7 @@
     width: 250px;             
     text-align: center;
     padding: 10px 0;
-    background: #003060;
+    background: #1ea7ff;
     color: #fff;
     font-weight: 600;
     border-radius: 6px;
@@ -534,7 +524,7 @@
 }
 
 .custom-upload-btn:hover {
-    background: #0358ad;
+    background: #1ea7ff;
 }
 
 
@@ -563,7 +553,7 @@
     font-weight: 700;
     margin-bottom: 8px;
     display: inline-block;
-    color: #2563eb;
+    color: #003060;
     font-size: 16px;
     letter-spacing: 0.04em;
 }
@@ -584,7 +574,7 @@
 
 .add-input {
     font-size: 1.13rem;
-    color: #2563eb;
+    color: #003060;
     font-weight: 600;
     letter-spacing: 0.01em;
     padding: 8px 10px;
@@ -594,7 +584,7 @@
     transition: border 0.2s;
 }
 .add-input:focus {
-    border: 1.5px solid #2563eb;
+    border: 1.5px solid #003060;
     outline: none;
     background: #fff;
 }
@@ -609,9 +599,72 @@
 .view-label {
     font-weight: 700;
     color: #1e293b;
-    font-size: 1.08rem;
+    font-size: 1rem;
     margin-bottom: 2px;
     letter-spacing: 0.01em;
+}
+
+/* Sex radio group styling */
+.sex-radio-group {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+}
+
+.sex-radio-group label {
+    display: grid;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    font-weight: 600;
+    color: #003060;
+}
+
+.sex-radio-group input[type="radio"] {
+    width: 18px;
+    height: 18px;
+    margin: 0;
+    accent-color: #003060; 
+    vertical-align: middle;
+    transform: translateY(-1px);
+}
+
+/* Fallback custom look for browsers without accent-color support */
+@supports not (accent-color: #003060) {
+    .sex-radio-group input[type="radio"] {
+        appearance: none;
+        -webkit-appearance: none;
+        display: inline-block;
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        border: 2px solid #cbd5e1;
+        background: #fff;
+        position: relative;
+    }
+    .sex-radio-group input[type="radio"]:checked::after {
+        content: '';
+        display: block;
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: #003060;
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+    }
+}
+
+/* Disabled/read-only state used in view modal */
+.sex-radio-group input[type="radio"][disabled],
+.sex-radio-group input[type="radio"][readonly] {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+.sex-radio-group label[aria-disabled="true"] {
+    opacity: 0.65;
+    cursor: default;
 }
 
 /* View Student Modal */
@@ -661,7 +714,7 @@
 
 .view-modal-close {
     font-size: 2.1rem;
-    color: #2563eb;
+    color: #003060;
     font-weight: 700;
     position: absolute;
     top: 18px;
@@ -670,11 +723,11 @@
 }
 
 .view-modal-title {
-    font-size: 2rem;
+    font-size: 1.85rem;
     font-weight: 800;
-    color: #2563eb;
-    letter-spacing: 1px;
-    margin-bottom: 28px;
+    color: #003060; /* match dark blue */
+    letter-spacing: 0.6px;
+    margin-bottom: 22px;
     text-align: center;
 }
 
@@ -684,7 +737,7 @@
 
 .view-student-image {
     border-radius: 50%;
-    border: 3px solid #2563eb;
+    border: 3px solid #003060;
     width: 120px;
     height: 120px;
     object-fit: cover;
@@ -705,7 +758,7 @@
 
 .view-id-num {
     font-weight: 800;
-    color: #2563eb;
+    color: #003060;
     font-size: 1.13em;
     letter-spacing: 0.03em;
 }
@@ -722,7 +775,7 @@
     padding: 0 18px;
     font-size: 1.13rem;
     font-weight: 700;
-    color: #2563eb;
+    color: #003060;
     letter-spacing: 0.04em;
 }
 
@@ -822,7 +875,7 @@
 #archiveStudentModal .student-id {
   display: block;
   font-size: 1.05rem;
-  color: #2563eb;
+  color: #003060;
   margin-top: 4px;
   font-weight: 600;
 }
@@ -859,7 +912,7 @@
 }
 
 #archiveStudentModal .add-input:focus {
-  border-color: #2563eb;
+  border-color: #003060;
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
   outline: none;
   background: #ffffff;
@@ -882,7 +935,7 @@
 }
 
 #archiveStudentModal .pro-add-save {
-  background: #2563eb;
+  background: #003060;
   color: #ffffff;
   font-weight: 600;
   border-radius: 8px;
@@ -1029,6 +1082,248 @@
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+.case-records-section {
+    margin-top: 30px;
+    padding: 20px;
+    background: #f9fafb;
+    border-radius: 8px;
+    border: 1px solid #e5e7eb;
+}
+
+.case-records-content {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.offense-summary {
+    flex: 1 1 35%;
+    background: #fff5f5;
+    padding: 20px;
+    border-radius: 8px;
+    border: 1px solid #fed7d7;
+    display: flex;
+    flex-direction: column; 
+}
+
+.current-records-container {
+    flex: 1 1 60%;
+    background: #ffffff;
+    padding: 20px;
+    border-radius: 8px;
+    border: 1px solid #e5e7eb;
+}
+
+.section-subtitle {
+    color: #003060;
+    font-weight: 700;
+    font-size: 1.15rem;
+    margin-bottom: 12px;
+}
+
+.offense-year {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    font-weight: 700;
+    font-size: 1rem;
+}
+
+.offense-total {
+    text-align: center;
+    font-size: 16px;
+    font-weight: bold;
+    color: #c53030;
+    background: #fed7d7;
+    padding: 10px;
+    border-radius: 5px;
+    margin-top: auto; 
+}
+
+.offense-count{
+    font-size: 1rem;
+    color: #003060;
+    font-weight: 500;
+    letter-spacing: 1;
+}
+
+.case-title{
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    font-size: 1rem;
+    padding-right: 10px;
+}
+
+.record-card {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 15px;
+    background: #f8f9fa;
+    transition: box-shadow 0.3s;
+}
+.record-card:hover {
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+.record-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+.record-details {
+    color: #003060;
+    font-size: 1.15rem;
+    margin-bottom: 10px;
+}
+.record-description {
+    font-size: 1.15rem;
+    color: #003060;
+    margin: 0;
+}
+.view-more-btn {
+    color: #007bff;
+    text-decoration: none;
+    font-weight: 500;
+}
+.view-more-btn:hover {
+    text-decoration: underline;
+}
+
+.record-card .badge.case-severity {
+    display: inline-block;
+    padding: 6px 10px;
+    min-width: 64px;
+    text-align: center;
+    border-radius: 10px;
+    font-weight: 700;
+    border: 1px solid rgba(7,89,133,0.12);
+    vertical-align: middle;
+}
+
+.record-card .badge.bg-info.case-severity {
+    color: #003060;
+    background: rgba(7,89,133,0.06);
+    border-color: rgba(7,89,133,0.12);
+}
+
+.record-card .badge.case-severity {
+    position: relative;
+    padding: 25px;
+}
+
+.record-card .badge.case-severity::before {
+    content: 'Severity:';
+    position: absolute;
+    top: 6px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: block;
+    font-weight: 700;
+    font-size: 0.9rem;
+    color: #003060;
+    opacity: 0.9;
+}
+
+.record-card .badge.case-severity span.badge-text,
+.record-card .badge.case-severity > * {
+    display: inline-block;
+    line-height: 1.0;
+    vertical-align: middle;
+}
+
+/* ==========================
+   FORM SECTION BOX STYLING
+   ========================== */
+.form-section {
+    margin-top: 28px;
+    padding: 40px 28px;
+    background: #ffffff;
+    border-radius: 8px;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+    transition: all 0.25s ease-in-out;
+}
+
+.form-section:first-of-type {
+    margin-top: 0;
+}
+
+.form-section:hover {
+    border-color: #bfdbfe;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.06);
+}
+
+/* ==========================
+   SECTION TITLE DESIGN
+   ========================== */
+.form-section-title {
+    display: inline-block;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #003060;
+    letter-spacing: 0.03em;
+    margin-bottom: 20px;
+    position: relative;
+    padding-left: 10px;
+}
+
+.form-section-title::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    height: 1.3em;
+    width: 4px;
+    border-radius: 3px;
+    background-color: #003060;
+}
+
+/* Improve spacing inside sections */
+.form-section .form-row {
+    margin-bottom: 18px;
+}
+
+/* ==========================
+   TITLE LINE EFFECT
+   ========================== */
+.section-divider {
+    position: relative;
+    text-align: center;
+    margin: 36px 0 24px 0;
+}
+
+.section-divider span {
+    background: #fff;
+    position: relative;
+    z-index: 1;
+    padding: 0 18px;
+    font-size: 1.08rem;
+    font-weight: 600;
+    color: #003060;
+    letter-spacing: 0.04em;s
+}
+
+.section-divider::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: 100%;
+    border-top: 2px solid #003060;
+    transform: translateY(-50%);
+}
+
+/* Adjust submit buttons */
+.pro-add-buttons {
+    width: 100%;
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 18px;
 }
 
 /* ______________________________________________________________________________ */
