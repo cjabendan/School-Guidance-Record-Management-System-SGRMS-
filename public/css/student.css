@@ -15,15 +15,6 @@
     overflow-x: auto;
 }
 
-@media (max-width: 600px) {
-    #exportDropdownMenu {
-        left: 0 !important;
-        right: auto !important;
-        min-width: 160px;
-        max-width: 98vw;
-    }
-}
-
 #exportDropdownMenu.show {
     display: block !important;
 }
@@ -126,13 +117,37 @@
     align-items: center;
 }
 
-.modal-content h2 {
-    margin-top: 0;
-    margin-bottom: 18px;
-    font-size: 1.6rem;
-    font-weight: 600;
+.modal-header-student {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;  
+    padding: 10px 20px 15px 20px;
+}
+
+.modal-content .modal-header-student {
+  align-self: stretch;
+}
+
+/* Left group (icon + title) */
+.modal-header-student .header-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* Icon + Title styling */
+.modal-header-student i {
     color: #003060;
-    letter-spacing: 1px;
+    font-size: 1.6rem;
+}
+
+.modal-header-student h2 {
+    color: #003060;
+    font-size: 1.5rem;
+    font-weight: 700;
+    letter-spacing: 0.6px;
+    margin: 0;
+    text-transform: capitalize;
 }
 
 .modal-content label {
@@ -975,6 +990,48 @@
   color: #dc2626;
 }
 
+/* Header Icon */
+#archiveStudentModal .modal-icon {
+  background: #e0e7ff;
+  color: #1e3a8a;
+  font-size: 2.6rem;
+  padding: 18px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 12px;
+  box-shadow: 0 0 12px rgba(30, 58, 138, 0.15);
+}
+
+#archiveStudentModal .modal-icon i {
+  display: block;
+}
+
+/* Improved Description with Student ID */
+#archiveStudentModal .modal-description {
+  font-size: 1rem;
+  color: #334155;
+  text-align: center;
+  margin-bottom: 22px;
+  line-height: 1.6;
+}
+
+#archiveStudentModal .student-id-label {
+  display: inline-block;
+  color: #003060;
+  font-weight: 600;
+  margin-right: 6px;
+  font-size: 1.05rem;
+}
+
+#archiveStudentModal .student-id {
+  display: inline-block;
+  font-size: 1.05rem;
+  color: #1e3a8a;
+  font-weight: 700;
+}
+
 .toggle-btn {
     display: flex;
     align-items: center;
@@ -990,49 +1047,42 @@
 
 .export-btn, .import-btn {
   vertical-align: middle;
-}
-
-/* === EXPORT BUTTON === */
-.export-btn {
   padding: 8px 12px;
   border-radius: 6px;
-  background: linear-gradient(90deg, #22c55e 0%, #16a34a 100%);
   color: #fff;
   border: none;
-  box-shadow: 0 2px 6px rgba(22, 163, 74, 0.3);
   cursor: pointer;
   transition: background 0.3s ease, transform 0.1s ease;
+}
+
+/* === EXPORT BUTTON (Blue Gradient) === */
+.export-btn {
+  background: linear-gradient(90deg, #3b82f6 0%, #2563eb 100%);
+  box-shadow: 0 2px 6px rgba(37, 99, 235, 0.3);
 }
 
 .export-btn:hover {
-  background: linear-gradient(90deg, #16a34a 0%, #15803d 100%);
+  background: linear-gradient(90deg, #2563eb 0%, #1d4ed8 100%);
+  transform: scale(1.03);
 }
 
-.export-btn i {
-  font-size: 18px;
-  vertical-align: middle;
-}
-
-/* === IMPORT BUTTON === */
+/* === IMPORT BUTTON (Cool Gray Gradient) === */
 .import-btn {
-  padding: 8px 12px;
-  border-radius: 6px;
-  background: linear-gradient(90deg, #ef4444 0%, #dc2626 100%);
-  color: #fff;
-  border: none;
-  box-shadow: 0 2px 6px rgba(220, 38, 38, 0.3);
-  cursor: pointer;
-  transition: background 0.3s ease, transform 0.1s ease;
+  background: linear-gradient(90deg, #64748b 0%, #475569 100%);
+  box-shadow: 0 2px 6px rgba(71, 85, 105, 0.3);
 }
 
 .import-btn:hover {
-  background: linear-gradient(90deg, #dc2626 0%, #b91c1c 100%);
+  background: linear-gradient(90deg, #475569 0%, #334155 100%);
+  transform: scale(1.03);
 }
 
-.import-btn i {
+/* === ICONS === */
+.export-btn i, .import-btn i {
   font-size: 18px;
   vertical-align: middle;
 }
+
 
 /* === DROPDOWN MENU === */
 .dropdown {
@@ -1286,44 +1336,6 @@
 /* Improve spacing inside sections */
 .form-section .form-row {
     margin-bottom: 18px;
-}
-
-/* ==========================
-   TITLE LINE EFFECT
-   ========================== */
-.section-divider {
-    position: relative;
-    text-align: center;
-    margin: 36px 0 24px 0;
-}
-
-.section-divider span {
-    background: #fff;
-    position: relative;
-    z-index: 1;
-    padding: 0 18px;
-    font-size: 1.08rem;
-    font-weight: 600;
-    color: #003060;
-    letter-spacing: 0.04em;s
-}
-
-.section-divider::before {
-    content: "";
-    position: absolute;
-    top: 50%;
-    left: 0;
-    width: 100%;
-    border-top: 2px solid #003060;
-    transform: translateY(-50%);
-}
-
-/* Adjust submit buttons */
-.pro-add-buttons {
-    width: 100%;
-    display: flex;
-    justify-content: flex-end;
-    margin-top: 18px;
 }
 
 /* ______________________________________________________________________________ */

@@ -122,7 +122,7 @@
     flex-direction: column;
     border-radius: 10px;
     padding: 20px 18px;
-    background: linear-gradient(135deg, #2395ff, #0073e6);
+    background-color: #1ea7ff;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
     overflow: hidden;
 }

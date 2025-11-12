@@ -32,17 +32,7 @@
                     </a>
                 </div>
                 <div class="search-bar">
-                    <div class="table-search">
-                        <form method="GET" action="<?php echo e(route('Parent.appointments.index')); ?>">
-                            <i class="fi fi-br-search"></i>
-                            <input type="text" name="search" value="<?php echo e(request('search')); ?>"
-                                placeholder="Search appointments..." id="appointment-search-input">
-                            <?php if(request('category')): ?>
-                                <input type="hidden" name="category" value="<?php echo e(request('category')); ?>">
-                            <?php endif; ?>
-                            <button type="submit" style="display:none"></button>
-                        </form>
-                    </div>
+                    
                     <button class="toggle-btn" id="toggle-view-btn">
                         <i class="fi fi-rr-table-layout" id="toggle-icon"></i>
                         <span id="toggle-label"></span>

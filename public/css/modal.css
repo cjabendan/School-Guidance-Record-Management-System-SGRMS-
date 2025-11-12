@@ -175,14 +175,14 @@ input:focus, select:focus, textarea:focus {
 .modal-icon-wrapper {
     background-color: #003060;
     border-radius: 50%;
-    padding: .8rem;
+    padding: .5rem;
     display: flex;
     justify-content: center;
     align-items: center;
 }
 
 .modal-icon {
-      width: 28px;
-      color: #fff;
-    height: 28px;
+    width: 24px;
+    color: #fff;
+    height: 24px;
 }

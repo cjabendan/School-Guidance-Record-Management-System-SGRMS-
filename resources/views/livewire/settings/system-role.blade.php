@@ -10,7 +10,7 @@
         <div style="display: flex; flex-direction: column; gap: 1rem; width: 58%;">
             @foreach ($features as $feature)
                 @if (!($role === 'counselor' && $feature['key'] === 'request'))
-                    <div class="flex items-center justify-between border-b border-gray-200 pb-2">
+                    <div class="flex items-center justify-between">
                         <span class="text-base font-medium">{{ $feature['name'] }}</span>
                         <button wire:click="toggle('{{ $feature['key'] }}')"
                             class="settings-form-button {{ $feature['enabled'] ? '' : 'secondary' }}">

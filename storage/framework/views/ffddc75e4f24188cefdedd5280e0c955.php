@@ -3,11 +3,11 @@
 
 <head>
     <meta charset="utf-8" />
-    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="csrf-token" content="<?php echo e(csrf_token()); ?>">
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@yield('title', 'SGRMS - School Guidance Records Management System')</title>
+    <title><?php echo $__env->yieldContent('title', 'SGRMS - School Guidance Records Management System'); ?></title>
 
-    <link rel="icon" type="image/svg+xml" href="{{ asset('1.png') }}">
+    <link rel="icon" type="image/svg+xml" href="<?php echo e(asset('1.png')); ?>">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
@@ -15,14 +15,14 @@
     <link rel='stylesheet'
         href='https://cdn-uicons.flaticon.com/3.0.0/uicons-solid-rounded/css/uicons-solid-rounded.css'>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{{ asset('css/tailwind.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/font-awesome.min.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/style.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/maintenance.css') }}">
+    <link rel="stylesheet" href="<?php echo e(asset('css/tailwind.css')); ?>">
+    <link rel="stylesheet" href="<?php echo e(asset('css/font-awesome.min.css')); ?>">
+    <link rel="stylesheet" href="<?php echo e(asset('css/style.css')); ?>">
+    <link rel="stylesheet" href="<?php echo e(asset('css/maintenance.css')); ?>">
 </head>
 
 <body>
-    @yield('content')
+    <?php echo $__env->yieldContent('content'); ?>
 
     <div class="maintenance-container">
         <div class="maintenance-content">
@@ -48,7 +48,7 @@
             </div>
 
             <div class="maintenance-flex" style="margin-top: .8rem;">
-                <a href="{{ url('/') }}" class="maintenance-button" style="text-align: center;">
+                <a href="<?php echo e(url('/')); ?>" class="maintenance-button" style="text-align: center;">
                     Return to Landing Page
                 </a>
             </div>
@@ -60,3 +60,4 @@
 </body>
 
 </html>
+<?php /**PATH C:\Users\Administrator\School-Guidance-Record-Management-System-SGRMS\resources\views/maintenance.blade.php ENDPATH**/ ?>

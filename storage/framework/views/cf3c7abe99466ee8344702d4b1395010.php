@@ -16,7 +16,7 @@
     
     <?php echo $__env->make('landing-sections.faq', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
 
-
+    <?php echo $__env->make('landing-sections.contact', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
     
 <?php $__env->stopSection(); ?>
 

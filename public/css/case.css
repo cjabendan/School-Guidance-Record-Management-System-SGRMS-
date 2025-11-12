@@ -155,6 +155,7 @@
 #student_search_results,
 [id^="edit_student_search_results"] {
     position: absolute;
+    width: 100%;
     top: 100%; 
     z-index: 9999;
     background: #fff;
@@ -206,86 +207,75 @@
     margin-left: auto;
 }
 
+/* ===========================
+   STUDENT TAG & VIEW MORE
+=========================== */
 .student-tag-input {
     display: flex;
-    gap: 8px;
     align-items: center;
     flex-wrap: wrap;
-    border: 1px solid #e6eef8;
-    padding: 6px 8px;
-    border-radius: 8px;
-    background: #fff;
+    gap: 6px;
+    background: #f9fafb;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    padding: 8px 10px;
     min-height: 40px;
+    position: relative;
 }
 
 .student-tag {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    background: #f0f8ff;
-    color: #0b3a66;
-    padding: 6px 10px;
-    border-radius: 999px;
-    font-weight: 500;
-    box-shadow: 0 4px 12px rgba(12, 55, 93, 0.06);
-}
-
-.student-tag .remove-tag {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 18px;
-    height: 18px;
-    border-radius: 50%;
-    background: rgba(0,0,0,0.06);
-    color: #084b83;
-    cursor: pointer;
-    font-weight: 700;
-    line-height: 1;
-}
-
-/* Compact "view more" control for View modal */
-.student-more {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    background: #eef6ff;
-    color: #0b66b2;
-    border: 1px solid #dbeffd;
-    padding: 6px 10px;
-    border-radius: 999px;
     font-weight: 600;
-    cursor: pointer;
-    box-shadow: 0 6px 18px rgba(13, 60, 98, 0.04);
-    margin-left: 6px;
-}
-.student-more:hover {
-    background: #e6f3ff;
-    transform: translateY(-1px);
+    border-radius: 4px;
+    padding: 4px 10px;
+    font-size: 0.9rem;
+    display: inline-block;
 }
 
-/* Popup list that appears when clicking view more */
+.student-more {
+    color: #003060;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    background: #e8f0ff;
+    border-radius: 4px;
+    padding: 4px 8px;
+    transition: background 0.2s, color 0.2s;
+}
+
+/* Dropdown for additional students */
 .student-more-list {
     position: absolute;
-    top: calc(100% + 8px);
+    top: 105%;
     left: 0;
-    min-width: 220px;
-    max-width: 420px;
-    background: #fff;
-    border: 1px solid #e6f3ff;
-    border-radius: 8px;
-    box-shadow: 0 8px 28px rgba(13,60,98,0.12);
-    padding: 8px;
-    z-index: 2000;
-}
-.student-more-item {
-    padding: 8px 10px;
+    background: #ffffff;
+    border: 1px solid #d1d5db;
     border-radius: 6px;
-    color: #032b53;
-    font-weight: 500;
+    margin-top: 5px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    z-index: 999;
+    width: 100%;
+    max-height: 200px;
+    overflow-y: auto;
+    animation: fadeIn 0.2s ease;
 }
-.student-more-item + .student-more-item { margin-top: 6px; }
-.student-more-item:hover { background: #f5fbff; }
+
+.student-more-item {
+    padding: 8px 12px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    color: #333;
+    transition: background 0.2s;
+}
+
+.student-more-item:hover {
+    background: #f0f4ff;
+}
+
+/* Smooth dropdown animation */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-4px); }
+    to { opacity: 1; transform: translateY(0); }
+}
 
 /* Smooth, minimal scrollbar for the list */
 .list-group::-webkit-scrollbar {
@@ -299,14 +289,98 @@
     border-radius: 8px;
 }
 
-.case-modal-content {
-    max-width: 700px !important; 
+
+/* ==========================
+   FORM SECTION BOX STYLING
+   ========================== */
+.case-form-section {
+    width: 650px !important;
+    margin-top: 28px;
+    padding: 40px 28px;
+    background: #ffffff;
+    border-radius: 8px;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+    transition: all 0.25s ease-in-out;
+}
+
+.case-form-section:first-of-type {
+    margin-top: 0;
+}
+
+.case-form-section:hover {
+    border-color: #bfdbfe;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.06);
+}
+
+/* ==========================
+   SECTION TITLE DESIGN
+   ========================== */
+.case-form-section-title {
+    display: inline-block;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #003060;
+    letter-spacing: 0.03em;
+    margin-bottom: 20px;
+    position: relative;
+    padding-left: 10px;
+}
+
+.case-form-section-title::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    height: 1.3em;
+    width: 4px;
+    border-radius: 3px;
+    background-color: #003060;
+}
+
+/* Improve spacing inside sections */
+.case-form-section .form-row {
+    margin-bottom: 18px;
 }
 
 .case-modal-title {
     font-size: 2rem;
     color: #0b2b4a;
     letter-spacing: 0.5px;
+}
+
+.modal-header-case {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;  
+    padding: 10px 20px 15px 20px;
+}
+
+.modal-content .modal-header-case {
+  align-self: stretch;
+}
+
+/* Left group (icon + title) */
+.modal-header-case .header-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* Icon + Title styling */
+.modal-header-case i {
+    color: #003060;
+    font-size: 1.6rem;
+}
+
+.modal-header-case h2 {
+    color: #003060;
+    font-size: 1.5rem;
+    font-weight: 700;
+    letter-spacing: 0.6px;
+    margin: 0;
+    text-transform: capitalize;
 }
 
 /* ============================
@@ -402,11 +476,17 @@
 
 /* Optional subtle card effect for form sections */
 .case-modal-content {
+    max-width: 700px !important; 
     background: #ffffff;
     border-radius: 12px;
     padding: 24px 28px;
     box-shadow: 0 8px 28px rgba(0, 0, 0, 0.08);
     animation: fadeIn 0.3s ease;
+}
+
+.pro-add-save {
+    align-self: flex-end;
+    margin-top: 50px !important;
 }
 
 #exportDropdownMenu {

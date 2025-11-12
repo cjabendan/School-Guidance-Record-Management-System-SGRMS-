@@ -8,6 +8,7 @@
         <a class="nav-link" href="<?php echo e(url('/#services')); ?>">Services</a>
         <a class="nav-link" href="<?php echo e(url('/#staff')); ?>">Meet Our Staff</a>
         <a class="nav-link" href="<?php echo e(url('/#faq')); ?>">FAQ's</a>
+        <a class="nav-link" href="<?php echo e(url('/#contact')); ?>">Contact</a>
         <a class="nav-link" href="<?php echo e(url('announcements')); ?>">Announcements</a>
     </nav>
     <div class="navigation">

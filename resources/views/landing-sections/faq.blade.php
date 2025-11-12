@@ -106,27 +106,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 </div>
             </div>
         </div>
-        <div class="cta-box">
-            <div class="flex-cta">
-                <div class="cta-content">
-                    <p>Still have questions or need someone to talk to?</p>
-                    <div class="cta-btn">
-                        <button class="btn-primary">Visit the Guidance Center
-                            <i class="fi fi-rr-marker"></i>
-                        </button>
-                        <button class="btn-secondary">Request Counseling
-                            <i class="fi fi-rr-arrow-small-right"></i>
-                        </button>
-                    </div>
-                </div>
-                <div>
-                    <div class="icon-img">
-                        <img src="{{ asset('images/img/assistance.png') }}" alt="assistance">
-                    </div>
-                </div>
-
-            </div>
-        </div>
+       
     </div>
 
 </section>

@@ -10,7 +10,7 @@
                 <option value="week" {{ request('filter') == 'week' ? 'selected' : '' }}>This
                     Week
                 </option>
-            </select>   
+            </select>
         </form>
     </div>
     <div class="appointments-table" id="appointments-table-container" style="position:relative;">
@@ -19,7 +19,7 @@
             <tbody>
                 @php
                     // Only show Approved and Ongoing (in-session) appointments on the Head dashboard
-                    $visibleAppointments = collect($upcomingAppointments)->filter(function($appointment) {
+                    $visibleAppointments = collect($upcomingAppointments)->filter(function ($appointment) {
                         $status = strtolower($appointment->status ?? '');
                         return in_array($status, ['approved', 'ongoing']);
                     });
@@ -42,7 +42,8 @@
                         </td>
                         <td class="appointment-actions-col">
                             <div class="appointment-countdown-wrapper" style="text-align:right; margin-right:65px;">
-                                <span class="appointment-countdown" data-datetime="{{ $appointment->appointment_datetime->toIso8601String() }}"></span>
+                                <span class="appointment-countdown"
+                                    data-datetime="{{ $appointment->appointment_datetime->toIso8601String() }}"></span>
                             </div>
                             <div class="appointment-action" style="text-align:right; margin-right:47px;">
                                 <a href="" class="appointment-link" style="margin-left:8px;">View details</a>
@@ -52,7 +53,9 @@
                 @empty
                     <tr>
                         <td colspan="3" class="no-appointments-cell">
-                            No upcoming appointments.
+                            <img src="{{ asset('images/icons/appointments.png') }}" alt="no-appointments"
+                                class="no-appointments-img">
+                            You have no upcoming appointments.
                         </td>
                     </tr>
                 @endforelse
@@ -61,7 +64,7 @@
     </div>
 </div>
 
-    <script>
+<script>
     function startHeadAppointmentCountdowns() {
         const els = document.querySelectorAll('.appointment-countdown');
         if (!els.length) return;
@@ -109,4 +112,4 @@
 
     // Initialize on load (and allow external calls after AJAX replacement)
     document.addEventListener('DOMContentLoaded', startHeadAppointmentCountdowns);
-    </script>
+</script>

@@ -289,7 +289,6 @@ section {
 .about-section {
     min-height: 100vh;
     background: #ffffff;
-   
 }
 
 .about-section .content {
@@ -374,7 +373,6 @@ section {
 .services-section {
     min-height: 100vh;
     background: #ffff;
-   
 }
 
 .services-section .content {
@@ -388,7 +386,7 @@ section {
     color: #1ea7ff;
     font-size: 48px;
     text-align: center;
-    margin-bottom: .5rem;
+    margin-bottom: 0.5rem;
 }
 
 .services-container {
@@ -527,7 +525,6 @@ section {
         linear-gradient(to bottom, transparent 50%, #fff 50%);
     background-size: 100% 60%, 100% 100%;
     background-repeat: no-repeat;
-    
 }
 
 .staff-content {
@@ -950,7 +947,7 @@ section {
     overflow: hidden;
     box-sizing: border-box;
     padding: 0 0;
-    
+
     transition: height 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease,
         padding 0.3s;
     will-change: height, opacity;
@@ -975,7 +972,6 @@ section {
 .faq-item.active .plus-btn i {
     transform: rotate(180deg);
 }
-
 
 .question {
     display: flex;
@@ -1103,6 +1099,178 @@ section {
     object-fit: cover;
 }
 
+/* Contact Section  */
+.contact-section {
+    background-color: #ffffff;
+}
+
+@media (min-width: 1024px) {
+    .contact-section {
+        padding: 5rem 2rem; /* lg:py-20 lg:px-8 */
+    }
+}
+
+/* Max-width wrapper */
+.contact-section .container {
+    max-width: 1120px; /* max-w-7xl */
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+/* Header block */
+.contact-section .header-block {
+    display: flex;
+    flex-direction: column;
+    gap: .5rem;
+}
+
+.contact-section .header-block h2 {
+    font-weight: 900;
+    font-size: 42px;
+    color: #003060;
+}
+
+.contact-section .header-block .intro-text {
+    font-size: 1.1rem;
+    color: #6d7375;
+    line-height: 1.8;
+}
+
+/* Flex grid */
+.contact-section .flex-grid {
+    display: flex;
+    gap: 2rem;
+    align-items: stretch; /* ensure items stretch to the tallest item */
+    align-content: stretch;
+    min-height: 0;
+}
+
+/* Left (Info Panel) */
+.contact-section .left {
+    flex: 0.9; /* ~40% share */
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+/* Right (Form Panel) */
+.contact-section .right {
+    flex: 1; /* ~60% share */
+    max-width: 600px;
+}
+
+/* Contact info items */
+.contact-info ul {
+    list-style: none;
+    padding: 0;
+}
+
+.contact-info li {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.contact-info li .icon {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 25%;
+    background-color: #003060; /* minimal */
+    color: #fff;
+    flex-shrink: 0;
+}
+
+.contact-info li h3 {
+    font-weight: 500;
+    font-size: 1.125rem;
+    color: #003060;
+    margin-bottom: 0.25rem;
+}
+
+.contact-info li p {
+    color: #555;
+    margin: 0;
+    font-size: 0.95rem;
+}
+
+/* Form card */
+.contact-section .card {
+    background-color: #fff;
+    padding: 2rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 10px 15px rgba(0, 0, 0, 0.05);
+}
+
+.contact-section .right {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    border: 1px solid #e0e0e0;
+    border-radius: 10px;
+    padding: 1.5rem;
+}
+
+.contact-section h2 {
+    font-size: 1.25rem;
+    font-weight: 500;
+    color: #003060;
+}
+
+.contact-section .contactForm {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.contact-section input,
+.contact-section textarea {
+    width: 100%;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid #ccc;
+    border-radius: 0.375rem;
+    font-size: 1rem;
+    color: #003060;
+    background-color: #fff;
+}
+
+.contact-section textarea {
+    resize: none;
+}
+
+.contact-section button {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    background-color: #1ea7ff;
+    color: #fff;
+    font-size: 1rem;
+    font-weight: 600;
+    border-radius: 0.5rem;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.contact-section .card button:hover {
+    background-color: #1582cc;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .contact-section .flex-grid {
+        flex-direction: column;
+    }
+
+    .contact-section .left,
+    .contact-section .right {
+        max-width: 100%;
+    }
+}
+
 /* Footer styles  */
 footer {
     background: #263238;
@@ -1207,6 +1375,7 @@ footer {
     padding-top: 2rem;
     border-top: 1px solid #37474f;
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
 }
@@ -1217,7 +1386,6 @@ footer {
     justify-content: center;
     gap: 0.6rem;
     flex-wrap: wrap;
-    margin-bottom: 1rem;
 }
 
 .footer-school-logo {

@@ -44,6 +44,9 @@
                 <img src="<?php echo e(asset('images/logo/school-logo.png')); ?>" alt="School Logo" class="footer-school-logo">
                 <p class="footer-affiliation-text">An initiative of the Guidance Office of <strong>Montessori Academy
                         Southern Cebu Inc.</strong></p>
+              
+            </div>
+            <div class="footer-affiliation" style="margin-top: -10px;">
                 <p class="footer-copyright">&copy; <span id="year">2025</span> SGRMS. All rights reserved.</p>
             </div>
         </div>

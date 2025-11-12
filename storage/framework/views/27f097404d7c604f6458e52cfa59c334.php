@@ -2,9 +2,13 @@
     <!-- Add/Edit Student Modal -->
     <div id="addStudentModal" class="modal">
         <div class="modal-content add-modal-content pro-add-modal">
-            <span class="close add-modal-close pro-add-close" id="closeAddModalBtn">&times;</span>
-            <h2 id="addModalTitle" class="add-modal-title pro-add-title">Add Student</h2>
-
+            <div class="modal-header-student">
+                <div class="header-left">
+                    <i class="fi fi-sr-folder-open"></i>
+                    <h2 id="addModalTitle" class="add-modal-title pro-add-title">Add Student</h2>
+                </div>
+                <span class="close add-modal-close pro-add-close" id="closeAddModalBtn">&times;</span>
+            </div>
             <form id="addStudentForm" method="POST" action="<?php echo e(url('Head/students')); ?>" enctype="multipart/form-data">
                 <?php echo csrf_field(); ?>
                 <input type="hidden" id="delete_profile_image" name="delete_photo" value="0">
@@ -169,9 +173,13 @@
     <!-- View Student Modal -->
     <div id="viewStudentModal" class="modal">
         <div class="modal-content add-modal-content pro-add-modal">
-            <span class="close add-modal-close pro-add-close" id="closeViewModalBtn">&times;</span>
-            <h2 class="add-modal-title pro-add-title">Student Record</h2>
-
+            <div class="modal-header-student">
+                <div class="header-left">
+                    <i class="fi fi-sr-folder-open"></i>
+                    <h2 class="add-modal-title pro-add-title">Student Records</h2>
+                </div>
+                <span class="close add-modal-close pro-add-close" id="closeViewModalBtn">&times;</span>
+            </div>  
             <form id="editStudentForm" method="POST" action="#" enctype="multipart/form-data">
                 <?php echo csrf_field(); ?>
 
@@ -371,24 +379,34 @@
         </div>
     </div>
 
-<!---------------------------------------------------------------------------------------->
+<!------------------------------------s---------------------------------------------------->
 
 <!-- Student Status Update Modal -->
 <div id="archiveStudentModal" class="modal" style="display:none;">
   <div class="modal-content">
     <span class="close add-modal-close pro-add-close" id="closeArchiveModalBtn">&times;</span>
 
+    <!-- Header Icon -->
+    <div class="modal-icon">
+      <i class="fi fi-sr-user-check"></i>
+    </div>
+
+    <!-- Title -->
     <h2 class="add-modal-title pro-add-title">
       Update Student Record
-      <span id="archiveStudentIdDisplay" class="student-id"></span>
     </h2>
 
     <form id="archiveStudentForm" method="POST" action="<?php echo e(url('/students/archive')); ?>">
       <?php echo csrf_field(); ?>
       <input type="hidden" name="s_id" id="archive_s_id">
 
+      <!-- Description with student ID -->
       <p class="modal-description">
-        Select the most accurate status for this student below. You may also disable their account access if the record should no longer be active.
+        Select the most accurate status for this student below.  
+        You may also disable their account access if the record should no longer be active.
+        <br><br>
+        <span class="student-id-label"><i class="fi fi-sr-id-badge"></i> Student ID:</span>
+        <span id="archiveStudentIdDisplay" class="student-id"></span>
       </p>
 
       <!-- Student Status -->
@@ -419,6 +437,7 @@
     </form>
   </div>
 </div>
+
 
 
 <!---------------------------------------------------------------------------------------->

@@ -1,107 +1,71 @@
-.maintenance {
-    position: relative; /* add this so ::before covers the element correctly */
-    min-height: 100vh;
+.maintenance-container {
     display: flex;
-    justify-content: center;
+    flex: 1;
+    height: 100vh;
     align-items: center;
-    background: url('/images/bg/school-bg.jpg') no-repeat center center fixed;
-    background-size: cover;
-    text-align: center;
-    padding: 2rem;
-}
-
-/* Add a soft overlay for readability */
-.maintenance::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: rgba(140, 211, 252, 0.507);
-    backdrop-filter: blur(3px);
-    z-index: 0;
+    justify-content: center;
 }
 
 .maintenance-content {
-    position: relative;
-    z-index: 1;
-    background: rgba(255, 255, 255, 0.945);
-    border-radius: 1.25rem;
-    box-shadow: 0 6px 20px rgba(0,0,0,0.1);
-    padding: 3rem 2rem;
-    max-width: 600px;
-    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 25%;
+    gap: 0.8rem;
 }
 
-
-.system-logo {
-    width: 80px;
-    height: 80px;
+.maintenance-icon-wrapper {
+    background-color: #f4f4f4;
     border-radius: 50%;
-    border: 1.5px solid #cccccc;
-    margin-bottom: 1rem;
-}
-
-.maintenance-title {
-    font-size: 2.2rem;
-    color: #0b8cdb;
-    font-weight: 600;
-    margin-bottom: 1rem;
-}
-
-.maintenance-text {
-    color: #7a7a7a;
-    font-size: 1.05rem;
-    line-height: 1.7;
-    margin-bottom: 1.5rem;
-}
-
-.maintenance-btn {
-    display: inline-block;
-    padding: 0.9rem 1.8rem;
-    border-radius: 8px;
-    background: linear-gradient(to right, #0b8cdb, #0064b7);
-    color: #fff;
-    font-weight: 500;
-    letter-spacing: 0.5px;
-    text-decoration: none;
-    transition: transform 0.2s ease, background 0.3s ease;
-}
-
-.maintenance-btn:hover {
-    background: linear-gradient(to right, #0890ff, #005ca0);
-}
-
-.maintenance-contact {
-    margin-top: 2rem;
-}
-
-.contact-links {
+    padding: 1rem;
     display: flex;
     justify-content: center;
+    align-items: center;
 }
 
-.contact-links a {
-    color: #0b8cdb;
-    font-size: 1.1rem;
+.maintenance-icon {
+    width: 30px;
+    height: 30px;
+    color: #003060;
+}
+
+.maintenance-header {
+    font-family: 'Inter', sans-serif;
+    font-weight: bold;
+    letter-spacing: 0.5px;
+    font-size: 2.75rem;
+    color: #003060;
+}
+
+.maintenance-subheader {
+    color: #aaaaaa;
+    text-align: center;
+    font-size: 1rem;
+}
+
+.maintenance-flex {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    width: 100%;
+    display: flex;
+    gap: 0.8rem;
+}
+
+.maintenance-button {
+    flex: 1;
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border-radius: 7px;
+    background-color: #003060;
+    color: white;
+    font-size: 0.95rem;
     font-weight: 500;
-    text-decoration: none;
-    transition: color 0.3s ease;
 }
 
-.contact-links a:hover {
-    color: #005ca0;
-}
-
-
-@media (max-width: 640px) {
-    .maintenance-content {
-        padding: 2rem 1.5rem;
-    }
-
-    .maintenance-title {
-        font-size: 1.8rem;
-    }
-
-    .maintenance-text {
-        font-size: 0.95rem;
-    }
+.maintenance-link {
+    color: #003060;
+    font-weight: 500;
+    text-decoration: underline;
+    cursor: pointer;
 }

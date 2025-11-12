@@ -18,6 +18,6 @@
     {{-- FAQ Section --}}
     @include('landing-sections.faq')
 
-
+    @include('landing-sections.contact')
     
 @endsection

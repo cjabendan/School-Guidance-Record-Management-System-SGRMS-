@@ -22,9 +22,6 @@
                                         data-type="approved">With Linked Students</a>
                                     <a href="#" class="type-filter <?php echo e($type == 'pending' ? 'active' : ''); ?>"
                                         data-type="pending">With Pending Requests</a>
-                                    <a href="#" class="type-filter <?php echo e($type == 'archived' ? 'active' : ''); ?>"
-                                        data-type="archived">No Links</a>   
-                                </li>
                             </div>
                         </div>
                     </div>

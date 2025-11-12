@@ -10,7 +10,7 @@
         <div style="display: flex; flex-direction: column; gap: 1rem; width: 58%;">
             <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $features; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $feature): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                 <!--[if BLOCK]><![endif]--><?php if(!($role === 'counselor' && $feature['key'] === 'request')): ?>
-                    <div class="flex items-center justify-between border-b border-gray-200 pb-2">
+                    <div class="flex items-center justify-between">
                         <span class="text-base font-medium"><?php echo e($feature['name']); ?></span>
                         <button wire:click="toggle('<?php echo e($feature['key']); ?>')"
                             class="settings-form-button <?php echo e($feature['enabled'] ? '' : 'secondary'); ?>">
