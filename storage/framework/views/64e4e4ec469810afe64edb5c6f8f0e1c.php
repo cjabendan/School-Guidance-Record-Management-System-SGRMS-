@@ -7,9 +7,9 @@
             <div class="left contact-info">
 
                 <div class="header-block">
-                    <h2>Get in Touch</h2>
+                    <h2> Got questions? </h2>
                     <p class="intro-text">
-                        Got questions? We'd love to hear from you!
+                       We'd love to hear from you!
                         Send us a message or reach out through the contact details below.
                     </p>
                 </div>
@@ -27,7 +27,7 @@
 
                         </div>
                         <div class="info-text">
-                            <h3>Our Address</h3>
+                            <h3>School Address</h3>
                             <p>6RV4+453, Incalajoan, Minglanilla</p>
                             <p>Cebu City, Cebu</p>
                         </div>
@@ -68,9 +68,9 @@
 
             <!-- Right: Contact Form -->
             <div class="right" id="form">
-                <h2>Send us a message</h2>
-                <p>Please fill up the form and we will respond to your inquiry as soon as possible.</p>
-                <form class="contactForm">
+                <h2>Send a Message</h2>
+                <p style="color: #666; margin-bottom: 10px;">Fill out the form below and we’ll get back to you as soon as possible.</p>
+                <form class="contactForm" action="" method="">
                     <div class="contactForm">
                         <input type="text" id="name" name="name" placeholder="Your name"
                             autocomplete="given-name">

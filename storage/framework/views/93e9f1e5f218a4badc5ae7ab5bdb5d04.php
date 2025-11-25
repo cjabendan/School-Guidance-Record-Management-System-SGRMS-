@@ -1,40 +1,69 @@
     <div class="settings-flex-row">
-        <div class="card shadow-sm p-4 w-100">
-            <h5 class="mb-3">📄 Upload Policy Document</h5>
+        <div class="settings-form">
+            <div class="settings-form-header">
+                <p class="settings-form-heading">Upload Policy Document</p>
+                <p class="settings-form-subheading">
+                    Upload policy files to be indexed into the system. Supported formats: TXT and PDF.
+                </p>
+            </div>
 
-            <!--[if BLOCK]><![endif]--><?php if(session('success')): ?>
-                <div class="alert alert-success"><?php echo e(session('success')); ?></div>
-            <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+            
+            <div style="display:flex; flex-direction:column; gap:1.5rem; width: 15%;">
 
-            <!--[if BLOCK]><![endif]--><?php if($errors->any()): ?>
-                <div class="alert alert-danger">
-                    <ul class="mb-0">
-                        <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $errors->all(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $error): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                            <li><?php echo e($error); ?></li>
-                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><!--[if ENDBLOCK]><![endif]-->
-                    </ul>
-                </div>
-            <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
 
-            <form action="<?php echo e(route('rag.store')); ?>" method="POST" enctype="multipart/form-data"
-                class="rag-upload-form">
-                <?php echo csrf_field(); ?>
-                <div class="mb-3">
-                    <label for="id" class="form-label fw-semibold">Document ID</label>
-                    <input type="text" name="id" id="id" class="form-control"
-                        placeholder="e.g. school_policy_2025" required>
-                </div>
+                
+                <!--[if BLOCK]><![endif]--><?php if(session('success')): ?>
+                    <p class="settings-form-subheading" style="font-size:14px; color:green;">
+                        <?php echo e(session('success')); ?>
 
-                <div class="mb-3">
-                    <label for="file" class="form-label fw-semibold">Select File</label>
-                    <input type="file" name="file" id="file" class="form-control" accept=".txt,.pdf"
-                        required>
-                    <small class="text-muted">Accepted formats: .txt or .pdf</small>
-                </div>
+                    </p>
+                <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
 
-                <button type="submit" class="btn btn-primary">
-                    🚀 Upload & Index to Pinecone
-                </button>
-            </form>
+                <!--[if BLOCK]><![endif]--><?php if($errors->any()): ?>
+                    <div style="font-size:14px; color:red;">
+                        <ul style="margin:0; padding-left:1.2rem;">
+                            <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $errors->all(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $error): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <li><?php echo e($error); ?></li>
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><!--[if ENDBLOCK]><![endif]-->
+                        </ul>
+                    </div>
+                <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+
+                
+                <form action="<?php echo e(route('rag.store')); ?>" method="POST" enctype="multipart/form-data"
+                    class="rag-upload-form" style="display:flex; flex-direction:column; gap:1rem;">
+                    <?php echo csrf_field(); ?>
+
+                    
+                    <div style="display:flex; flex-direction:column; gap:0.3rem;">
+                        <label class="settings-form-subheading fw-semibold">Document ID</label>
+                        <input type="text" name="id" id="id" class="form-control"
+                            placeholder="e.g. school_policy_2025" required>
+                    </div>
+
+                    
+                    <div style="display:flex; flex-direction:column; gap:0.3rem;">
+                        <label class="settings-form-subheading fw-semibold">Select File</label>
+                        <input type="file" name="file" id="file" class="form-control" accept=".txt,.pdf"
+                            required>
+                        <span class="settings-form-subheading" style="font-size:14px; color:#555;">
+                            Accepted formats: .txt or .pdf
+                        </span>
+                    </div>
+
+                    
+                    <button type="submit" class="settings-form-button">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                            stroke="currentColor" class="icons">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5" />
+                        </svg>
+                        Upload document
+                    </button>
+                </form>
+
+            </div>
         </div>
-    </div><?php /**PATH C:\Users\Administrator\School-Guidance-Record-Management-System-SGRMS\resources\views/livewire/settings/system-chatbot.blade.php ENDPATH**/ ?>
+
+    </div>
+<?php /**PATH C:\Users\Administrator\School-Guidance-Record-Management-System-SGRMS\resources\views/livewire/settings/system-chatbot.blade.php ENDPATH**/ ?>

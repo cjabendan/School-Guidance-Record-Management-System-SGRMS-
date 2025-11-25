@@ -106,7 +106,7 @@
     background: #fff;
     border-radius: 7px;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
-    padding: 32px 28px 24px 28px;
+    padding: 32px 28px;
     max-width: 1250px;
     width: 100%;
     margin: 2rem auto;
@@ -121,7 +121,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between;  
-    padding: 10px 20px 15px 20px;
+    padding: 15px 0;
 }
 
 .modal-content .modal-header-student {
@@ -281,14 +281,12 @@
     max-width: 260px;
     box-sizing: border-box;
     padding-right: 18px;
-    border-right: 1.5px solid #e5e7eb;
 }
 .image-name-row .name-fields-col {
     flex: 1 1 0;
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
-    padding-left: 32px;
     box-sizing: border-box;
 }
 
@@ -403,7 +401,6 @@
     width: 100%;
     display: flex;
     justify-content: flex-end;
-    margin-top: 18px;
 }
 .pro-add-save {
     background: #003060;
@@ -711,7 +708,7 @@
     min-width: 220px;
     max-width: 220px;
     padding: 28px 0 28px 0;
-    border-right: 1.5px solid #e5e7eb;
+   
     box-sizing: border-box;
     background: #f4f6fa;
     border-radius: 12px;
@@ -1289,7 +1286,7 @@
    FORM SECTION BOX STYLING
    ========================== */
 .form-section {
-    margin-top: 28px;
+   
     padding: 40px 28px;
     background: #ffffff;
     border-radius: 8px;
@@ -1302,10 +1299,6 @@
     margin-top: 0;
 }
 
-.form-section:hover {
-    border-color: #bfdbfe;
-    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.06);
-}
 
 /* ==========================
    SECTION TITLE DESIGN

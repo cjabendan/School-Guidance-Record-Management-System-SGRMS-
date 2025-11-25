@@ -1,11 +1,10 @@
-@extends('layouts.counselor')
-@section('title', 'SGRMS - School Guidance Records Management System')
-@section('content')
+<?php $__env->startSection('title', 'SGRMS - School Guidance Records Management System'); ?>
+<?php $__env->startSection('content'); ?>
 
 
     <!-- MAIN CONTENT -->
     <section id="content">
-        @include('partials.navbar')
+        <?php echo $__env->make('partials.navbar', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
         <div class="wrapper">
             <div class="table-container">
                 <div class="table-management">
@@ -27,11 +26,11 @@
                         <div class="table-search">
                             <form method="GET" action="">
                                 <i class="fi fi-br-search"></i>
-                                <input type="text" name="search" value="{{ request('search') }}"
+                                <input type="text" name="search" value="<?php echo e(request('search')); ?>"
                                     placeholder="Search counseling..." id="counseling-search-input">
-                                @if (request('category'))
-                                    <input type="hidden" name="category" value="{{ request('category') }}">
-                                @endif
+                                <?php if(request('category')): ?>
+                                    <input type="hidden" name="category" value="<?php echo e(request('category')); ?>">
+                                <?php endif; ?>
                                 <button type="submit" style="display:none"></button>
                             </form>
                         </div>
@@ -53,33 +52,36 @@
                         <div class="table-col actions">Actions</div>
                     </div>
                     <div class="table">
-                        @forelse($counselings as $counseling)
+                        <?php $__empty_1 = true; $__currentLoopData = $counselings; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $counseling): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                             <div class="table-card">
-                                <div class="table-col title">{{ $counseling->note_id }}</div>
-                                <div class="table-col category">{{ $counseling->caseType->type_name ?? 'N/A' }}</div>
-                                <div class="table-col">{{ $counseling->created_at }}</div>
+                                <div class="table-col title"><?php echo e($counseling->note_id); ?></div>
+                                <div class="table-col category"><?php echo e($counseling->caseType->type_name ?? 'N/A'); ?></div>
+                                <div class="table-col"><?php echo e($counseling->created_at); ?></div>
                                 <div class="table-col status">
-                                    <span class="status-label status-{{ strtolower($counseling->remarks) }}">
-                                        <span class="status-dot status-{{ strtolower($counseling->remarks) }}"></span>
-                                        {{ ucfirst($counseling->remarks) }}
+                                    <span class="status-label status-<?php echo e(strtolower($counseling->remarks)); ?>">
+                                        <span class="status-dot status-<?php echo e(strtolower($counseling->remarks)); ?>"></span>
+                                        <?php echo e(ucfirst($counseling->remarks)); ?>
+
                                     </span>
                                 </div>
                         
                                 <div class="table-col actions">
                                     <button type="button" class="view-btn" data-bs-toggle="modal"
-                                        data-bs-target="#viewcounselingModal{{ $counseling->case_id }}"><i class='bx bx-show'></i></button>
+                                        data-bs-target="#viewcounselingModal<?php echo e($counseling->case_id); ?>"><i class='bx bx-show'></i></button>
                                     <button type="button" class="edit-btn" data-bs-toggle="modal"
-                                        data-bs-target="#editcounselingModal{{ $counseling->case_id }}"><i class='bx bx-edit'></i></button>
+                                        data-bs-target="#editcounselingModal<?php echo e($counseling->case_id); ?>"><i class='bx bx-edit'></i></button>
                                     <button type="button" class="archive-btn"><i class='bx bx-archive'></i></button>
                                 </div>
                             </div>
-                        @empty
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                             <div class="no-table-cell">No counseling notes found.</div>
-                        @endforelse
+                        <?php endif; ?>
                     </div>
                 </div>
             </div>
         </div>
     </section>
-   <!-- @include('Head.Modal.counselingModal') -->
-@endsection
+   <!-- <?php echo $__env->make('Head.Modal.counselingModal', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?> -->
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make('layouts.counselor', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\Administrator\School-Guidance-Record-Management-System-SGRMS\resources\views/Counselor/counseling.blade.php ENDPATH**/ ?>

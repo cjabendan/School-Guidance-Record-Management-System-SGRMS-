@@ -9,6 +9,25 @@
     <!--[if BLOCK]><![endif]--><?php if($selectedUser): ?>
         <?php echo $__env->make('livewire.user-profile-pane', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
     <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+
+    
+    <?php
+$__split = function ($name, $params = []) {
+    return [$name, $params];
+};
+[$__name, $__params] = $__split('modals.delete-chat-modal');
+
+$__html = app('livewire')->mount($__name, $__params, 'lw-319146344-0', $__slots ?? [], get_defined_vars());
+
+echo $__html;
+
+unset($__html);
+unset($__name);
+unset($__params);
+unset($__split);
+if (isset($__slots)) unset($__slots);
+?>
+
 </div>
 
 <script>

@@ -57,7 +57,7 @@
                                 <i class="fi fi-sr-minus-circle"></i>
                                 <a href="#"><?php echo e($hasBlocked ? 'Unblock' : 'Block'); ?></a>
                             </li>
-                            <li style="cursor: pointer;">
+                            <li wire:click="requestDeleteChat" style="cursor: pointer;">
                                 <i class="fi fi-sr-trash"></i>
                                 <a href="#">Delete chat</a>
                             </li>

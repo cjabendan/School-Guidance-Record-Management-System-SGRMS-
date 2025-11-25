@@ -225,7 +225,7 @@
 <script>
     let seconds = 5;
     const countdownDisplay = document.getElementById("count");
-    const redirectUrl = "{{ url('/?login=true') }}";
+    const redirectUrl = "<?php echo e(url('/?login=true')); ?>";
 
     const interval = setInterval(() => {
         seconds--;
@@ -247,7 +247,7 @@
         // ⭐ START COUNTDOWN
         let seconds = 5;
         const countdownDisplay = document.getElementById("count");
-        const redirectUrl = "{{ url('/?login=true') }}";
+        const redirectUrl = "<?php echo e(url('/?login=true')); ?>";
 
         const interval = setInterval(() => {
             seconds--;
@@ -261,3 +261,4 @@
 
     }, 500);
 </script>
+<?php /**PATH C:\Users\Administrator\School-Guidance-Record-Management-System-SGRMS\resources\views/auth/success-verification.blade.php ENDPATH**/ ?>

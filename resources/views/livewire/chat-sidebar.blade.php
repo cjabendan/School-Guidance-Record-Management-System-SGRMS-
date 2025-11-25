@@ -13,7 +13,7 @@
             </svg>
             <ul class="convo-results">
                 @forelse($conversationSearchResults as $u)
-                    <li wire:click="selectNewChatUser({{ $u->id }})"
+                    <li wire:key="search-result-{{ $u->id }}" wire:click="selectNewChatUser({{ $u->id }})"
                         style="display:flex;align-items:center;gap:8px;cursor:pointer;">
                         <img src="{{ asset('images/user/' . $u->profile_image) }}" class="search-user-img">
                         <span>{{ $u->first_name }} {{ $u->last_name }}@if (in_array($u->role, ['admin', 'counselor']))
@@ -56,7 +56,7 @@
         @if (empty($conversationSearch))
             <div id="chatList" class="chat-list">
                 @foreach ($users as $user)
-                    <div wire:click="selectUser({{ $user->id }})"
+                    <div wire:key="chat-item-{{ $user->id }}" wire:click="selectUser({{ $user->id }})"
                         class="chat-item {{ $selectedUser && $selectedUser->id === $user->id ? 'active' : '' }}">
                         <img src="{{ asset('images/user/' . $user->profile_image) }}" class="user-img" alt="User">
                         <div class="chat-item-info">

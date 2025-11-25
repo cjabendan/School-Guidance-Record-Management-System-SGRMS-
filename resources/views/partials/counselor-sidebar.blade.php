@@ -21,7 +21,7 @@
                         <span class="text">Dashboard</span>
                     </a>
                 </li>
-               @if (\App\Models\Feature::isEnabled('chat', 'counselor'))
+                 @if (\App\Models\Feature::isEnabled('chat', 'counselor'))
                     <li class="{{ Request::is('Counselor/messages*') ? 'active' : '' }}">
                         <a href="{{ url('Counselor/messages') }}">
                             <i class="fi fi-sr-comment"></i>
@@ -37,6 +37,12 @@
                         </a>
                     </li>
                 @endif
+                   <li class="{{ Request::is('Counselor/counseling') ? 'active' : '' }}">
+                    <a href="{{ url('Counselor/counseling') }}">
+                          <i class="fi fi-sr-journal-alt"></i>
+                        <span class="text">Counseling Notes</span>
+                    </a>
+                </li>
                 <li class="{{ Request::is('/settings*') ? 'active' : '' }}">
                     <a href="{{ url('/settings') }}">
                         <i class='bx bxs-cog'></i>

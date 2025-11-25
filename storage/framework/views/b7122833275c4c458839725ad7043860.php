@@ -7,7 +7,7 @@
 
                 <ul class="user-results">
                     <!--[if BLOCK]><![endif]--><?php $__empty_1 = true; $__currentLoopData = $newChatSearchResults; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $u): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
-                        <li wire:click="selectNewChatUser(<?php echo e($u->id); ?>)"
+                        <li wire:key="new-chat-search-<?php echo e($u->id); ?>" wire:click="selectNewChatUser(<?php echo e($u->id); ?>)"
                             style="display:flex;align-items:center;gap:8px;cursor:pointer;">
                             <img src="<?php echo e(asset('images/user/' . $u->profile_image)); ?>" class="search-user-img">
                             <span><?php echo e($u->first_name); ?> <?php echo e($u->last_name); ?><!--[if BLOCK]><![endif]--><?php if(in_array($u->role, ['admin', 'counselor'])): ?>
@@ -132,7 +132,7 @@
                             </div>
                         <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
 
-                        <div class="message-row <?php echo e($isSentByMe ? 'sent' : 'received'); ?>"
+                        <div wire:key="message-<?php echo e($message->id); ?>" class="message-row <?php echo e($isSentByMe ? 'sent' : 'received'); ?>"
                             id="message-<?php echo e($message->id); ?>">
                             
                             <!--[if BLOCK]><![endif]--><?php if(!$isSentByMe): ?>

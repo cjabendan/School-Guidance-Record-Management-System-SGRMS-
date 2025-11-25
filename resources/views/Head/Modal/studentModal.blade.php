@@ -7,7 +7,7 @@
                     <i class="fi fi-sr-folder-open"></i>
                     <h2 id="addModalTitle" class="add-modal-title pro-add-title">Add Student</h2>
                 </div>
-                <span class="close add-modal-close pro-add-close" id="closeAddModalBtn">&times;</span>
+                <span class="qr-close" id="closeAddModalBtn">&times;</span>
             </div>
             <form id="addStudentForm" method="POST" action="{{ url('Head/students') }}" enctype="multipart/form-data">
                 @csrf
@@ -161,7 +161,7 @@
 
                 <!-- Save Button -->
                 <div class="pro-add-buttons">
-                    <button type="submit" id="addEditSaveBtn" class="pro-add-save">Save</button>
+                    <button type="submit" id="addEditSaveBtn" class="">Save</button>
                 </div>
             </form>
         </div>
@@ -178,7 +178,7 @@
                     <i class="fi fi-sr-folder-open"></i>
                     <h2 class="add-modal-title pro-add-title">Student Records</h2>
                 </div>
-                <span class="close add-modal-close pro-add-close" id="closeViewModalBtn">&times;</span>
+                <span class="qr-close" id="closeViewModalBtn">&times;</span>
             </div>  
             <form id="editStudentForm" method="POST" action="#" enctype="multipart/form-data">
                 @csrf

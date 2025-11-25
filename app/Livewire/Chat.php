@@ -541,6 +541,7 @@ class Chat extends Component
         return [
             "echo-private:chat.{$this->loginID},MessageSent" => 'newChatMessageNotification',
             "echo-private:chat.{$this->loginID},UserBlockedStatus" => 'handleRealtimeBlock',
+            'chatDeleted' => 'handleChatDeleted',
         ];
     }
 
@@ -572,6 +573,33 @@ class Chat extends Component
             $this->loadBlockStatus();
             $this->loadChatList();
             $this->dispatch('chat:messageSent');
+        }
+    }
+
+    // === Delete Chat ===
+    public function requestDeleteChat()
+    {
+        if (!$this->selectedUser) {
+            return;
+        }
+
+        $this->dispatch('openDeleteChatModal', userId: $this->selectedUser->id);
+    }
+
+    public function handleChatDeleted($userId)
+    {
+        // Reset the selected user and reload chat list
+        if ($this->selectedUser && $this->selectedUser->id == $userId) {
+            $this->selectedUser = null;
+            Session::forget(self::ACTIVE_CONVO_SESSION_KEY);
+        }
+
+        $this->loadChatList();
+        $this->messages = collect();
+
+        // Auto-select the first (most recent) user from the updated chat list
+        if ($this->users->isNotEmpty()) {
+            $this->setActiveConversation($this->users->first());
         }
     }
 

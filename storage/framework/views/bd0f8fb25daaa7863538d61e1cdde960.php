@@ -13,7 +13,7 @@
             </svg>
             <ul class="convo-results">
                 <!--[if BLOCK]><![endif]--><?php $__empty_1 = true; $__currentLoopData = $conversationSearchResults; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $u): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
-                    <li wire:click="selectNewChatUser(<?php echo e($u->id); ?>)"
+                    <li wire:key="search-result-<?php echo e($u->id); ?>" wire:click="selectNewChatUser(<?php echo e($u->id); ?>)"
                         style="display:flex;align-items:center;gap:8px;cursor:pointer;">
                         <img src="<?php echo e(asset('images/user/' . $u->profile_image)); ?>" class="search-user-img">
                         <span><?php echo e($u->first_name); ?> <?php echo e($u->last_name); ?><!--[if BLOCK]><![endif]--><?php if(in_array($u->role, ['admin', 'counselor'])): ?>
@@ -56,7 +56,7 @@
         <!--[if BLOCK]><![endif]--><?php if(empty($conversationSearch)): ?>
             <div id="chatList" class="chat-list">
                 <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $users; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $user): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                    <div wire:click="selectUser(<?php echo e($user->id); ?>)"
+                    <div wire:key="chat-item-<?php echo e($user->id); ?>" wire:click="selectUser(<?php echo e($user->id); ?>)"
                         class="chat-item <?php echo e($selectedUser && $selectedUser->id === $user->id ? 'active' : ''); ?>">
                         <img src="<?php echo e(asset('images/user/' . $user->profile_image)); ?>" class="user-img" alt="User">
                         <div class="chat-item-info">

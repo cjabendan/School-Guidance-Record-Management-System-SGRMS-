@@ -21,7 +21,7 @@
                         <span class="text">Dashboard</span>
                     </a>
                 </li>
-               <?php if(\App\Models\Feature::isEnabled('chat', 'counselor')): ?>
+                 <?php if(\App\Models\Feature::isEnabled('chat', 'counselor')): ?>
                     <li class="<?php echo e(Request::is('Counselor/messages*') ? 'active' : ''); ?>">
                         <a href="<?php echo e(url('Counselor/messages')); ?>">
                             <i class="fi fi-sr-comment"></i>
@@ -37,6 +37,12 @@
                         </a>
                     </li>
                 <?php endif; ?>
+                   <li class="<?php echo e(Request::is('Counselor/counseling') ? 'active' : ''); ?>">
+                    <a href="<?php echo e(url('Counselor/counseling')); ?>">
+                          <i class="fi fi-sr-journal-alt"></i>
+                        <span class="text">Counseling Notes</span>
+                    </a>
+                </li>
                 <li class="<?php echo e(Request::is('/settings*') ? 'active' : ''); ?>">
                     <a href="<?php echo e(url('/settings')); ?>">
                         <i class='bx bxs-cog'></i>

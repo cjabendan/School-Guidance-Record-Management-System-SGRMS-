@@ -44,7 +44,7 @@ use App\Http\Controllers\Head\HeadSettingsController;
 use App\Http\Controllers\Counselor\CounselorDashboardController;
 use App\Http\Controllers\Counselor\CounselorMessageController;
 use App\Http\Controllers\Counselor\CounselorAppointmentController;
-
+use App\Http\Controllers\Counselor\CounselorCounselingController;
 // Parent Controllers
 use App\Http\Controllers\Parents\ParentDashboardController;
 use App\Http\Controllers\Parents\ParentAppointmentController;
@@ -271,6 +271,15 @@ Route::prefix('Counselor')->name('Counselor.')->middleware(['auth', 'role.counse
     Route::get('/messages/{user?}', [CounselorMessageController::class, 'index'])
         ->middleware('feature:chat')
         ->name('messages');
+
+
+     Route::prefix('counseling')->name('counseling.')->group(function () {
+        Route::get('/', [CounselorCounselingController::class, 'index'])->name('index');
+      
+    });
+
+
+
 
     Route::get('/appointments', [CounselorDashboardController::class, 'appointments'])
         ->middleware('feature:appointment')

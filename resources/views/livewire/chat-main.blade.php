@@ -7,7 +7,7 @@
 
                 <ul class="user-results">
                     @forelse($newChatSearchResults as $u)
-                        <li wire:click="selectNewChatUser({{ $u->id }})"
+                        <li wire:key="new-chat-search-{{ $u->id }}" wire:click="selectNewChatUser({{ $u->id }})"
                             style="display:flex;align-items:center;gap:8px;cursor:pointer;">
                             <img src="{{ asset('images/user/' . $u->profile_image) }}" class="search-user-img">
                             <span>{{ $u->first_name }} {{ $u->last_name }}@if (in_array($u->role, ['admin', 'counselor']))
@@ -132,7 +132,7 @@
                             </div>
                         @endif
 
-                        <div class="message-row {{ $isSentByMe ? 'sent' : 'received' }}"
+                        <div wire:key="message-{{ $message->id }}" class="message-row {{ $isSentByMe ? 'sent' : 'received' }}"
                             id="message-{{ $message->id }}">
                             {{-- Sender Profile Image for RECEIVED messages --}}
                             @if (!$isSentByMe)

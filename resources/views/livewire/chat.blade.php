@@ -9,6 +9,10 @@
     @if ($selectedUser)
         @include('livewire.user-profile-pane')
     @endif
+
+    {{-- Delete Chat Modal --}}
+    @livewire('modals.delete-chat-modal')
+
 </div>
 
 <script>

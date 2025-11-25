@@ -1,24 +1,32 @@
 <div class="container">
+    <a href="{{ url('/?login=true') }}" class="back-btn"><svg xmlns="http://www.w3.org/2000/svg" fill="none"
+            viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
+        </svg>
+        Go back</a>
     <div class="card">
         <div class="content">
             <div class="header">
+                <h2>SGRMS</h2>
+            </div>
+            <div class="content-body">
                 <div class="left">
                     <img src="{{ asset('images/icons/email-pending.png') }}" alt="Email Pending Icon" class="icon">
                 </div>
                 <div class="right">
-                    <h2 class="heading">ACCOUNT ACTIVATION</h2>
-                    <p class="subheading">To ensures you receive updates, stay connected, and recover your account if
-                        needed.
-                        Please verify your email address by clicking the link we sent to:
+                    <h2 class="heading">Please confirm your email address</h2>
+                    <p class="subheading">
+                        Verify your email to activate your account, stay connected, and recover it if needed. Click the
+                        link we sent to:
+
                     </p>
                     <p class="email">
-                        <a href="https://mail.google.com/mail/u/0/#inbox" target="_blank"
+                        <a href="https://mail.google.com/mail/u/0/#inbox"
                             style="color:#1ea7ff;text-decoration:underline;">
                             {{ session('registered_email') }}
                         </a>
                     </p>
                     <p class="note">If you didn't receive the email, please check your spam folder.</p>
-
                 </div>
             </div>
             <div class="footer">
@@ -26,7 +34,7 @@
                     <form method="POST" action="{{ route('verification.resend') }}">
                         @csrf
                         <p class="resendNote">Didn’t receive the email?</p>
-                        <a href="#" class="resend">Resend Email Link</a>
+                        <a href="#" class="resend">Resend Email</a>
                     </form>
                 </div>
             </div>
@@ -42,7 +50,7 @@
     }
 
     body {
-        background-color: #daedff;
+        background-color: #ffffff;
         font-family: 'Poppins', sans-serif;
         height: 100vh;
         display: flex;
@@ -60,7 +68,34 @@
         border-radius: 10px;
         padding: 2rem;
         width: 100%;
-        max-width: 900px;
+        max-width: 650px;
+        position: relative;
+    }
+
+    .back-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+        color: #003060;
+        font-size: 16px;
+        font-weight: 520;
+        text-decoration: none;
+        transition: color 0.2s ease;
+    }
+
+    .back-btn svg {
+        width: 20px;
+        height: 20px;
+    }
+
+    .back-btn:hover {
+        color: #0080ff;
+    }
+
+    .back-btn:active {
+        opacity: 0.8;
+        /* subtle feedback when clicked */
     }
 
     .card {
@@ -71,101 +106,103 @@
         background-color: #ffffff;
         border-radius: 10px;
         box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+        overflow: hidden;
     }
 
     .content {
         display: flex;
         flex-direction: column;
+        width: 100%;
+    }
+
+    .header {
+        display: flex;
+        width: 100%;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem 0;
+        /* background: linear-gradient(to right, rgb(21, 163, 255), rgb(0, 48, 96)); */
+        background: rgb(0, 48, 96)
+    }
+
+    .header h2 {
+        color: #ffffff;
+        font-size: 28px;
+        font-weight: 600;
+    }
+
+    .content-body {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 1.5rem;
+        text-align: center;
     }
 
     .left {
         display: flex;
-        width: 40%;
         justify-content: center;
-        align-self: center;
+        margin-bottom: 1rem;
     }
 
     .icon {
-        width: 350px;
+        width: 200px;
+        max-width: 100%;
     }
 
     .right {
         display: flex;
         flex-direction: column;
-        align-self: center;
         gap: 0.5rem;
-        padding: 1rem 1rem 1rem 0;
-        margin-left: -20px;
-
-    }
-
-    .header,
-    .footer,
-    form {
-        display: flex;
-        flex-direction: row;
-    }
-
-    .header {
-        padding: 1rem 1rem 0 1rem;
     }
 
     .heading {
-        font-size: 38px;
-        color: #1ea7ff;
-        text-transform: uppercase;
-        text-align: center;
+        color: #003060;
+        font-weight: 600;
     }
 
     .subheading {
-        font-size: 18px;
+        font-size: 16px;
         color: #555555;
-        text-align: center;
-        letter-spacing: .5px;
-        line-height: 1.4;
-        margin: 1rem 0;
+        line-height: 1.5;
+        margin: .8rem 0;
     }
 
     .email {
         font-size: 18px;
         color: #1ea7ff;
-        letter-spacing: 1.5px;
-        text-align: center;
         margin-bottom: 1rem;
-        cursor: pointer;
     }
 
     .note {
-        font-size: 16px;
+        font-size: 15px;
         color: #888888;
-        text-align: center;
-        letter-spacing: .5px;
+        margin-bottom: .5rem;
     }
 
     .footer {
         background-color: #f9f9f9;
         padding: 1rem;
+        border-top: 1px solid #eee;
     }
 
-    .resendEmail {
+    .resendEmail form {
         display: flex;
-        width: 100%;
+        flex-direction: row;
         justify-content: flex-end;
         align-items: center;
-        padding: 0 1.5rem;
+        width: 100%;
     }
 
     .resendNote {
         font-size: 16px;
         color: #555555;
-        align-self: center;
-        margin-right: 10px;
     }
 
     .resend {
         color: #1ea7ff;
-        padding: 8px 18px;
-        cursor: pointer;
+        padding: 8px 12px;
         font-size: 16px;
     }
 
