@@ -28,6 +28,10 @@ class PasswordResetController extends Controller
             'email' => ['required', 'email'],
         ]);
 
+        system_log('auth.password_reset_link_requested', null, [
+            'email' => $credentials['email'],
+        ]);
+
         $status = Password::sendResetLink($credentials);
 
         if ($status === Password::RESET_LINK_SENT) {
@@ -70,6 +74,7 @@ class PasswordResetController extends Controller
                     'remember_token' => Str::random(60),
                 ])->save();
 
+                system_log('auth.password_reset', $user);
                 event(new PasswordReset($user));
             }
         );

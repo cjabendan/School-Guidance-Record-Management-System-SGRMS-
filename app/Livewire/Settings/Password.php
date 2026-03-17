@@ -31,6 +31,7 @@ class Password extends Component
 
         $user->password = Hash::make($this->new_password);
         $user->save();
+        system_log('auth.password_changed', $user);
 
         // Clear fields and flash success
         $this->current_password = $this->new_password = $this->confirm_password = '';
