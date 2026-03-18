@@ -111,6 +111,9 @@ use App\Livewire\Auth\TwoFactorChallenge;
 
 Route::get('/two-factor-challenge', TwoFactorChallenge::class)->name('two-factor-challenge');
 
+    // Lightweight student search used for autocomplete (available to any authenticated user)
+    Route::get('/students/search', [HeadStudentController::class, 'search'])->name('students.search');
+
 Route::middleware(['auth', 'system.access'])->group(function () {
 
     // General Settings
@@ -278,6 +281,13 @@ Route::prefix('Counselor')->name('Counselor.')->middleware(['auth', 'role.counse
       
     });
 
+      // allow counselors to store/update/delete counseling notes
+      Route::prefix('counseling')->name('counseling.')->group(function () {
+          Route::post('/store', [CounselorCounselingController::class, 'store'])->name('store');
+          Route::put('/{id}', [CounselorCounselingController::class, 'update'])->name('update');
+          Route::delete('/{id}', [CounselorCounselingController::class, 'destroy'])->name('destroy');
+      });
+
 
 
 
@@ -288,13 +298,13 @@ Route::prefix('Counselor')->name('Counselor.')->middleware(['auth', 'role.counse
     Route::post('/appointments', [CounselorAppointmentController::class, 'store'])->name('appointments.store');
     Route::post('/appointments/{id}/approve', [CounselorDashboardController::class, 'approve'])->name('appointments.approve');
     Route::post('/appointments/{id}/decline', [CounselorDashboardController::class, 'decline'])->name('appointments.decline');
-    Route::post('/appointments/{id}/cancel', [\App\Http\Controllers\Counselor\CounselorAppointmentController::class, 'cancel'])->name('appointments.cancel');
-    Route::post('/appointments/{id}/start', [\App\Http\Controllers\Counselor\CounselorAppointmentController::class, 'startSession'])->name('appointments.start');
-    Route::post('/appointments/{id}/end', [\App\Http\Controllers\Counselor\CounselorAppointmentController::class, 'endSession'])->name('appointments.end');
-    Route::post('/appointments', [\App\Http\Controllers\Counselor\CounselorAppointmentController::class, 'store'])->name('appointments.store');
-    Route::get('/appointments/{id}/json', [\App\Http\Controllers\Counselor\CounselorAppointmentController::class, 'json'])->name('appointments.json');
-    Route::put('/appointments/{id}', [\App\Http\Controllers\Counselor\CounselorAppointmentController::class, 'update'])->name('appointments.update');
-     Route::post('/appointments/{id}/missed', [\App\Http\Controllers\Counselor\CounselorAppointmentController::class, 'markMissed'])->name('appointments.missed');
+    Route::post('/appointments/{id}/cancel', [CounselorAppointmentController::class, 'cancel'])->name('appointments.cancel');
+    Route::post('/appointments/{id}/start', [CounselorAppointmentController::class, 'startSession'])->name('appointments.start');
+    Route::post('/appointments/{id}/end', [CounselorAppointmentController::class, 'endSession'])->name('appointments.end');
+    Route::post('/appointments', [CounselorAppointmentController::class, 'store'])->name('appointments.store');
+    Route::get('/appointments/{id}/json', [CounselorAppointmentController::class, 'json'])->name('appointments.json');
+    Route::put('/appointments/{id}', [CounselorAppointmentController::class, 'update'])->name('appointments.update');
+     Route::post('/appointments/{id}/missed', [CounselorAppointmentController::class, 'markMissed'])->name('appointments.missed');
 });
 
 
