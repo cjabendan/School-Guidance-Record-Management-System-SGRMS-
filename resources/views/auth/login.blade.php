@@ -43,7 +43,7 @@
                     </span>
                 </div>
                 <div class="forgot-link">
-                    <a href="#">Forgot password?</a>
+                    <a href="{{ route('password.request') }}">Forgot password?</a>
                 </div>
                 <button type="submit" class="log-btn">Login</button>
                 <div class="signup-link">

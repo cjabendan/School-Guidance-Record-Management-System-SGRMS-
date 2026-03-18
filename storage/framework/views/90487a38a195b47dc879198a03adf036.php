@@ -46,7 +46,49 @@
 
     <?php echo $__env->yieldContent('content'); ?>
     
-  
+
+    <?php if(session('status')): ?>
+        <div id="global-status-banner" style="
+            position: fixed;
+            top: 1rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #16a34a;
+            color: white;
+            padding: 0.75rem 1.25rem;
+            border-radius: 999px;
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+            z-index: 9999;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        ">
+            <i class="fas fa-check-circle"></i>
+            <span><?php echo e(session('status')); ?></span>
+        </div>
+        <script>
+            // Auto-open login (if available) after 3 seconds when a status message exists,
+            // e.g., after a successful password reset.
+            window.addEventListener('DOMContentLoaded', function() {
+                setTimeout(function() {
+                    var banner = document.getElementById('global-status-banner');
+                    if (banner) {
+                        banner.style.opacity = '0';
+                        banner.style.transition = 'opacity 0.3s ease';
+                        setTimeout(function() {
+                            banner.remove();
+                        }, 300);
+                    }
+
+                    if (typeof openLoginModal === 'function') {
+                        openLoginModal();
+                    }
+                }, 3000);
+            });
+        </script>
+    <?php endif; ?>
+
     <?php echo $__env->make('auth.login', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
     <?php echo $__env->make('partials.footer', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
 

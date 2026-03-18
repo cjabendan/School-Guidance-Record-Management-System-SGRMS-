@@ -17,6 +17,7 @@ use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\LogoutController;
 use App\Http\Controllers\Auth\ConfirmablePasswordController;
+use App\Http\Controllers\Auth\PasswordResetController;
 
 // Global / Shared Controllers
 use App\Http\Controllers\StaffController;
@@ -79,6 +80,14 @@ Route::middleware(['web'])->group(function () {
         Route::get('/verify-email', 'showVerificationEmail')->name('verify');
         Route::get('/success-verification', 'showSuccessEmail')->name('success');
         Route::post('/verification/resend', 'resendActivationLink')->name('verification.resend');
+    });
+
+    // Password Reset
+    Route::controller(PasswordResetController::class)->group(function () {
+        Route::get('forgot-password', 'showLinkRequestForm')->name('password.request');
+        Route::post('forgot-password', 'sendResetLinkEmail')->name('password.email');
+        Route::get('reset-password/{token}', 'showResetForm')->name('password.reset');
+        Route::post('reset-password', 'reset')->name('password.update');
     });
 
     Route::post('/logout', [LogoutController::class, 'logout'])->name('logout');

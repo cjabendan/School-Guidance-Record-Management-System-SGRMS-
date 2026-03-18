@@ -267,10 +267,10 @@ section {
 .highlight-box {
     display: flex;
     flex-direction: column;
-    flex: 1 1 200px;
     background: #ffffff;
     justify-content: center;
     border-radius: 0.75rem;
+    width: 240px;
     padding: 1rem;
     height: 200px;
     text-align: center;
