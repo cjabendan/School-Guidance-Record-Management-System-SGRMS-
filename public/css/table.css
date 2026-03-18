@@ -25,6 +25,16 @@
 .status-label.status-pending { background: #fff7e6; color: #ffb347; }
 .status-label.status-declined { background: #ffeaea; color: #ff4d4d; }
 
+/* Counseling remark mappings */
+.status-label.status-alarming { background: #ffeaea; color: #ff4d4d; }
+.status-dot.status-alarming { background: #ff4d4d; }
+
+.status-label.status-moderate { background: #fff7e6; color: #ffb347; }
+.status-dot.status-moderate { background: #ffb347; }
+
+.status-label.status-low { background: #eafaf3; color: #43d477; }
+.status-dot.status-low { background: #43d477; }
+
 /* ---------------------------------------------------------
    TABLE STRUCTURE STYLING
 --------------------------------------------------------- */

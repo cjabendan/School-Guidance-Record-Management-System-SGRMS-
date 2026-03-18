@@ -18,7 +18,8 @@ class ChatbotController extends Controller
     
     public function generateResponse(Request $request, RagService $rag)
     {
-        set_time_limit(90);
+        // Keep web requests responsive; long-running indexing should be queued (see ProcessDocument job).
+        set_time_limit((int) env('CHATBOT_MAX_EXECUTION_SEC', 30));
         $request->validate(['prompt' => 'required|string']);
         $userPrompt = $request->json('prompt');
         $userId = Auth::id();
@@ -165,6 +166,10 @@ SYS;
         // 6. Combine context
         // -------------------------------
         $context = implode("\n\n---\n\n", $docs);
+        $maxContextChars = (int) env('RAG_MAX_CONTEXT_CHARS', 4000);
+        if (strlen($context) > $maxContextChars) {
+            $context = substr($context, 0, $maxContextChars);
+        }
         $recentConversation = ''; // History is eliminated
 
         $systemInstruction = $isViolentQuestion

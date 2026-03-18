@@ -1,8 +1,8 @@
-<div class="welcome">
+<div class="welcome welcome-card parent-welcome" role="region" aria-labelledby="parent-welcome">
     <?php
         $user = Auth::user();
         $sex = strtolower($user->sex ?? '');
-        $lastName = $user->last_name ?? 'Unknown';
+        $lastName = $user->last_name ?? ($user->first_name ?? 'Parent');
 
         if ($sex === 'male') {
             $prefix = 'Mr.';
@@ -11,70 +11,69 @@
         } else {
             $prefix = '';
         }
+
+        // initials fallback for avatar
+        $first = $user->first_name ?? '';
+        $initials = trim(($first ? $first[0] : '') . ($user->last_name ? $user->last_name[0] : '')) ?: 'P';
+        $avatar = $user->avatar ?? null;
     ?>
 
-    <h2 class="Parent-name">
-        <span id='greeting' style="color: #474545;">Hello,</span> <?php echo e($prefix ? $prefix . ' ' : ''); ?><?php echo e($lastName); ?>!
-    </h2>
-    <p class="welcome-note">Here’s a quick summary of your children’s guidance records.</p>
-    <div class="welcome-counts">
-        <div class="box">
-            <div class="icon">
-                <i class='bx bxs-user'></i>
-            </div>
-            <div class="text-container">
-                <p class="box-text1">My Children</p>
-                <h3 class="box-count1"><?php echo e($childCount ?? 0); ?></h3>
+    <div class="welcome-top">
+        <div class="avatar" aria-hidden="true">
+            <?php if($avatar): ?>
+                <img src="<?php echo e(asset($avatar)); ?>" alt="<?php echo e($user->first_name ?? $lastName); ?> avatar" />
+            <?php else: ?>
+                <span class="initials"><?php echo e(strtoupper($initials)); ?></span>
+            <?php endif; ?>
+        </div>
 
+        <div class="welcome-main">
+            <div class="greet-small" aria-hidden="true"><span id="greeting" style="color:#474545">Hello,</span></div>
+            <h2 class="Parent-name" id="parent-welcome"><?php echo e($prefix ? $prefix . ' ' : ''); ?><?php echo e($lastName); ?>!</h2>
+
+            <div class="stats-row" aria-hidden="true">
+                <span class="pill">Children: <strong>—</strong></span>
+                <span class="pill">Upcoming events: <strong>—</strong></span>
+                <span class="pill">Messages: <strong>—</strong></span>
             </div>
         </div>
 
-    
-        <div class="box">
-            <div class="icon">
-                <i class="fi fi-sr-info"></i>
+        <aside class="welcome-tip" aria-label="Parent tip">
+            <div class="small-note">
+                <h4>Note for parents</h4>
+                <p class="note-text">Keep contact details updated to receive timely notices. Check your child's assignments weekly.</p>
             </div>
-            <div class="text-container">
-                <p class="box-text">Active Cases</p>
-                <h3 class="box-count"><?php echo e($casesCount ?? 0); ?></h3>
-            </div>
-        </div>
+        </aside>
+    </div>
 
-       
-        <div class="box">
-            <div class="icon">
-                <i class="fi fi-sr-clock-three"></i>
-            </div>
-            <div class="text-container">
-                <p class="box-text">Requests</p>
-                <h3 class="box-count"><?php echo e($pendingRequestCount ?? 0); ?></h3>
-
-            </div>
-        </div>
-    </div> 
+    <div class="welcome-subtext" id="current-date"></div>
 
 </div>
 
 <script>
-    const greetingEl = document.getElementById('greeting');
-    const hour = new Date().getHours();
-    let greeting = 'Hello';
-    let emoji = ''; // default emoji
+    (function(){
+        const greetingEl = document.getElementById('greeting');
+        const hour = new Date().getHours();
+        let greeting = 'Hello';
 
-    if (hour >= 5 && hour < 12) {
-        greeting = 'Good Morning';
-        emoji = '';
-    } else if (hour >= 12 && hour < 17) {
-        greeting = 'Good Afternoon';
-        emoji = '';
-    } else if (hour >= 17 && hour < 20) {
-        greeting = 'Good Evening';
-        emoji = '';
-    } else {
-        greeting = 'Good Night';
-        emoji = '';
-    }
+        if (hour >= 5 && hour < 12) {
+            greeting = 'Good Morning';
+        } else if (hour >= 12 && hour < 17) {
+            greeting = 'Good Afternoon';
+        } else if (hour >= 17 && hour < 20) {
+            greeting = 'Good Evening';
+        } else {
+            greeting = 'Good Night';
+        }
 
-    greetingEl.textContent = emoji + ' ' + greeting + ',';
+        if (greetingEl) greetingEl.textContent = greeting + ',';
+
+        const dateEl = document.getElementById('current-date');
+        if (dateEl) {
+            const now = new Date();
+            const opts = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: '2-digit' };
+            dateEl.textContent = now.toLocaleString(undefined, opts);
+        }
+    })();
 </script>
 <?php /**PATH C:\Users\Administrator\School-Guidance-Record-Management-System-SGRMS\resources\views/Parent/dashboard-sections/welcome-stats.blade.php ENDPATH**/ ?>
