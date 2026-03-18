@@ -58,6 +58,10 @@ class RegisterController extends Controller
 
         // 1. Create user (parent, pending)
         $user = User::create($data);
+        system_log('auth.register', $user, [
+            'role' => $user->role,
+            'status' => $user->status,
+        ]);
 
         if (empty($user->profile_image)) {
             $user->profile_image = $user->sex === 'Male'
@@ -75,6 +79,7 @@ class RegisterController extends Controller
             'user_id' => $user->id,
             'relationship' => $request->guardian_relationship ?? '',
         ]);
+        system_log('parent_profile.created', $parent);
 
 
         // 3. Send welcome email with activation link
@@ -109,6 +114,7 @@ class RegisterController extends Controller
         $user->activation_token = null;
         $user->activation_token_expires_at = null;
         $user->save();
+        system_log('auth.email_verified', $user);
 
         // Send success email
         Mail::to($user->email)->send(new \App\Mail\SuccessEmail($user));
@@ -134,6 +140,7 @@ class RegisterController extends Controller
 
         $activationLink = url('/activate/' . $user->activation_token);
         Mail::to($user->email)->send(new WelcomeEmail($user, $activationLink));
+        system_log('auth.activation_link_resent', $user);
 
         return back()->with('success', 'A new activation link has been sent to your email.');
     }
