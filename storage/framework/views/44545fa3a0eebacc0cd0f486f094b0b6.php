@@ -28,6 +28,8 @@
         <link rel="stylesheet" href="<?php echo e(asset('css/notify.css')); ?>">
         <link rel="stylesheet" href="<?php echo e(asset('css/table.css')); ?>">
         <link rel="stylesheet" href="<?php echo e(asset('css/scrollbar.css')); ?>">
+        <link rel="stylesheet" href="<?php echo e(asset('css/counseling.css')); ?>">
+        <link rel="stylesheet" href="<?php echo e(asset('css/modal.css')); ?>">
         
         <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet" />
         <link href="<?php echo e(asset('css/cropper.min.css')); ?>" rel="stylesheet">

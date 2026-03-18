@@ -1,0 +1,87 @@
+/* Counseling modal styles: match the centered overlay behavior of .custom-modal */
+.modal-counseling {
+    display: none; /* JS toggles inline style to 'block' */
+    position: fixed;
+    z-index: 2000;
+    left: 0;
+    top: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0,0,0,0.35);
+    backdrop-filter: blur(2px);
+    box-sizing: border-box;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+}
+
+.modal-content-counseling {
+    background: #fff;
+    border-radius: 8px;
+    max-width: 680px !important;
+    width: 640px !important;
+    margin: auto;
+    padding: 1.5rem !important;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.25);
+    position: relative;
+}
+
+.modal-header-counseling { display:flex; justify-content:space-between; align-items:center; }
+.modal-header-counseling h2 { margin:0; font-size:1.25rem; color:#003060; font-weight:700; }
+.close-btn { background:none; border:none; font-size:1.25rem; cursor:pointer; color:#333; }
+
+/* Force consistent font and sizing inside modal across layouts */
+.modal-content-counseling, .modal-content-counseling * {
+    font-family: 'Poppins', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial !important;
+    font-size: 14px !important;
+    line-height: 1.35 !important;
+}
+
+/* ensure form controls inside counseling modal match layout */
+.modal-content-counseling .form-group { margin-bottom:0.9rem; }
+.modal-content-counseling label { display:block; margin-bottom:0.35rem; font-weight:600; color:#1f2d3d; }
+.modal-content-counseling input,
+.modal-content-counseling select,
+.modal-content-counseling textarea { width:100%; padding:0.6rem 0.65rem; border-radius:6px; border:1px solid #d3dce6; box-sizing:border-box; }
+.modal-content-counseling input.form-control { height:42px; }
+.modal-content-counseling select { height:42px; }
+.modal-footer { display:flex; justify-content:flex-end; gap:0.6rem; margin-top:1rem; }
+
+/* Buttons inside modal footer */
+.modal-content-counseling .modal-footer .btn { padding:8px 14px; border-radius:6px; border:none; cursor:pointer; font-weight:600; }
+.modal-content-counseling .modal-footer .btn.cancel { background:#eef0f2; color:#222; }
+.modal-content-counseling .modal-footer .btn.save { background:#003060; color:#fff; }
+
+/* Make long textarea content scroll inside the field and limit height to keep modal compact */
+.modal-content-counseling textarea {
+    min-height: 110px; /* slightly taller to match counselor visuals */
+    max-height: 340px; /* don't allow textarea to grow beyond this inside modal */
+    overflow: auto;
+    resize: vertical; /* allow user to expand but constrained by max-height */
+}
+
+/* Autocomplete suggestion box styling */
+.autocomplete-suggestions { border-radius:4px; box-shadow:0 6px 18px rgba(25,40,60,0.08); }
+.autocomplete-suggestions .suggestion-item { padding:10px 12px; border-bottom:1px solid #f1f3f6; }
+.autocomplete-suggestions .suggestion-item:last-child { border-bottom:none; }
+.autocomplete-suggestions .suggestion-item:hover { background:#f4f8ff; }
+
+/* Ensure overlay flex centering works on both layouts */
+.modal-counseling { display:none; align-items:center; justify-content:center; }
+
+/* Follow-up block alignment for parity */
+.modal-content-counseling .followup-block { padding-top:6px; padding-bottom:2px; }
+.modal-content-counseling .followup-block input[type="checkbox"] { width:18px; height:18px; vertical-align:middle; }
+.modal-content-counseling .followup-block label { color:#1f2d3d; }
+
+/* Ensure autocomplete suggestions appear below the input field */
+.modal-content-counseling .autocomplete-suggestions {
+    position: absolute !important;
+    top: calc(100% + 6px) !important;
+    left: 0 !important;
+    right: 0 !important;
+    z-index: 99999 !important;
+    background: #fff !important;
+}
+
+/* (flat-table variant removed) */

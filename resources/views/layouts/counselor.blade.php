@@ -28,6 +28,8 @@
         <link rel="stylesheet" href="{{ asset('css/notify.css') }}">
         <link rel="stylesheet" href="{{ asset('css/table.css') }}">
         <link rel="stylesheet" href="{{ asset('css/scrollbar.css') }}">
+        <link rel="stylesheet" href="{{ asset('css/counseling.css') }}">
+        <link rel="stylesheet" href="{{ asset('css/modal.css') }}">
         
         <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet" />
         <link href="{{ asset('css/cropper.min.css') }}" rel="stylesheet">

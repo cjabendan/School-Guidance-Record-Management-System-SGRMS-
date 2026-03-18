@@ -156,6 +156,37 @@ class HeadStudentController extends Controller
         return response()->json($cases);
     }
 
+    /**
+     * Simple JSON search for student names for autocomplete.
+     * Returns up to 5 results with id and full name.
+     */
+    public function search(Request $request)
+    {
+        $q = $request->get('q', '');
+        $q = trim($q);
+        if ($q === '') {
+            return response()->json([]);
+        }
+
+        $students = Student::select('s_id', 'user_id')
+            ->with('user')
+            ->whereHas('user', function ($query) use ($q) {
+                $query->where('first_name', 'like', "%{$q}%")
+                    ->orWhere('last_name', 'like', "%{$q}%")
+                    ->orWhere(DB::raw("CONCAT(users.first_name, ' ', users.last_name)"), 'like', "%{$q}%");
+            })
+            ->limit(5)
+            ->get()
+            ->map(function ($s) {
+                return [
+                    's_id' => $s->s_id,
+                    'name' => ($s->user->first_name ?? '') . ' ' . ($s->user->last_name ?? ''),
+                ];
+            });
+
+        return response()->json($students);
+    }
+
 //_________________________________________________________________________________
 
 

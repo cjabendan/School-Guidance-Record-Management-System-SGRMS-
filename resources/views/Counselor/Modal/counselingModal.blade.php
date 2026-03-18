@@ -46,12 +46,10 @@
                 <textarea id="recommendations" name="recommendations" class="form-control" rows="3"></textarea>
             </div>
 
-            <div class="form-group followup-block">
-                <label for="follow_up_needed" style="margin:0 0 8px 0; display:block; font-weight:600;">Follow-up needed</label>
-                <div style="text-align:center;">
-                    <input type="checkbox" id="follow_up_needed" name="follow_up_needed" value="1" style="transform:scale(1.02);">
-                    <span id="follow_up_display" style="display:none; font-weight:600; margin-left:8px;"></span>
-                </div>
+            <div class="form-group" style="display:flex; align-items:center; gap:12px;">
+                <label for="follow_up_needed" style="margin:0;">Follow-up needed</label>
+                <input type="checkbox" id="follow_up_needed" name="follow_up_needed" value="1">
+                <span id="follow_up_display" style="display:none; font-weight:600; margin-left:6px;"></span>
             </div>
 
             <div class="form-group" id="follow-up-wrapper" style="display:none;">
