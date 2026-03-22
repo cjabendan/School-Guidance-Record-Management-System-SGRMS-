@@ -54,10 +54,12 @@ class LoginController extends Controller
             // Throw exception, which returns a 422 JSON response
             // CRUCIAL: Explicitly set status to 422 to guarantee JSON response for AJAX failure
             // NOTE: Removed ->onlyInput('login') for compatibility with older/inconsistent Laravel versions.
-            system_log('auth.login_failed', null, [
-                'login' => $loginInput,
-                'message' => $message,
-            ]);
+            if (function_exists('system_log')) {
+                \system_log('auth.login_failed', null, [
+                    'login' => $loginInput,
+                    'message' => $message,
+                ]);
+            }
             throw ValidationException::withMessages([
                 'login' => $message,
             ])->status(422);
@@ -143,10 +145,12 @@ class LoginController extends Controller
             RateLimiter::clear($throttleKey); // Clear attempts on successful credentials check
             $request->session()->regenerate();
             session(['2fa:user:id' => $user->id, 'pending_role_id' => $role_id, 'pending_role' => $user->role]);
-            system_log('auth.login_2fa_challenge', $user, [
-                'login' => $loginInput,
-                'role' => $user->role,
-            ]);
+            if (function_exists('system_log')) {
+                \system_log('auth.login_2fa_challenge', $user, [
+                    'login' => $loginInput,
+                    'role' => $user->role,
+                ]);
+            }
             
             // Return JSON response for client-side redirection
             // Assuming route('two-factor-challenge') is defined
@@ -193,10 +197,12 @@ class LoginController extends Controller
                 $handleFailure('Your role is not recognized.');
             }
 
-            system_log('auth.login', $user, [
-                'login' => $loginInput,
-                'role' => $user->role,
-            ]);
+            if (function_exists('system_log')) {
+                \system_log('auth.login', $user, [
+                    'login' => $loginInput,
+                    'role' => $user->role,
+                ]);
+            }
 
             // Return success JSON response with redirect path
             return response()->json([

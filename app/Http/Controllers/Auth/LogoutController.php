@@ -12,7 +12,9 @@ class LogoutController extends Controller
     {
         $user = Auth::user();
         if ($user) {
-            system_log('auth.logout', $user);
+            if (function_exists('system_log')) {
+                \system_log('auth.logout', $user);
+            }
         }
         Auth::logout();
         $request->session()->invalidate();
