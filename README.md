@@ -70,17 +70,6 @@ To protect sensitive guidance records and student case files, SGRMS implements s
 
 ---
 
-## 📱 System Screenshots
-
-<p align="center">
-  <img src="public/images/img/ss-dashboard.png" alt="Dashboard" width="22%" style="display: inline-block; margin: 0 6px;" />
-  <img src="public/images/img/ss-records.png" alt="Student Records" width="22%" style="display: inline-block; margin: 0 6px;" />
-  <img src="public/images/img/ss-calendar.png" alt="Appointments" width="22%" style="display: inline-block; margin: 0 6px;" />
-  <img src="public/images/img/ss-chat.png" alt="Gabby Chatbot" width="22%" style="display: inline-block; margin: 0 6px;" />
-</p>
-
----
-
 ## ⚠️ Scope & System Boundaries
 
 To set clear operational expectations, SGRMS is bounded by the following parameters:
